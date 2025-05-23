@@ -7,89 +7,99 @@ export async function analyzePatientData(
   medicalHistory: string,
   studyProtocol: string
 ): Promise<PatientData> {
-  try {
-    if (!config.ai.endpoint || !config.ai.apiKey || !config.ai.model) {
-      console.error('Brak pełnej konfiguracji AI. Sprawdź zmienne środowiskowe.');
-      throw new Error('Brak konfiguracji AI');
-    }
-
-    console.log('Rozpoczynam analizę z użyciem AI...', {
-      endpoint: config.ai.endpoint,
-      model: config.ai.model,
-      hasApiKey: !!config.ai.apiKey
-    });
-
-    const response = await fetch(config.ai.endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${config.ai.apiKey}`,
-      },
-      body: JSON.stringify({
-        model: config.ai.model,
-        messages: [
-          {
-            role: 'system',
-            content: AI_PROMPT,
-          },
-          {
-            role: 'user',
-            content: `Przeanalizuj następującą historię medyczną i protokół badania dla oceny pre-screeningowej:
-              
-              Historia Medyczna:
-              ${medicalHistory}
-              
-              Protokół Badania:
-              ${studyProtocol}`,
-          },
-        ],
-        temperature: 0.7,
-        max_tokens: 2000,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Błąd odpowiedzi AI:', {
-        status: response.status,
-        statusText: response.statusText,
-        errorText
-      });
-      throw new Error(`Błąd API: ${response.status} ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    console.log('Otrzymano odpowiedź z AI:', data);
-    
-    const processedData = processAIResponse(data);
-    return {
-      ...processedData,
-      isMockData: false
-    };
-  } catch (error) {
-    console.error('Błąd podczas analizy danych pacjenta:', error);
-    const mockData = getMockPatientData();
-    return {
-      ...mockData,
-      isMockData: true
-    };
+  if (!config.ai.endpoint || !config.ai.apiKey || !config.ai.model) {
+    throw new Error('Brak pełnej konfiguracji AI. Sprawdź zmienne środowiskowe.');
   }
+
+  const response = await fetch(config.ai.endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${config.ai.apiKey}`,
+    },
+    body: JSON.stringify({
+      model: config.ai.model,
+      messages: [
+        {
+          role: 'system',
+          content: AI_PROMPT,
+        },
+        {
+          role: 'user',
+          content: `Przeanalizuj następującą historię medyczną i protokół badania dla oceny pre-screeningowej:
+            
+            Historia Medyczna:
+            ${medicalHistory}
+            
+            Protokół Badania:
+            ${studyProtocol}`,
+        },
+      ],
+      temperature: 0.7,
+      max_tokens: 2000,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Błąd API: ${response.status} ${response.statusText} - ${errorText}`);
+  }
+
+  const data = await response.json();
+  return processAIResponse(data);
 }
 
 function processAIResponse(aiResponse: any): PatientData {
-  // Tu dodaj właściwą logikę przetwarzania odpowiedzi AI
-  // Tymczasowo zwracamy mock data
-  return getMockPatientData();
+  // Przetwarzamy odpowiedź z API na format PatientData
+  const content = aiResponse.choices[0].message.content;
+  
+  try {
+    // Próbujemy sparsować odpowiedź jako JSON
+    const parsedContent = JSON.parse(content);
+    
+    // Mapujemy odpowiedź na strukturę PatientData
+    return {
+      summary: {
+        id: parsedContent.id || `Patient/${new Date().toISOString()}`,
+        age: parsedContent.age || 0,
+        mainDiagnosis: parsedContent.mainDiagnosis || '',
+        comorbidities: parsedContent.comorbidities || [],
+      },
+      episodeEstimation: {
+        scenarios: parsedContent.episodeEstimation?.scenarios || [],
+        conclusion: parsedContent.episodeEstimation?.conclusion || '',
+      },
+      trdAnalysis: {
+        episodeStartDate: parsedContent.trdAnalysis?.episodeStartDate || '',
+        pharmacotherapy: parsedContent.trdAnalysis?.pharmacotherapy || [],
+        conclusion: parsedContent.trdAnalysis?.conclusion || '',
+      },
+      inclusionCriteria: parsedContent.inclusionCriteria?.map(mapCriterion) || [],
+      psychiatricExclusionCriteria: parsedContent.psychiatricExclusionCriteria?.map(mapCriterion) || [],
+      medicalExclusionCriteria: parsedContent.medicalExclusionCriteria?.map(mapCriterion) || [],
+      reportConclusion: {
+        overallQualification: parsedContent.reportConclusion?.overallQualification || '',
+        mainIssues: parsedContent.reportConclusion?.mainIssues || [],
+        criticalInfoNeeded: parsedContent.reportConclusion?.criticalInfoNeeded || [],
+        estimatedProbability: parsedContent.reportConclusion?.estimatedProbability || 0,
+      },
+      analyzedAt: new Date().toISOString(),
+      isMockData: false,
+    };
+  } catch (error) {
+    console.error('Błąd podczas przetwarzania odpowiedzi AI:', error);
+    throw new Error('Nieprawidłowy format odpowiedzi z API');
+  }
 }
 
-function getMockPatientData(): PatientData {
+function mapCriterion(criterion: any) {
   return {
-    summary: {
-      id: "Pacjent XYZ/05/2025",
-      age: 33,
-      mainDiagnosis: "F33.1 Zaburzenie depresyjne nawracające, obecnie epizod depresyjny umiarkowany",
-      comorbidities: ["F42 Zaburzenia obsesyjno-kompulsyjne (OCD) - przewlekłe, objawowe", "Astma oskrzelowa"],
-    },
-    // ... reszta mock data pozostaje bez zmian
+    id: criterion.id || '',
+    name: criterion.name || '',
+    status: criterion.status || 'weryfikacja',
+    details: criterion.details || '',
+    userStatus: null,
+    userComment: null,
+    userOverrideTimestamp: null,
   };
 }
