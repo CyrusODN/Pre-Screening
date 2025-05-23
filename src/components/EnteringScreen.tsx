@@ -1,17 +1,24 @@
+// src/components/EnteringScreen.tsx
 import React, { useState } from 'react';
-import { Upload, FileText, AlertCircle, History } from 'lucide-react';
+import { Upload, FileText, AlertCircle, History, BrainCircuit, PlayCircle } from 'lucide-react'; // Added PlayCircle
 import { PatientHistory } from './PatientHistory';
 import { ProtocolSelector } from './ProtocolSelector';
 import { getHistory, clearHistory } from '../services/patientHistory';
-import { Protocol } from '../types';
-import { PREDEFINED_PROTOCOLS } from '../data/protocols';
+import type { Protocol, SupportedAIModel } from '../types';
 
 interface EnteringScreenProps {
-  onDataSubmit: (data: { protocol: string; medicalHistory: string }) => void;
+  onDataSubmit: (data: { protocol: string; medicalHistory: string; selectedAIModel: SupportedAIModel }) => void;
   onSelectHistoricalPatient: (patientId: string) => void;
+  selectedAIModel: SupportedAIModel;
+  onAIModelChange: (model: SupportedAIModel) => void;
 }
 
-export const EnteringScreen: React.FC<EnteringScreenProps> = ({ onDataSubmit, onSelectHistoricalPatient }) => {
+export const EnteringScreen: React.FC<EnteringScreenProps> = ({ 
+    onDataSubmit, 
+    onSelectHistoricalPatient,
+    selectedAIModel,
+    onAIModelChange
+}) => {
   const [protocol, setProtocol] = useState('');
   const [selectedProtocol, setSelectedProtocol] = useState<Protocol | null>(null);
   const [medicalHistory, setMedicalHistory] = useState('');
@@ -27,7 +34,7 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({ onDataSubmit, on
       if (type === 'protocol') {
         setProtocol(text);
         setProtocolFile(file);
-        setSelectedProtocol(null);
+        setSelectedProtocol(null); 
       } else {
         setMedicalHistory(text);
         setMedicalHistoryFile(file);
@@ -41,27 +48,28 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({ onDataSubmit, on
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const protocolText = selectedProtocol 
-      ? JSON.stringify(selectedProtocol.criteria, null, 2)
+      ? JSON.stringify(selectedProtocol.criteria, null, 2) 
       : protocol;
       
     if (!protocolText || !medicalHistory) {
-      setError('Proszę wprowadzić zarówno protokół jak i historię choroby.');
+      setError('Proszę wprowadzić zarówno protokół (lub wybrać predefiniowany) jak i historię choroby.');
       return;
     }
-    onDataSubmit({ protocol: protocolText, medicalHistory });
+    onDataSubmit({ protocol: protocolText, medicalHistory, selectedAIModel });
   };
 
-  const handleProtocolSelect = (protocol: Protocol) => {
-    setSelectedProtocol(protocol);
-    setProtocol('');
-    setProtocolFile(null);
-    setShowCustomProtocol(false);
+  const handleProtocolSelect = (protocolObj: Protocol) => {
+    setSelectedProtocol(protocolObj);
+    setProtocol(''); 
+    setProtocolFile(null); 
+    setShowCustomProtocol(false); 
   };
-
+  
   const handleClearHistory = () => {
     clearHistory();
-    setShowHistory(false);
+    setShowHistory(false); 
   };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 to-sky-100 p-4 sm:p-6 md:p-8 font-sans">
@@ -75,26 +83,44 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({ onDataSubmit, on
           </p>
         </header>
 
-        <div className="flex justify-end mb-6 gap-4">
-          <button
-            onClick={() => setShowCustomProtocol(!showCustomProtocol)}
-            className="flex items-center gap-2 px-4 py-2 text-sky-600 hover:text-sky-700 hover:bg-sky-50 rounded-md transition-colors"
-          >
-            <FileText className="w-5 h-5" />
-            {showCustomProtocol ? 'Wybierz predefiniowany' : 'Własny protokół'}
-          </button>
-          <button
-            onClick={() => setShowHistory(!showHistory)}
-            className="flex items-center gap-2 px-4 py-2 text-sky-600 hover:text-sky-700 hover:bg-sky-50 rounded-md transition-colors"
-          >
-            <History className="w-5 h-5" />
-            {showHistory ? 'Ukryj historię' : 'Pokaż historię'}
-          </button>
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+          <div className="flex items-center gap-2 bg-white p-3 rounded-lg shadow-sm border border-slate-200">
+            <BrainCircuit className="w-5 h-5 text-sky-600" />
+            <label htmlFor="ai-model-select" className="text-sm font-medium text-slate-700">
+              Model AI:
+            </label>
+            <select
+              id="ai-model-select"
+              value={selectedAIModel}
+              onChange={(e) => onAIModelChange(e.target.value as SupportedAIModel)}
+              className="p-2 border border-slate-300 rounded-md text-sm focus:ring-sky-500 focus:border-sky-500"
+            >
+              <option value="o3">o3 (OpenAI-like)</option>
+              <option value="gemini">Gemini 2.5 Pro Preview 05-06</option>
+            </select>
+          </div>
+          <div className="flex gap-4">
+            <button
+              onClick={() => setShowCustomProtocol(!showCustomProtocol)}
+              className="flex items-center gap-2 px-4 py-2 text-sky-600 hover:text-sky-700 hover:bg-sky-50 rounded-md transition-colors"
+            >
+              <FileText className="w-5 h-5" />
+              {showCustomProtocol ? 'Wybierz predefiniowany' : 'Własny protokół'}
+            </button>
+            <button
+              onClick={() => setShowHistory(!showHistory)}
+              className="flex items-center gap-2 px-4 py-2 text-sky-600 hover:text-sky-700 hover:bg-sky-50 rounded-md transition-colors"
+            >
+              <History className="w-5 h-5" />
+              {showHistory ? 'Ukryj historię' : 'Pokaż historię'}
+            </button>
+          </div>
         </div>
+
 
         {showHistory ? (
           <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-            <PatientHistory
+             <PatientHistory
               history={getHistory()}
               onClearHistory={handleClearHistory}
               onSelectPatient={onSelectHistoricalPatient}
@@ -103,7 +129,7 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({ onDataSubmit, on
         ) : (
           <form onSubmit={handleSubmit} className="space-y-8">
             {error && (
-              <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
+              <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4 rounded-md">
                 <div className="flex items-center">
                   <AlertCircle className="text-red-500 mr-2" />
                   <p className="text-red-700">{error}</p>
@@ -120,9 +146,12 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({ onDataSubmit, on
                   <div className="space-y-4">
                     <textarea
                       value={protocol}
-                      onChange={(e) => setProtocol(e.target.value)}
+                      onChange={(e) => {
+                        setProtocol(e.target.value);
+                        if (selectedProtocol) setSelectedProtocol(null); 
+                      }}
                       className="w-full h-48 p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                      placeholder="Wprowadź lub wklej protokół badania..."
+                      placeholder="Wprowadź lub wklej protokół badania (w formacie JSON lub tekstowym)..."
                     />
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2 text-sm text-slate-600">
@@ -134,7 +163,7 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({ onDataSubmit, on
                         <span>Wczytaj z pliku</span>
                         <input
                           type="file"
-                          accept=".txt,.doc,.docx"
+                          accept=".txt,.json,.doc,.docx"
                           className="hidden"
                           onChange={(e) => {
                             const file = e.target.files?.[0];
@@ -177,7 +206,7 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({ onDataSubmit, on
                       <span>Wczytaj z pliku</span>
                       <input
                         type="file"
-                        accept=".txt,.doc,.docx"
+                        accept=".txt,.doc,.docx,.pdf"
                         className="hidden"
                         onChange={(e) => {
                           const file = e.target.files?.[0];
@@ -193,8 +222,9 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({ onDataSubmit, on
             <div className="flex justify-center">
               <button
                 type="submit"
-                className="btn-primary px-8 py-3 text-lg flex items-center"
+                className="btn-primary px-8 py-3 text-lg font-semibold flex items-center justify-center shadow-md hover:shadow-lg transition-shadow duration-200"
               >
+                <PlayCircle size={22} className="mr-2 -ml-1" />
                 Rozpocznij Analizę
               </button>
             </div>

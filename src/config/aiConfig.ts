@@ -1,20 +1,7 @@
-import { AIConfig } from '../types';
+// src/config/aiConfig.ts
+import { AIConfig, GeminiAIConfig, SupportedAIModel } from '../types';
 
-export const aiConfig: AIConfig = {
-  // Podstawowa konfiguracja
-  apiKey: import.meta.env.VITE_AI_API_KEY || '',
-  endpoint: import.meta.env.VITE_AI_ENDPOINT || '',
-  model: import.meta.env.VITE_AI_MODEL || '',
-  
-  // Parametry modelu
-  temperature: 0.7,
-  maxCompletionTokens: 4000,
-  topP: 1,
-  frequencyPenalty: 0,
-  presencePenalty: 0,
-  
-  // Prompt systemowy
-  systemPrompt: `Jesteś zaawansowanym narzędziem AI, emulującym doświadczonego, wnikliwego i wysoce profesjonalnego badacza klinicznego. Twoją podstawową funkcją jest przeprowadzanie skrupulatnego pre-screeningu potencjalnych uczestników badań klinicznych w dziedzinie psychiatrii.
+const SYSTEM_PROMPT = `Jesteś zaawansowanym narzędziem AI, emulującym doświadczonego, wnikliwego i wysoce profesjonalnego badacza klinicznego. Twoją podstawową funkcją jest przeprowadzanie skrupulatnego pre-screeningu potencjalnych uczestników badań klinicznych w dziedzinie psychiatrii.
 
 Twoje Zadanie: Na podstawie dostarczonej historii medycznej pacjenta (która może być w formie tekstowej, potencjalnie pochodzącej z obrazu lub pliku) oraz specyficznego protokołu badania klinicznego (który zostanie Ci dostarczony), musisz:
 
@@ -115,5 +102,39 @@ Format odpowiedzi musi być zgodny z następującą strukturą JSON:
     "criticalInfoNeeded": string[],
     "estimatedProbability": number
   }
-}`
+}`;
+
+const o3Config: AIConfig = {
+  apiKey: import.meta.env.VITE_AI_API_KEY || '',
+  endpoint: import.meta.env.VITE_AI_ENDPOINT || '',
+  model: import.meta.env.VITE_AI_MODEL || 'o3',
+  temperature: 0.7,
+  maxCompletionTokens: 4000,
+  topP: 1,
+  frequencyPenalty: 0,
+  presencePenalty: 0,
+  systemPrompt: SYSTEM_PROMPT,
 };
+
+const geminiConfig: GeminiAIConfig = {
+  apiKey: import.meta.env.VITE_GEMINI_API_KEY || '',
+  model: import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.5-pro-preview-05-06', // User provided "Gemini 2.5 Pro Preview 05-06"
+  temperature: 0.1,
+  maxOutputTokens: 65536, // Gemini has different token limits, adjust as needed
+  topP: 1.0,
+  systemPrompt: SYSTEM_PROMPT, // System prompt is prepended to user message
+};
+
+export function getAIConfig(modelType: SupportedAIModel): AIConfig | GeminiAIConfig {
+  if (modelType === 'gemini') {
+    return geminiConfig;
+  }
+  return o3Config; // Default to o3/OpenAI compatible
+}
+
+export function getModelSystemPrompt(modelType: SupportedAIModel): string {
+    if (modelType === 'gemini') {
+        return geminiConfig.systemPrompt;
+    }
+    return o3Config.systemPrompt;
+}

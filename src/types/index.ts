@@ -1,15 +1,25 @@
 // src/types/index.ts
+export type SupportedAIModel = 'o3' | 'gemini';
+
 export interface AIConfig {
   apiKey: string;
   endpoint: string;
   model: string;
   temperature: number;
-  /** reasoning-modele (o-series) – max_completion_tokens */
   maxCompletionTokens: number;
   topP: number;
   frequencyPenalty: number;
   presencePenalty: number;
   systemPrompt: string;
+}
+
+export interface GeminiAIConfig {
+  apiKey: string;
+  model: string; // e.g., 'gemini-2.5-pro-preview-05-06'
+  temperature: number;
+  maxOutputTokens: number;
+  topP: number;
+  systemPrompt: string; // System prompt will be part of the user message for Gemini
 }
 
 export interface AppConfig {
@@ -82,6 +92,7 @@ export interface PatientData {
   };
   analyzedAt?: string;
   isMockData?: boolean;
+  modelUsed?: SupportedAIModel;
 }
 
 export interface PatientHistoryEntry {
@@ -99,6 +110,7 @@ export interface PatientHistoryEntry {
     criticalInfoNeeded: string[];
     estimatedProbability: number;
   };
+  modelUsed?: SupportedAIModel;
 }
 
 export interface Criterion {

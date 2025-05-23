@@ -1,12 +1,14 @@
+// src/App.tsx
 import React, { useState, useMemo, useEffect } from 'react';
-import { ChevronDown, ChevronUp, AlertTriangle, CheckCircle2, XCircle, HelpCircle, User, CalendarDays, Stethoscope, Pill, ListChecks, Target, BarChart3, Info, Filter, ArrowDownUp, Edit3, Save, X, MessageSquare, RotateCcw } from 'lucide-react';
+import { ChevronDown, ChevronUp, AlertTriangle, CheckCircle2, XCircle, HelpCircle, User, CalendarDays, Stethoscope, Pill, ListChecks, Target, BarChart3, Info, Filter, ArrowDownUp, Edit3, Save, X, MessageSquare, RotateCcw, BrainCircuit } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { DetailedTrdTimelineChart } from './components/charts/DetailedTrdTimelineChart';
 import { EnteringScreen } from './components/EnteringScreen';
 import { initialPatientData } from './data/mockData';
 import { analyzePatientData } from './services/ai';
 import { saveToHistory } from './services/patientHistory';
-import { PatientData } from './types';
+import type { PatientData, SupportedAIModel, Criterion, PharmacotherapyItem } from './types';
+import { getAIConfig } from './config/aiConfig'; 
 
 const USER_STATUS_OPTIONS = [
   { value: 'spełnione_manual', label: 'Spełnione (ocena badacza)' },
@@ -14,9 +16,9 @@ const USER_STATUS_OPTIONS = [
   { value: 'weryfikacja_manual', label: 'Wymaga weryfikacji (ocena badacza)' },
 ];
 
-const getEffectiveStatus = (criterion) => criterion.userStatus || criterion.status;
+const getEffectiveStatus = (criterion: Criterion) => criterion.userStatus || criterion.status;
 
-const getStatusColor = (status) => {
+const getStatusColor = (status: string | null | undefined) => {
   if (status?.endsWith('_manual')) return 'text-blue-600';
   switch (status) {
     case 'spełnione': case 'prawdopodobnie OK': return 'text-green-600';
@@ -26,7 +28,7 @@ const getStatusColor = (status) => {
   }
 };
 
-const getStatusIcon = (status) => {
+const getStatusIcon = (status: string | null | undefined) => {
   const className = "inline-block mr-2 h-5 w-5";
   if (status?.endsWith('_manual')) {
     if (status.startsWith('spełnione')) return <CheckCircle2 className={className} />;
@@ -41,7 +43,7 @@ const getStatusIcon = (status) => {
   }
 };
 
-const AccordionItem = ({ title, icon, children, defaultOpen = false }) => {
+const AccordionItem: React.FC<{title: string, icon: React.ReactNode, children: React.ReactNode, defaultOpen?: boolean}> = ({ title, icon, children, defaultOpen = false }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   return (
     <div className="border border-slate-200 rounded-lg mb-3 shadow-sm bg-white transition-all duration-300 ease-in-out">
@@ -54,7 +56,7 @@ const AccordionItem = ({ title, icon, children, defaultOpen = false }) => {
   );
 };
 
-const EditCriterionModal = ({ criterion, onClose, onSave }) => {
+const EditCriterionModal: React.FC<{criterion: Criterion, onClose: () => void, onSave: (id: string, status: string, comment: string) => void}> = ({ criterion, onClose, onSave }) => {
   const [newStatus, setNewStatus] = useState(criterion.userStatus || '');
   const [comment, setComment] = useState(criterion.userComment || '');
   const handleSave = () => { onSave(criterion.id, newStatus, comment); onClose(); };
@@ -82,11 +84,11 @@ const EditCriterionModal = ({ criterion, onClose, onSave }) => {
   );
 };
 
-const CriteriaList = ({ criteria, title, onUpdateCriterion }) => {
+const CriteriaList: React.FC<{criteria: Criterion[], title: string, onUpdateCriterion: (id: string, status: string | null, comment: string | null) => void}> = ({ criteria, title, onUpdateCriterion }) => {
   const [filter, setFilter] = useState('all');
   const [sortOrder, setSortOrder] = useState('id');
-  const [editingCriterion, setEditingCriterion] = useState(null);
-  const statusOrder = { 'problem/weryfikacja': 1, 'potencjalne wykluczenie': 1, 'niespełnione_manual': 1, 'potencjalnie niespełnione/weryfikacja': 2, 'weryfikacja': 2, 'weryfikacja_manual': 2, 'prawdopodobnie spełnione': 3, 'prawdopodobnie OK': 3, 'spełnione': 4, 'spełnione_manual': 4, };
+  const [editingCriterion, setEditingCriterion] = useState<Criterion | null>(null);
+  const statusOrder: Record<string, number> = { 'problem/weryfikacja': 1, 'potencjalne wykluczenie': 1, 'niespełnione_manual': 1, 'potencjalnie niespełnione/weryfikacja': 2, 'weryfikacja': 2, 'weryfikacja_manual': 2, 'prawdopodobnie spełnione': 3, 'prawdopodobnie OK': 3, 'spełnione': 4, 'spełnione_manual': 4, };
   const uniqueStatuses = useMemo(() => { const statuses = (criteria || []).map(c => getEffectiveStatus(c)); const userStatuses = USER_STATUS_OPTIONS.map(opt => opt.value); return ['all', ...new Set([...statuses, ...userStatuses])]; }, [criteria]);
   const filteredAndSortedCriteria = useMemo(() => {
     let result = [...(criteria || [])];
@@ -95,7 +97,7 @@ const CriteriaList = ({ criteria, title, onUpdateCriterion }) => {
     else { result.sort((a, b) => a.id.localeCompare(b.id)); }
     return result;
   }, [criteria, filter, sortOrder]);
-  const handleResetOverride = (criterionId) => { onUpdateCriterion(criterionId, null, null); };
+  const handleResetOverride = (criterionId: string) => { onUpdateCriterion(criterionId, null, null); };
 
   if (!criteria) {
     return <p className="text-slate-500 text-center py-4">Brak danych kryteriów do wyświetlenia.</p>;
@@ -111,7 +113,7 @@ const CriteriaList = ({ criteria, title, onUpdateCriterion }) => {
       </div>
       {filteredAndSortedCriteria.length === 0 && <p className="text-slate-500 text-center py-4">Brak kryteriów pasujących do wybranego filtra.</p>}
       <ul className="space-y-2">
-        {filteredAndSortedCriteria.map(criterion => {
+        {filteredAndSortedCriteria.map((criterion: Criterion) => {
           const effectiveStatus = getEffectiveStatus(criterion);
           return (
             <li key={criterion.id} className={`p-3 rounded-md border ${getStatusColor(effectiveStatus).replace('text-', 'border-').replace('-600', '-300').replace('-500', '-300')} bg-white shadow-sm hover:shadow-md transition-shadow`}>
@@ -129,11 +131,11 @@ const CriteriaList = ({ criteria, title, onUpdateCriterion }) => {
             </li>);
         })}
       </ul>
-      {editingCriterion && <EditCriterionModal criterion={editingCriterion} onClose={() => setEditingCriterion(null)} onSave={onUpdateCriterion} />}
+      {editingCriterion && <EditCriterionModal criterion={editingCriterion} onClose={() => setEditingCriterion(null)} onSave={(id, status, comment) => onUpdateCriterion(id, status, comment)} />}
     </div>);
 };
 
-const CriteriaStatusPieChart = ({ criteriaData, title }) => {
+const CriteriaStatusPieChart: React.FC<{criteriaData: Array<Criterion & {type: string}>, title: string}> = ({ criteriaData, title }) => {
   if (!criteriaData || criteriaData.length === 0) {
     return <p className="text-slate-500 text-center py-4">Brak danych do wyświetlenia wykresu dla: {title}</p>;
   }
@@ -145,12 +147,16 @@ const CriteriaStatusPieChart = ({ criteriaData, title }) => {
         'Do Weryfikacji';
     acc[statusLabel] = (acc[statusLabel] || 0) + 1;
     return acc;
-  }, {});
+  }, {} as Record<string, number>);
 
   const data = Object.entries(statusCounts).map(([name, value]) => ({ name, value }));
-  const COLORS = { 'Pozytywne / OK': '#22c55e', 'Negatywne / Problem': '#ef4444', 'Do Weryfikacji': '#f59e0b' };
+  const COLORS: Record<string, string> = { 'Pozytywne / OK': '#22c55e', 'Negatywne / Problem': '#ef4444', 'Do Weryfikacji': '#f59e0b' };
   const RADIAN = Math.PI / 180;
-  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name, value }) => {
+  
+  interface CustomizedLabelProps {
+    cx: number; cy: number; midAngle: number; innerRadius: number; outerRadius: number; percent: number; name: string; value: number;
+  }
+  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name, value }: CustomizedLabelProps) => {
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
@@ -177,7 +183,7 @@ const CriteriaStatusPieChart = ({ criteriaData, title }) => {
           >
             {data.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[entry.name] || '#8884d8'} />)}
           </Pie>
-          <Tooltip formatter={(value, name) => [value, name]} />
+          <Tooltip formatter={(value: number, name: string) => [value, name]} />
           <Legend wrapperStyle={{ fontSize: '12px' }} />
         </PieChart>
       </ResponsiveContainer>
@@ -186,26 +192,29 @@ const CriteriaStatusPieChart = ({ criteriaData, title }) => {
 };
 
 const App = () => {
-  // Move all useState declarations to the top level
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [hasSubmittedData, setHasSubmittedData] = useState(false);
   const [patientProfile, setPatientProfile] = useState<PatientData | null>(null);
+  const [selectedAIModel, setSelectedAIModel] = useState<SupportedAIModel>('o3'); 
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
+
   const [dynamicConclusion, setDynamicConclusion] = useState({
     overallQualification: '',
-    mainIssues: [],
-    criticalInfoNeeded: [],
+    mainIssues: [] as string[],
+    criticalInfoNeeded: [] as string[],
     estimatedProbability: 0
   });
 
-  const handleDataSubmit = async (data: { protocol: string; medicalHistory: string }) => {
+  const handleDataSubmit = async (data: { protocol: string; medicalHistory: string; selectedAIModel: SupportedAIModel }) => {
+    setHasSubmittedData(true); // Set this first to change view from EnteringScreen
     setIsAnalyzing(true);
+    setAnalysisError(null); 
     try {
-      const analysisResult = await analyzePatientData(data.medicalHistory, data.protocol);
+      const analysisResult = await analyzePatientData(data.medicalHistory, data.protocol, data.selectedAIModel);
       setPatientProfile(analysisResult);
-      setHasSubmittedData(true);
+      // setHasSubmittedData(true); // Moved up
       saveToHistory(analysisResult);
 
-      // Initialize dynamicConclusion with the analysis result
       if (analysisResult.reportConclusion) {
         setDynamicConclusion({
           overallQualification: analysisResult.reportConclusion.overallQualification || '',
@@ -216,21 +225,25 @@ const App = () => {
       }
     } catch (error) {
       console.error('Error analyzing data:', error);
-      // Show an error message to the user
-      alert('Wystąpił błąd podczas analizy danych. Używam danych testowych.');
+      const errorMessage = error instanceof Error ? error.message : 'Wystąpił nieznany błąd.';
+      setAnalysisError(`Błąd podczas analizy danych (${data.selectedAIModel}): ${errorMessage}. Używam danych testowych.`);
       
-      const mockData = { ...initialPatientData, analyzedAt: new Date().toISOString() };
-      setPatientProfile(mockData);
-      setHasSubmittedData(true);
-      saveToHistory(mockData);
+      const mockDataWithModel: PatientData = {
+        ...initialPatientData, 
+        analyzedAt: new Date().toISOString(),
+        isMockData: true,
+        modelUsed: data.selectedAIModel
+      };
+      setPatientProfile(mockDataWithModel);
+      // setHasSubmittedData(true); // Moved up
+      saveToHistory(mockDataWithModel);
 
-      // Initialize dynamicConclusion with mock data
-      if (mockData.reportConclusion) {
+      if (mockDataWithModel.reportConclusion) {
         setDynamicConclusion({
-          overallQualification: mockData.reportConclusion.overallQualification || '',
-          mainIssues: mockData.reportConclusion.mainIssues || [],
-          criticalInfoNeeded: mockData.reportConclusion.criticalInfoNeeded || [],
-          estimatedProbability: mockData.reportConclusion.estimatedProbability || 0
+          overallQualification: mockDataWithModel.reportConclusion.overallQualification || '',
+          mainIssues: mockDataWithModel.reportConclusion.mainIssues || [],
+          criticalInfoNeeded: mockDataWithModel.reportConclusion.criticalInfoNeeded || [],
+          estimatedProbability: mockDataWithModel.reportConclusion.estimatedProbability || 0
         });
       }
     } finally {
@@ -239,16 +252,16 @@ const App = () => {
   };
 
   const handleSelectHistoricalPatient = (patientId: string) => {
-    alert('Funkcja przeglądania historycznych analiz będzie dostępna wkrótce.');
+    alert(`Funkcja przeglądania historycznych analiz dla pacjenta ${patientId} będzie dostępna wkrótce.`);
   };
 
-  const handleUpdateCriterion = (criterionType, criterionId, newUserStatus, newUserComment) => {
+  const handleUpdateCriterion = (criterionType: keyof Pick<PatientData, 'inclusionCriteria' | 'psychiatricExclusionCriteria' | 'medicalExclusionCriteria'>, criterionId: string, newUserStatus: string | null, newUserComment: string | null) => {
     setPatientProfile(prevProfile => {
       if (!prevProfile || !prevProfile[criterionType]) {
         console.error(`Cannot update criterion: ${criterionType} is undefined in patientProfile.`);
         return prevProfile;
       }
-      const updatedCriteria = prevProfile[criterionType].map(c =>
+      const updatedCriteria = prevProfile[criterionType].map((c: Criterion) =>
         c.id === criterionId
           ? {
               ...c,
@@ -258,8 +271,8 @@ const App = () => {
             }
           : c
       );
-      const updatedProfile = { ...prevProfile, [criterionType]: updatedCriteria };
-      saveToHistory(updatedProfile);
+      const updatedProfile = { ...prevProfile, [criterionType]: updatedCriteria as Criterion[] };
+      saveToHistory(updatedProfile); 
       return updatedProfile;
     });
   };
@@ -293,10 +306,10 @@ const App = () => {
       if (criterion && criterion.status) {
         const initialStatus = criterion.status;
         const effectiveStatus = getEffectiveStatus(criterion);
-        if (criterion.userStatus) {
+        if (criterion.userStatus) { 
           if ((initialStatus.includes('problem') || initialStatus.includes('wykluczenie') || initialStatus.includes('niespełnione')) &&
             (effectiveStatus.includes('spełnione_manual'))) {
-            baseProbability = Math.min(100, baseProbability + 5);
+            baseProbability = Math.min(100, baseProbability + 5); 
           }
           else if ((initialStatus.includes('spełnione') || initialStatus.includes('OK')) &&
             (effectiveStatus.includes('niespełnione_manual'))) {
@@ -305,15 +318,17 @@ const App = () => {
         }
       }
     });
-
+    
     setDynamicConclusion(prev => ({
       ...prev,
       overallQualification: newOverallQualification,
-      estimatedProbability: Math.round(baseProbability),
+      estimatedProbability: Math.round(Math.max(0, Math.min(100, baseProbability))), 
     }));
+
   }, [patientProfile]);
 
-  const allCriteriaForChart = useMemo(() => {
+
+  const allCriteriaForChart = useMemo((): Array<Criterion & {type: string}> => {
     if (!patientProfile) return [];
     return [
       ...(patientProfile.inclusionCriteria || []).map(c => ({ ...c, type: 'Włączenia' })),
@@ -322,10 +337,16 @@ const App = () => {
     ];
   }, [patientProfile]);
 
+  const currentSelectedAIConfig = getAIConfig(selectedAIModel);
+  const isCurrentModelConfigured = !!(currentSelectedAIConfig.apiKey && currentSelectedAIConfig.model);
+
+
   if (!hasSubmittedData) {
     return <EnteringScreen 
       onDataSubmit={handleDataSubmit}
       onSelectHistoricalPatient={handleSelectHistoricalPatient}
+      selectedAIModel={selectedAIModel}
+      onAIModelChange={setSelectedAIModel}
     />;
   }
 
@@ -333,8 +354,13 @@ const App = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-100 to-sky-100 p-4 sm:p-6 md:p-8 font-sans flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-sky-600 mx-auto mb-4"></div>
-          <p className="text-xl text-slate-700">Analizowanie danych pacjenta...</p>
+          <div role="status" className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-sky-600 border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" aria-label="Ładowanie">
+            <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
+              Ładowanie...
+            </span>
+          </div>
+          <p className="text-xl text-slate-700 mt-4">Analizowanie danych pacjenta (model: {selectedAIModel === 'gemini' ? 'Gemini 2.5 Pro Preview 05-06' : selectedAIModel.toUpperCase()})...</p>
+          <p className="text-sm text-slate-500 mt-2">To może potrwać chwilę...</p>
         </div>
       </div>
     );
@@ -342,11 +368,28 @@ const App = () => {
 
   if (!patientProfile || Object.keys(patientProfile).length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-100 to-sky-100 p-4 sm:p-6 md:p-8 font-sans flex items-center justify-center">
-        <p className="text-xl text-slate-700">Ładowanie danych pacjenta lub brak danych...</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-100 to-sky-100 p-4 sm:p-6 md:p-8 font-sans flex flex-col items-center justify-center">
+        <AlertTriangle size={48} className="text-red-500 mb-4" />
+        <p className="text-xl text-slate-700 mb-2">Wystąpił błąd podczas ładowania danych pacjenta.</p>
+        <p className="text-slate-600 text-center mb-4">Nie udało się załadować profilu pacjenta. Spróbuj ponownie.</p>
+        {analysisError && (
+            <div className="mt-4 p-3 bg-red-100 text-red-800 rounded-md text-sm max-w-md text-left">
+                <p><strong>Szczegóły błędu:</strong></p>
+                <p>{analysisError}</p>
+            </div>
+        )}
+        <button 
+          onClick={() => { setHasSubmittedData(false); setAnalysisError(null);}} 
+          className="mt-6 px-6 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 transition-colors"
+        >
+          Powrót do wprowadzania danych
+        </button>
       </div>
     );
   }
+  
+  const modelDisplayName = patientProfile.modelUsed === 'gemini' ? 'Gemini 2.5 Pro Preview 05-06' : patientProfile.modelUsed?.toUpperCase() || 'Nieznany';
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 to-sky-100 p-4 sm:p-6 md:p-8 font-sans">
@@ -356,11 +399,19 @@ const App = () => {
       `}</style>
       <header className="mb-8 text-center">
         <h1 className="text-3xl sm:text-4xl font-bold text-sky-700">Interaktywny Raport Pre-screeningowy</h1>
-        <p className="text-lg text-slate-600 mt-1">Analiza Kwalifikacji Pacjenta (z możliwością edycji)</p>
+        <p className="text-lg text-slate-600 mt-1">Analiza Kwalifikacji Pacjenta (model: <span className="font-semibold">{modelDisplayName}</span>)</p>
+        
+        {analysisError && !patientProfile.isMockData && (
+            <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-md inline-block text-sm">
+                <AlertTriangle size={16} className="inline-block mr-1" />
+                {analysisError}
+            </div>
+        )}
         {patientProfile.isMockData && (
           <div className="mt-2 p-2 bg-yellow-100 text-yellow-800 rounded-md inline-block">
             <AlertTriangle size={16} className="inline-block mr-1" />
-            Używane są dane testowe - połączenie z AI jest niedostępne
+            Używane są dane testowe - połączenie z AI ({modelDisplayName}) jest niedostępne lub wystąpił błąd.
+            {!isCurrentModelConfigured && ` Sprawdź konfigurację (klucz API, model) dla ${modelDisplayName} w pliku .env.`}
           </div>
         )}
       </header>
@@ -387,7 +438,6 @@ const App = () => {
           <div className="grid grid-cols-1 gap-6">
             <DetailedTrdTimelineChart
               pharmacotherapy={patientProfile.trdAnalysis?.pharmacotherapy || []}
-              overallStartDate={patientProfile.trdAnalysis?.episodeStartDate}
             />
             <div className="lg:col-span-1 mt-6">
               <CriteriaStatusPieChart criteriaData={allCriteriaForChart} title="Ogólny Status Kryteriów (po zmianach)" />
@@ -428,7 +478,7 @@ const App = () => {
           <div className="space-y-6">
             <div>
               <h3 className="text-xl font-semibold text-slate-800 mb-2">Ogólna Kwalifikacja:</h3>
-              <p className={`text-lg font-bold ${dynamicConclusion.overallQualification.includes("nie kwalifikuje") ? "text-red-600" : "text-green-600"}`}>
+              <p className={`text-lg font-bold ${dynamicConclusion.overallQualification.toLowerCase().includes("nie kwalifikuje") ? "text-red-600" : dynamicConclusion.overallQualification.toLowerCase().includes("kwalifikuje") ? "text-green-600" : "text-yellow-500"}`}>
                 {dynamicConclusion.overallQualification || 'Brak oceny kwalifikacji.'}
               </p>
             </div>
@@ -457,13 +507,13 @@ const App = () => {
               <div className="flex items-center gap-3">
                 <BarChart3 size={28} className="text-sky-600 flex-shrink-0" />
                 <div className="w-full bg-slate-200 rounded-full h-8 overflow-hidden">
-                  <div className="bg-gradient-to-r from-sky-500 to-sky-700 h-8 rounded-full flex items-center justify-center text-white font-bold transition-all duration-500 ease-out" style={{ width: `${dynamicConclusion.estimatedProbability}%` }}>
+                  <div className={`h-8 rounded-full flex items-center justify-center text-white font-bold transition-all duration-500 ease-out ${dynamicConclusion.estimatedProbability >= 70 ? 'bg-green-500' : dynamicConclusion.estimatedProbability >=40 ? 'bg-yellow-500' : 'bg-red-500'}`} style={{ width: `${dynamicConclusion.estimatedProbability}%` }}>
                     {dynamicConclusion.estimatedProbability > 5 ? `${dynamicConclusion.estimatedProbability}%` : ''}
                   </div>
                 </div>
                 {dynamicConclusion.estimatedProbability <= 5 && <span className="text-sky-700 font-bold ml-2">{dynamicConclusion.estimatedProbability}%</span>}
               </div>
-              <p className="text-sm text-slate-600 mt-2">Prawdopodobieństwo uwzględnia modyfikacje badacza. Ocena początkowa AI: {patientProfile.reportConclusion?.estimatedProbability || 0}%.</p>
+              <p className="text-sm text-slate-600 mt-2">Prawdopodobieństwo uwzględnia modyfikacje badacza. Ocena początkowa AI ({modelDisplayName}): {patientProfile.reportConclusion?.estimatedProbability || 0}%.</p>
             </div>
           </div>
         </section>
@@ -471,6 +521,12 @@ const App = () => {
       <footer className="mt-12 text-center text-sm text-slate-500 py-6 border-t border-slate-200">
         <p>&copy; {new Date().getFullYear()} Aplikacja Raportów Pre-screeningowych. Wszelkie prawa zastrzeżone.</p>
         <p>Wygenerowano: {new Date().toLocaleString('pl-PL', { dateStyle: 'long', timeStyle: 'short' })}</p>
+         <button 
+          onClick={() => { setHasSubmittedData(false); setAnalysisError(null);}} 
+          className="mt-4 px-4 py-2 text-sm bg-sky-100 text-sky-700 rounded-md hover:bg-sky-200 transition-colors"
+        >
+          Analizuj nowego pacjenta
+        </button>
       </footer>
     </div>
   );
