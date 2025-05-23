@@ -45,25 +45,55 @@ export async function analyzePatientData(
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(`Błąd API: ${response.status} - ${errorData.error?.message || response.statusText}`);
     }
 
     const data = await response.json();
+    
+    if (!data.choices?.[0]?.message?.content) {
+      throw new Error('Nieprawidłowa odpowiedź API');
+    }
+
     return processAIResponse(data);
   } catch (error) {
     console.error('Error during AI analysis:', error);
-    throw error;
+    
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new Error('Błąd połączenia z serwerem AI. Sprawdź połączenie internetowe.');
+    }
+    
+    if (error instanceof Error) {
+      throw error;
+    }
+    
+    throw new Error('Wystąpił nieoczekiwany błąd podczas analizy');
+  }
+}
+
+function validateAIResponse(parsedData: any): void {
+  const requiredFields = ['summary', 'episodeEstimation', 'trdAnalysis', 'inclusionCriteria', 
+    'psychiatricExclusionCriteria', 'medicalExclusionCriteria', 'reportConclusion'];
+  
+  for (const field of requiredFields) {
+    if (!parsedData[field]) {
+      throw new Error(`Brak wymaganego pola: ${field}`);
+    }
+  }
+
+  if (typeof parsedData.reportConclusion.estimatedProbability !== 'number' ||
+      parsedData.reportConclusion.estimatedProbability < 0 ||
+      parsedData.reportConclusion.estimatedProbability > 100) {
+    throw new Error('Nieprawidłowa wartość estimatedProbability');
   }
 }
 
 function processAIResponse(aiResponse: any): PatientData {
   try {
-    // Przykładowa implementacja przetwarzania odpowiedzi AI
-    // W rzeczywistej implementacji należy dostosować to do formatu odpowiedzi AI
     const content = aiResponse.choices[0].message.content;
-    
-    // Parsowanie odpowiedzi AI do formatu PatientData
     const parsedData = JSON.parse(content);
+    
+    validateAIResponse(parsedData);
     
     return {
       summary: {
@@ -95,7 +125,10 @@ function processAIResponse(aiResponse: any): PatientData {
     };
   } catch (error) {
     console.error('Error processing AI response:', error);
-    throw new Error('Failed to process AI response');
+    if (error instanceof SyntaxError) {
+      throw new Error('Otrzymano nieprawidłowy format odpowiedzi z API');
+    }
+    throw error;
   }
 }
 
