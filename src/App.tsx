@@ -1,13 +1,20 @@
 // src/App.tsx
 import React, { useState, useMemo, useEffect } from 'react';
-import { ChevronDown, ChevronUp, AlertTriangle, CheckCircle2, XCircle, HelpCircle, User, CalendarDays, Stethoscope, Pill, ListChecks, Target, BarChart3, Info, Filter, ArrowDownUp, Edit3, Save, X, MessageSquare, RotateCcw, BrainCircuit } from 'lucide-react';
+import { 
+  ChevronDown, ChevronUp, AlertTriangle, CheckCircle2, XCircle, HelpCircle, 
+  User, CalendarDays, Stethoscope, Pill, ListChecks, Target, BarChart3, 
+  Info, Filter, ArrowDownUp, Edit3, Save, RotateCcw 
+  // Usunięto nieużywane importy: X, MessageSquare, BrainCircuit
+} from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { DetailedTrdTimelineChart } from './components/charts/DetailedTrdTimelineChart';
 import { EnteringScreen } from './components/EnteringScreen';
 import { initialPatientData } from './data/mockData';
 import { analyzePatientData } from './services/ai';
 import { saveToHistory } from './services/patientHistory';
-import type { PatientData, SupportedAIModel, Criterion, PharmacotherapyItem } from './types';
+// Usunięto nieużywany import typu PharmacotherapyItem z tego pliku,
+// ponieważ jest on potrzebny tylko w DetailedTrdTimelineChart.tsx
+import type { PatientData, SupportedAIModel, Criterion } from './types'; 
 import { getAIConfig } from './config/aiConfig'; 
 
 const USER_STATUS_OPTIONS = [
@@ -73,7 +80,8 @@ const EditCriterionModal: React.FC<{criterion: Criterion, onClose: () => void, o
         </div>
         <div className="mb-6">
           <label htmlFor="comment-input" className="block text-sm font-medium text-slate-700 mb-1">Komentarz Badacza:</label>
-          <textarea id="comment-input" value={comment} onChange={(e) => setComment(e.target.value)} rows="3" className="w-full p-2 border border-slate-300 rounded-md focus:ring-sky-500 focus:border-sky-500" placeholder="Dodaj uzasadnienie zmiany statusu..." />
+          {/* Poprawka: rows oczekuje liczby, nie stringa. Ustawiono na 3. */}
+          <textarea id="comment-input" value={comment} onChange={(e) => setComment(e.target.value)} rows={3} className="w-full p-2 border border-slate-300 rounded-md focus:ring-sky-500 focus:border-sky-500" placeholder="Dodaj uzasadnienie zmiany statusu..." />
         </div>
         <div className="flex justify-end space-x-3">
           <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-md border border-slate-300">Anuluj</button>
@@ -99,8 +107,8 @@ const CriteriaList: React.FC<{criteria: Criterion[], title: string, onUpdateCrit
   }, [criteria, filter, sortOrder]);
   const handleResetOverride = (criterionId: string) => { onUpdateCriterion(criterionId, null, null); };
 
-  if (!criteria) {
-    return <p className="text-slate-500 text-center py-4">Brak danych kryteriów do wyświetlenia.</p>;
+  if (!criteria || criteria.length === 0) { 
+    return <p className="text-slate-500 text-center py-4">Brak danych kryteriów do wyświetlenia dla {title}.</p>;
   }
 
   return (
@@ -206,13 +214,12 @@ const App = () => {
   });
 
   const handleDataSubmit = async (data: { protocol: string; medicalHistory: string; selectedAIModel: SupportedAIModel }) => {
-    setHasSubmittedData(true); // Set this first to change view from EnteringScreen
+    setHasSubmittedData(true); 
     setIsAnalyzing(true);
     setAnalysisError(null); 
     try {
       const analysisResult = await analyzePatientData(data.medicalHistory, data.protocol, data.selectedAIModel);
       setPatientProfile(analysisResult);
-      // setHasSubmittedData(true); // Moved up
       saveToHistory(analysisResult);
 
       if (analysisResult.reportConclusion) {
@@ -224,7 +231,7 @@ const App = () => {
         });
       }
     } catch (error) {
-      console.error('Error analyzing data:', error);
+      console.error('Error analyzing data in App.tsx:', error);
       const errorMessage = error instanceof Error ? error.message : 'Wystąpił nieznany błąd.';
       setAnalysisError(`Błąd podczas analizy danych (${data.selectedAIModel}): ${errorMessage}. Używam danych testowych.`);
       
@@ -235,7 +242,6 @@ const App = () => {
         modelUsed: data.selectedAIModel
       };
       setPatientProfile(mockDataWithModel);
-      // setHasSubmittedData(true); // Moved up
       saveToHistory(mockDataWithModel);
 
       if (mockDataWithModel.reportConclusion) {

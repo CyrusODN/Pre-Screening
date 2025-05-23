@@ -1,5 +1,5 @@
 // src/services/patientHistory.ts
-import type { PatientData, PatientHistoryEntry, SupportedAIModel } from '../types';
+import type { PatientData, PatientHistoryEntry } from '../types';
 
 const STORAGE_KEY = 'patient-history';
 

@@ -15,11 +15,11 @@ export interface AIConfig {
 
 export interface GeminiAIConfig {
   apiKey: string;
-  model: string; // e.g., 'gemini-2.5-pro-preview-05-06'
+  model: string; 
   temperature: number;
   maxOutputTokens: number;
   topP: number;
-  systemPrompt: string; // System prompt will be part of the user message for Gemini
+  systemPrompt: string; 
 }
 
 export interface AppConfig {
@@ -50,6 +50,20 @@ export interface Protocol {
   };
 }
 
+// Definiujemy i eksportujemy interfejs PharmacotherapyItem
+export interface PharmacotherapyItem {
+  id: string;
+  drugName: string;
+  shortName: string;
+  startDate: string | null;
+  endDate: string | null;
+  dose: string;
+  attemptGroup: number;
+  notes?: string;
+  isAugmentation?: boolean;
+  baseDrug?: string;
+}
+
 export interface PatientData {
   summary: {
     id: string;
@@ -67,18 +81,8 @@ export interface PatientData {
   };
   trdAnalysis: {
     episodeStartDate: string | null;
-    pharmacotherapy: Array<{
-      id: string;
-      drugName: string;
-      shortName: string;
-      startDate: string | null;
-      endDate: string | null;
-      dose: string;
-      attemptGroup: number;
-      notes?: string;
-      isAugmentation?: boolean;
-      baseDrug?: string;
-    }>;
+    // Używamy zdefiniowanego interfejsu PharmacotherapyItem
+    pharmacotherapy: Array<PharmacotherapyItem>; 
     conclusion: string;
   };
   inclusionCriteria: Array<Criterion>;

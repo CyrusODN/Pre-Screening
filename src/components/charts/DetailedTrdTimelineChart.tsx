@@ -10,100 +10,235 @@ import {
   LabelList,
   Cell,
 } from 'recharts';
-import { parseISO, differenceInDays, format, addDays, isValid } from 'date-fns';
+import { parseISO, differenceInDays, addDays, isValid, max as dateMax, isBefore, lightFormat } from 'date-fns';
+// Trying a slightly different import path, assuming 'index.ts' is resolved automatically
 import type { PharmacotherapyItem } from '../../types';
 
+interface ProcessedDrugEpisode extends PharmacotherapyItem {
+  isMerged?: boolean;
+  parsedStartDate: Date; // Ensured to be a valid Date after initial filtering
+  parsedEndDate: Date;   // Ensured to be a valid Date after initial filtering
+  originalIndex?: number;
+}
+
 interface ChartDataItem {
-  name: string;
-  id: string;
-  start: number; // Timestamp
-  duration: number; // Days
-  originalStartDate: string;
-  originalEndDate: string;
-  dose: string;
+  yCategoryKey: string;    
+  yTickLabel: string;      
+  fullDrugNameWithDose: string; 
+  id: string;              
+  start: number;           
+  duration: number;        
+  originalStartDateStr: string; 
+  originalEndDateStr: string;   
+  dose: string;            
   attemptGroup: number;
-  color: string;
+  color: string;           
+  notes?: string; 
+  range: [number, number]; 
 }
 
 interface DetailedTrdTimelineChartProps {
   pharmacotherapy: PharmacotherapyItem[];
 }
 
-const ATTEMPT_COLORS = [
-  '#3B82F6', // blue-500
-  '#10B981', // emerald-500
-  '#F59E0B', // amber-500
-  '#EF4444', // red-500
-  '#8B5CF6', // violet-500
-  '#EC4899', // pink-500
+const BASE_COLORS = [
+  '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', 
+  '#64748B', '#F97316', '#22D3EE', '#A3E635', '#FACC15', '#FB7185',
+  '#6366F1', '#D946EF', '#06B6D4', '#A1A1AA', '#F43F5E', '#84CC16'
 ];
+
+function hashCode(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash |= 0; 
+  }
+  return Math.abs(hash);
+}
+
+function getDrugDoseColor(drugName: string, dose: string): string {
+  const key = `${drugName}---${dose}`.toLowerCase(); 
+  const colorIndex = hashCode(key) % BASE_COLORS.length;
+  return BASE_COLORS[colorIndex];
+}
 
 const safeDate = (dateStr: string | null | undefined): Date | null => {
   if (!dateStr) return null;
-  const parsed = parseISO(dateStr);
+  const parsed = parseISO(dateStr); 
   return isValid(parsed) ? parsed : null;
 };
 
 export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> = ({ pharmacotherapy }) => {
-  const { chartData, minDateTimestamp, maxDateTimestamp, yAxisDomain } = useMemo(() => {
-    const validDrugs = pharmacotherapy
-      .map(drug => ({
+  console.log('[Chart] Initial pharmacotherapy prop:', JSON.parse(JSON.stringify(pharmacotherapy)));
+
+  const { chartDataForRecharts, minDateTimestamp, maxDateTimestamp, yAxisCategories } = useMemo(() => {
+    const initialProcessedDrugs: ProcessedDrugEpisode[] = pharmacotherapy
+      .map((drug, index) => ({
         ...drug,
+        originalIndex: index,
         parsedStartDate: safeDate(drug.startDate),
         parsedEndDate: safeDate(drug.endDate),
       }))
-      .filter(drug => drug.parsedStartDate && drug.parsedEndDate && drug.parsedStartDate <= drug.parsedEndDate);
+      .filter(drug => {
+        const isValidDrug = drug.parsedStartDate instanceof Date && 
+                            isValid(drug.parsedStartDate) &&
+                            drug.parsedEndDate instanceof Date && 
+                            isValid(drug.parsedEndDate) && 
+                            !isBefore(drug.parsedEndDate, drug.parsedStartDate);
+        if(!isValidDrug) {
+          console.warn(`[Chart] Invalid drug data (pre-merge) filtered out (originalIndex: ${drug.originalIndex}): Start: ${drug.startDate}, End: ${drug.endDate}, Name: ${drug.drugName}`, drug);
+        }
+        return isValidDrug;
+      }) as ProcessedDrugEpisode[];
 
-    if (validDrugs.length === 0) {
-      return { chartData: [], minDateTimestamp: 0, maxDateTimestamp: 0, yAxisDomain: [] };
-    }
+    const groupedForMerging = new Map<string, ProcessedDrugEpisode[]>();
+    initialProcessedDrugs.forEach(drug => {
+      const drugNameKey = (drug.drugName || 'Nieznany Lek').trim();
+      const doseKey = (drug.dose || 'N/A').trim();
+      const mergeKey = `${drugNameKey}---${doseKey}`;
+      if (!groupedForMerging.has(mergeKey)) {
+        groupedForMerging.set(mergeKey, []);
+      }
+      groupedForMerging.get(mergeKey)!.push(drug); 
+    });
 
-    const allTimestamps = validDrugs.flatMap(d => [d.parsedStartDate!.getTime(), d.parsedEndDate!.getTime()]);
-    const minTs = Math.min(...allTimestamps);
-    const maxTs = Math.max(...allTimestamps);
-    
-    const paddingDays = validDrugs.length > 1 && minTs !== maxTs ? 30 : 60;
-    const minDate = addDays(new Date(minTs), -paddingDays);
-    const maxDate = addDays(new Date(maxTs), paddingDays);
+    const mergedDrugDoseEpisodes: ProcessedDrugEpisode[] = [];
+    groupedForMerging.forEach(group => {
+      if (group.length === 0) return;
+      group.sort((a, b) => a.parsedStartDate.getTime() - b.parsedStartDate.getTime());
 
-    const overallMinTimestamp = minDate.getTime();
-    const overallMaxTimestamp = maxDate.getTime();
+      let currentMerged: ProcessedDrugEpisode = { ...group[0] };
+      currentMerged.isMerged = false; 
 
-    const data: ChartDataItem[] = validDrugs.map((drug, index) => {
-      const duration = differenceInDays(drug.parsedEndDate!, drug.parsedStartDate!) + 1;
-      return {
-        name: drug.shortName || drug.drugName || 'Nieznany Lek', // Fallback for name
-        id: drug.id || `drug-${index}-${Math.random()}`, // More unique fallback ID
-        start: drug.parsedStartDate!.getTime(),
-        duration: duration > 0 ? duration : 1, // Ensure duration is at least 1
-        originalStartDate: format(drug.parsedStartDate!, 'dd.MM.yy'),
-        originalEndDate: format(drug.parsedEndDate!, 'dd.MM.yy'),
-        dose: drug.dose || 'N/A',
-        attemptGroup: drug.attemptGroup || 0,
-        color: ATTEMPT_COLORS[((drug.attemptGroup || 0) -1 + ATTEMPT_COLORS.length) % ATTEMPT_COLORS.length] || '#6B7280',
-      };
+      for (let i = 1; i < group.length; i++) {
+        const nextDrug = group[i];
+        if (currentMerged.parsedEndDate && isValid(currentMerged.parsedEndDate) && 
+            nextDrug.parsedStartDate && isValid(nextDrug.parsedStartDate) &&
+            nextDrug.parsedStartDate <= addDays(currentMerged.parsedEndDate, 1)) { 
+          currentMerged.parsedEndDate = dateMax(currentMerged.parsedEndDate, nextDrug.parsedEndDate);
+          currentMerged.isMerged = true;
+          if (!currentMerged.notes?.includes('Okresy scalone')) {
+            currentMerged.notes = `${currentMerged.notes || ''}${currentMerged.notes ? '; ' : ''}Okresy scalone`.trim();
+          }
+        } else {
+          mergedDrugDoseEpisodes.push(currentMerged);
+          currentMerged = { ...nextDrug };
+          currentMerged.isMerged = false;
+        }
+      }
+      mergedDrugDoseEpisodes.push(currentMerged);
     });
     
-    const yDomain = data.map(d => d.name).reverse(); 
+    console.log('[Chart] Merged drug-dose episodes:', JSON.parse(JSON.stringify(mergedDrugDoseEpisodes)));
+    
+    const finalValidMergedItems = mergedDrugDoseEpisodes.filter(drug => {
+        const stillValid = drug.parsedStartDate instanceof Date && 
+                            isValid(drug.parsedStartDate) && 
+                            drug.parsedEndDate instanceof Date && 
+                            isValid(drug.parsedEndDate) && 
+                            !isBefore(drug.parsedEndDate, drug.parsedStartDate);
+        if (!stillValid) {
+            console.warn('[Chart] Invalid item after merge, filtering out before creating ChartDataItem:', drug);
+        }
+        return stillValid;
+    });
 
-    return { chartData: data, minDateTimestamp: overallMinTimestamp, maxDateTimestamp: overallMaxTimestamp, yAxisDomain: yDomain };
+    if (finalValidMergedItems.length === 0) {
+      return { chartDataForRecharts: [], minDateTimestamp: 0, maxDateTimestamp: 0, yAxisCategories: [] };
+    }
+
+    const allTimestamps = finalValidMergedItems.flatMap(d => [d.parsedStartDate.getTime(), d.parsedEndDate.getTime()]);
+    let minTs = Math.min(...allTimestamps);
+    let maxTs = Math.max(...allTimestamps);
+    
+    const dateDiff = differenceInDays(new Date(maxTs), new Date(minTs));
+    if (dateDiff < 30) {
+        minTs = addDays(new Date(minTs), - Math.floor((30 - dateDiff) / 2) - 15).getTime();
+        maxTs = addDays(new Date(maxTs), Math.ceil((30 - dateDiff) / 2) + 15).getTime();
+    } else {
+        minTs = addDays(new Date(minTs), -15).getTime();
+        maxTs = addDays(new Date(maxTs), 15).getTime();
+    }
+    const overallMinTimestamp = minTs;
+    const overallMaxTimestamp = maxTs;
+
+    const items: ChartDataItem[] = finalValidMergedItems.map((drug, index) => {
+      // Critical check before date operations
+      if (!isValid(drug.parsedStartDate) || !isValid(drug.parsedEndDate)) {
+        console.error(`[Chart] Creating ChartDataItem: Invalid date found for drug at originalIndex ${drug.originalIndex}`, drug);
+        // Return a placeholder or skip this item to prevent RangeError
+        // For now, skipping might be safer if data is truly corrupt.
+        // However, the filter above should prevent this. This is an extra safeguard.
+        return null; 
+      }
+
+      const duration = differenceInDays(drug.parsedEndDate, drug.parsedStartDate) + 1;
+      const fullDrugName = (drug.drugName || 'Nieznany Lek').trim();
+      const dose = (drug.dose || 'N/A').trim();
+      const yCategoryKey = fullDrugName;
+      const shortName = (drug.shortName || fullDrugName.substring(0,3).toUpperCase() || 'N/A').trim();
+
+      return {
+        yCategoryKey: yCategoryKey,
+        yTickLabel: shortName, 
+        fullDrugNameWithDose: `${fullDrugName} (${dose})`,
+        id: drug.id ? `${drug.id}-${index}-ep` : `drug-ep-${index}-${Math.random().toString(16).slice(2)}`,
+        start: drug.parsedStartDate.getTime(),
+        duration: duration > 0 ? duration : 1,
+        originalStartDateStr: lightFormat(drug.parsedStartDate, 'dd.MM.yy'),
+        originalEndDateStr: lightFormat(drug.parsedEndDate, 'dd.MM.yy'),
+        dose: dose,
+        attemptGroup: drug.attemptGroup || 0,
+        color: getDrugDoseColor(fullDrugName, dose),
+        notes: drug.notes,
+        range: [
+          drug.parsedStartDate.getTime(), 
+          addDays(drug.parsedStartDate, (duration > 0 ? duration : 1) - 1).getTime()
+        ] as [number, number],
+      };
+    }).filter(item => item !== null) as ChartDataItem[]; // Filter out any nulls from invalid date handling
+    
+    const yCategoryMap = new Map<string, { label: string, minStart: number }>();
+    initialProcessedDrugs.forEach(drug => {
+        const fullDrugNameKey = (drug.drugName || 'Nieznany Lek').trim();
+        const shortNameLabel = (drug.shortName || fullDrugNameKey.substring(0,3).toUpperCase() || 'N/A').trim();
+        if (drug.parsedStartDate && isValid(drug.parsedStartDate) && !yCategoryMap.has(fullDrugNameKey)) { 
+            yCategoryMap.set(fullDrugNameKey, { label: shortNameLabel, minStart: drug.parsedStartDate.getTime() });
+        }
+    });
+
+    const sortedYCategories = Array.from(yCategoryMap.entries())
+        .sort(([, a], [, b]) => a.minStart - b.minStart) 
+        .map(([key, val]) => ({ value: key, label: val.label }));
+
+    console.log('[Chart] Final chartDataForRecharts (items for Recharts):', JSON.parse(JSON.stringify(items)));
+    console.log('[Chart] Y-Axis Categories (for domain and ticks):', sortedYCategories);
+
+    return { 
+      chartDataForRecharts: items, 
+      minDateTimestamp: overallMinTimestamp, 
+      maxDateTimestamp: overallMaxTimestamp, 
+      yAxisCategories: sortedYCategories 
+    };
   }, [pharmacotherapy]);
 
-  if (chartData.length === 0) {
-    return <p className="text-slate-500 text-center py-4">Brak danych do wizualizacji osi czasu leczenia.</p>;
+  if (chartDataForRecharts.length === 0) {
+    return <p className="text-slate-500 text-center py-4">Brak prawidłowych danych farmakoterapii do wizualizacji osi czasu leczenia.</p>;
   }
   
   const CustomTooltipContent: React.FC<any> = ({ active, payload }) => {
     if (active && payload && payload.length) {
-      const data = payload[0].payload as ChartDataItem; // item from chartData
+      const data = payload[0].payload as ChartDataItem; 
       return (
         <div className="bg-white p-3 shadow-lg rounded-md border border-slate-200 text-sm">
-          <p className="font-semibold text-slate-800">{data.name} ({data.dose})</p>
+          <p className="font-semibold text-slate-800">{data.fullDrugNameWithDose}</p>
           <p className="text-slate-600">
-            Okres: {data.originalStartDate} - {data.originalEndDate}
+            Okres: {data.originalStartDateStr} - {data.originalEndDateStr}
           </p>
           <p className="text-slate-600">Czas trwania: {data.duration} dni</p>
           {data.attemptGroup > 0 && <p className="text-slate-600">Próba leczenia: {data.attemptGroup}</p>}
+          {data.notes && <p className="text-xs text-slate-500 mt-1">Uwagi: {data.notes}</p>}
         </div>
       );
     }
@@ -112,94 +247,73 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
 
   const XAxisTickFormatter = (timestamp: number): string => {
     const date = new Date(timestamp);
-    return format(date, 'dd.MM.yy'); 
+    return lightFormat(date, 'dd.MM.yy'); 
   };
-
-  // dataKey for Bar should relate to the 'value' of the bar for positioning purposes.
-  // Since we're making a Gantt chart, the 'value' is essentially the [start, end] range.
-  // Recharts expects a single value for dataKey to determine bar length from origin,
-  // or an array of two values [start, end] for a bar that doesn't start at origin.
-  const dataKeyForBar: [string, string] = ["start", "end_calculated_for_recharts_bar"];
-  // However, to make it simpler with LabelList and Cell, we'll use a single dataKey for Bar
-  // and handle positioning and width via Cells and ensure LabelList gets the correct 'entry'.
-  // The `Bar` component itself doesn't directly draw if you provide custom Cells for everything.
-  // We can make `dataKey` point to `duration` and use `x` in a custom shape or rely on `Cell` to be correctly placed.
-  // The current approach maps `Bar` with `dataKey="start"` and Cells inside.
-  // Let's define a `value` that represents the end point for the `Bar` `dataKey` for length calculation.
-  // Each item in `chartData` will need `start` (timestamp) and an `end` (timestamp).
-  const chartDataWithEndpoints = chartData.map(item => ({
-    ...item,
-    // This 'value' will be used by the Bar to determine its length on the XAxis (from origin if not stacked/custom)
-    // For a Gantt, we pass an array [start, end] to dataKey if supported or use custom shape.
-    // Here, we're using `Bar dataKey="start"` and Cells. This is unusual.
-    // The <Bar dataKey="start"> means the length of the bar is determined by the 'start' value, which is not what we want for Gantt.
-    // We want the bar to be drawn from 'start' for a length of 'duration'.
-    // A common approach for Gantt in Recharts:
-    // dataKey="range" where range = [item.start, item.start + item.duration_in_ms]
-    // Or, use a "dummy" Bar component and render everything with custom shapes or Cells based on an iteration.
-    // The Bar > Cell approach means Cell is responsible for rendering its segment.
-    // If we use Cell, the Bar's dataKey is less critical if Cell overrides rendering.
-    // However, LabelList is tricky. It associates with the Bar's data.
-
-    // Let's map data for Bar to have a clear [start, end] for dataKey.
-    range: [item.start, addDays(new Date(item.start), item.duration -1).getTime()] as [number, number]
-  }));
-
-
-  const barHeight = 25;
-  const chartHeight = yAxisDomain.length * (barHeight + 15) + 80; // Increased bottom margin
+  
+  const barHeight = 20;
+  const yCategoryPadding = 35;
+  const chartHeight = Math.max(300, yAxisCategories.length * yCategoryPadding + 120);
 
   return (
-    <div style={{ width: '100%', height: chartHeight }} className="overflow-x-auto">
-      <ResponsiveContainer width="100%" height="100%" minWidth={600}>
+    <div style={{ width: '100%', height: chartHeight }} className="overflow-x-auto bg-slate-50 p-4 rounded-lg shadow-inner">
+      <ResponsiveContainer width="100%" height="100%" minWidth={800}>
         <BarChart
           layout="vertical"
-          data={chartDataWithEndpoints} // Use data with 'range'
-          margin={{ top: 20, right: 50, left: 20, bottom: 40 }} // Adjusted margins
-          barCategoryGap="25%"
+          data={chartDataForRecharts} 
+          margin={{ top: 20, right: 70, left: 50, bottom: 60 }} 
+          barCategoryGap="0%" 
         >
           <XAxis
             type="number"
             domain={[minDateTimestamp, maxDateTimestamp]}
             tickFormatter={XAxisTickFormatter}
             scale="time"
-            minTickGap={60} 
-            tick={{ fontSize: 10, fill: '#64748b' }}
-            padding={{left: 10, right: 10}}
-            label={{ value: "Oś Czasu", position: "insideBottom", offset: -25, fontSize: 12, fill: '#334155' }}
+            minTickGap={50}
+            tick={{ fontSize: 10, fill: '#475569' }}
+            padding={{left: 20, right: 20}} 
+            label={{ value: "Oś Czasu Farmakoterapii", position: "insideBottom", offset: -35, fontSize: 13, fill: '#1e293b', fontWeight: 'bold' }}
+            allowDuplicatedCategory={false} 
+            stroke="#cbd5e1"
           />
           <YAxis
             type="category"
-            dataKey="name" // This refers to 'name' in chartDataWithEndpoints (via original chartData items)
-            width={120} // Increased width for drug names
-            tick={{ fontSize: 11, fill: '#334155' }}
-            domain={yAxisDomain} 
+            dataKey="yCategoryKey" 
+            ticks={yAxisCategories.map(cat => cat.value)} 
+            tickFormatter={(yCategoryKeyValue) => { 
+                const cat = yAxisCategories.find(c => c.value === yCategoryKeyValue);
+                return cat ? cat.label : ''; 
+            }}
+            width={100} 
+            tick={{ fontSize: 11, fill: '#1e293b', fontWeight: 'bold', textAnchor: 'end' }}
             interval={0} 
+            tickLine={false}
+            axisLine={{ stroke: '#cbd5e1' }}
           />
-          <Tooltip content={<CustomTooltipContent />} cursor={{ fill: 'rgba(200,200,200,0.1)' }} />
+          <Tooltip content={<CustomTooltipContent />} cursor={{ fill: 'rgba(203, 213, 225, 0.3)' }} />
           
           <Bar dataKey="range" barSize={barHeight} radius={[4, 4, 4, 4]}>
-            {chartDataWithEndpoints.map((entry) => (
+            {chartDataForRecharts.map((entry) => (
               <Cell key={`cell-${entry.id}`} fill={entry.color} />
             ))}
             <LabelList
-                // dataKey="name" // This was causing 'value' to be 'name'
-                // Let's not specify dataKey here, so 'entry' in formatter is the full data object
-                // and 'value' would be the value of Bar's dataKey ('range')
-                // Or, content can be a custom component.
-                // For simplicity, let's ensure the formatter gets the full entry.
-                // If dataKey is not set on LabelList, it might use the Bar's dataKey by default.
-                // The 'value' passed to formatter would be 'range'. 'entry' would be the data item.
-                position="insideRight" 
-                offset={8}
-                fill="#ffffff"
-                fontSize={10}
-                formatter={(value: [number,number], entry: ChartDataItem) => { // Value is now 'range', entry is from chartDataWithEndpoints which has ChartDataItem props
-                    if (entry && typeof entry.duration === 'number') {
-                        // entry.name should be correct here, as 'entry' is the item from chartDataWithEndpoints
-                        return `${entry.name} (${entry.duration}d)`;
+                position="right"
+                offset={5}
+                fill="#334155" 
+                fontSize={9}
+                formatter={(_value: any, entry: ChartDataItem) => { 
+                    if (entry && typeof entry.duration === 'number' && entry.fullDrugNameWithDose) {
+                        const chartRenderWidth = typeof window !== "undefined" ? window.innerWidth * 0.7 - 250 : 450; 
+                        const timeSpanRatio = (entry.range[1] - entry.range[0]) / (maxDateTimestamp - minDateTimestamp);
+                        const barPixelWidth = timeSpanRatio * chartRenderWidth;
+                        
+                        const labelText = `${entry.dose} (${entry.duration}d)`; 
+                        
+                        if (barPixelWidth < 30 && entry.duration > 0) return `(${entry.duration}d)`;
+                        if (barPixelWidth < (labelText.length * 4.5)) { 
+                             return `(${entry.duration}d)`;
+                        }
+                        return labelText;
                     }
-                    if (entry && entry.name) return entry.name; // Fallback
                     return '';
                 }}
             />
