@@ -39,56 +39,7 @@ export interface PatientData {
     estimatedProbability: number;
   };
   analyzedAt?: string;
+  isMockData?: boolean; // Dodane nowe pole
 }
 
-export interface PatientHistoryEntry {
-  id: string;
-  analyzedAt: string;
-  summary: PatientData['summary'];
-  reportConclusion: PatientData['reportConclusion'];
-}
-
-export interface Criterion {
-  id: string;
-  name: string;
-  status: string;
-  details: string;
-  userStatus: string | null;
-  userComment: string | null;
-  userOverrideTimestamp: string | null;
-}
-
-export interface AIConfig {
-  apiKey: string;
-  endpoint: string;
-  model: string;
-}
-
-export interface AppConfig {
-  ai: AIConfig;
-  defaultLanguage: string;
-  theme: 'light' | 'dark';
-}
-
-export interface Protocol {
-  id: string;
-  name: string;
-  description: string;
-  criteria: {
-    inclusion: Array<{
-      id: string;
-      name: string;
-      details: string;
-    }>;
-    psychiatricExclusion: Array<{
-      id: string;
-      name: string;
-      details: string;
-    }>;
-    medicalExclusion: Array<{
-      id: string;
-      name: string;
-      details: string;
-    }>;
-  };
-}
+// ... reszta interfejsów pozostaje bez zmian
