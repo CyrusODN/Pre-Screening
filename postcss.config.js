@@ -1,6 +1,6 @@
 export default {
   plugins: {
-    tailwindcss: {},
+    tailwindcss: {}, // Standardowa konfiguracja dla Tailwind v3
     autoprefixer: {},
   },
 };

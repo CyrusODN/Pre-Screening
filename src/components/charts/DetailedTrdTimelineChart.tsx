@@ -1,5 +1,5 @@
 // src/components/charts/DetailedTrdTimelineChart.tsx
-import React, { useMemo } from 'react';
+import React, { useMemo } from 'react'; 
 import {
   BarChart,
   Bar,
@@ -9,22 +9,22 @@ import {
   ResponsiveContainer,
   LabelList,
   Cell,
+  CartesianGrid,
 } from 'recharts';
 import { parseISO, differenceInDays, addDays, isValid, max as dateMax, isBefore, lightFormat } from 'date-fns';
-// Trying a slightly different import path, assuming 'index.ts' is resolved automatically
-import type { PharmacotherapyItem } from '../../types';
+import type { PharmacotherapyItem } from '../../types/index';
 
 interface ProcessedDrugEpisode extends PharmacotherapyItem {
   isMerged?: boolean;
-  parsedStartDate: Date; // Ensured to be a valid Date after initial filtering
-  parsedEndDate: Date;   // Ensured to be a valid Date after initial filtering
+  parsedStartDate: Date; 
+  parsedEndDate: Date;   
   originalIndex?: number;
 }
 
 interface ChartDataItem {
-  yCategoryKey: string;    
-  yTickLabel: string;      
-  fullDrugNameWithDose: string; 
+  yCategoryKey: string;    // Unikalny klucz dla osi Y: "DrugName---Dose"
+  yTickLabel: string;      // Etykieta na osi Y: "SHORTNAME Dose (skrócona)"
+  fullDrugNameWithDose: string; // Dla tooltipów: "NazwaLeku (Pełna Dawka)"
   id: string;              
   start: number;           
   duration: number;        
@@ -44,7 +44,8 @@ interface DetailedTrdTimelineChartProps {
 const BASE_COLORS = [
   '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', 
   '#64748B', '#F97316', '#22D3EE', '#A3E635', '#FACC15', '#FB7185',
-  '#6366F1', '#D946EF', '#06B6D4', '#A1A1AA', '#F43F5E', '#84CC16'
+  '#6366F1', '#D946EF', '#06B6D4', '#A1A1AA', '#F43F5E', '#84CC16',
+  '#F0ABFC', '#FDE68A', '#A7F3D0', '#BFDBFE'
 ];
 
 function hashCode(str: string): number {
@@ -57,9 +58,8 @@ function hashCode(str: string): number {
   return Math.abs(hash);
 }
 
-function getDrugDoseColor(drugName: string, dose: string): string {
-  const key = `${drugName}---${dose}`.toLowerCase(); 
-  const colorIndex = hashCode(key) % BASE_COLORS.length;
+function getDrugDoseColor(drugNamePlusDoseKey: string): string {
+  const colorIndex = hashCode(drugNamePlusDoseKey.toLowerCase()) % BASE_COLORS.length;
   return BASE_COLORS[colorIndex];
 }
 
@@ -70,10 +70,10 @@ const safeDate = (dateStr: string | null | undefined): Date | null => {
 };
 
 export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> = ({ pharmacotherapy }) => {
-  console.log('[Chart] Initial pharmacotherapy prop:', JSON.parse(JSON.stringify(pharmacotherapy)));
+  console.log('[Chart] Initial pharmacotherapy prop (individual episodes from AI):', JSON.parse(JSON.stringify(pharmacotherapy)));
 
-  const { chartDataForRecharts, minDateTimestamp, maxDateTimestamp, yAxisCategories } = useMemo(() => {
-    const initialProcessedDrugs: ProcessedDrugEpisode[] = pharmacotherapy
+  const { chartData, minDateTimestamp, maxDateTimestamp, yAxisCategories } = useMemo(() => {
+    const validIndividualEpisodes: ProcessedDrugEpisode[] = pharmacotherapy
       .map((drug, index) => ({
         ...drug,
         originalIndex: index,
@@ -87,158 +87,136 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
                             isValid(drug.parsedEndDate) && 
                             !isBefore(drug.parsedEndDate, drug.parsedStartDate);
         if(!isValidDrug) {
-          console.warn(`[Chart] Invalid drug data (pre-merge) filtered out (originalIndex: ${drug.originalIndex}): Start: ${drug.startDate}, End: ${drug.endDate}, Name: ${drug.drugName}`, drug);
+          console.warn(`[Chart] Invalid individual drug episode filtered out (originalIndex: ${drug.originalIndex}): Start: ${drug.startDate}, End: ${drug.endDate}, Name: ${drug.drugName}`, drug);
         }
         return isValidDrug;
       }) as ProcessedDrugEpisode[];
 
-    const groupedForMerging = new Map<string, ProcessedDrugEpisode[]>();
-    initialProcessedDrugs.forEach(drug => {
-      const drugNameKey = (drug.drugName || 'Nieznany Lek').trim();
-      const doseKey = (drug.dose || 'N/A').trim();
-      const mergeKey = `${drugNameKey}---${doseKey}`;
-      if (!groupedForMerging.has(mergeKey)) {
-        groupedForMerging.set(mergeKey, []);
-      }
-      groupedForMerging.get(mergeKey)!.push(drug); 
-    });
-
-    const mergedDrugDoseEpisodes: ProcessedDrugEpisode[] = [];
-    groupedForMerging.forEach(group => {
-      if (group.length === 0) return;
-      group.sort((a, b) => a.parsedStartDate.getTime() - b.parsedStartDate.getTime());
-
-      let currentMerged: ProcessedDrugEpisode = { ...group[0] };
-      currentMerged.isMerged = false; 
-
-      for (let i = 1; i < group.length; i++) {
-        const nextDrug = group[i];
-        if (currentMerged.parsedEndDate && isValid(currentMerged.parsedEndDate) && 
-            nextDrug.parsedStartDate && isValid(nextDrug.parsedStartDate) &&
-            nextDrug.parsedStartDate <= addDays(currentMerged.parsedEndDate, 1)) { 
-          currentMerged.parsedEndDate = dateMax(currentMerged.parsedEndDate, nextDrug.parsedEndDate);
-          currentMerged.isMerged = true;
-          if (!currentMerged.notes?.includes('Okresy scalone')) {
-            currentMerged.notes = `${currentMerged.notes || ''}${currentMerged.notes ? '; ' : ''}Okresy scalone`.trim();
-          }
-        } else {
-          mergedDrugDoseEpisodes.push(currentMerged);
-          currentMerged = { ...nextDrug };
-          currentMerged.isMerged = false;
-        }
-      }
-      mergedDrugDoseEpisodes.push(currentMerged);
-    });
-    
-    console.log('[Chart] Merged drug-dose episodes:', JSON.parse(JSON.stringify(mergedDrugDoseEpisodes)));
-    
-    const finalValidMergedItems = mergedDrugDoseEpisodes.filter(drug => {
-        const stillValid = drug.parsedStartDate instanceof Date && 
-                            isValid(drug.parsedStartDate) && 
-                            drug.parsedEndDate instanceof Date && 
-                            isValid(drug.parsedEndDate) && 
-                            !isBefore(drug.parsedEndDate, drug.parsedStartDate);
-        if (!stillValid) {
-            console.warn('[Chart] Invalid item after merge, filtering out before creating ChartDataItem:', drug);
-        }
-        return stillValid;
-    });
-
-    if (finalValidMergedItems.length === 0) {
-      return { chartDataForRecharts: [], minDateTimestamp: 0, maxDateTimestamp: 0, yAxisCategories: [] };
+    if (validIndividualEpisodes.length === 0) {
+      return { chartData: [], minDateTimestamp: 0, maxDateTimestamp: 0, yAxisCategories: [] };
     }
 
-    const allTimestamps = finalValidMergedItems.flatMap(d => [d.parsedStartDate.getTime(), d.parsedEndDate.getTime()]);
-    let minTs = Math.min(...allTimestamps);
-    let maxTs = Math.max(...allTimestamps);
+    // Grupuj epizody po kluczu: NazwaLeku---Dawka
+    const groupedByDrugAndDose = new Map<string, ProcessedDrugEpisode[]>();
+    validIndividualEpisodes.forEach(episode => {
+      const drugName = (episode.drugName || 'Nieznany Lek').trim();
+      const dose = (episode.dose || 'N/A').trim();
+      const key = `${drugName}---${dose}`;
+      if (!groupedByDrugAndDose.has(key)) {
+        groupedByDrugAndDose.set(key, []);
+      }
+      groupedByDrugAndDose.get(key)!.push(episode);
+    });
+
+    const finalChartItems: ChartDataItem[] = [];
+    let uniqueIdCounter = 0;
     
-    const dateDiff = differenceInDays(new Date(maxTs), new Date(minTs));
-    if (dateDiff < 30) {
-        minTs = addDays(new Date(minTs), - Math.floor((30 - dateDiff) / 2) - 15).getTime();
-        maxTs = addDays(new Date(maxTs), Math.ceil((30 - dateDiff) / 2) + 15).getTime();
+    // Kolejność na osi Y: najpierw wg pierwszego pojawienia się leku, potem wg dawki
+    const yCategoryOrderMap = new Map<string, { firstAppearance: number, doses: Set<string>, shortName: string }>();
+    validIndividualEpisodes.forEach(ep => {
+        const drugName = (ep.drugName || 'Nieznany Lek').trim();
+        const shortName = (ep.shortName || drugName.substring(0,4).toUpperCase() || 'N/A').trim();
+        const dose = (ep.dose || 'N/A').trim();
+        if (ep.parsedStartDate && isValid(ep.parsedStartDate)) {
+            if (!yCategoryOrderMap.has(drugName)) {
+                yCategoryOrderMap.set(drugName, { firstAppearance: ep.parsedStartDate.getTime(), doses: new Set(), shortName: shortName });
+            }
+            yCategoryOrderMap.get(drugName)!.doses.add(dose);
+            if (ep.parsedStartDate.getTime() < yCategoryOrderMap.get(drugName)!.firstAppearance) {
+                yCategoryOrderMap.get(drugName)!.firstAppearance = ep.parsedStartDate.getTime();
+            }
+        }
+    });
+
+    const sortedDrugNamesForYAxis = Array.from(yCategoryOrderMap.keys())
+      .sort((a,b) => yCategoryOrderMap.get(a)!.firstAppearance - yCategoryOrderMap.get(b)!.firstAppearance);
+
+    const yCategoriesForAxis: { value: string; label: string; }[] = [];
+
+    sortedDrugNamesForYAxis.forEach(drugName => {
+        const doses = Array.from(yCategoryOrderMap.get(drugName)!.doses).sort((a,b) => a.localeCompare(b, undefined, {numeric: true, sensitivity: 'base'}));
+        const shortName = yCategoryOrderMap.get(drugName)!.shortName;
+
+        doses.forEach(dose => {
+            const yCategoryKey = `${drugName}---${dose}`;
+            const episodesInGroup = groupedByDrugAndDose.get(yCategoryKey) || [];
+            
+            if (episodesInGroup.length === 0) return;
+            
+            // Nie ma już potrzeby scalania, bo AI dostarcza indywidualne epizody, a każdy lek+dawka to osobny tor
+            // Każdy epizod z AI staje się osobnym słupkiem
+            episodesInGroup.forEach(episode => {
+                const duration = differenceInDays(episode.parsedEndDate, episode.parsedStartDate) + 1;
+                finalChartItems.push({
+                    yCategoryKey: yCategoryKey,
+                    yTickLabel: `${shortName} ${dose.substring(0,12)}${dose.length > 12 ? '...' : ''}`,
+                    fullDrugNameWithDose: `${drugName} (${dose})`,
+                    id: episode.id || `ep-${uniqueIdCounter++}`, // Użyj ID od AI jeśli jest, inaczej generuj
+                    start: episode.parsedStartDate.getTime(),
+                    duration: duration > 0 ? duration : 1,
+                    originalStartDateStr: lightFormat(episode.parsedStartDate, 'dd.MM.yy'),
+                    originalEndDateStr: lightFormat(episode.parsedEndDate, 'dd.MM.yy'),
+                    dose: dose,
+                    attemptGroup: episode.attemptGroup || 0,
+                    color: getDrugDoseColor(yCategoryKey),
+                    notes: episode.notes,
+                    range: [episode.parsedStartDate.getTime(), episode.parsedEndDate.getTime()] as [number, number],
+                });
+            });
+            // Dodaj do kategorii osi Y tylko raz dla każdej kombinacji lek+dawka
+            if (!yCategoriesForAxis.find(cat => cat.value === yCategoryKey)) {
+                 yCategoriesForAxis.push({ value: yCategoryKey, label: `${shortName} ${dose.substring(0,12)}${dose.length > 12 ? '...' : ''}` });
+            }
+        });
+    });
+    
+    if (finalChartItems.length === 0) {
+      return { chartData: [], minDateTimestamp: 0, maxDateTimestamp: 0, yAxisCategories: [] };
+    }
+
+    const allAggregatedTimestamps = finalChartItems.flatMap(d => d.range ? [d.start, d.range[1]] : [d.start]);
+    let minTs = Math.min(...allAggregatedTimestamps);
+    let maxTs = Math.max(...allAggregatedTimestamps);
+
+    const dateDiffVal = differenceInDays(new Date(maxTs), new Date(minTs));
+    if (dateDiffVal < 60) {
+        const paddingNeeded = (60 - dateDiffVal) / 2;
+        minTs = addDays(new Date(minTs), -Math.ceil(paddingNeeded) - 20).getTime();
+        maxTs = addDays(new Date(maxTs), Math.ceil(paddingNeeded) + 20).getTime();
     } else {
-        minTs = addDays(new Date(minTs), -15).getTime();
-        maxTs = addDays(new Date(maxTs), 15).getTime();
+        minTs = addDays(new Date(minTs), -30).getTime();
+        maxTs = addDays(new Date(maxTs), 30).getTime();
     }
     const overallMinTimestamp = minTs;
     const overallMaxTimestamp = maxTs;
-
-    const items: ChartDataItem[] = finalValidMergedItems.map((drug, index) => {
-      // Critical check before date operations
-      if (!isValid(drug.parsedStartDate) || !isValid(drug.parsedEndDate)) {
-        console.error(`[Chart] Creating ChartDataItem: Invalid date found for drug at originalIndex ${drug.originalIndex}`, drug);
-        // Return a placeholder or skip this item to prevent RangeError
-        // For now, skipping might be safer if data is truly corrupt.
-        // However, the filter above should prevent this. This is an extra safeguard.
-        return null; 
-      }
-
-      const duration = differenceInDays(drug.parsedEndDate, drug.parsedStartDate) + 1;
-      const fullDrugName = (drug.drugName || 'Nieznany Lek').trim();
-      const dose = (drug.dose || 'N/A').trim();
-      const yCategoryKey = fullDrugName;
-      const shortName = (drug.shortName || fullDrugName.substring(0,3).toUpperCase() || 'N/A').trim();
-
-      return {
-        yCategoryKey: yCategoryKey,
-        yTickLabel: shortName, 
-        fullDrugNameWithDose: `${fullDrugName} (${dose})`,
-        id: drug.id ? `${drug.id}-${index}-ep` : `drug-ep-${index}-${Math.random().toString(16).slice(2)}`,
-        start: drug.parsedStartDate.getTime(),
-        duration: duration > 0 ? duration : 1,
-        originalStartDateStr: lightFormat(drug.parsedStartDate, 'dd.MM.yy'),
-        originalEndDateStr: lightFormat(drug.parsedEndDate, 'dd.MM.yy'),
-        dose: dose,
-        attemptGroup: drug.attemptGroup || 0,
-        color: getDrugDoseColor(fullDrugName, dose),
-        notes: drug.notes,
-        range: [
-          drug.parsedStartDate.getTime(), 
-          addDays(drug.parsedStartDate, (duration > 0 ? duration : 1) - 1).getTime()
-        ] as [number, number],
-      };
-    }).filter(item => item !== null) as ChartDataItem[]; // Filter out any nulls from invalid date handling
     
-    const yCategoryMap = new Map<string, { label: string, minStart: number }>();
-    initialProcessedDrugs.forEach(drug => {
-        const fullDrugNameKey = (drug.drugName || 'Nieznany Lek').trim();
-        const shortNameLabel = (drug.shortName || fullDrugNameKey.substring(0,3).toUpperCase() || 'N/A').trim();
-        if (drug.parsedStartDate && isValid(drug.parsedStartDate) && !yCategoryMap.has(fullDrugNameKey)) { 
-            yCategoryMap.set(fullDrugNameKey, { label: shortNameLabel, minStart: drug.parsedStartDate.getTime() });
-        }
-    });
-
-    const sortedYCategories = Array.from(yCategoryMap.entries())
-        .sort(([, a], [, b]) => a.minStart - b.minStart) 
-        .map(([key, val]) => ({ value: key, label: val.label }));
-
-    console.log('[Chart] Final chartDataForRecharts (items for Recharts):', JSON.parse(JSON.stringify(items)));
-    console.log('[Chart] Y-Axis Categories (for domain and ticks):', sortedYCategories);
+    // Sortowanie yCategoriesForAxis na podstawie kolejności z sortedDrugNamesForYAxis i sortowania dawek
+    // Ta część jest już obsłużona przez iterację po sortedDrugNamesForYAxis i dodawanie do yCategoriesForAxis
 
     return { 
-      chartDataForRecharts: items, 
+      chartData: finalChartItems, 
       minDateTimestamp: overallMinTimestamp, 
       maxDateTimestamp: overallMaxTimestamp, 
-      yAxisCategories: sortedYCategories 
+      yAxisCategories: yCategoriesForAxis // Użyj nowo utworzonej, posortowanej listy
     };
   }, [pharmacotherapy]);
 
-  if (chartDataForRecharts.length === 0) {
+  if (chartData.length === 0) {
     return <p className="text-slate-500 text-center py-4">Brak prawidłowych danych farmakoterapii do wizualizacji osi czasu leczenia.</p>;
   }
   
-  const CustomTooltipContent: React.FC<any> = ({ active, payload }) => {
+  const CustomTooltipContent: React.FC<any> = ({ active, payload }): JSX.Element | null => {
     if (active && payload && payload.length) {
       const data = payload[0].payload as ChartDataItem; 
       return (
-        <div className="bg-white p-3 shadow-lg rounded-md border border-slate-200 text-sm">
+        <div className="bg-white p-3 shadow-lg rounded-md border border-slate-200 text-sm max-w-md">
           <p className="font-semibold text-slate-800">{data.fullDrugNameWithDose}</p>
           <p className="text-slate-600">
             Okres: {data.originalStartDateStr} - {data.originalEndDateStr}
           </p>
           <p className="text-slate-600">Czas trwania: {data.duration} dni</p>
           {data.attemptGroup > 0 && <p className="text-slate-600">Próba leczenia: {data.attemptGroup}</p>}
-          {data.notes && <p className="text-xs text-slate-500 mt-1">Uwagi: {data.notes}</p>}
+          {data.notes && <p className="text-xs text-slate-500 mt-1 whitespace-pre-wrap">Uwagi: {data.notes}</p>}
         </div>
       );
     }
@@ -250,69 +228,66 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
     return lightFormat(date, 'dd.MM.yy'); 
   };
   
-  const barHeight = 20;
-  const yCategoryPadding = 35;
-  const chartHeight = Math.max(300, yAxisCategories.length * yCategoryPadding + 120);
+  const barHeightConst = 20;
+  const yCategoryLanePadding = 20; // Zmniejszony padding dla gęstszego upakowania
+  const chartHeight = Math.max(500, yAxisCategories.length * (barHeightConst + yCategoryLanePadding) + 200); // Zwiększona minimalna i ogólna wysokość
 
   return (
-    <div style={{ width: '100%', height: chartHeight }} className="overflow-x-auto bg-slate-50 p-4 rounded-lg shadow-inner">
-      <ResponsiveContainer width="100%" height="100%" minWidth={800}>
+    <div style={{ width: '100%', height: chartHeight }} className="overflow-x-auto bg-white p-6 rounded-xl shadow-2xl border border-slate-300">
+      <ResponsiveContainer width="100%" height="100%" minWidth={1000}> {/* Zwiększone minWidth */}
         <BarChart
           layout="vertical"
-          data={chartDataForRecharts} 
-          margin={{ top: 20, right: 70, left: 50, bottom: 60 }} 
-          barCategoryGap="0%" 
+          data={chartData} 
+          margin={{ top: 40, right: 30, left: 200, bottom: 80 }} // Znacznie zwiększony lewy margines, zmniejszony prawy
+          barCategoryGap="10%" // Mniejszy odstęp między kategoriami na osi Y
         >
+          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
           <XAxis
             type="number"
             domain={[minDateTimestamp, maxDateTimestamp]}
             tickFormatter={XAxisTickFormatter}
             scale="time"
-            minTickGap={50}
-            tick={{ fontSize: 10, fill: '#475569' }}
+            minTickGap={60} // Zmniejszony minTickGap dla potencjalnie większej liczby ticków
+            tick={{ fontSize: 11, fill: '#374151' }}
             padding={{left: 20, right: 20}} 
-            label={{ value: "Oś Czasu Farmakoterapii", position: "insideBottom", offset: -35, fontSize: 13, fill: '#1e293b', fontWeight: 'bold' }}
+            label={{ value: "Oś Czasu Farmakoterapii", position: "insideBottom", offset: -50, fontSize: 16, fill: '#111827', fontWeight: '600' }}
             allowDuplicatedCategory={false} 
-            stroke="#cbd5e1"
+            stroke="#6b7280"
           />
           <YAxis
             type="category"
             dataKey="yCategoryKey" 
             ticks={yAxisCategories.map(cat => cat.value)} 
-            tickFormatter={(yCategoryKeyValue) => { 
+            tickFormatter={(yCategoryKeyValue: string) => { 
                 const cat = yAxisCategories.find(c => c.value === yCategoryKeyValue);
                 return cat ? cat.label : ''; 
             }}
-            width={100} 
-            tick={{ fontSize: 11, fill: '#1e293b', fontWeight: 'bold', textAnchor: 'end' }}
+            width={180} // Zwiększona szerokość dla dłuższych etykiet "SKRÓT DAWKA"
+            tick={{ fontSize: 10, fill: '#111827', fontWeight: '500', textAnchor: 'end' }} // Mniejsza czcionka dla osi Y
             interval={0} 
             tickLine={false}
-            axisLine={{ stroke: '#cbd5e1' }}
+            axisLine={{ stroke: '#6b7280' }}
           />
-          <Tooltip content={<CustomTooltipContent />} cursor={{ fill: 'rgba(203, 213, 225, 0.3)' }} />
+          <Tooltip content={<CustomTooltipContent />} cursor={{ fill: 'rgba(107, 114, 128, 0.1)' }} />
           
-          <Bar dataKey="range" barSize={barHeight} radius={[4, 4, 4, 4]}>
-            {chartDataForRecharts.map((entry) => (
+          <Bar dataKey="range" barSize={barHeightConst} radius={[3, 3, 3, 3]}>
+            {chartData.map((entry) => (
               <Cell key={`cell-${entry.id}`} fill={entry.color} />
             ))}
             <LabelList
-                position="right"
-                offset={5}
-                fill="#334155" 
-                fontSize={9}
+                position="insideRight" 
+                offset={5} // Zmniejszony offset
+                fill="#ffffff" 
+                fontSize={9} // Mniejsza czcionka etykiety na słupku
+                fontWeight="500" // Lżejsza czcionka
                 formatter={(_value: any, entry: ChartDataItem) => { 
-                    if (entry && typeof entry.duration === 'number' && entry.fullDrugNameWithDose) {
-                        const chartRenderWidth = typeof window !== "undefined" ? window.innerWidth * 0.7 - 250 : 450; 
-                        const timeSpanRatio = (entry.range[1] - entry.range[0]) / (maxDateTimestamp - minDateTimestamp);
-                        const barPixelWidth = timeSpanRatio * chartRenderWidth;
-                        
-                        const labelText = `${entry.dose} (${entry.duration}d)`; 
-                        
-                        if (barPixelWidth < 30 && entry.duration > 0) return `(${entry.duration}d)`;
-                        if (barPixelWidth < (labelText.length * 4.5)) { 
-                             return `(${entry.duration}d)`;
-                        }
-                        return labelText;
+                    if (!entry || !entry.range || entry.range.length !== 2 || typeof entry.range[0] !== 'number' || typeof entry.range[1] !== 'number') {
+                        console.warn("[Chart LabelList] Invalid entry or entry.range for formatter:", entry);
+                        return '';
+                    }
+                    if (typeof entry.duration === 'number' && entry.dose) {
+                        // Wyświetlaj tylko czas trwania na słupku dla zwięzłości
+                        return `(${entry.duration}d)`; 
                     }
                     return '';
                 }}
