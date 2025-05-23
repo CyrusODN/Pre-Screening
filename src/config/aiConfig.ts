@@ -48,6 +48,7 @@ Szczegółowo opisz zrekonstruowaną historię farmakoterapii, oceniając adekwa
 Wniosek Dotyczący Kwalifikacji i Uzasadnienie:
 Na podstawie swojej analizy, przedstaw jasne stwierdzenie dotyczące prawdopodobnej kwalifikacji pacjenta (np. "Prawdopodobnie kwalifikuje się", "Prawdopodobnie nie kwalifikuje się z powodu [konkretne kryterium/kryteria]", "Potencjalnie kwalifikuje się, jednak wymagane są następujące dodatkowe informacje: [...]").
 Zwięźle uzasadnij swój wniosek, odnosząc się do najważniejszych kryteriów, które doprowadziły do Twojej decyzji.
+Jeśli w historii nie ma informacji o tym ze np. w rodzinie były choroby psychiczne to zakładasz ze ich nie było i analogicznie do innych - jeśli w historii masz podany wiek i pacjent sie kwalifikuje na podstawie tego wieku to zaznaczasz ze spełnia kryterium wiekowe itd.
 
 Szacowane Prawdopodobieństwo Kwalifikacji:
 Na końcu raportu przedstaw oszacowane prawdopodobieństwo, że pacjent kwalifikuje się do badania.
@@ -90,8 +91,8 @@ const o3Config: AIConfig = {
   apiKey: import.meta.env.VITE_AI_API_KEY || '',
   endpoint: import.meta.env.VITE_AI_ENDPOINT || '',
   model: import.meta.env.VITE_AI_MODEL || 'o3',
-  temperature: 0.3, // Jeszcze niższa dla bardziej precyzyjnego JSONa
-  maxCompletionTokens: 4096, 
+  temperature: 0.2, // Jeszcze niższa dla bardziej precyzyjnego JSONa
+  maxCompletionTokens: 65000, 
   topP: 1,
   frequencyPenalty: 0,
   presencePenalty: 0,

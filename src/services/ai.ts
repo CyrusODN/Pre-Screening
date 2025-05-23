@@ -64,7 +64,7 @@ ${studyProtocol}`;
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userContent },
       ],
-      max_tokens: o3Conf.maxCompletionTokens, 
+      max_completion_tokens: o3Conf.maxCompletionTokens, 
     };
     const isReasoningModel = /^o[134]/.test(o3Conf.model);
     if (!isReasoningModel) {

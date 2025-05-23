@@ -238,7 +238,7 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
         <BarChart
           layout="vertical"
           data={chartData} 
-          margin={{ top: 40, right: 30, left: 200, bottom: 80 }} // Znacznie zwiększony lewy margines, zmniejszony prawy
+          margin={{ top: 40, right: 250, left: 0, bottom: 80 }} // 
           barCategoryGap="10%" // Mniejszy odstęp między kategoriami na osi Y
         >
           <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
