@@ -4,11 +4,11 @@ export const aiConfig: AIConfig = {
   // Podstawowa konfiguracja
   apiKey: import.meta.env.VITE_AI_API_KEY || '',
   endpoint: import.meta.env.VITE_AI_ENDPOINT || '',
-  model: import.meta.env.VITE_AI_MODEL || 'gpt-4',
+  model: import.meta.env.VITE_AI_MODEL || '',
   
   // Parametry modelu
   temperature: 0.7,
-  maxTokens: 4000,
+  maxCompletionTokens: 4000,
   topP: 1,
   frequencyPenalty: 0,
   presencePenalty: 0,
