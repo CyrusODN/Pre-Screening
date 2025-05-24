@@ -15,11 +15,11 @@ export interface AIConfig {
 
 export interface GeminiAIConfig {
   apiKey: string;
-  model: string; 
+  model: string;
   temperature: number;
   maxOutputTokens: number;
   topP: number;
-  systemPrompt: string; 
+  systemPrompt: string;
 }
 
 export interface AppConfig {
@@ -27,30 +27,38 @@ export interface AppConfig {
   theme: 'light' | 'dark';
 }
 
+// Definicja struktury dla mghAtrqPoland
+interface MghAtrqPolandDetails {
+  minTrialDurationWeeks: string;
+  medications: Array<{
+    drugName: string;
+    brandName?: string; // Nazwa handlowa jest opcjonalna
+    minDose: string;
+    notes?: string; // Notatki są opcjonalne
+  }>;
+  generalNotes: string[];
+}
+
+// Definicja typu dla pojedynczego kryterium protokołu
+// To jest kluczowa zmiana - dodajemy opcjonalne pole mghAtrqPoland
+export interface ProtocolCriterion {
+  id: string;
+  name: string;
+  details: string;
+  mghAtrqPoland?: MghAtrqPolandDetails; // Opcjonalne pole dla IC6
+}
+
 export interface Protocol {
   id: string;
   name: string;
   description: string;
   criteria: {
-    inclusion: Array<{
-      id: string;
-      name: string;
-      details: string;
-    }>;
-    psychiatricExclusion: Array<{
-      id: string;
-      name: string;
-      details: string;
-    }>;
-    medicalExclusion: Array<{
-      id: string;
-      name: string;
-      details: string;
-    }>;
+    inclusion: Array<ProtocolCriterion>; // Używamy nowego typu ProtocolCriterion
+    psychiatricExclusion: Array<ProtocolCriterion>; // Używamy nowego typu ProtocolCriterion
+    medicalExclusion: Array<ProtocolCriterion>; // Używamy nowego typu ProtocolCriterion
   };
 }
 
-// Definiujemy i eksportujemy interfejs PharmacotherapyItem
 export interface PharmacotherapyItem {
   id: string;
   drugName: string;
@@ -81,8 +89,7 @@ export interface PatientData {
   };
   trdAnalysis: {
     episodeStartDate: string | null;
-    // Używamy zdefiniowanego interfejsu PharmacotherapyItem
-    pharmacotherapy: Array<PharmacotherapyItem>; 
+    pharmacotherapy: Array<PharmacotherapyItem>;
     conclusion: string;
   };
   inclusionCriteria: Array<Criterion>;
@@ -117,7 +124,7 @@ export interface PatientHistoryEntry {
   modelUsed?: SupportedAIModel;
 }
 
-export interface Criterion {
+export interface Criterion { // Ten typ jest używany dla danych pacjenta, nie dla definicji protokołu
   id: string;
   name: string;
   status: string;

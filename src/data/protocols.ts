@@ -32,10 +32,73 @@ export const PREDEFINED_PROTOCOLS: Record<string, Protocol> = {
           name: 'Wynik MADRS ≥20',
           details: 'Całkowity wynik w skali MADRS ≥20 podczas screeningu i wizyty początkowej.'
         },
+        // ZASTĄPIONY IC6
         {
           id: 'IC6',
-          name: 'Lekooporność (TRD)',
-          details: 'Niepowodzenie 2-4 różnych terapii farmakologicznych w obecnym epizodzie, potwierdzone przez MGH-ATRQ.'
+          name: 'Lekooporność (TRD) wg MGH-ATRQ (specyficzne dla badania)',
+          details: 'Niepowodzenie co najmniej dwóch (2) do czterech (4) różnych, adekwatnych prób leczenia przeciwdepresyjnego (monoterapia lub leczenie adjuwantowe) w obecnym epizodzie depresyjnym. Adekwatność próby leczenia oceniana jest wyłącznie na podstawie specyficznego dla tego badania formularza MGH-ATRQ (minimalna dawka i czas trwania). Dodatkowo, dla Polski, uwzględnia się Kwetiapinę 150mg jako leczenie adjuwantowe. Szczegóły poniżej.',
+          mghAtrqPoland: { // Nazwa pola pozostaje dla spójności, ale odnosi się teraz do specyficznego ATRQ badania
+            minTrialDurationWeeks: "co najmniej 8 lub 10 tygodni", // Zgodnie z instrukcją na formularzu MGH-ATRQ
+            medications: [
+              // Leki i minimalne adekwatne dawki wyłącznie z dostarczonego formularza MGH-ATRQ (lewa kolumna "Minimum** Dose")
+              // Tricyclic Antidepressants
+              { drugName: "Doxepin", brandName: "Adapin", minDose: "150mg/d" },
+              { drugName: "Clomipramine", brandName: "Anafranil", minDose: "150mg/d" },
+              { drugName: "Amoxapine", brandName: "Asendin", minDose: "150mg/d" },
+              { drugName: "Amitriptyline", brandName: "Endep/Elavil", minDose: "150mg/d" },
+              { drugName: "Maprotiline", brandName: "Ludiomil", minDose: "150mg/d" },
+              { drugName: "Desipramine", brandName: "Norpramin", minDose: "150mg/d" },
+              { drugName: "Nortriptyline", brandName: "Pamelor", minDose: "75mg/d" },
+              { drugName: "Doxepin ", brandName: "Sinequan", minDose: "150mg/d" }, // Powtórzenie Doxepin, ale inna nazwa handlowa
+              { drugName: "Trimipramine", brandName: "Surmontil", minDose: "150mg/d" },
+              { drugName: "Imipramine", brandName: "Tofranil", minDose: "150mg/d" },
+              { drugName: "Protriptyline", brandName: "Vivactil", minDose: "30mg/d" },
+              { drugName: "Pipofezine", brandName: "Azafen", minDose: "150mg/d" },
+              { drugName: "Noxiptiline", brandName: "Agedal/Elronon", minDose: "100mg/d" },
+              // Monoamine Oxidase Inhibitors (MAOIs)
+              { drugName: "Isocarboxazid", brandName: "Marplan", minDose: "30mg/d", notes: "MAOI" },
+              { drugName: "Phenelzine", brandName: "Nardil", minDose: "45mg/d", notes: "MAOI" },
+              { drugName: "Tranylcypromine", brandName: "Parnate", minDose: "30mg/d", notes: "MAOI" },
+              { drugName: "Selegiline patch", brandName: "Emsam", minDose: "6 mg/24 hrs", notes: "MAOI" },
+              { drugName: "Moclobemide", brandName: "Aurorix", minDose: "300 mg/d", notes: "MAOI (RIMA)" },
+              { drugName: "Pirlindole", brandName: "Pirazidol", minDose: "200 mg/d", notes: "MAOI (RIMA)" },
+              // Selective Serotonin Reuptake Inhibitors (SSRIs)
+              { drugName: "Escitalopram", brandName: "Lexapro", minDose: "10mg/d", notes: "SSRI" },
+              { drugName: "Fluvoxamine", brandName: "Luvox", minDose: "50mg/d", notes: "SSRI" },
+              { drugName: "Paroxetine", brandName: "Paxil", minDose: "20/25mg/d", notes: "SSRI - dawka 20 LUB 25 mg/d" },
+              { drugName: "Fluoxetine", brandName: "Prozac", minDose: "20mg/d", notes: "SSRI" },
+              { drugName: "Sertraline", brandName: "Zoloft", minDose: "50mg/d", notes: "SSRI" },
+              { drugName: "Citalopram", brandName: "Celexa", minDose: "20mg/d", notes: "SSRI" },
+              // Inne (wg formularza, kontynuacja z drugiego zdjęcia)
+              { drugName: "Vilazodone", brandName: "Viibryd", minDose: "40mg/d" },
+              { drugName: "Vortioxetine", brandName: "Brintellix", minDose: "10mg/d" },
+              // Serotonin-Norepinephrine Reuptake Inhibitors (SNRIs)
+              { drugName: "Venlafaxine", brandName: "Effexor", minDose: "150mg/d", notes: "SNRI" },
+              { drugName: "Duloxetine", brandName: "Cymbalta", minDose: "60mg/d", notes: "SNRI" },
+              { drugName: "Desvenlafaxine", brandName: "Pristiq", minDose: "50mg/d", notes: "SNRI" },
+              { drugName: "Milnacipran", brandName: "Savella", minDose: "100mg/d", notes: "SNRI" },
+              { drugName: "Levomilnacipran", brandName: "Fetzima", minDose: "40mg/d", notes: "SNRI" },
+              // Other Antidepressants (wg formularza)
+              { drugName: "Trazodone", brandName: "Desyrel", minDose: "300mg/d" },
+              { drugName: "Nefazodone", brandName: "Serzone", minDose: "300mg/d" },
+              { drugName: "Bupropion", brandName: "Wellbutrin", minDose: "300mg/d" },
+              { drugName: "Mirtazapine", brandName: "Remeron", minDose: "15mg/d" },
+              { drugName: "Agomelatine", brandName: "Valdoxan", minDose: "25mg/d" },
+              { drugName: "Tianeptine", brandName: "Stablon", minDose: "37.5mg/d" },
+              { drugName: "Reboxetine", brandName: "Edronax", minDose: "4 mg/d" },
+              { drugName: "Mianserin", brandName: "Bolvidon/Depnon, Norval/Tolvon", minDose: "30 mg/d" },
+              { drugName: "Opipramol", brandName: "Insidon", minDose: "150 mg/d" },
+
+              // Dodatek specyficzny dla Polski (spoza głównego formularza MGH-ATRQ, ale istotny dla badania)
+              { drugName: "Kwetiapina (jako leczenie adjuwantowe)", minDose: "150 mg/dzień", notes: "Specyficzne dla Polski, leczenie adjuwantowe przez co najmniej 8 lub 10 tygodni." }
+            ],
+            generalNotes: [
+              "Powyższa lista leków i dawek opiera się wyłącznie na specyficznym formularzu MGH-ATRQ dostarczonym dla tego badania.",
+              "Za adekwatną próbę leczenia uznaje się stosowanie leku w określonej minimalnej dawce (lub wyższej) przez co najmniej 8 lub 10 tygodni.",
+              "Kwetiapina 150mg/dzień jest uznawana w Polsce jako adekwatne leczenie adjuwantowe trwające co najmniej 8 lub 10 tygodni.",
+              "Ocena powinna ściśle bazować na powyższych kryteriach. Należy zwrócić uwagę na instrukcję na formularzu MGH-ATRQ dotyczącą sprawdzania, czy lek był dodany w celu augmentacji/wzmocnienia efektu antydepresyjnego."
+            ]
+          }
         },
         {
           id: 'IC7',
