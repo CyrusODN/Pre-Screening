@@ -1,5 +1,5 @@
 // src/config/aiConfig.ts
-import type { AIConfig, GeminiAIConfig, SupportedAIModel } from '../types/index';
+import type { AIConfig, GeminiAIConfig, ClaudeAIConfig, SupportedAIModel } from '../types/index';
 
 // Zastosowano prompt użytkownika 1:1, z dostosowaniem struktury JSON w sekcji pharmacotherapy
 const SYSTEM_PROMPT = `Jesteś zaawansowanym narzędziem AI, emulującym doświadczonego, wnikliwego i wysoce profesjonalnego badacza klinicznego. Twoją podstawową funkcją jest przeprowadzanie skrupulatnego pre-screeningu potencjalnych uczestników badań klinicznych w dziedzinie psychiatrii.
@@ -136,9 +136,21 @@ const geminiConfig: GeminiAIConfig = {
   systemPrompt: SYSTEM_PROMPT, 
 };
 
-export function getAIConfig(modelType: SupportedAIModel): AIConfig | GeminiAIConfig {
+const claudeOpusConfig: ClaudeAIConfig = {
+  apiKey: import.meta.env.VITE_CLAUDE_API_KEY || '',
+  model: import.meta.env.VITE_CLAUDE_OPUS_MODEL || 'claude-opus-4-20250514',
+  temperature: 0.1,
+  maxTokens: 32000,
+  topP: 1.0,
+  systemPrompt: SYSTEM_PROMPT,
+};
+
+export function getAIConfig(modelType: SupportedAIModel): AIConfig | GeminiAIConfig | ClaudeAIConfig {
   if (modelType === 'gemini') {
     return geminiConfig;
+  }
+  if (modelType === 'claude-opus') {
+    return claudeOpusConfig;
   }
   return o3Config;
 }
@@ -146,6 +158,9 @@ export function getAIConfig(modelType: SupportedAIModel): AIConfig | GeminiAICon
 export function getModelSystemPrompt(modelType: SupportedAIModel): string {
     if (modelType === 'gemini') {
         return geminiConfig.systemPrompt;
+    }
+    if (modelType === 'claude-opus') {
+        return claudeOpusConfig.systemPrompt;
     }
     return o3Config.systemPrompt;
 }

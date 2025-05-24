@@ -1,7 +1,7 @@
 // src/services/ai.ts
 import { getAIConfig, getModelSystemPrompt } from '../config/aiConfig';
 // Poprawiona ścieżka importu typów
-import type { PatientData, Criterion, SupportedAIModel, AIConfig, GeminiAIConfig, PharmacotherapyItem } from '../types/index'; 
+import type { PatientData, Criterion, SupportedAIModel, AIConfig, GeminiAIConfig, ClaudeAIConfig, PharmacotherapyItem } from '../types/index'; 
 import { initialPatientData } from '../data/mockData';
 // Usunięto nieużywany import 'differenceInDays'
 import { addDays, formatISO, isValid, parseISO } from 'date-fns'; 
@@ -52,6 +52,23 @@ ${studyProtocol}`;
         topP: geminiConf.topP,
         responseMimeType: "application/json",
       }
+    };
+  } else if (selectedModel === 'claude-opus') {
+    const claudeConf = currentConfig as ClaudeAIConfig;
+    apiUrl = '/api/anthropic/v1/messages';
+    headers['x-api-key'] = claudeConf.apiKey;
+    headers['anthropic-version'] = '2023-06-01';
+    headers['anthropic-dangerous-direct-browser-access'] = 'true';
+    
+    requestBody = {
+      model: claudeConf.model,
+      max_tokens: claudeConf.maxTokens,
+      temperature: claudeConf.temperature,
+      top_p: claudeConf.topP,
+      system: systemPrompt,
+      messages: [
+        { role: 'user', content: userContent }
+      ]
     };
   } else { 
     const o3Conf = currentConfig as AIConfig;
@@ -111,6 +128,19 @@ ${studyProtocol}`;
             throw new Error('Nieprawidłowa odpowiedź API Gemini: brak oczekiwanej treści.');
         }
         processedResponse = processAIResponse(data.candidates[0].content.parts[0].text, selectedModel);
+    } else if (selectedModel === 'claude-opus') {
+        if (!data.content?.[0]?.text) {
+            console.error('Invalid Claude API response structure:', data);
+            throw new Error('Nieprawidłowa odpowiedź API Claude: brak oczekiwanej treści.');
+        }
+        
+        // Check for refusal stop reason in Claude 4 models
+        if (data.stop_reason === 'refusal') {
+            console.warn('Claude 4 model refused to generate content for safety reasons:', data);
+            throw new Error('Model Claude 4 odmówił wygenerowania odpowiedzi ze względów bezpieczeństwa. Spróbuj zmodyfikować prompt lub dane wejściowe.');
+        }
+        
+        processedResponse = processAIResponse(data.content[0].text, selectedModel);
     } else { 
         if (!data.choices?.[0]?.message?.content) {
             console.error('Invalid o3 API response structure:', data);

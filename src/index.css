@@ -1,4 +1,50 @@
 @import './styles/brand.css';
+@import './styles/print.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* REMEDY Theme Styles */
+@layer base {
+  body {
+    font-family: 'Roboto', system-ui, sans-serif;
+    @apply bg-gradient-theme-light;
+  }
+}
+
+@layer components {
+  /* Gradient Theme Class */
+  .gradient-theme {
+    background: linear-gradient(135deg, #4A90B9 0%, #5BA6B6 50%, #68BFB3 100%);
+  }
+  
+  /* Button Styles */
+  .btn-primary {
+    @apply bg-gradient-theme text-white font-medium px-6 py-3 rounded-xl transition-all duration-300 hover:shadow-lg hover:scale-102;
+  }
+  
+  .btn-secondary {
+    @apply bg-white border-2 border-remedy-accent text-remedy-accent font-medium px-6 py-3 rounded-xl transition-all duration-300 hover:shadow-lg hover:scale-102;
+  }
+  
+  /* Card Styles */
+  .card-remedy {
+    @apply bg-white rounded-xl shadow-md p-6 transition-all duration-300 hover:shadow-xl;
+  }
+  
+  /* Icon Circle */
+  .icon-circle {
+    @apply w-12 h-12 bg-gradient-theme rounded-full flex items-center justify-center text-white;
+  }
+}
+
+@layer utilities {
+  /* Custom scale-102 utility */
+  .scale-102 {
+    transform: scale(1.02);
+  }
+  
+  .hover\:scale-102:hover {
+    transform: scale(1.02);
+  }
+}

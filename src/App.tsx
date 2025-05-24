@@ -3,12 +3,13 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { 
   ChevronDown, ChevronUp, AlertTriangle, CheckCircle2, XCircle, HelpCircle, 
   User, CalendarDays, Stethoscope, Pill, ListChecks, Target, BarChart3, 
-  Info, Filter, ArrowDownUp, Edit3, Save, RotateCcw 
-  // Usunięto nieużywane importy: X, MessageSquare, BrainCircuit
+  Info, Filter, ArrowDownUp, Edit3, Save, RotateCcw, Printer, X
+  // Usunięto nieużywane importy: MessageSquare, BrainCircuit
 } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { DetailedTrdTimelineChart } from './components/charts/DetailedTrdTimelineChart';
 import { EnteringScreen } from './components/EnteringScreen';
+import { PrintableReport } from './components/PrintableReport';
 import { initialPatientData } from './data/mockData';
 import { analyzePatientData } from './services/ai';
 import { saveToHistory } from './services/patientHistory';
@@ -16,6 +17,7 @@ import { saveToHistory } from './services/patientHistory';
 // ponieważ jest on potrzebny tylko w DetailedTrdTimelineChart.tsx
 import type { PatientData, SupportedAIModel, Criterion } from './types'; 
 import { getAIConfig } from './config/aiConfig'; 
+import './styles/print.css';
 
 const USER_STATUS_OPTIONS = [
   { value: 'spełnione_manual', label: 'Spełnione (ocena badacza)' },
@@ -52,40 +54,75 @@ const getStatusIcon = (status: string | null | undefined) => {
 
 const AccordionItem: React.FC<{title: string, icon: React.ReactNode, children: React.ReactNode, defaultOpen?: boolean}> = ({ title, icon, children, defaultOpen = false }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
+  
   return (
-    <div className="border border-slate-200 rounded-lg mb-3 shadow-sm bg-white transition-all duration-300 ease-in-out">
-      <button onClick={() => setIsOpen(!isOpen)} className="w-full flex justify-between items-center p-4 text-left text-lg font-semibold text-slate-700 hover:bg-slate-50 rounded-t-lg focus:outline-none">
-        <div className="flex items-center">{icon}<span className="ml-3">{title}</span></div>
-        {isOpen ? <ChevronUp size={24} className="text-sky-600" /> : <ChevronDown size={24} className="text-slate-500" />}
+    <div className="card-remedy">
+      <button onClick={() => setIsOpen(!isOpen)} className="w-full flex items-center justify-between text-left">
+        <div className="flex items-center text-2xl font-bold text-gray-900">
+          <div className="icon-circle mr-4">
+            {icon}
+          </div>
+          <span>{title}</span>
+        </div>
+        <ChevronDown size={24} className={`text-remedy-accent transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
-      {isOpen && <div className="p-4 border-t border-slate-200 bg-slate-50 rounded-b-lg animate-fadeIn">{children}</div>}
+      {isOpen && (
+        <div className="mt-6 animate-fadeIn">
+          {children}
+        </div>
+      )}
     </div>
   );
 };
 
 const EditCriterionModal: React.FC<{criterion: Criterion, onClose: () => void, onSave: (id: string, status: string, comment: string) => void}> = ({ criterion, onClose, onSave }) => {
-  const [newStatus, setNewStatus] = useState(criterion.userStatus || '');
+  const [newStatus, setNewStatus] = useState(criterion.userStatus || criterion.status || '');
   const [comment, setComment] = useState(criterion.userComment || '');
   const handleSave = () => { onSave(criterion.id, newStatus, comment); onClose(); };
+  
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 animate-fadeIn">
-      <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg">
-        <h3 className="text-xl font-semibold text-slate-800 mb-4">Edytuj Kryterium: {criterion.id} - {criterion.name}</h3>
-        <div className="mb-4">
-          <label htmlFor="status-select" className="block text-sm font-medium text-slate-700 mb-1">Nowy Status:</label>
-          <select id="status-select" value={newStatus} onChange={(e) => setNewStatus(e.target.value)} className="w-full p-2 border border-slate-300 rounded-md focus:ring-sky-500 focus:border-sky-500">
-            <option value="">Wybierz status (lub usuń nadpisanie)</option>
-            {USER_STATUS_OPTIONS.map(opt => (<option key={opt.value} value={opt.value}>{opt.label}</option>))}
-          </select>
-        </div>
-        <div className="mb-6">
-          <label htmlFor="comment-input" className="block text-sm font-medium text-slate-700 mb-1">Komentarz Badacza:</label>
-          {/* Poprawka: rows oczekuje liczby, nie stringa. Ustawiono na 3. */}
-          <textarea id="comment-input" value={comment} onChange={(e) => setComment(e.target.value)} rows={3} className="w-full p-2 border border-slate-300 rounded-md focus:ring-sky-500 focus:border-sky-500" placeholder="Dodaj uzasadnienie zmiany statusu..." />
-        </div>
-        <div className="flex justify-end space-x-3">
-          <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-md border border-slate-300">Anuluj</button>
-          <button onClick={handleSave} className="px-4 py-2 text-sm font-medium text-white bg-sky-600 hover:bg-sky-700 rounded-md flex items-center"><Save size={16} className="mr-2" /> Zapisz Zmiany</button>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="p-8">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-2xl font-bold text-gray-900">Edytuj kryterium</h3>
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+              <X size={24} />
+            </button>
+          </div>
+          
+          <div className="space-y-6">
+            <div>
+              <h4 className="text-lg font-semibold text-gray-900 mb-2">{criterion.id}: {criterion.name}</h4>
+              <p className="text-gray-600 text-sm">{criterion.details}</p>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">Status:</label>
+              <select value={newStatus} onChange={(e) => setNewStatus(e.target.value)}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-remedy-accent focus:border-remedy-accent transition-all">
+                <option value="spełnione">Spełnione</option>
+                <option value="niespełnione">Niespełnione</option>
+                <option value="weryfikacja">Wymaga weryfikacji</option>
+                <option value="spełnione_manual">Spełnione (zmienione przez badacza)</option>
+                <option value="niespełnione_manual">Niespełnione (zmienione przez badacza)</option>
+                <option value="weryfikacja_manual">Wymaga weryfikacji (zmienione przez badacza)</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">Komentarz badacza:</label>
+              <textarea value={comment} onChange={(e) => setComment(e.target.value)} rows={4}
+                        placeholder="Opcjonalny komentarz..."
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-remedy-accent focus:border-remedy-accent transition-all resize-none">
+              </textarea>
+            </div>
+          </div>
+          
+          <div className="flex justify-end gap-3 mt-8">
+            <button onClick={onClose} className="btn-secondary">Anuluj</button>
+            <button onClick={handleSave} className="btn-primary">Zapisz</button>
+          </div>
         </div>
       </div>
     </div>
@@ -205,6 +242,7 @@ const App = () => {
   const [patientProfile, setPatientProfile] = useState<PatientData | null>(null);
   const [selectedAIModel, setSelectedAIModel] = useState<SupportedAIModel>('o3'); 
   const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [isPrintMode, setIsPrintMode] = useState(false);
 
   const [dynamicConclusion, setDynamicConclusion] = useState({
     overallQualification: '',
@@ -346,6 +384,13 @@ const App = () => {
   const currentSelectedAIConfig = getAIConfig(selectedAIModel);
   const isCurrentModelConfigured = !!(currentSelectedAIConfig.apiKey && currentSelectedAIConfig.model);
 
+  const handlePrint = () => {
+    setIsPrintMode(true);
+    setTimeout(() => {
+      window.print();
+      setIsPrintMode(false);
+    }, 100);
+  };
 
   if (!hasSubmittedData) {
     return <EnteringScreen 
@@ -358,15 +403,22 @@ const App = () => {
 
   if (isAnalyzing) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-100 to-sky-100 p-4 sm:p-6 md:p-8 font-sans flex items-center justify-center">
-        <div className="text-center">
-          <div role="status" className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-sky-600 border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" aria-label="Ładowanie">
-            <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
-              Ładowanie...
-            </span>
+      <div className="min-h-screen bg-gradient-theme-light p-4 sm:p-6 md:p-8 font-sans flex items-center justify-center">
+        <div className="text-center card-remedy max-w-md">
+          <div className="icon-circle mx-auto mb-6">
+            <div role="status" className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-solid border-white border-r-transparent" aria-label="Ładowanie">
+              <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
+                Ładowanie...
+              </span>
+            </div>
           </div>
-          <p className="text-xl text-slate-700 mt-4">Analizowanie danych pacjenta (model: {selectedAIModel === 'gemini' ? 'Gemini 2.5 Pro Preview 05-06' : selectedAIModel.toUpperCase()})...</p>
-          <p className="text-sm text-slate-500 mt-2">To może potrwać chwilę...</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Analizowanie danych pacjenta</h2>
+          <p className="text-gray-600 mb-2">Model: {
+            selectedAIModel === 'gemini' ? 'Gemini 2.5 Pro Preview 05-06' : 
+            selectedAIModel === 'claude-opus' ? 'Claude 4 Opus' :
+            selectedAIModel.toUpperCase()
+          }</p>
+          <p className="text-sm text-gray-500">To może potrwać chwilę...</p>
         </div>
       </div>
     );
@@ -374,166 +426,221 @@ const App = () => {
 
   if (!patientProfile || Object.keys(patientProfile).length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-100 to-sky-100 p-4 sm:p-6 md:p-8 font-sans flex flex-col items-center justify-center">
-        <AlertTriangle size={48} className="text-red-500 mb-4" />
-        <p className="text-xl text-slate-700 mb-2">Wystąpił błąd podczas ładowania danych pacjenta.</p>
-        <p className="text-slate-600 text-center mb-4">Nie udało się załadować profilu pacjenta. Spróbuj ponownie.</p>
-        {analysisError && (
-            <div className="mt-4 p-3 bg-red-100 text-red-800 rounded-md text-sm max-w-md text-left">
-                <p><strong>Szczegóły błędu:</strong></p>
-                <p>{analysisError}</p>
-            </div>
-        )}
-        <button 
-          onClick={() => { setHasSubmittedData(false); setAnalysisError(null);}} 
-          className="mt-6 px-6 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 transition-colors"
-        >
-          Powrót do wprowadzania danych
-        </button>
+      <div className="min-h-screen bg-gradient-theme-light p-4 sm:p-6 md:p-8 font-sans flex flex-col items-center justify-center">
+        <div className="card-remedy max-w-md text-center">
+          <div className="icon-circle mx-auto mb-6">
+            <AlertTriangle size={24} className="text-white" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Wystąpił błąd</h2>
+          <p className="text-gray-600 mb-4">Nie udało się załadować profilu pacjenta. Spróbuj ponownie.</p>
+          {analysisError && (
+              <div className="mt-4 p-4 bg-red-50 border border-red-200 text-red-800 rounded-lg text-sm text-left">
+                  <p className="font-semibold mb-2">Szczegóły błędu:</p>
+                  <p>{analysisError}</p>
+              </div>
+          )}
+          <button 
+            onClick={() => { setHasSubmittedData(false); setAnalysisError(null);}} 
+            className="btn-primary mt-6"
+          >
+            Powrót do wprowadzania danych
+          </button>
+        </div>
       </div>
     );
   }
   
-  const modelDisplayName = patientProfile.modelUsed === 'gemini' ? 'Gemini 2.5 Pro Preview 05-06' : patientProfile.modelUsed?.toUpperCase() || 'Nieznany';
+  const modelDisplayName = patientProfile.modelUsed === 'gemini' ? 'Gemini 2.5 Pro Preview 05-06' : 
+                        patientProfile.modelUsed === 'claude-opus' ? 'Claude 4 Opus' :
+                        patientProfile.modelUsed?.toUpperCase() || 'Nieznany';
 
+  // If in print mode, render the printable report
+  if (isPrintMode) {
+    return (
+      <PrintableReport 
+        patientProfile={patientProfile}
+        dynamicConclusion={dynamicConclusion}
+      />
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 to-sky-100 p-4 sm:p-6 md:p-8 font-sans">
+    <div className="min-h-screen bg-gradient-theme-light py-20 px-4 sm:px-6 lg:px-8 font-sans">
       <style>{`
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fadeIn { animation: fadeIn 0.3s ease-out; }
       `}</style>
-      <header className="mb-8 text-center">
-        <h1 className="text-3xl sm:text-4xl font-bold text-sky-700">Interaktywny Raport Pre-screeningowy</h1>
-        <p className="text-lg text-slate-600 mt-1">Analiza Kwalifikacji Pacjenta (model: <span className="font-semibold">{modelDisplayName}</span>)</p>
-        
-        {analysisError && !patientProfile.isMockData && (
-            <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-md inline-block text-sm">
-                <AlertTriangle size={16} className="inline-block mr-1" />
-                {analysisError}
+      
+      <div className="max-w-7xl mx-auto">
+        <header className="mb-20 text-center">
+          <div className="flex justify-between items-start mb-8">
+            <div className="flex-1"></div>
+            <div className="flex-1 text-center">
+              <h1 className="text-4xl font-bold text-gray-900 mb-2">Interaktywny Raport Pre-screeningowy</h1>
+              <p className="text-xl text-gray-600 mt-2">Analiza Kwalifikacji Pacjenta</p>
+              <p className="text-base text-gray-500 mt-1">Model: <span className="font-medium">{modelDisplayName}</span></p>
             </div>
-        )}
-        {patientProfile.isMockData && (
-          <div className="mt-2 p-2 bg-yellow-100 text-yellow-800 rounded-md inline-block">
-            <AlertTriangle size={16} className="inline-block mr-1" />
-            Używane są dane testowe - połączenie z AI ({modelDisplayName}) jest niedostępne lub wystąpił błąd.
-            {!isCurrentModelConfigured && ` Sprawdź konfigurację (klucz API, model) dla ${modelDisplayName} w pliku .env.`}
-          </div>
-        )}
-      </header>
-
-      <main className="max-w-5xl mx-auto space-y-6">
-        <section className="bg-white p-6 rounded-xl shadow-lg border border-sky-200">
-          <div className="flex items-center text-2xl font-semibold text-sky-700 mb-4">
-            <User size={30} className="mr-3 text-sky-600" />
-            <span>Dane Pacjenta: {patientProfile.summary?.id || 'Brak ID'}</span>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-slate-700">
-            <p><strong className="font-medium">Wiek:</strong> {patientProfile.summary?.age || 'N/A'} lat</p>
-            <p><strong className="font-medium">Główna diagnoza:</strong> {patientProfile.summary?.mainDiagnosis || 'N/A'}</p>
-            <div><strong className="font-medium">Choroby współistniejące:</strong>
-              <ul className="list-disc list-inside ml-4 mt-1">
-                {(patientProfile.summary?.comorbidities || []).map((com, idx) => <li key={idx}>{com}</li>)}
-                {(patientProfile.summary?.comorbidities || []).length === 0 && <li>Brak</li>}
-              </ul>
+            <div className="flex-1 flex justify-end">
+              <button
+                onClick={handlePrint}
+                className="no-print btn-primary flex items-center gap-2"
+                title="Drukuj raport"
+              >
+                <Printer size={20} />
+                <span className="hidden sm:inline">Drukuj Raport</span>
+              </button>
             </div>
           </div>
-        </section>
-
-        <AccordionItem title="Wizualizacje Danych" icon={<BarChart3 size={22} className="text-sky-600" />} defaultOpen={true}>
-          <div className="grid grid-cols-1 gap-6">
-            <DetailedTrdTimelineChart
-              pharmacotherapy={patientProfile.trdAnalysis?.pharmacotherapy || []}
-            />
-            <div className="lg:col-span-1 mt-6">
-              <CriteriaStatusPieChart criteriaData={allCriteriaForChart} title="Ogólny Status Kryteriów (po zmianach)" />
-            </div>
-          </div>
-        </AccordionItem>
-
-        <AccordionItem title="Szacowanie Początku Obecnego Epizodu Depresyjnego" icon={<CalendarDays size={22} className="text-sky-600" />}>
-          <div className="space-y-3 text-slate-700">
-            {(patientProfile.episodeEstimation?.scenarios || []).map(sc => (<div key={sc.id} className="p-3 border border-slate-200 rounded-md bg-slate-50"><p><strong className="font-medium">Scenariusz {sc.id}:</strong> {sc.description}</p><p className="text-sm text-slate-600 mt-1"><em>Przesłanki:</em> {sc.evidence}</p></div>))}
-            {(patientProfile.episodeEstimation?.scenarios || []).length === 0 && <p>Brak scenariuszy.</p>}
-            <div className="mt-3 p-3 border-t border-slate-300"><p><strong className="font-medium">Wnioski dotyczące początku epizodu dla celów badania:</strong> {patientProfile.episodeEstimation?.conclusion || 'Brak wniosków.'}</p></div>
-          </div>
-        </AccordionItem>
-
-        <AccordionItem title="Analiza TRD (Kryterium IC6) - Podsumowanie" icon={<Pill size={22} className="text-sky-600" />}>
-          <p className="mb-3 text-sm text-slate-600">Poniżej znajduje się podsumowanie wniosków z analizy farmakoterapii. Szczegółowa oś czasu leczenia dostępna jest w sekcji "Wizualizacje Danych".</p>
-          <p className="mt-4 font-semibold text-slate-800">{patientProfile.trdAnalysis?.conclusion || 'Brak podsumowania analizy TRD.'}</p>
-        </AccordionItem>
-
-        <AccordionItem title="Kryteria Włączenia (IC)" icon={<ListChecks size={22} className="text-green-600" />}>
-          <CriteriaList criteria={patientProfile.inclusionCriteria || []} title="Inclusion" onUpdateCriterion={(id, status, comment) => handleUpdateCriterion('inclusionCriteria', id, status, comment)} />
-        </AccordionItem>
-
-        <AccordionItem title="Psychiatryczne Kryteria Wyłączenia (EC)" icon={<AlertTriangle size={22} className="text-red-600" />}>
-          <CriteriaList criteria={patientProfile.psychiatricExclusionCriteria || []} title="PsychiatricExclusion" onUpdateCriterion={(id, status, comment) => handleUpdateCriterion('psychiatricExclusionCriteria', id, status, comment)} />
-        </AccordionItem>
-
-        <AccordionItem title="Ogólne Medyczne Kryteria Wyłączenia (GMEC)" icon={<Stethoscope size={22} className="text-red-600" />}>
-          <CriteriaList criteria={patientProfile.medicalExclusionCriteria || []} title="MedicalExclusion" onUpdateCriterion={(id, status, comment) => handleUpdateCriterion('medicalExclusionCriteria', id, status, comment)} />
-        </AccordionItem>
-
-        <section className="bg-white p-6 rounded-xl shadow-lg border border-sky-200">
-          <div className="flex items-center text-2xl font-semibold text-sky-700 mb-6">
-            <Target size={30} className="mr-3 text-sky-600" />
-            <span>Wniosek Dotyczący Kwalifikacji i Prawdopodobieństwo</span>
-          </div>
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-xl font-semibold text-slate-800 mb-2">Ogólna Kwalifikacja:</h3>
-              <p className={`text-lg font-bold ${dynamicConclusion.overallQualification.toLowerCase().includes("nie kwalifikuje") ? "text-red-600" : dynamicConclusion.overallQualification.toLowerCase().includes("kwalifikuje") ? "text-green-600" : "text-yellow-500"}`}>
-                {dynamicConclusion.overallQualification || 'Brak oceny kwalifikacji.'}
-              </p>
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold text-slate-800 mb-2">Główne Problemy / Potencjalne Przeszkody (wg AI):</h3>
-              {dynamicConclusion.mainIssues && dynamicConclusion.mainIssues.length > 0 ? (
-                <ul className="list-disc list-inside ml-4 space-y-1 text-slate-700">
-                  {dynamicConclusion.mainIssues.map((issue, idx) => <li key={idx}>{issue}</li>)}
-                </ul>
-              ) : (
-                <p className="text-slate-600">Brak zidentyfikowanych problemów</p>
-              )}
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold text-slate-800 mb-2">Krytyczne Informacje do Uzyskania/Weryfikacji (wg AI):</h3>
-              {dynamicConclusion.criticalInfoNeeded && dynamicConclusion.criticalInfoNeeded.length > 0 ? (
-                <ul className="list-disc list-inside ml-4 space-y-1 text-slate-700">
-                  {dynamicConclusion.criticalInfoNeeded.map((info, idx) => <li key={idx}>{info}</li>)}
-                </ul>
-              ) : (
-                <p className="text-slate-600">Brak krytycznych informacji do weryfikacji</p>
-              )}
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold text-slate-800 mb-3">Szacowane Prawdopodobieństwo Kwalifikacji:</h3>
-              <div className="flex items-center gap-3">
-                <BarChart3 size={28} className="text-sky-600 flex-shrink-0" />
-                <div className="w-full bg-slate-200 rounded-full h-8 overflow-hidden">
-                  <div className={`h-8 rounded-full flex items-center justify-center text-white font-bold transition-all duration-500 ease-out ${dynamicConclusion.estimatedProbability >= 70 ? 'bg-green-500' : dynamicConclusion.estimatedProbability >=40 ? 'bg-yellow-500' : 'bg-red-500'}`} style={{ width: `${dynamicConclusion.estimatedProbability}%` }}>
-                    {dynamicConclusion.estimatedProbability > 5 ? `${dynamicConclusion.estimatedProbability}%` : ''}
-                  </div>
-                </div>
-                {dynamicConclusion.estimatedProbability <= 5 && <span className="text-sky-700 font-bold ml-2">{dynamicConclusion.estimatedProbability}%</span>}
+          
+          {analysisError && !patientProfile.isMockData && (
+              <div className="mt-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl inline-block text-sm">
+                  <AlertTriangle size={16} className="inline-block mr-2" />
+                  {analysisError}
               </div>
-              <p className="text-sm text-slate-600 mt-2">Prawdopodobieństwo uwzględnia modyfikacje badacza. Ocena początkowa AI ({modelDisplayName}): {patientProfile.reportConclusion?.estimatedProbability || 0}%.</p>
+          )}
+          {patientProfile.isMockData && (
+            <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-xl inline-block">
+              <AlertTriangle size={16} className="inline-block mr-2" />
+              Używane są dane testowe - połączenie z AI ({modelDisplayName}) jest niedostępne lub wystąpił błąd.
+              {!isCurrentModelConfigured && ` Sprawdź konfigurację (klucz API, model) dla ${modelDisplayName} w pliku .env.`}
             </div>
-          </div>
-        </section>
-      </main>
-      <footer className="mt-12 text-center text-sm text-slate-500 py-6 border-t border-slate-200">
-        <p>&copy; {new Date().getFullYear()} Aplikacja Raportów Pre-screeningowych. Wszelkie prawa zastrzeżone.</p>
-        <p>Wygenerowano: {new Date().toLocaleString('pl-PL', { dateStyle: 'long', timeStyle: 'short' })}</p>
-         <button 
-          onClick={() => { setHasSubmittedData(false); setAnalysisError(null);}} 
-          className="mt-4 px-4 py-2 text-sm bg-sky-100 text-sky-700 rounded-md hover:bg-sky-200 transition-colors"
-        >
-          Analizuj nowego pacjenta
-        </button>
-      </footer>
+          )}
+        </header>
+
+        <main className="space-y-8">
+          <section className="card-remedy">
+            <div className="flex items-center text-3xl font-bold text-gray-900 mb-6">
+              <div className="icon-circle mr-4">
+                <User size={24} />
+              </div>
+              <span>Dane Pacjenta: {patientProfile.summary?.id || 'Brak ID'}</span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-600">
+              <p><strong className="font-medium text-gray-900">Wiek:</strong> {patientProfile.summary?.age || 'N/A'} lat</p>
+              <p><strong className="font-medium text-gray-900">Główna diagnoza:</strong> {patientProfile.summary?.mainDiagnosis || 'N/A'}</p>
+              <div className="md:col-span-2">
+                <strong className="font-medium text-gray-900">Choroby współistniejące:</strong>
+                <ul className="list-disc list-inside ml-4 mt-2 space-y-1">
+                  {(patientProfile.summary?.comorbidities || []).map((com, idx) => <li key={idx}>{com}</li>)}
+                  {(patientProfile.summary?.comorbidities || []).length === 0 && <li>Brak</li>}
+                </ul>
+              </div>
+            </div>
+          </section>
+
+          <AccordionItem title="Wizualizacje Danych" icon={<BarChart3 size={24} />} defaultOpen={true}>
+            <div className="grid grid-cols-1 gap-6">
+              <DetailedTrdTimelineChart
+                pharmacotherapy={patientProfile.trdAnalysis?.pharmacotherapy || []}
+              />
+              <div className="lg:col-span-1 mt-6">
+                <CriteriaStatusPieChart criteriaData={allCriteriaForChart} title="Ogólny Status Kryteriów (po zmianach)" />
+              </div>
+            </div>
+          </AccordionItem>
+
+          <AccordionItem title="Szacowanie Początku Obecnego Epizodu Depresyjnego" icon={<CalendarDays size={24} />}>
+            <div className="space-y-4 text-gray-600">
+              {(patientProfile.episodeEstimation?.scenarios || []).map(sc => (
+                <div key={sc.id} className="p-4 border border-gray-200 rounded-lg bg-gray-50">
+                  <p><strong className="font-medium text-gray-900">Scenariusz {sc.id}:</strong> {sc.description}</p>
+                  <p className="text-sm text-gray-500 mt-2"><em>Przesłanki:</em> {sc.evidence}</p>
+                </div>
+              ))}
+              {(patientProfile.episodeEstimation?.scenarios || []).length === 0 && <p>Brak scenariuszy.</p>}
+              <div className="mt-4 p-4 border-t-2 border-gray-300 bg-blue-50 rounded-lg">
+                <p><strong className="font-medium text-gray-900">Wnioski dotyczące początku epizodu dla celów badania:</strong></p>
+                <p className="mt-2">{patientProfile.episodeEstimation?.conclusion || 'Brak wniosków.'}</p>
+              </div>
+            </div>
+          </AccordionItem>
+
+          <AccordionItem title="Analiza TRD (Kryterium IC6) - Podsumowanie" icon={<Pill size={24} />}>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-500">Poniżej znajduje się podsumowanie wniosków z analizy farmakoterapii. Szczegółowa oś czasu leczenia dostępna jest w sekcji "Wizualizacje Danych".</p>
+              <p className="font-semibold text-gray-900">{patientProfile.trdAnalysis?.conclusion || 'Brak podsumowania analizy TRD.'}</p>
+            </div>
+          </AccordionItem>
+
+          <AccordionItem title="Kryteria Włączenia (IC)" icon={<ListChecks size={24} />}>
+            <CriteriaList criteria={patientProfile.inclusionCriteria || []} title="Inclusion" onUpdateCriterion={(id, status, comment) => handleUpdateCriterion('inclusionCriteria', id, status, comment)} />
+          </AccordionItem>
+
+          <AccordionItem title="Psychiatryczne Kryteria Wyłączenia (EC)" icon={<AlertTriangle size={24} />}>
+            <CriteriaList criteria={patientProfile.psychiatricExclusionCriteria || []} title="PsychiatricExclusion" onUpdateCriterion={(id, status, comment) => handleUpdateCriterion('psychiatricExclusionCriteria', id, status, comment)} />
+          </AccordionItem>
+
+          <AccordionItem title="Ogólne Medyczne Kryteria Wyłączenia (GMEC)" icon={<Stethoscope size={24} />}>
+            <CriteriaList criteria={patientProfile.medicalExclusionCriteria || []} title="MedicalExclusion" onUpdateCriterion={(id, status, comment) => handleUpdateCriterion('medicalExclusionCriteria', id, status, comment)} />
+          </AccordionItem>
+
+          <section className="card-remedy">
+            <div className="flex items-center text-3xl font-bold text-gray-900 mb-6">
+              <div className="icon-circle mr-4">
+                <Target size={24} />
+              </div>
+              <span>Wniosek Dotyczący Kwalifikacji i Prawdopodobieństwo</span>
+            </div>
+            <div className="space-y-8">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Ogólna Kwalifikacja:</h3>
+                <p className={`text-xl font-bold ${dynamicConclusion.overallQualification.toLowerCase().includes("nie kwalifikuje") ? "text-red-600" : dynamicConclusion.overallQualification.toLowerCase().includes("kwalifikuje") ? "text-green-600" : "text-yellow-500"}`}>
+                  {dynamicConclusion.overallQualification || 'Brak oceny kwalifikacji.'}
+                </p>
+              </div>
+              
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Główne Problemy / Potencjalne Przeszkody (wg AI):</h3>
+                {dynamicConclusion.mainIssues && dynamicConclusion.mainIssues.length > 0 ? (
+                  <ul className="list-disc list-inside ml-4 space-y-2 text-gray-600">
+                    {dynamicConclusion.mainIssues.map((issue, idx) => <li key={idx}>{issue}</li>)}
+                  </ul>
+                ) : (
+                  <p className="text-gray-500">Brak zidentyfikowanych problemów</p>
+                )}
+              </div>
+              
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Krytyczne Informacje do Uzyskania/Weryfikacji (wg AI):</h3>
+                {dynamicConclusion.criticalInfoNeeded && dynamicConclusion.criticalInfoNeeded.length > 0 ? (
+                  <ul className="list-disc list-inside ml-4 space-y-2 text-gray-600">
+                    {dynamicConclusion.criticalInfoNeeded.map((info, idx) => <li key={idx}>{info}</li>)}
+                  </ul>
+                ) : (
+                  <p className="text-gray-500">Brak krytycznych informacji do weryfikacji</p>
+                )}
+              </div>
+              
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Szacowane Prawdopodobieństwo Kwalifikacji:</h3>
+                <div className="flex items-center gap-4">
+                  <div className="icon-circle flex-shrink-0">
+                    <BarChart3 size={24} />
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-12 overflow-hidden">
+                    <div className={`h-12 rounded-full flex items-center justify-center text-white font-bold transition-all duration-500 ease-out ${dynamicConclusion.estimatedProbability >= 70 ? 'bg-green-500' : dynamicConclusion.estimatedProbability >=40 ? 'bg-yellow-500' : 'bg-red-500'}`} style={{ width: `${dynamicConclusion.estimatedProbability}%` }}>
+                      {dynamicConclusion.estimatedProbability > 10 ? `${dynamicConclusion.estimatedProbability}%` : ''}
+                    </div>
+                  </div>
+                  {dynamicConclusion.estimatedProbability <= 10 && <span className="text-gray-900 font-bold text-xl ml-2">{dynamicConclusion.estimatedProbability}%</span>}
+                </div>
+                <p className="text-sm text-gray-500 mt-3">Prawdopodobieństwo uwzględnia modyfikacje badacza. Ocena początkowa AI ({modelDisplayName}): {patientProfile.reportConclusion?.estimatedProbability || 0}%.</p>
+              </div>
+            </div>
+          </section>
+        </main>
+        
+        <footer className="mt-20 text-center text-sm text-gray-500 py-6 border-t border-gray-200">
+          <p>&copy; {new Date().getFullYear()} Aplikacja Raportów Pre-screeningowych. Wszelkie prawa zastrzeżone.</p>
+          <p>Wygenerowano: {new Date().toLocaleString('pl-PL', { dateStyle: 'long', timeStyle: 'short' })}</p>
+          <button 
+            onClick={() => { setHasSubmittedData(false); setAnalysisError(null);}} 
+            className="no-print btn-secondary mt-4"
+          >
+            Analizuj nowego pacjenta
+          </button>
+        </footer>
+      </div>
     </div>
   );
 };

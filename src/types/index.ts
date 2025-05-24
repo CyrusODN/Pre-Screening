@@ -1,5 +1,5 @@
 // src/types/index.ts
-export type SupportedAIModel = 'o3' | 'gemini';
+export type SupportedAIModel = 'o3' | 'gemini' | 'claude-opus';
 
 export interface AIConfig {
   apiKey: string;
@@ -18,6 +18,15 @@ export interface GeminiAIConfig {
   model: string;
   temperature: number;
   maxOutputTokens: number;
+  topP: number;
+  systemPrompt: string;
+}
+
+export interface ClaudeAIConfig {
+  apiKey: string;
+  model: string;
+  temperature: number;
+  maxTokens: number;
   topP: number;
   systemPrompt: string;
 }

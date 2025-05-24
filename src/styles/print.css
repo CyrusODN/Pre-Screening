@@ -1,0 +1,275 @@
+/* Print styles for the application */
+@media print {
+  /* Hide elements that shouldn't be printed */
+  .no-print,
+  .print-hide {
+    display: none !important;
+  }
+
+  /* Reset styles for print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body {
+    font-size: 12pt !important;
+    line-height: 1.4 !important;
+    color: #000 !important;
+    background: white !important;
+  }
+
+  /* Page setup */
+  @page {
+    margin: 1.5cm;
+    size: A4;
+  }
+
+  /* Print-specific layout */
+  .print-report {
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: white !important;
+  }
+
+  /* Reduce overall spacing for print */
+  .print-report header {
+    margin-bottom: 12pt !important;
+    padding-bottom: 8pt !important;
+  }
+
+  /* Headers */
+  .print-report h1 {
+    font-size: 18pt !important;
+    margin-bottom: 8pt !important;
+    page-break-after: avoid;
+  }
+
+  .print-report h2 {
+    font-size: 14pt !important;
+    margin-top: 8pt !important;
+    margin-bottom: 6pt !important;
+    page-break-after: avoid;
+  }
+
+  .print-report h3 {
+    font-size: 12pt !important;
+    margin-top: 6pt !important;
+    margin-bottom: 4pt !important;
+    page-break-after: avoid;
+  }
+
+  /* Sections - drastically reduce spacing */
+  .print-report section {
+    page-break-inside: avoid;
+    margin-bottom: 8pt !important;
+  }
+
+  /* Override Tailwind margins for print */
+  .print-report .mb-8 {
+    margin-bottom: 8pt !important;
+  }
+
+  .print-report .mb-4 {
+    margin-bottom: 4pt !important;
+  }
+
+  .print-report .mb-2 {
+    margin-bottom: 2pt !important;
+  }
+
+  .print-report .mt-4 {
+    margin-top: 4pt !important;
+  }
+
+  .print-report .mt-2 {
+    margin-top: 2pt !important;
+  }
+
+  .print-report .p-8 {
+    padding: 0 !important;
+  }
+
+  .print-report .p-6 {
+    padding: 8pt !important;
+  }
+
+  .print-report .p-4 {
+    padding: 6pt !important;
+  }
+
+  .print-report .p-3 {
+    padding: 4pt !important;
+  }
+
+  .print-report .py-2 {
+    padding-top: 2pt !important;
+    padding-bottom: 2pt !important;
+  }
+
+  /* Specific spacing overrides for compact print */
+  .print-report .space-y-3 > * + * {
+    margin-top: 3pt !important;
+  }
+
+  .print-report .space-y-2 > * + * {
+    margin-top: 2pt !important;
+  }
+
+  .print-report .space-y-4 > * + * {
+    margin-top: 4pt !important;
+  }
+
+  /* Reduce gap in grids */
+  .print-report .gap-4 {
+    gap: 4pt !important;
+  }
+
+  /* Ensure most text is black, but allow status colors */
+  .print-report p,
+  .print-report div:not([class*="text-"]),
+  .print-report span:not([class*="text-"]),
+  .print-report li:not([class*="text-"]) {
+    color: #000 !important;
+  }
+
+  /* Keep header and main content black */
+  .print-report h1,
+  .print-report h2:not([class*="text-"]),
+  .print-report h3:not([class*="text-"]) {
+    color: #000 !important;
+  }
+
+  /* Tables and lists */
+  .print-report ul, .print-report ol {
+    margin-bottom: 8pt !important;
+  }
+
+  .print-report li {
+    margin-bottom: 2pt !important;
+  }
+
+  /* Backgrounds and borders for print */
+  .print-report .bg-gray-50,
+  .print-report .bg-blue-50,
+  .print-report .bg-yellow-100 {
+    background: #f8f9fa !important;
+    border: 1px solid #dee2e6 !important;
+  }
+
+  .print-report .border-l-4 {
+    border-left: 3px solid #6c757d !important;
+  }
+
+  .print-report .border-blue-200 {
+    border-left-color: #007bff !important;
+  }
+
+  .print-report .border-gray-200 {
+    border-color: #dee2e6 !important;
+  }
+
+  /* Text colors for print */
+  .print-report .text-blue-700,
+  .print-report .text-blue-600 {
+    color: #003d82 !important;
+    font-weight: 600 !important;
+  }
+
+  .print-report .text-green-600,
+  .print-report .text-green-700 {
+    color: #0f5132 !important;
+    font-weight: 600 !important;
+  }
+
+  .print-report .text-red-600,
+  .print-report .text-red-700 {
+    color: #842029 !important;
+    font-weight: 600 !important;
+  }
+
+  .print-report .text-yellow-600 {
+    color: #664d03 !important;
+    font-weight: 600 !important;
+  }
+
+  .print-report .text-gray-600,
+  .print-report .text-gray-500 {
+    color: #495057 !important;
+  }
+
+  /* Specific colors for main section headers */
+  .print-report .text-blue-700 {
+    color: #003d82 !important;
+  }
+
+  /* Status indicators should be bold and colored */
+  .print-report [class*="text-green"],
+  .print-report [class*="text-red"],
+  .print-report [class*="text-blue"],
+  .print-report [class*="text-yellow"] {
+    font-weight: 600 !important;
+  }
+
+  /* Conclusion section colors */
+  .print-report .text-2xl.font-bold.text-blue-700 {
+    color: #003d82 !important;
+    font-weight: 700 !important;
+  }
+
+  /* Ensure qualification status is properly colored */
+  .print-report .text-lg.font-bold {
+    font-weight: 700 !important;
+  }
+
+  .print-report .text-lg.font-bold.text-green-600 {
+    color: #0f5132 !important;
+  }
+
+  .print-report .text-lg.font-bold.text-red-600 {
+    color: #842029 !important;
+  }
+
+  .print-report .text-lg.font-bold.text-yellow-600 {
+    color: #664d03 !important;
+  }
+
+  /* Icons in print */
+  .print-report svg {
+    width: 12pt !important;
+    height: 12pt !important;
+  }
+
+  /* Force page breaks */
+  .page-break-before {
+    page-break-before: always;
+  }
+
+  .page-break-after {
+    page-break-after: always;
+  }
+
+  .page-break-inside-avoid {
+    page-break-inside: avoid;
+  }
+
+  /* Grid layouts for print */
+  .print-report .grid {
+    display: block !important;
+  }
+
+  .print-report .grid > div {
+    margin-bottom: 8pt !important;
+  }
+
+  /* Footer */
+  .print-report footer {
+    margin-top: 12pt !important;
+    padding-top: 8pt !important;
+    border-top: 1px solid #000 !important;
+  }
+} 
