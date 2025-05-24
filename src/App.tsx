@@ -12,6 +12,7 @@ import { EnteringScreen } from './components/EnteringScreen';
 import { PrintableReport } from './components/PrintableReport';
 import { initialPatientData } from './data/mockData';
 import { analyzePatientData } from './services/ai';
+import { analyzePatientDataMultiAgent, isMultiAgentAvailable } from './services/multiAgentService';
 import { saveToHistory } from './services/patientHistory';
 // Usunięto nieużywany import typu PharmacotherapyItem z tego pliku,
 // ponieważ jest on potrzebny tylko w DetailedTrdTimelineChart.tsx
@@ -243,6 +244,7 @@ const App = () => {
   const [selectedAIModel, setSelectedAIModel] = useState<SupportedAIModel>('o3'); 
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [isPrintMode, setIsPrintMode] = useState(false);
+  const [isMultiAgentMode, setIsMultiAgentMode] = useState(false);
 
   const [dynamicConclusion, setDynamicConclusion] = useState({
     overallQualification: '',
@@ -255,8 +257,18 @@ const App = () => {
     setHasSubmittedData(true); 
     setIsAnalyzing(true);
     setAnalysisError(null); 
+    
     try {
-      const analysisResult = await analyzePatientData(data.medicalHistory, data.protocol, data.selectedAIModel);
+      let analysisResult: PatientData;
+      
+      if (isMultiAgentMode && isMultiAgentAvailable()) {
+        console.log('🤖 Rozpoczynanie analizy wieloagentowej...');
+        analysisResult = await analyzePatientDataMultiAgent(data.medicalHistory, data.protocol, data.selectedAIModel);
+      } else {
+        console.log('🔧 Rozpoczynanie analizy klasycznej...');
+        analysisResult = await analyzePatientData(data.medicalHistory, data.protocol, data.selectedAIModel);
+      }
+      
       setPatientProfile(analysisResult);
       saveToHistory(analysisResult);
 
@@ -271,7 +283,8 @@ const App = () => {
     } catch (error) {
       console.error('Error analyzing data in App.tsx:', error);
       const errorMessage = error instanceof Error ? error.message : 'Wystąpił nieznany błąd.';
-      setAnalysisError(`Błąd podczas analizy danych (${data.selectedAIModel}): ${errorMessage}. Używam danych testowych.`);
+      const analysisType = isMultiAgentMode ? 'wieloagentowej' : 'klasycznej';
+      setAnalysisError(`Błąd podczas analizy ${analysisType} (${data.selectedAIModel}): ${errorMessage}. Używam danych testowych.`);
       
       const mockDataWithModel: PatientData = {
         ...initialPatientData, 
@@ -398,6 +411,8 @@ const App = () => {
       onSelectHistoricalPatient={handleSelectHistoricalPatient}
       selectedAIModel={selectedAIModel}
       onAIModelChange={setSelectedAIModel}
+      isMultiAgentMode={isMultiAgentMode}
+      onMultiAgentModeChange={setIsMultiAgentMode}
     />;
   }
 
@@ -418,6 +433,9 @@ const App = () => {
             selectedAIModel === 'claude-opus' ? 'Claude 4 Opus' :
             selectedAIModel.toUpperCase()
           }</p>
+          <p className="text-gray-600 mb-2">
+            Tryb: {isMultiAgentMode ? '🤖 Wieloagentowy' : '🔧 Klasyczny'}
+          </p>
           <p className="text-sm text-gray-500">To może potrwać chwilę...</p>
         </div>
       </div>

@@ -1,9 +1,10 @@
 // src/components/EnteringScreen.tsx
 import React, { useState } from 'react';
-import { Upload, FileText, AlertCircle, History, BrainCircuit, PlayCircle } from 'lucide-react'; // Added PlayCircle
+import { Upload, FileText, AlertCircle, History, BrainCircuit, PlayCircle, Network } from 'lucide-react'; // Added Network
 import { PatientHistory } from './PatientHistory';
 import { ProtocolSelector } from './ProtocolSelector';
 import { getHistory, clearHistory } from '../services/patientHistory';
+import { isMultiAgentAvailable } from '../services/multiAgentService';
 import type { Protocol, SupportedAIModel } from '../types';
 
 interface EnteringScreenProps {
@@ -11,13 +12,17 @@ interface EnteringScreenProps {
   onSelectHistoricalPatient: (patientId: string) => void;
   selectedAIModel: SupportedAIModel;
   onAIModelChange: (model: SupportedAIModel) => void;
+  isMultiAgentMode: boolean;
+  onMultiAgentModeChange: (enabled: boolean) => void;
 }
 
 export const EnteringScreen: React.FC<EnteringScreenProps> = ({ 
     onDataSubmit, 
     onSelectHistoricalPatient,
     selectedAIModel,
-    onAIModelChange
+    onAIModelChange,
+    isMultiAgentMode,
+    onMultiAgentModeChange
 }) => {
   const [protocol, setProtocol] = useState('');
   const [selectedProtocol, setSelectedProtocol] = useState<Protocol | null>(null);
@@ -84,24 +89,54 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
         </header>
 
         <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
-          <div className="flex items-center gap-3 card-remedy">
-            <div className="icon-circle">
-              <BrainCircuit className="w-6 h-6" />
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            {/* AI Model Selector */}
+            <div className="flex items-center gap-3 card-remedy">
+              <div className="icon-circle">
+                <BrainCircuit className="w-6 h-6" />
+              </div>
+              <label htmlFor="ai-model-select" className="text-base font-medium text-gray-900">
+                Model AI:
+              </label>
+              <select
+                id="ai-model-select"
+                value={selectedAIModel}
+                onChange={(e) => onAIModelChange(e.target.value as SupportedAIModel)}
+                className="p-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-remedy-accent focus:border-remedy-accent transition-all"
+              >
+                <option value="o3">o3 (OpenAI-like)</option>
+                <option value="gemini">Gemini 2.5 Pro Preview 05-06</option>
+                <option value="claude-opus">Claude 4 Opus</option>
+              </select>
             </div>
-            <label htmlFor="ai-model-select" className="text-base font-medium text-gray-900">
-              Model AI:
-            </label>
-            <select
-              id="ai-model-select"
-              value={selectedAIModel}
-              onChange={(e) => onAIModelChange(e.target.value as SupportedAIModel)}
-              className="p-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-remedy-accent focus:border-remedy-accent transition-all"
-            >
-              <option value="o3">o3 (OpenAI-like)</option>
-              <option value="gemini">Gemini 2.5 Pro Preview 05-06</option>
-              <option value="claude-opus">Claude 4 Opus</option>
-            </select>
+
+            {/* Multi-Agent Mode Toggle */}
+            <div className="flex items-center gap-3 card-remedy">
+              <div className="icon-circle">
+                <Network className="w-6 h-6" />
+              </div>
+              <label htmlFor="multi-agent-toggle" className="text-base font-medium text-gray-900">
+                Tryb wieloagentowy:
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  id="multi-agent-toggle"
+                  type="checkbox"
+                  checked={isMultiAgentMode}
+                  onChange={(e) => onMultiAgentModeChange(e.target.checked)}
+                  disabled={!isMultiAgentAvailable()}
+                  className="w-5 h-5 text-remedy-accent bg-gray-100 border-gray-300 rounded focus:ring-remedy-accent focus:ring-2 disabled:opacity-50"
+                />
+                <span className={`text-sm ${isMultiAgentMode ? 'text-remedy-accent font-medium' : 'text-gray-500'}`}>
+                  {isMultiAgentMode ? 'Włączony' : 'Wyłączony'}
+                </span>
+                {!isMultiAgentAvailable() && (
+                  <span className="text-xs text-red-500 ml-2">(Niedostępny)</span>
+                )}
+              </div>
+            </div>
           </div>
+
           <div className="flex gap-4">
             <button
               onClick={() => setShowCustomProtocol(!showCustomProtocol)}
