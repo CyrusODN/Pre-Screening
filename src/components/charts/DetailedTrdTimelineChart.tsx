@@ -380,105 +380,125 @@ const generatePredictiveAnalytics = (
 // OPTIMIZED UTILITY FUNCTIONS
 // ============================================================================
 
-// Enhanced zoom levels with clinical context and AI insights
+// Enhanced zoom levels with infinite scroll support
 const ZOOM_LEVELS = [
   { 
     name: '5 lat', 
-    days: 1825, 
-    tickInterval: 'year', 
+    pixelsPerDay: 0.5,
+    tickInterval: 'year' as const,
     format: 'yyyy', 
-    unit: 'year', 
-    density: 'very-low', 
+    unit: 'year' as const,
+    density: 'very-low' as const,
+    minorTickInterval: 'quarter' as const,
+    minorFormat: 'QQQ',
     clinicalContext: 'lifetime_overview',
     aiContext: 'long_term_patterns'
   },
   { 
     name: '2 lata', 
-    days: 730, 
-    tickInterval: 'quarter', 
+    pixelsPerDay: 1,
+    tickInterval: 'quarter' as const,
     format: 'QQQ yyyy', 
-    unit: 'quarter', 
-    density: 'low', 
+    unit: 'quarter' as const,
+    density: 'low' as const,
+    minorTickInterval: 'month' as const,
+    minorFormat: 'MMM',
     clinicalContext: 'long_term_patterns',
     aiContext: 'treatment_resistance_analysis'
   },
   { 
     name: 'Rok', 
-    days: 365, 
-    tickInterval: 'month', 
+    pixelsPerDay: 2,
+    tickInterval: 'month' as const,
     format: 'MMM yyyy', 
-    unit: 'month', 
-    density: 'medium', 
+    unit: 'month' as const,
+    density: 'medium' as const,
+    minorTickInterval: 'week' as const,
+    minorFormat: 'dd',
     clinicalContext: 'annual_review',
     aiContext: 'efficacy_trend_analysis'
   },
   { 
     name: '6 miesięcy', 
-    days: 180, 
-    tickInterval: 'month', 
+    pixelsPerDay: 4,
+    tickInterval: 'month' as const,
     format: 'MMM yyyy', 
-    unit: 'month', 
-    density: 'medium', 
+    unit: 'month' as const,
+    density: 'medium' as const,
+    minorTickInterval: 'week' as const,
+    minorFormat: 'dd MMM',
     clinicalContext: 'episode_analysis',
     aiContext: 'response_prediction'
   },
   { 
     name: '3 miesiące', 
-    days: 90, 
-    tickInterval: 'week', 
+    pixelsPerDay: 8,
+    tickInterval: 'week' as const,
     format: 'dd MMM', 
-    unit: 'week', 
-    density: 'high', 
+    unit: 'week' as const,
+    density: 'high' as const,
+    minorTickInterval: 'day' as const,
+    minorFormat: 'dd',
     clinicalContext: 'treatment_response',
     aiContext: 'early_response_detection'
   },
   { 
     name: 'Miesiąc', 
-    days: 30, 
-    tickInterval: 'week', 
+    pixelsPerDay: 16,
+    tickInterval: 'week' as const,
     format: 'dd MMM', 
-    unit: 'week', 
-    density: 'high', 
+    unit: 'week' as const,
+    density: 'high' as const,
+    minorTickInterval: 'day' as const,
+    minorFormat: 'dd',
     clinicalContext: 'acute_monitoring',
     aiContext: 'side_effect_monitoring'
   },
   { 
     name: '2 tygodnie', 
-    days: 14, 
-    tickInterval: 'day', 
+    pixelsPerDay: 32,
+    tickInterval: 'day' as const,
     format: 'dd.MM', 
-    unit: 'day', 
-    density: 'very-high', 
+    unit: 'day' as const,
+    density: 'very-high' as const,
+    minorTickInterval: 'hour' as const,
+    minorFormat: 'HH:mm',
     clinicalContext: 'titration_period',
     aiContext: 'dose_optimization'
   },
   { 
     name: 'Tydzień', 
-    days: 7, 
-    tickInterval: 'day', 
+    pixelsPerDay: 64,
+    tickInterval: 'day' as const,
     format: 'dd.MM', 
-    unit: 'day', 
-    density: 'very-high', 
+    unit: 'day' as const,
+    density: 'very-high' as const,
+    minorTickInterval: 'hour' as const,
+    minorFormat: 'HH:mm',
     clinicalContext: 'daily_monitoring',
     aiContext: 'acute_response_tracking'
   },
   { 
     name: '3 dni', 
-    days: 3, 
-    tickInterval: 'hour', 
+    pixelsPerDay: 128,
+    tickInterval: 'hour' as const,
     format: 'dd.MM HH:mm', 
-    unit: 'hour', 
-    density: 'ultra', 
+    unit: 'hour' as const,
+    density: 'ultra' as const,
+    minorTickInterval: 'hour' as const,
+    minorFormat: 'HH:mm',
     clinicalContext: 'crisis_intervention',
     aiContext: 'emergency_monitoring'
   },
   { 
     name: 'Dzień', 
-    days: 1, 
-    tickInterval: 'hour', 
+    pixelsPerDay: 256,
+    tickInterval: 'hour' as const,
     format: 'HH:mm', 
-    unit: 'hour', 
-    density: 'ultra', 
+    unit: 'hour' as const,
+    density: 'ultra' as const,
+    minorTickInterval: 'hour' as const,
+    minorFormat: 'HH:mm',
     clinicalContext: 'hourly_monitoring',
     aiContext: 'real_time_analysis'
   },
@@ -618,11 +638,14 @@ const getDrugColor = (drugName: string, drugClass?: string): string => {
   
   let color: string;
   
-  // First try drug class colors
+  // First try drug class colors - these can be shared between drugs of the same class
   if (drugClass && DRUG_CLASS_COLORS[drugClass as keyof typeof DRUG_CLASS_COLORS]) {
     color = DRUG_CLASS_COLORS[drugClass as keyof typeof DRUG_CLASS_COLORS];
+    // Don't add drug class colors to usedColors - they can be shared
+    drugColorCache.set(cacheKey, color);
+    return color;
   } else {
-    // Use improved hash with collision detection
+    // Use improved hash with collision detection for drugs without specific class colors
     let colorIndex = hashCode(drugName.toLowerCase()) % BASE_COLORS.length;
     color = BASE_COLORS[colorIndex];
     
@@ -650,9 +673,11 @@ const getDrugColor = (drugName: string, drugClass?: string): string => {
           color = baseColor + '66'; // Another transparency
       }
     }
+    
+    // Only add BASE_COLORS to usedColors to prevent conflicts between unclassified drugs
+    usedColors.add(color);
   }
   
-  usedColors.add(color);
   drugColorCache.set(cacheKey, color);
   return color;
 };
@@ -880,6 +905,10 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
   enablePredictiveAnalytics = true,
   showAdvancedMetrics = false
 }) => {
+  // Clear color cache at the start of each render to ensure fresh color assignment
+  drugColorCache.clear();
+  usedColors.clear();
+  
   // ============================================================================
   // STATE MANAGEMENT - Optimized with proper separation
   // ============================================================================
@@ -889,7 +918,6 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
   
   // Core state
   const [zoomLevel, setZoomLevel] = useState(initialZoomLevel);
-  const [viewStart, setViewStart] = useState<Date | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<TimelineEvent | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [highlightedDrug, setHighlightedDrug] = useState<string | null>(null);
@@ -1220,40 +1248,44 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
     return filtered;
   }, [drugGroups, selectedDrugClasses, showMghCompliantOnly]);
 
-  // Current view range calculation
+  // Current view range calculation - now infinite scroll based
   const currentViewRange = useMemo(() => {
-    if (!viewStart) return { start: timeRange.start, end: timeRange.end };
-    
-    const zoomConfig = ZOOM_LEVELS[zoomLevel];
-    const end = zoomConfig.unit === 'hour' 
-      ? addHours(viewStart, zoomConfig.days * 24)
-      : addDays(viewStart, zoomConfig.days);
-    
-    return { start: viewStart, end };
-  }, [viewStart, zoomLevel, timeRange]);
+    // Always show the full data range, zoom affects only visual density
+    return { start: timeRange.start, end: timeRange.end };
+  }, [timeRange]);
 
-  // Time markers generation
+  // Calculate timeline width based on zoom level
+  const timelineWidth = useMemo(() => {
+    const zoomConfig = ZOOM_LEVELS[zoomLevel];
+    const totalDays = differenceInDays(timeRange.end, timeRange.start);
+    return Math.max(totalDays * zoomConfig.pixelsPerDay, 1000); // Minimum 1000px width
+  }, [timeRange, zoomLevel]);
+
+  // Dynamic time markers generation with infinite scroll support
   const timeMarkers = useMemo(() => {
     const markers: { date: Date; label: string; x: number; type: 'major' | 'minor' }[] = [];
     const { start, end } = currentViewRange;
     const zoomConfig = ZOOM_LEVELS[zoomLevel];
+    const totalDays = differenceInDays(end, start);
     
+    // Generate major markers
     let current = start;
-    const step = zoomConfig.unit === 'hour' ? 24 : 
-                 zoomConfig.density === 'very-low' ? 365 :
-                 zoomConfig.density === 'low' ? 90 :
-                 zoomConfig.density === 'medium' ? 30 :
-                 zoomConfig.density === 'high' ? 7 : 1;
+    const getMajorStep = () => {
+      const interval = zoomConfig.tickInterval;
+      if (interval === 'year') return { years: 1 };
+      if (interval === 'quarter') return { months: 3 };
+      if (interval === 'month') return { months: 1 };
+      if (interval === 'week') return { weeks: 1 };
+      if (interval === 'day') return { days: 1 };
+      if (interval === 'hour') return { hours: zoomConfig.density === 'ultra' ? 6 : 12 };
+      return { days: 1 };
+    };
     
-    const totalTime = zoomConfig.unit === 'hour' 
-      ? differenceInHours(end, start)
-      : differenceInDays(end, start);
+    const majorStep = getMajorStep();
     
     while (current <= end) {
-      const timeSinceStart = zoomConfig.unit === 'hour'
-        ? differenceInHours(current, start)
-        : differenceInDays(current, start);
-      const x = (timeSinceStart / totalTime) * 100;
+      const daysSinceStart = differenceInDays(current, start);
+      const x = (daysSinceStart / totalDays) * 100;
       
       markers.push({
         date: current,
@@ -1262,14 +1294,56 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
         type: 'major'
       });
       
-      if (zoomConfig.unit === 'hour') {
-        current = addHours(current, step);
-      } else {
-        current = addDays(current, step);
+      // Add next major marker
+      if (majorStep.years) current = addDays(current, 365 * majorStep.years);
+      else if (majorStep.months) current = addDays(current, 30 * majorStep.months);
+      else if (majorStep.weeks) current = addDays(current, 7 * majorStep.weeks);
+      else if (majorStep.days) current = addDays(current, majorStep.days);
+      else if (majorStep.hours) current = addHours(current, majorStep.hours);
+    }
+    
+    // Generate minor markers for higher zoom levels
+    if (zoomConfig.density === 'high' || zoomConfig.density === 'very-high' || zoomConfig.density === 'ultra') {
+      current = start;
+      const getMinorStep = () => {
+        const interval = zoomConfig.minorTickInterval;
+        if (interval === 'quarter') return { months: 3 };
+        if (interval === 'month') return { months: 1 };
+        if (interval === 'week') return { weeks: 1 };
+        if (interval === 'day') return { days: 1 };
+        if (interval === 'hour') return { hours: zoomConfig.density === 'ultra' ? 1 : 6 };
+        return { days: 1 };
+      };
+      
+      const minorStep = getMinorStep();
+      
+      while (current <= end) {
+        const daysSinceStart = differenceInDays(current, start);
+        const x = (daysSinceStart / totalDays) * 100;
+        
+        // Only add minor markers that don't overlap with major ones
+        const isOverlappingMajor = markers.some(m => 
+          m.type === 'major' && Math.abs(m.x - x) < 0.5
+        );
+        
+        if (!isOverlappingMajor) {
+          markers.push({
+            date: current,
+            label: format(current, zoomConfig.minorFormat),
+            x,
+            type: 'minor'
+          });
+        }
+        
+        // Add next minor marker
+        if (minorStep.months) current = addDays(current, 30 * minorStep.months);
+        else if (minorStep.weeks) current = addDays(current, 7 * minorStep.weeks);
+        else if (minorStep.days) current = addDays(current, minorStep.days);
+        else if (minorStep.hours) current = addHours(current, minorStep.hours);
       }
     }
     
-    return markers;
+    return markers.sort((a, b) => a.x - b.x);
   }, [currentViewRange, zoomLevel]);
 
   // Container height calculation
@@ -1390,9 +1464,7 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
     const events: TimelineEvent[] = [];
     const { start, end } = currentViewRange;
     const zoomConfig = ZOOM_LEVELS[zoomLevel];
-    const totalTime = zoomConfig.unit === 'hour' 
-      ? differenceInHours(end, start)
-      : differenceInDays(end, start);
+    const totalDays = differenceInDays(end, start);
     
     filteredDrugGroups.forEach(group => {
       if (!group.isVisible) return;
@@ -1415,96 +1487,89 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
           if (!dosePositionInfo) return;
           
           episodes.forEach(episode => {
-            if (episode.parsedEndDate >= start && episode.parsedStartDate <= end) {
-              const eventStart = episode.parsedStartDate;
-              const eventEnd = episode.parsedEndDate;
-              
-              const startTime = zoomConfig.unit === 'hour'
-                ? differenceInHours(eventStart, start)
-                : differenceInDays(eventStart, start);
-              const duration = zoomConfig.unit === 'hour'
-                ? differenceInHours(eventEnd, eventStart) + 1
-                : differenceInDays(eventEnd, eventStart) + 1;
-              
-              const x = (startTime / totalTime) * 100;
-              const width = Math.max((duration / totalTime) * 100, 0.2);
-              
-              // Analyze overlaps with enhanced detection
-              const overlaps = [...new Set(allEvents
-                .filter(other => 
-                  other.drugName !== episode.drugName &&
-                  (isWithinInterval(other.parsedStartDate, { start: eventStart, end: eventEnd }) ||
-                   isWithinInterval(other.parsedEndDate, { start: eventStart, end: eventEnd }))
-                )
-                .map(other => other.drugName || 'Unknown'))];
-              
-              // Enhanced clinical significance assessment
-              let clinicalSignificance: 'low' | 'moderate' | 'high' | 'critical' = 'moderate';
-              if (episode.clinicalAnalysis.adverseEvents.severity === 'severe') clinicalSignificance = 'critical';
-              else if (episode.clinicalAnalysis.treatmentResponse.responseType === 'no_response') clinicalSignificance = 'high';
-              else if (episode.clinicalAnalysis.mghAtrqCompliance.isCompliant) clinicalSignificance = 'moderate';
-              else clinicalSignificance = 'low';
-              
-              // Protocol relevance assessment
-              let protocolRelevance: 'not_relevant' | 'relevant' | 'critical' = 'not_relevant';
-              if (episode.drugClassification.isProtocolRelevant) {
-                protocolRelevance = episode.clinicalAnalysis.mghAtrqCompliance.isCompliant ? 'critical' : 'relevant';
-              }
-              
-              // Data quality assessment
-              let dataQuality: 'poor' | 'fair' | 'good' | 'excellent' = 'fair';
-              if (episode.dataQuality.completeness >= 0.9) dataQuality = 'excellent';
-              else if (episode.dataQuality.completeness >= 0.7) dataQuality = 'good';
-              else if (episode.dataQuality.completeness >= 0.5) dataQuality = 'fair';
-              else dataQuality = 'poor';
-              
-              // Predictive analytics
-              const predictiveAnalytics = generatePredictiveAnalytics(group.episodes, patientData);
-              
-              events.push({
-                id: episode.id || `${group.drugName}-${dose}-${episode.originalIndex}`,
-                drugName: group.drugName,
-                shortName: group.shortName,
-                dose,
-                startDate: episode.parsedStartDate,
-                endDate: episode.parsedEndDate,
-                duration: differenceInDays(episode.parsedEndDate, episode.parsedStartDate) + 1,
-                attemptGroup: episode.attemptGroup || 0,
-                notes: episode.notes,
-                color: group.color,
-                x,
-                width,
-                y: dosePositionInfo.calculatedBarY, // Use the new calculated Y
-                height: LAYOUT.EPISODE_HEIGHT,
-                
-                // Enhanced clinical data
-                clinicalAnalysis: episode.clinicalAnalysis,
-                drugClassification: episode.drugClassification,
-                treatmentContext: episode.treatmentContext,
-                predictiveAnalytics,
-                
-                // Visual indicators
-                clinicalSignificance,
-                protocolRelevance,
-                dataQuality,
-                aiConfidence: predictiveAnalytics.confidenceLevel,
-                
-                // Legacy fields (maintained for compatibility)
-                efficacyScore: episode.clinicalAnalysis.treatmentResponse.efficacyScore,
-                sideEffects: episode.clinicalAnalysis.adverseEvents.events.map(e => e.type),
-                adherence: episode.clinicalAnalysis.adverseEvents.impactOnTreatment === 'none' ? 0.8 : 0.6,
-                overlaps,
-                washoutPeriod: episode.treatmentContext.washoutPeriod,
-                mghAtrqCompliant: episode.clinicalAnalysis.mghAtrqCompliance.isCompliant
-              });
+            // Always show all episodes in infinite scroll mode
+            const eventStart = episode.parsedStartDate;
+            const eventEnd = episode.parsedEndDate;
+            
+            const startDays = differenceInDays(eventStart, start);
+            const durationDays = differenceInDays(eventEnd, eventStart) + 1;
+            
+            const x = (startDays / totalDays) * 100;
+            const width = Math.max((durationDays / totalDays) * 100, 0.1);
+            
+            // Analyze overlaps with enhanced detection
+            const overlaps = [...new Set(allEvents
+              .filter(other => 
+                other.drugName !== episode.drugName &&
+                (isWithinInterval(other.parsedStartDate, { start: eventStart, end: eventEnd }) ||
+                 isWithinInterval(other.parsedEndDate, { start: eventStart, end: eventEnd }))
+              )
+              .map(other => other.drugName || 'Unknown'))];
+            
+            // Enhanced clinical significance assessment
+            let clinicalSignificance: 'low' | 'moderate' | 'high' | 'critical' = 'moderate';
+            if (episode.clinicalAnalysis.adverseEvents.severity === 'severe') clinicalSignificance = 'critical';
+            else if (episode.clinicalAnalysis.treatmentResponse.responseType === 'no_response') clinicalSignificance = 'high';
+            else if (episode.clinicalAnalysis.mghAtrqCompliance.isCompliant) clinicalSignificance = 'moderate';
+            else clinicalSignificance = 'low';
+            
+            // Protocol relevance assessment
+            let protocolRelevance: 'not_relevant' | 'relevant' | 'critical' = 'not_relevant';
+            if (episode.drugClassification.isProtocolRelevant) {
+              protocolRelevance = episode.clinicalAnalysis.mghAtrqCompliance.isCompliant ? 'critical' : 'relevant';
             }
+            
+            // Data quality assessment
+            let dataQuality: 'poor' | 'fair' | 'good' | 'excellent' = 'fair';
+            if (episode.dataQuality.completeness >= 0.9) dataQuality = 'excellent';
+            else if (episode.dataQuality.completeness >= 0.7) dataQuality = 'good';
+            else if (episode.dataQuality.completeness >= 0.5) dataQuality = 'fair';
+            else dataQuality = 'poor';
+            
+            // Predictive analytics
+            const predictiveAnalytics = generatePredictiveAnalytics(group.episodes, patientData);
+            
+            events.push({
+              id: episode.id || `${group.drugName}-${dose}-${episode.originalIndex}`,
+              drugName: group.drugName,
+              shortName: group.shortName,
+              dose,
+              startDate: episode.parsedStartDate,
+              endDate: episode.parsedEndDate,
+              duration: differenceInDays(episode.parsedEndDate, episode.parsedStartDate) + 1,
+              attemptGroup: episode.attemptGroup || 0,
+              notes: episode.notes,
+              color: group.color,
+              x,
+              width,
+              y: dosePositionInfo.calculatedBarY, // Use the new calculated Y
+              height: LAYOUT.EPISODE_HEIGHT,
+              
+              // Enhanced clinical data
+              clinicalAnalysis: episode.clinicalAnalysis,
+              drugClassification: episode.drugClassification,
+              treatmentContext: episode.treatmentContext,
+              predictiveAnalytics,
+              
+              // Visual indicators
+              clinicalSignificance,
+              protocolRelevance,
+              dataQuality,
+              aiConfidence: predictiveAnalytics.confidenceLevel,
+              
+              // Legacy fields (maintained for compatibility)
+              efficacyScore: episode.clinicalAnalysis.treatmentResponse.efficacyScore,
+              sideEffects: episode.clinicalAnalysis.adverseEvents.events.map(e => e.type),
+              adherence: episode.clinicalAnalysis.adverseEvents.impactOnTreatment === 'none' ? 0.8 : 0.6,
+              overlaps,
+              washoutPeriod: episode.treatmentContext.washoutPeriod,
+              mghAtrqCompliant: episode.clinicalAnalysis.mghAtrqCompliance.isCompliant
+            });
           });
         });
       } else {
         // Collapsed view - show summary
-        const allEpisodes = group.episodes.filter(episode => 
-          episode.parsedEndDate >= start && episode.parsedStartDate <= end
-        );
+        const allEpisodes = group.episodes; // Show all episodes in infinite scroll mode
         
         if (allEpisodes.length > 0) {
           const firstStart = Math.min(...allEpisodes.map(e => e.parsedStartDate.getTime()));
@@ -1513,15 +1578,11 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
           const eventStart = new Date(firstStart);
           const eventEnd = new Date(lastEnd);
           
-          const startTime = zoomConfig.unit === 'hour'
-            ? differenceInHours(eventStart, start)
-            : differenceInDays(eventStart, start);
-          const duration = zoomConfig.unit === 'hour'
-            ? differenceInHours(eventEnd, eventStart) + 1
-            : differenceInDays(eventEnd, eventStart) + 1;
+          const startDays = differenceInDays(eventStart, start);
+          const durationDays = differenceInDays(eventEnd, eventStart) + 1;
           
-          const x = (startTime / totalTime) * 100;
-          const width = Math.max((duration / totalTime) * 100, 0.2);
+          const x = (startDays / totalDays) * 100;
+          const width = Math.max((durationDays / totalDays) * 100, 0.1);
           
           const collapsedPositionInfo = groupCalculatedPositions.dosePositions.get('collapsed');
           if (!collapsedPositionInfo) return; // Should have a value from map generation
@@ -1594,7 +1655,7 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
       const newSet = new Set(prev);
       if (newSet.has(drugName)) {
         newSet.delete(drugName);
-    } else {
+      } else {
         newSet.add(drugName);
       }
       return newSet;
@@ -1612,13 +1673,6 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
       return newSet;
     });
   }, []);
-
-  // Initialize view
-  useEffect(() => {
-    if (!viewStart && timeRange.start) {
-      setViewStart(timeRange.start);
-    }
-  }, [timeRange.start, viewStart]);
 
   // ============================================================================
   // CLEANUP EFFECTS (This was for the old scrollTimeoutRef, can be removed)
@@ -1718,8 +1772,7 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
             <div 
               className="relative h-full"
               style={{ 
-                minWidth: '150%',
-                width: 'max-content'
+                width: timelineWidth // Use calculated timeline width based on zoom
               }}
             >
               {timeMarkers.map((marker, index) => (
@@ -1876,7 +1929,7 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
               className="relative overflow-visible"
               style={{ 
                 height: '100%', // Occupy full height of parent containerRef
-                minWidth: '150%'
+                width: timelineWidth // Use calculated timeline width based on zoom
               }}
             >
               {/* Grid lines */}
