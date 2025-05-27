@@ -18,23 +18,23 @@
     background: linear-gradient(135deg, #4A90B9 0%, #5BA6B6 50%, #68BFB3 100%);
   }
   
-  /* Button Styles */
+  /* Button Styles - Smaller and more compact */
   .btn-primary {
-    @apply bg-gradient-theme text-white font-medium px-6 py-3 rounded-xl transition-all duration-300 hover:shadow-lg hover:scale-102;
+    @apply bg-gradient-theme text-white font-medium px-4 py-2 rounded-lg transition-all duration-300 hover:shadow-lg hover:scale-102 text-sm;
   }
   
   .btn-secondary {
-    @apply bg-white border-2 border-remedy-accent text-remedy-accent font-medium px-6 py-3 rounded-xl transition-all duration-300 hover:shadow-lg hover:scale-102;
+    @apply bg-white border-2 border-remedy-accent text-remedy-accent font-medium px-4 py-2 rounded-lg transition-all duration-300 hover:shadow-lg hover:scale-102 text-sm;
   }
   
-  /* Card Styles */
+  /* Card Styles - More compact */
   .card-remedy {
-    @apply bg-white rounded-xl shadow-md p-6 transition-all duration-300 hover:shadow-xl;
+    @apply bg-white rounded-lg shadow-md p-4 transition-all duration-300 hover:shadow-xl;
   }
   
-  /* Icon Circle */
+  /* Icon Circle - Smaller */
   .icon-circle {
-    @apply w-12 h-12 bg-gradient-theme rounded-full flex items-center justify-center text-white;
+    @apply w-8 h-8 bg-gradient-theme rounded-full flex items-center justify-center text-white;
   }
 }
 
@@ -46,5 +46,28 @@
   
   .hover\:scale-102:hover {
     transform: scale(1.02);
+  }
+  
+  /* Hide scrollbars while maintaining scroll functionality */
+  .scrollbar-hide {
+    /* Firefox */
+    scrollbar-width: none;
+    /* Internet Explorer 10+ */
+    -ms-overflow-style: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    /* Webkit browsers (Chrome, Safari, Edge) */
+    display: none;
+  }
+  
+  /* Alternative scrollbar hiding for React components */
+  .hide-webkit-scrollbar::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+  }
+  
+  .hide-webkit-scrollbar::-webkit-scrollbar-thumb {
+    background: transparent;
   }
 }

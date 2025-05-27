@@ -21,10 +21,39 @@ export class TRDAssessmentAgent extends AbstractBaseAgent<TRDAssessmentResult> {
 4. **Określenie statusu TRD dla każdego scenariusza**
 5. **Szczegółowe uzasadnienie decyzji**
 
+**ŚCISŁE WYTYCZNE MGH-ATRQ z PROTOKOŁU BADANIA:**
+Twoja ocena lekooporności (kryterium IC6) MUSI opierać się WYŁĄCZNIE na informacjach zawartych w obiekcie definiującym szczegółowe kryteria MGH-ATRQ, który jest częścią kryterium IC6 w dostarczonym protokole badania (nazywane "Kryteriami MGH-ATRQ Badania"). NIE STOSUJ ŻADNEJ zewnętrznej wiedzy, standardowych interpretacji MGH-ATRQ ani NIE ZAKŁADAJ, że brakuje specyficznych kryteriów – one SĄ dostarczone w protokole.
+
+**DEFINICJA "ADEKWATNEJ PRÓBY LECZENIA":**
+"Adekwatna próba leczenia" jest zdefiniowana WYŁĄCZNIE przez listę leków, ich minimalne dawki (minDose) i minimalny czas trwania (minTrialDurationWeeks) określone w "Kryteriach MGH-ATRQ Badania" (obiekt mghAtrqPoland wewnątrz kryterium IC6 protokołu).
+
+**SPRAWDZANIE KAŻDEGO LEKU:**
+- Sprawdź KAŻDY lek przeciwdepresyjny przyjmowany przez pacjenta w obecnym epizodzie depresyjnym
+- Porównaj go z listą leków w "Kryteriach MGH-ATRQ Badania" 
+- MUSISZ DOKŁADNIE SPRAWDZIĆ NAZWĘ LEKU (np. Escitalopram ma minDose "10mg/d", a Citalopram ma minDose "20mg/d")
+- Jeśli lek znajduje się na liście:
+  * Sprawdź, czy stosowana dawka była ≥ minDose z kryteriów
+  * Sprawdź, czy czas trwania leczenia tą dawką był ≥ minTrialDurationWeeks (standardowo 8-10 tygodni)
+  * Uwzględnij ewentualne notes przy leku
+- Próba jest "adekwatna" TYLKO jeśli oba warunki (dawka i czas) są spełnione
+
+**LICZENIE NIEPOWODZEŃ TERAPEUTYCZNYCH:**
+Pacjent spełnia kryterium IC6, jeśli doświadczył niepowodzenia co najmniej DWÓCH (2) RÓŻNYCH, "adekwatnych prób leczenia" w obecnym epizodzie depresyjnym.
+
+**"RÓŻNE PRÓBY LECZENIA" oznaczają:**
+- Zmianę leku na inny z listy w "Kryteriach MGH-ATRQ Badania"
+- Dodanie leku augmentującego (np. "Kwetiapina jako leczenie adjuwantowe") do wcześniej stosowanego leku
+- Taka adekwatna próba augmentacji liczy się jako NOWA, OSOBNA próba leczenia
+
+**PRZYKŁAD LICZENIA:**
+- Próba 1: Wenlafaksyna 150mg/d przez 10 tygodni. Brak poprawy → JEDNO niepowodzenie
+- Próba 2: Do Wenlafaksyny dodano Kwetiapinę 150mg/d przez 10 tygodni. Brak poprawy → DRUGIE niepowodzenie
+- Wynik: 2 niepowodzenia = spełnia TRD
+
 **KRYTERIA ADEKWATNEJ PRÓBY:**
 - Lek musi być na liście MGH-ATRQ z protokołu badania
 - Dawka ≥ minimalnej dawki z kryteriów MGH-ATRQ
-- Czas trwania ≥ minimalnego czasu z kryteriów MGH-ATRQ
+- Czas trwania ≥ minimalnego czasu z kryteriów MGH-ATRQ (standardowo co najmniej 8 lub 10 tygodni)
 - Leczenie w obecnym epizodzie depresyjnym
 
 **ZASADY LICZENIA:**
@@ -37,6 +66,7 @@ export class TRDAssessmentAgent extends AbstractBaseAgent<TRDAssessmentResult> {
 - Sprawdź dokładnie nazwy leków (Escitalopram ≠ Citalopram)
 - Uwzględnij kontekst scenariuszy epizodów
 - Dokumentuj każdą decyzję szczegółowo
+- Uwzględnij generalNotes w "Kryteriach MGH-ATRQ Badania" dla dodatkowych wskazówek
 
 ODPOWIEDŹ MUSI BYĆ W FORMACIE JSON:
 {
@@ -48,12 +78,12 @@ ODPOWIEDŹ MUSI BYĆ W FORMACIE JSON:
       "dose": "string",
       "duration": number,
       "adequate": boolean,
-      "reasoning": "string - szczegółowe uzasadnienie"
+      "reasoning": "string - szczegółowe uzasadnienie wg MGH-ATRQ"
     }
   ],
   "trdStatus": "confirmed" | "not_confirmed" | "insufficient_data",
   "failureCount": number,
-  "conclusion": "string - szczegółowy wniosek z listą niepowodzeń"
+  "conclusion": "string - szczegółowy wniosek z listą punktowaną niepowodzeń: \\n- Próba 1: opis\\n- Próba 2: opis"
 }`,
       dependencies: ['clinical-synthesis', 'episode-analysis', 'pharmacotherapy-analysis']
     };
@@ -71,25 +101,12 @@ ODPOWIEDŹ MUSI BYĆ W FORMACIE JSON:
 === HISTORIA MEDYCZNA ===
 ${context.medicalHistory}
 
-=== ANALIZA KLINICZNA ===
-${clinicalData?.patientOverview || 'Brak danych'}
-
-=== SCENARIUSZE EPIZODÓW ===
-${episodeData?.scenarios?.map(s => `Scenariusz ${s.id}: ${s.description} (${s.startDate} - ${s.endDate}), pewność: ${s.confidence}`).join('\n') || 'Brak danych'}
-Najbardziej prawdopodobny: ${episodeData?.mostLikelyScenario || 'N/A'}
-
-=== OŚ CZASU FARMAKOTERAPII ===
-${pharmacoData?.timeline?.map(item => 
-  `${item.drugName} (${item.dose}): ${item.startDate} - ${item.endDate}, grupa: ${item.attemptGroup}, uwagi: ${item.notes}`
-).join('\n') || 'Brak danych'}
-
-=== MAPOWANIA LEKÓW ===
-${pharmacoData?.drugMappings?.map(m => `${m.originalName} → ${m.standardName}`).join('\n') || 'Brak mapowań'}
+${context.previousAgentResults || ''}
 
 === PROTOKÓŁ BADANIA z KRYTERIAMI MGH-ATRQ ===
 ${context.studyProtocol}
 
-Wykonaj szczegółową ocenę TRD według instrukcji systemowych, uwzględniając najbardziej prawdopodobny scenariusz epizodu.`;
+Wykonaj szczegółową ocenę TRD według instrukcji systemowych, uwzględniając najbardziej prawdopodobny scenariusz epizodu i precyzyjną analizę farmakoterapii z poprzednich agentów.`;
 
     const response = await this.callAI(prompt, this.config.systemPrompt, context.modelUsed);
     return this.parseJSONResponse<TRDAssessmentResult>(response);

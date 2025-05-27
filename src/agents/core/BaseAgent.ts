@@ -21,17 +21,23 @@ export abstract class AbstractBaseAgent<TResult = any> implements BaseAgent<TRes
     const startTime = Date.now();
     
     try {
+      console.log(`🚀 [${this.name}] Rozpoczynanie przetwarzania...`);
+      
       // Sprawdź zależności
       this.validateDependencies(context);
+      console.log(`✅ [${this.name}] Zależności sprawdzone`);
       
       // Wykonaj logikę specyficzną dla agenta
       const result = await this.executeLogic(context);
+      console.log(`✅ [${this.name}] executeLogic zakończone`, result);
       
       // Waliduj wynik
       const isValid = this.validate(result);
       if (!isValid) {
+        console.error(`❌ [${this.name}] Walidacja nie powiodła się:`, result);
         throw new Error(`Validation failed for agent ${this.name}`);
       }
+      console.log(`✅ [${this.name}] Walidacja zakończona pomyślnie`);
       
       const processingTime = Date.now() - startTime;
       
@@ -47,6 +53,10 @@ export abstract class AbstractBaseAgent<TResult = any> implements BaseAgent<TRes
     } catch (error) {
       const processingTime = Date.now() - startTime;
       
+      console.error(`💥 [${this.name}] BŁĄD podczas przetwarzania:`, error);
+      console.error(`💥 [${this.name}] Stack trace:`, error instanceof Error ? error.stack : 'Brak stack trace');
+      
+      // Zwracamy fallback zamiast rzucać błąd
       return {
         agentName: this.name,
         data: this.getErrorFallback(),
@@ -86,8 +96,7 @@ export abstract class AbstractBaseAgent<TResult = any> implements BaseAgent<TRes
       'episode-analysis': 'episodeAnalysis',
       'pharmacotherapy-analysis': 'pharmacotherapyAnalysis',
       'trd-assessment': 'trdAssessment',
-      'inclusion-criteria': 'inclusionCriteriaAssessment',
-      'exclusion-criteria': 'exclusionCriteriaAssessment',
+      'criteria-assessment': 'inclusionCriteriaAssessment',
       'risk-assessment': 'riskAssessment'
     };
     
@@ -95,119 +104,144 @@ export abstract class AbstractBaseAgent<TResult = any> implements BaseAgent<TRes
   }
 
   // Obliczanie pewności - domyślna implementacja
-  protected calculateConfidence(result: TResult, context: SharedContext): number {
+  protected calculateConfidence(_result: TResult, _context: SharedContext): number {
     // Domyślnie zwracamy 0.8, ale każdy agent może to przesłonić
     return 0.8;
   }
 
   // Generowanie ostrzeżeń - domyślna implementacja
-  protected generateWarnings(result: TResult, context: SharedContext): string[] {
+  protected generateWarnings(_result: TResult, _context: SharedContext): string[] {
     return [];
   }
 
   // Pomocnicza metoda do wywoływania API AI
-  protected async callAI(
-    prompt: string, 
-    systemPrompt: string, 
-    modelType: SupportedAIModel
-  ): Promise<string> {
-    const currentConfig = getAIConfig(modelType);
-
-    if (!currentConfig.apiKey || !currentConfig.model) {
-      throw new Error(`Incomplete configuration for model ${modelType}`);
-    }
-
-    let requestBody: Record<string, unknown>;
-    let apiUrl: string;
-    let headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-
-    if (modelType === 'gemini') {
-      const geminiConf = currentConfig as any;
-      apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${geminiConf.model}:generateContent?key=${geminiConf.apiKey}`;
-      requestBody = {
-        contents: [{
-          role: "user", 
-          parts: [{ text: `${systemPrompt}\n\n${prompt}` }]
-        }],
-        generationConfig: {
+  protected async callAI(userPrompt: string, systemPrompt: string, model: SupportedAIModel): Promise<string> {
+    const backendUrl = 'http://localhost:3001';
+    
+    try {
+      console.log(`🔄 [${this.name}] Wysyłanie żądania do backend proxy dla modelu: ${model}`);
+      
+      const response = await fetch(`${backendUrl}/api/ai/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model,
+          systemPrompt,
+          userPrompt,
           temperature: this.config.temperature,
-          maxOutputTokens: this.config.maxTokens,
-          topP: 1.0,
-        }
-      };
-    } else if (modelType === 'claude-opus') {
-      const claudeConf = currentConfig as any;
-      apiUrl = '/api/anthropic/v1/messages';
-      headers['x-api-key'] = claudeConf.apiKey;
-      headers['anthropic-version'] = '2023-06-01';
-      headers['anthropic-dangerous-direct-browser-access'] = 'true';
+          maxTokens: this.config.maxTokens
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Backend API Error (${model}): ${response.status} - ${errorData.message || JSON.stringify(errorData)}`);
+      }
+
+      const data = await response.json();
+      console.log(`✅ [${this.name}] Otrzymano odpowiedź z backend proxy dla modelu: ${model}`);
+      return data.content || '';
       
-      requestBody = {
-        model: claudeConf.model,
-        max_tokens: this.config.maxTokens,
-        temperature: this.config.temperature,
-        top_p: 1.0,
-        system: systemPrompt,
-        messages: [
-          { role: 'user', content: prompt }
-        ]
-      };
-    } else { 
-      const o3Conf = currentConfig as any;
-      apiUrl = o3Conf.endpoint;
-      headers['Authorization'] = `Bearer ${o3Conf.apiKey}`;
+    } catch (error) {
+      console.error(`💥 [${this.name}] BŁĄD podczas komunikacji z backend:`, error);
       
-      requestBody = {
-        model: o3Conf.model,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: prompt },
-        ],
-        max_completion_tokens: this.config.maxTokens,
-        temperature: this.config.temperature,
-      };
-    }
-
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: headers,
-      body: JSON.stringify(requestBody),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`API Error (${modelType}): ${response.status} - ${errorText}`);
-    }
-
-    const data = await response.json();
-
-    if (modelType === 'gemini') {
-      if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
-        throw new Error('Invalid Gemini API response structure');
+      // Sprawdź czy backend jest dostępny
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error(`Backend server is not running. Please start it with: npm run server`);
       }
-      return data.candidates[0].content.parts[0].text;
-    } else if (modelType === 'claude-opus') {
-      if (!data.content?.[0]?.text) {
-        throw new Error('Invalid Claude API response structure');
-      }
-      return data.content[0].text;
-    } else {
-      if (!data.choices?.[0]?.message?.content) {
-        throw new Error('Invalid O3 API response structure');
-      }
-      return data.choices[0].message.content;
+      
+      throw error;
     }
   }
 
   // Pomocnicza metoda do parsowania JSON z obsługą błędów
   protected parseJSONResponse<T>(jsonString: string): T {
     try {
-      const cleanedJsonString = jsonString.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-      return JSON.parse(cleanedJsonString);
+      console.log(`🔍 [${this.name}] Parsowanie odpowiedzi JSON...`);
+      
+      // Usuń białe znaki na początku i końcu
+      let cleanedString = jsonString.trim();
+      
+      // Znajdź i wytnij JSON z bloków markdown ```json```
+      const jsonBlockRegex = /```json\s*([\s\S]*?)\s*```/;
+      const jsonMatch = cleanedString.match(jsonBlockRegex);
+      
+      if (jsonMatch) {
+        cleanedString = jsonMatch[1].trim();
+        console.log(`🔍 [${this.name}] Znaleziono blok JSON w markdown`);
+      } else {
+        // Spróbuj znaleźć JSON między nawiasami klamrowymi
+        const jsonObjectRegex = /\{[\s\S]*\}/;
+        const objectMatch = cleanedString.match(jsonObjectRegex);
+        
+        if (objectMatch) {
+          cleanedString = objectMatch[0];
+          console.log(`🔍 [${this.name}] Znaleziono obiekt JSON w tekście`);
+        }
+      }
+      
+      // NAPRAW PROBLEM Z UNDEFINED - zamień na null
+      cleanedString = cleanedString.replace(/:\s*undefined\b/g, ': null');
+      cleanedString = cleanedString.replace(/,\s*undefined\b/g, ', null');
+      cleanedString = cleanedString.replace(/\[\s*undefined\b/g, '[null');
+      cleanedString = cleanedString.replace(/undefined\s*,/g, 'null,');
+      cleanedString = cleanedString.replace(/undefined\s*\]/g, 'null]');
+      
+      console.log(`🔍 [${this.name}] Oczyszczony JSON:`, cleanedString.substring(0, 200) + '...');
+      
+      try {
+        const parsed = JSON.parse(cleanedString);
+        console.log(`✅ [${this.name}] JSON sparsowany pomyślnie`);
+        return parsed;
+      } catch (parseError) {
+        // PRÓBA NAPRAWY: Jeśli JSON jest uszkodzony, spróbuj obciąć na ostatnim poprawnym miejscu
+        console.log(`🔧 [${this.name}] Próba naprawy uszkodzonego JSON...`);
+        
+        // Znajdź ostatni poprawny nawias zamykający
+        const lastValidBrace = this.findLastValidJsonEnd(cleanedString);
+        if (lastValidBrace > 0) {
+          const repairedJson = cleanedString.substring(0, lastValidBrace + 1);
+          console.log(`🔧 [${this.name}] Próba parsowania naprawionego JSON (${repairedJson.length} znaków)`);
+          
+          try {
+            const parsed = JSON.parse(repairedJson);
+            console.log(`✅ [${this.name}] Naprawiony JSON sparsowany pomyślnie`);
+            return parsed;
+          } catch (repairError) {
+            console.log(`❌ [${this.name}] Naprawa JSON nie powiodła się`);
+          }
+        }
+        
+        throw parseError;
+      }
+      
     } catch (error) {
-      throw new Error(`Failed to parse JSON response: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error(`💥 [${this.name}] Błąd parsowania JSON:`, error);
+      console.error(`💥 [${this.name}] Oryginalna odpowiedź:`, jsonString.substring(0, 500) + '...');
+      throw new Error(`Błąd parsowania odpowiedzi ${this.name}: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
+  }
+
+  // Pomocnicza metoda do znajdowania ostatniego poprawnego końca JSON
+  private findLastValidJsonEnd(jsonString: string): number {
+    let braceCount = 0;
+    let lastValidEnd = -1;
+    
+    for (let i = 0; i < jsonString.length; i++) {
+      const char = jsonString[i];
+      
+      if (char === '{') {
+        braceCount++;
+      } else if (char === '}') {
+        braceCount--;
+        if (braceCount === 0) {
+          lastValidEnd = i;
+        }
+      }
+    }
+    
+    return lastValidEnd;
   }
 } 

@@ -9,6 +9,7 @@ interface PrintableReportProps {
     estimatedProbability: number;
     mainIssues: string[];
     criticalInfoNeeded: string[];
+    riskFactors?: string[];
   };
 }
 
@@ -145,6 +146,16 @@ export const PrintableReport: React.FC<PrintableReportProps> = ({
               )}
             </ul>
           </div>
+          {(dynamicConclusion.riskFactors && dynamicConclusion.riskFactors.length > 0) && (
+            <div className="md:col-span-2">
+              <p><strong>Czynniki ryzyka/społeczne:</strong></p>
+              <ul className="list-disc list-inside ml-4 mt-1">
+                {dynamicConclusion.riskFactors.map((risk, idx) => (
+                  <li key={idx} className="text-orange-700">{risk}</li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </section>
 

@@ -101,13 +101,17 @@ Zwróć JSON z następującą strukturą:
     const response = await this.callAI(prompt, this.config.systemPrompt, context.modelUsed);
     
     try {
-      const result = JSON.parse(response);
+      console.log(`🔍 [${this.name}] Otrzymana odpowiedź (pierwsze 200 znaków):`, response.substring(0, 200) + '...');
+      
+      const result = this.parseJSONResponse<RiskAssessmentResult>(response);
       
       // Walidacja struktury odpowiedzi
       this.validateRiskAssessmentResult(result);
       
       return result;
     } catch (error) {
+      console.error(`💥 [${this.name}] Błąd parsowania:`, error);
+      console.error(`💥 [${this.name}] Pełna odpowiedź:`, response);
       throw new Error(`Błąd parsowania odpowiedzi Agent Oceny Ryzyka: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }

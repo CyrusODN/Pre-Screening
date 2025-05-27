@@ -1,6 +1,6 @@
 // src/components/EnteringScreen.tsx
 import React, { useState } from 'react';
-import { Upload, FileText, AlertCircle, History, BrainCircuit, PlayCircle, Network } from 'lucide-react'; // Added Network
+import { Upload, FileText, AlertCircle, History, BrainCircuit, PlayCircle, Network, Zap } from 'lucide-react'; // Added Network, Zap
 import { PatientHistory } from './PatientHistory';
 import { ProtocolSelector } from './ProtocolSelector';
 import { getHistory, clearHistory } from '../services/patientHistory';
@@ -10,6 +10,7 @@ import type { Protocol, SupportedAIModel } from '../types';
 interface EnteringScreenProps {
   onDataSubmit: (data: { protocol: string; medicalHistory: string; selectedAIModel: SupportedAIModel }) => void;
   onSelectHistoricalPatient: (patientId: string) => void;
+  onLoadDemo?: () => void; // Nowa prop dla trybu demo
   selectedAIModel: SupportedAIModel;
   onAIModelChange: (model: SupportedAIModel) => void;
   isMultiAgentMode: boolean;
@@ -19,6 +20,7 @@ interface EnteringScreenProps {
 export const EnteringScreen: React.FC<EnteringScreenProps> = ({ 
     onDataSubmit, 
     onSelectHistoricalPatient,
+    onLoadDemo,
     selectedAIModel,
     onAIModelChange,
     isMultiAgentMode,
@@ -77,45 +79,45 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
 
 
   return (
-    <div className="min-h-screen bg-gradient-theme-light py-20 px-4 sm:px-6 lg:px-8 font-sans">
-      <div className="max-w-7xl mx-auto">
-        <header className="text-center mb-20">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+    <div className="min-h-screen bg-gradient-theme-light py-8 px-3 sm:px-4 lg:px-6 font-sans">
+      <div className="max-w-6xl mx-auto">
+        <header className="text-center mb-8">
+          <h1 className="text-2xl font-bold text-gray-900 mb-3">
             Interaktywny Raport Pre-screeningowy
           </h1>
-          <p className="text-xl text-gray-600">
+          <p className="text-lg text-gray-600">
             Wprowadź dane do analizy kwalifikacji pacjenta
           </p>
         </header>
 
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
-          <div className="flex flex-col sm:flex-row items-center gap-4">
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-3">
+          <div className="flex flex-col sm:flex-row items-center gap-3">
             {/* AI Model Selector */}
-            <div className="flex items-center gap-3 card-remedy">
+            <div className="flex items-center gap-2 card-remedy">
               <div className="icon-circle">
-                <BrainCircuit className="w-6 h-6" />
+                <BrainCircuit className="w-4 h-4" />
               </div>
-              <label htmlFor="ai-model-select" className="text-base font-medium text-gray-900">
-                Model AI:
-              </label>
-              <select
-                id="ai-model-select"
-                value={selectedAIModel}
-                onChange={(e) => onAIModelChange(e.target.value as SupportedAIModel)}
-                className="p-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-remedy-accent focus:border-remedy-accent transition-all"
-              >
-                <option value="o3">o3 (OpenAI-like)</option>
-                <option value="gemini">Gemini 2.5 Pro Preview 05-06</option>
+              <label htmlFor="ai-model-select" className="text-sm font-medium text-gray-900">
+              Model AI:
+            </label>
+            <select
+              id="ai-model-select"
+              value={selectedAIModel}
+              onChange={(e) => onAIModelChange(e.target.value as SupportedAIModel)}
+                className="p-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-remedy-accent focus:border-remedy-accent transition-all"
+            >
+              <option value="o3">o3 (OpenAI-like)</option>
+              <option value="gemini">Gemini 2.5 Pro Preview 05-06</option>
                 <option value="claude-opus">Claude 4 Opus</option>
-              </select>
+            </select>
             </div>
 
             {/* Multi-Agent Mode Toggle */}
-            <div className="flex items-center gap-3 card-remedy">
+            <div className="flex items-center gap-2 card-remedy">
               <div className="icon-circle">
-                <Network className="w-6 h-6" />
+                <Network className="w-4 h-4" />
               </div>
-              <label htmlFor="multi-agent-toggle" className="text-base font-medium text-gray-900">
+              <label htmlFor="multi-agent-toggle" className="text-sm font-medium text-gray-900">
                 Tryb wieloagentowy:
               </label>
               <div className="flex items-center gap-2">
@@ -125,7 +127,7 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
                   checked={isMultiAgentMode}
                   onChange={(e) => onMultiAgentModeChange(e.target.checked)}
                   disabled={!isMultiAgentAvailable()}
-                  className="w-5 h-5 text-remedy-accent bg-gray-100 border-gray-300 rounded focus:ring-remedy-accent focus:ring-2 disabled:opacity-50"
+                  className="w-4 h-4 text-remedy-accent bg-gray-100 border-gray-300 rounded focus:ring-remedy-accent focus:ring-2 disabled:opacity-50"
                 />
                 <span className={`text-sm ${isMultiAgentMode ? 'text-remedy-accent font-medium' : 'text-gray-500'}`}>
                   {isMultiAgentMode ? 'Włączony' : 'Wyłączony'}
@@ -137,21 +139,32 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
             </div>
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex gap-3">
             <button
               onClick={() => setShowCustomProtocol(!showCustomProtocol)}
               className="btn-secondary flex items-center gap-2"
             >
-              <FileText className="w-5 h-5" />
+              <FileText className="w-4 h-4" />
               {showCustomProtocol ? 'Wybierz predefiniowany' : 'Własny protokół'}
             </button>
             <button
               onClick={() => setShowHistory(!showHistory)}
               className="btn-secondary flex items-center gap-2"
             >
-              <History className="w-5 h-5" />
+              <History className="w-4 h-4" />
               {showHistory ? 'Ukryj historię' : 'Pokaż historię'}
             </button>
+            {onLoadDemo && (
+              <button
+                onClick={onLoadDemo}
+                className="btn-primary flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                title="Załaduj przykładowe dane z bogatą historią farmakoterapii"
+              >
+                <Zap className="w-4 h-4" />
+                <span className="hidden sm:inline">Tryb Demo</span>
+                <span className="sm:hidden">Demo</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -165,39 +178,39 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
             />
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-8">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-              <div className="bg-red-50 border border-red-200 p-6 mb-6 rounded-xl">
+              <div className="bg-red-50 border border-red-200 p-4 mb-4 rounded-lg">
                 <div className="flex items-center">
-                  <AlertCircle className="text-red-500 mr-3" size={20} />
-                  <p className="text-red-700 font-medium">{error}</p>
+                  <AlertCircle className="text-red-500 mr-2" size={16} />
+                  <p className="text-red-700 font-medium text-sm">{error}</p>
                 </div>
               </div>
             )}
 
             {showCustomProtocol ? (
-              <div className="card-remedy space-y-6">
+              <div className="card-remedy space-y-4">
                 <div>
-                  <label className="block text-2xl font-bold text-gray-900 mb-4">
+                  <label className="block text-lg font-bold text-gray-900 mb-3">
                     Własny Protokół Badania
                   </label>
-                  <div className="space-y-6">
+                  <div className="space-y-4">
                     <textarea
                       value={protocol}
                       onChange={(e) => {
                         setProtocol(e.target.value);
                         if (selectedProtocol) setSelectedProtocol(null); 
                       }}
-                      className="w-full h-48 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-remedy-accent focus:border-remedy-accent transition-all resize-none"
+                      className="w-full h-40 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-remedy-accent focus:border-remedy-accent transition-all resize-none text-sm"
                       placeholder="Wprowadź lub wklej protokół badania (w formacie JSON lub tekstowym)..."
                     />
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3 text-gray-600">
-                        <FileText size={20} />
-                        <span className="font-medium">{protocolFile ? protocolFile.name : 'Nie wybrano pliku'}</span>
+                      <div className="flex items-center space-x-2 text-gray-600">
+                        <FileText size={16} />
+                        <span className="font-medium text-sm">{protocolFile ? protocolFile.name : 'Nie wybrano pliku'}</span>
                       </div>
                       <label className="btn-primary cursor-pointer flex items-center gap-2">
-                        <Upload size={18} />
+                        <Upload size={16} />
                         <span>Wczytaj z pliku</span>
                         <input
                           type="file"
@@ -220,25 +233,25 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
               />
             )}
 
-            <div className="card-remedy space-y-6">
+            <div className="card-remedy space-y-4">
               <div>
-                <label className="block text-2xl font-bold text-gray-900 mb-4">
+                <label className="block text-lg font-bold text-gray-900 mb-3">
                   Historia Choroby
                 </label>
-                <div className="space-y-6">
+                <div className="space-y-4">
                   <textarea
                     value={medicalHistory}
                     onChange={(e) => setMedicalHistory(e.target.value)}
-                    className="w-full h-48 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-remedy-accent focus:border-remedy-accent transition-all resize-none"
+                    className="w-full h-40 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-remedy-accent focus:border-remedy-accent transition-all resize-none text-sm"
                     placeholder="Wprowadź lub wklej historię choroby..."
                   />
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3 text-gray-600">
-                      <FileText size={20} />
-                      <span className="font-medium">{medicalHistoryFile ? medicalHistoryFile.name : 'Nie wybrano pliku'}</span>
+                    <div className="flex items-center space-x-2 text-gray-600">
+                      <FileText size={16} />
+                      <span className="font-medium text-sm">{medicalHistoryFile ? medicalHistoryFile.name : 'Nie wybrano pliku'}</span>
                     </div>
                     <label className="btn-primary cursor-pointer flex items-center gap-2">
-                      <Upload size={18} />
+                      <Upload size={16} />
                       <span>Wczytaj z pliku</span>
                       <input
                         type="file"
@@ -255,12 +268,8 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
               </div>
             </div>
 
-            <div className="flex justify-center pt-8">
-              <button
-                type="submit"
-                className="btn-primary px-12 py-4 text-xl font-bold flex items-center gap-3 shadow-lg hover:shadow-xl transition-shadow duration-200"
-              >
-                <PlayCircle size={24} />
+            <div className="text-center">
+              <button type="submit" className="btn-primary text-lg px-8 py-3">
                 Rozpocznij Analizę
               </button>
             </div>

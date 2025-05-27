@@ -65,3 +65,55 @@ Prompt AI znajduje się w pliku `src/services/ai.ts`. Możesz go dostosować do 
    - Sprawdź konsolę przeglądarki pod kątem błędów
    - Upewnij się, że endpoint API jest dostępny
    - Sprawdź, czy model AI jest poprawnie skonfigurowany
+
+## Uruchomienie Systemu
+
+### Wymagane Klucze API
+Upewnij się, że masz skonfigurowane klucze API w pliku `.env`:
+```
+OPENAI_API_KEY=your_openai_api_key
+ANTHROPIC_API_KEY=your_anthropic_api_key  
+GOOGLE_API_KEY=your_google_api_key
+```
+
+### Uruchomienie Pełnego Systemu
+```bash
+# Instalacja zależności
+npm install
+
+# Uruchomienie backend + frontend (zalecane)
+npm start
+
+# Alternatywnie - używając skryptu startowego
+./start.sh
+
+# Alternatywnie - uruchomienie osobno:
+# Backend (port 3001)
+npm run server
+
+# Frontend (port 5178)
+npm run dev
+```
+
+### Szybki Start
+```bash
+# Najprostszy sposób - uruchom wszystko naraz
+./start.sh
+```
+
+Skrypt automatycznie:
+- Sprawdzi czy masz klucze API w `.env`
+- Zainstaluje zależności jeśli potrzeba
+- Uruchomi backend i frontend
+- Pokaże status i adresy URL
+
+### Architektura
+
+System składa się z:
+1. **Backend Proxy Server** (port 3001) - obsługuje wywołania API AI
+2. **Frontend React App** (port 5178) - interfejs użytkownika
+3. **Multi-Agent System** - 6 wyspecjalizowanych agentów AI
+
+### Rozwiązanie Problemów CORS
+
+System używa backend proxy server'a do obsługi wywołań API AI, co rozwiązuje problemy CORS występujące przy bezpośrednich wywołaniach z przeglądarki.

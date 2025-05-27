@@ -1,6 +1,6 @@
 // src/types/agents.ts
 
-import type { PatientData, Criterion, PharmacotherapyItem, SupportedAIModel } from './index';
+import type { PatientData, PharmacotherapyItem, SupportedAIModel } from './index';
 
 // Podstawowe typy dla systemu wieloagentowego
 
@@ -32,6 +32,8 @@ export interface AgentError {
 
 export interface ClinicalSynthesisResult {
   patientOverview: string;
+  mainDiagnosis: string; // Główne rozpoznanie - najważniejsza diagnoza w kontekście leczenia
+  comorbidities: string[]; // Choroby towarzyszące - inne diagnozy medyczne
   clinicalTimeline: string[];
   keyObservations: string[];
   treatmentHistory: string;
@@ -49,6 +51,13 @@ export interface EpisodeAnalysisResult {
   }>;
   mostLikelyScenario: number;
   conclusion: string;
+  remissionPeriods: Array<{
+    startDate: string | null;
+    endDate: string | null;
+    evidence: string;
+    confidence: number;
+    notes: string;
+  }>;
 }
 
 export interface PharmacotherapyAnalysisResult {
@@ -60,30 +69,28 @@ export interface PharmacotherapyAnalysisResult {
   }>;
   gaps: string[];
   notes: string[];
+  prohibitedDrugs: Array<{
+    drugName: string;
+    lastUsed: string | null;
+    washoutRequired: string;
+    status: 'compliant' | 'violation' | 'verification';
+  }>;
+  clinicalClaimsVerification: string;
 }
 
 export interface TRDAssessmentResult {
-  scenarioAssessments: Array<{
-    scenarioId: string;
-    scenarioName: string;
-    adequateTrials: Array<{
-      medication: string;
-      duration: string;
-      dosage: string;
-      isAdequate: boolean;
-      reasoning: string;
-    }>;
-    totalAdequateTrials: number;
-    meetsIC6Criteria: boolean;
-    confidence: number;
+  episodeStartDate: string | null;
+  adequateTrials: Array<{
+    id: string;
+    drugName: string;
+    dose: string;
+    duration: number;
+    adequate: boolean;
     reasoning: string;
   }>;
-  overallTRDAssessment: {
-    bestScenario: string;
-    maxAdequateTrials: number;
-    recommendedScenario: string;
-    confidence: number;
-  };
+  trdStatus: 'confirmed' | 'not_confirmed' | 'insufficient_data';
+  failureCount: number;
+  conclusion: string;
 }
 
 export interface CriteriaAssessmentResult {
@@ -177,6 +184,9 @@ export interface SharedContext {
   inclusionCriteriaAssessment?: AgentResult<CriteriaAssessmentResult>;
   exclusionCriteriaAssessment?: AgentResult<CriteriaAssessmentResult>;
   riskAssessment?: AgentResult<RiskAssessmentResult>;
+  
+  // Wzbogacony kontekst dla agentów
+  previousAgentResults?: string;
 }
 
 // Interface dla podstawowego agenta

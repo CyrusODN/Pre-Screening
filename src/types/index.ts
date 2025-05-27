@@ -109,6 +109,7 @@ export interface PatientData {
     mainIssues: string[];
     criticalInfoNeeded: string[];
     estimatedProbability: number;
+    riskFactors?: string[];
   };
   analyzedAt?: string;
   isMockData?: boolean;
@@ -129,6 +130,7 @@ export interface PatientHistoryEntry {
     mainIssues: string[];
     criticalInfoNeeded: string[];
     estimatedProbability: number;
+    riskFactors?: string[];
   };
   modelUsed?: SupportedAIModel;
 }

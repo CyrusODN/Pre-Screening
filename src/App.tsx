@@ -3,16 +3,19 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { 
   ChevronDown, ChevronUp, AlertTriangle, CheckCircle2, XCircle, HelpCircle, 
   User, CalendarDays, Stethoscope, Pill, ListChecks, Target, BarChart3, 
-  Info, Filter, ArrowDownUp, Edit3, Save, RotateCcw, Printer, X
+  Info, Filter, ArrowDownUp, Edit3, Save, RotateCcw, Printer, X, Zap
   // Usunięto nieużywane importy: MessageSquare, BrainCircuit
 } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { DetailedTrdTimelineChart } from './components/charts/DetailedTrdTimelineChart';
 import { EnteringScreen } from './components/EnteringScreen';
 import { PrintableReport } from './components/PrintableReport';
-import { initialPatientData } from './data/mockData';
+import { ChatButton } from './components/ChatButton';
+import { ChatWindow } from './components/ChatWindow';
+import { initialPatientData, demoPatientData } from './data/mockData';
 import { analyzePatientData } from './services/ai';
 import { analyzePatientDataMultiAgent, isMultiAgentAvailable } from './services/multiAgentService';
+import { chatbotService } from './services/chatbotService';
 import { saveToHistory } from './services/patientHistory';
 // Usunięto nieużywany import typu PharmacotherapyItem z tego pliku,
 // ponieważ jest on potrzebny tylko w DetailedTrdTimelineChart.tsx
@@ -59,16 +62,16 @@ const AccordionItem: React.FC<{title: string, icon: React.ReactNode, children: R
   return (
     <div className="card-remedy">
       <button onClick={() => setIsOpen(!isOpen)} className="w-full flex items-center justify-between text-left">
-        <div className="flex items-center text-2xl font-bold text-gray-900">
-          <div className="icon-circle mr-4">
+        <div className="flex items-center text-lg font-bold text-gray-900">
+          <div className="icon-circle mr-3">
             {icon}
           </div>
           <span>{title}</span>
         </div>
-        <ChevronDown size={24} className={`text-remedy-accent transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown size={20} className={`text-remedy-accent transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
       {isOpen && (
-        <div className="mt-6 animate-fadeIn">
+        <div className="mt-4 animate-fadeIn">
           {children}
         </div>
       )}
@@ -108,8 +111,8 @@ const EditCriterionModal: React.FC<{criterion: Criterion, onClose: () => void, o
                 <option value="spełnione_manual">Spełnione (zmienione przez badacza)</option>
                 <option value="niespełnione_manual">Niespełnione (zmienione przez badacza)</option>
                 <option value="weryfikacja_manual">Wymaga weryfikacji (zmienione przez badacza)</option>
-              </select>
-            </div>
+          </select>
+        </div>
             
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">Komentarz badacza:</label>
@@ -123,7 +126,7 @@ const EditCriterionModal: React.FC<{criterion: Criterion, onClose: () => void, o
           <div className="flex justify-end gap-3 mt-8">
             <button onClick={onClose} className="btn-secondary">Anuluj</button>
             <button onClick={handleSave} className="btn-primary">Zapisz</button>
-          </div>
+        </div>
         </div>
       </div>
     </div>
@@ -241,16 +244,19 @@ const App = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [hasSubmittedData, setHasSubmittedData] = useState(false);
   const [patientProfile, setPatientProfile] = useState<PatientData | null>(null);
-  const [selectedAIModel, setSelectedAIModel] = useState<SupportedAIModel>('o3'); 
+  const [selectedAIModel, setSelectedAIModel] = useState<SupportedAIModel>('claude-opus'); 
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [isPrintMode, setIsPrintMode] = useState(false);
   const [isMultiAgentMode, setIsMultiAgentMode] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [hasChatSession, setHasChatSession] = useState(false);
 
   const [dynamicConclusion, setDynamicConclusion] = useState({
     overallQualification: '',
     mainIssues: [] as string[],
     criticalInfoNeeded: [] as string[],
-    estimatedProbability: 0
+    estimatedProbability: 0,
+    riskFactors: [] as string[]
   });
 
   const handleDataSubmit = async (data: { protocol: string; medicalHistory: string; selectedAIModel: SupportedAIModel }) => {
@@ -260,10 +266,23 @@ const App = () => {
     
     try {
       let analysisResult: PatientData;
+      let agentResults: Record<string, any> = {};
       
       if (isMultiAgentMode && isMultiAgentAvailable()) {
         console.log('🤖 Rozpoczynanie analizy wieloagentowej...');
-        analysisResult = await analyzePatientDataMultiAgent(data.medicalHistory, data.protocol, data.selectedAIModel);
+        
+        // Importuj coordinator bezpośrednio
+        const { MultiAgentCoordinatorImpl } = await import('./agents/coordination/MultiAgentCoordinator');
+        const coordinator = new MultiAgentCoordinatorImpl();
+        
+        const coordinatorResult = await coordinator.executeAgentPipeline(
+          data.medicalHistory, 
+          data.protocol, 
+          data.selectedAIModel
+        );
+        
+        analysisResult = coordinatorResult.finalResult;
+        agentResults = coordinatorResult.agentResults;
       } else {
         console.log('🔧 Rozpoczynanie analizy klasycznej...');
         analysisResult = await analyzePatientData(data.medicalHistory, data.protocol, data.selectedAIModel);
@@ -272,12 +291,29 @@ const App = () => {
       setPatientProfile(analysisResult);
       saveToHistory(analysisResult);
 
+      // Inicjalizuj sesję chatbota jeśli była analiza wieloagentowa
+      if (isMultiAgentMode && Object.keys(agentResults).length > 0) {
+        try {
+          chatbotService.initializeSession(
+            analysisResult,
+            agentResults,
+            data.medicalHistory,
+            data.protocol
+          );
+          setHasChatSession(true);
+          console.log('✅ Sesja chatbota została zainicjalizowana');
+        } catch (error) {
+          console.error('❌ Błąd podczas inicjalizacji chatbota:', error);
+        }
+      }
+
       if (analysisResult.reportConclusion) {
         setDynamicConclusion({
           overallQualification: analysisResult.reportConclusion.overallQualification || '',
           mainIssues: analysisResult.reportConclusion.mainIssues || [],
           criticalInfoNeeded: analysisResult.reportConclusion.criticalInfoNeeded || [],
-          estimatedProbability: analysisResult.reportConclusion.estimatedProbability || 0
+          estimatedProbability: analysisResult.reportConclusion.estimatedProbability || 0,
+          riskFactors: analysisResult.reportConclusion.riskFactors || []
         });
       }
     } catch (error) {
@@ -300,7 +336,8 @@ const App = () => {
           overallQualification: mockDataWithModel.reportConclusion.overallQualification || '',
           mainIssues: mockDataWithModel.reportConclusion.mainIssues || [],
           criticalInfoNeeded: mockDataWithModel.reportConclusion.criticalInfoNeeded || [],
-          estimatedProbability: mockDataWithModel.reportConclusion.estimatedProbability || 0
+          estimatedProbability: mockDataWithModel.reportConclusion.estimatedProbability || 0,
+          riskFactors: mockDataWithModel.reportConclusion.riskFactors || []
         });
       }
     } finally {
@@ -310,6 +347,26 @@ const App = () => {
 
   const handleSelectHistoricalPatient = (patientId: string) => {
     alert(`Funkcja przeglądania historycznych analiz dla pacjenta ${patientId} będzie dostępna wkrótce.`);
+  };
+
+  // Funkcja do ładowania danych demonstracyjnych
+  const loadDemoData = () => {
+    console.log('🎯 Ładowanie danych demonstracyjnych...');
+    setHasSubmittedData(true);
+    setPatientProfile(demoPatientData);
+    setAnalysisError(null);
+    
+    if (demoPatientData.reportConclusion) {
+      setDynamicConclusion({
+        overallQualification: demoPatientData.reportConclusion.overallQualification || '',
+        mainIssues: demoPatientData.reportConclusion.mainIssues || [],
+        criticalInfoNeeded: demoPatientData.reportConclusion.criticalInfoNeeded || [],
+        estimatedProbability: demoPatientData.reportConclusion.estimatedProbability || 0,
+        riskFactors: demoPatientData.reportConclusion.riskFactors || []
+      });
+    }
+    
+    console.log('✅ Dane demonstracyjne załadowane pomyślnie');
   };
 
   const handleUpdateCriterion = (criterionType: keyof Pick<PatientData, 'inclusionCriteria' | 'psychiatricExclusionCriteria' | 'medicalExclusionCriteria'>, criterionId: string, newUserStatus: string | null, newUserComment: string | null) => {
@@ -409,6 +466,7 @@ const App = () => {
     return <EnteringScreen 
       onDataSubmit={handleDataSubmit}
       onSelectHistoricalPatient={handleSelectHistoricalPatient}
+      onLoadDemo={loadDemoData}
       selectedAIModel={selectedAIModel}
       onAIModelChange={setSelectedAIModel}
       isMultiAgentMode={isMultiAgentMode}
@@ -418,22 +476,22 @@ const App = () => {
 
   if (isAnalyzing) {
     return (
-      <div className="min-h-screen bg-gradient-theme-light p-4 sm:p-6 md:p-8 font-sans flex items-center justify-center">
-        <div className="text-center card-remedy max-w-md">
-          <div className="icon-circle mx-auto mb-6">
-            <div role="status" className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-solid border-white border-r-transparent" aria-label="Ładowanie">
-              <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
-                Ładowanie...
-              </span>
-            </div>
+      <div className="min-h-screen bg-gradient-theme-light p-3 sm:p-4 md:p-6 font-sans flex items-center justify-center">
+        <div className="text-center card-remedy max-w-sm">
+          <div className="icon-circle mx-auto mb-4">
+            <div role="status" className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-white border-r-transparent" aria-label="Ładowanie">
+            <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
+              Ładowanie...
+            </span>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Analizowanie danych pacjenta</h2>
-          <p className="text-gray-600 mb-2">Model: {
+          </div>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Analizowanie danych pacjenta</h2>
+          <p className="text-gray-600 mb-2 text-sm">Model: {
             selectedAIModel === 'gemini' ? 'Gemini 2.5 Pro Preview 05-06' : 
             selectedAIModel === 'claude-opus' ? 'Claude 4 Opus' :
             selectedAIModel.toUpperCase()
           }</p>
-          <p className="text-gray-600 mb-2">
+          <p className="text-gray-600 mb-2 text-sm">
             Tryb: {isMultiAgentMode ? '🤖 Wieloagentowy' : '🔧 Klasyczny'}
           </p>
           <p className="text-sm text-gray-500">To może potrwać chwilę...</p>
@@ -444,25 +502,25 @@ const App = () => {
 
   if (!patientProfile || Object.keys(patientProfile).length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-theme-light p-4 sm:p-6 md:p-8 font-sans flex flex-col items-center justify-center">
-        <div className="card-remedy max-w-md text-center">
-          <div className="icon-circle mx-auto mb-6">
-            <AlertTriangle size={24} className="text-white" />
+      <div className="min-h-screen bg-gradient-theme-light p-3 sm:p-4 md:p-6 font-sans flex flex-col items-center justify-center">
+        <div className="card-remedy max-w-sm text-center">
+          <div className="icon-circle mx-auto mb-4">
+            <AlertTriangle size={16} className="text-white" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Wystąpił błąd</h2>
-          <p className="text-gray-600 mb-4">Nie udało się załadować profilu pacjenta. Spróbuj ponownie.</p>
-          {analysisError && (
-              <div className="mt-4 p-4 bg-red-50 border border-red-200 text-red-800 rounded-lg text-sm text-left">
-                  <p className="font-semibold mb-2">Szczegóły błędu:</p>
-                  <p>{analysisError}</p>
-              </div>
-          )}
-          <button 
-            onClick={() => { setHasSubmittedData(false); setAnalysisError(null);}} 
-            className="btn-primary mt-6"
-          >
-            Powrót do wprowadzania danych
-          </button>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Wystąpił błąd</h2>
+          <p className="text-gray-600 mb-3 text-sm">Nie udało się załadować profilu pacjenta. Spróbuj ponownie.</p>
+        {analysisError && (
+              <div className="mt-3 p-3 bg-red-50 border border-red-200 text-red-800 rounded-lg text-sm text-left">
+                  <p className="font-semibold mb-1">Szczegóły błędu:</p>
+                <p>{analysisError}</p>
+            </div>
+        )}
+        <button 
+          onClick={() => { setHasSubmittedData(false); setAnalysisError(null);}} 
+            className="btn-primary mt-4"
+        >
+          Powrót do wprowadzania danych
+        </button>
         </div>
       </div>
     );
@@ -483,20 +541,20 @@ const App = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-theme-light py-20 px-4 sm:px-6 lg:px-8 font-sans">
+    <div className="min-h-screen bg-gradient-theme-light py-8 px-3 sm:px-4 lg:px-6 font-sans">
       <style>{`
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fadeIn { animation: fadeIn 0.3s ease-out; }
       `}</style>
       
-      <div className="max-w-7xl mx-auto">
-        <header className="mb-20 text-center">
-          <div className="flex justify-between items-start mb-8">
+      <div className="max-w-6xl mx-auto">
+      <header className="mb-8 text-center">
+          <div className="flex justify-between items-start mb-6">
             <div className="flex-1"></div>
             <div className="flex-1 text-center">
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">Interaktywny Raport Pre-screeningowy</h1>
-              <p className="text-xl text-gray-600 mt-2">Analiza Kwalifikacji Pacjenta</p>
-              <p className="text-base text-gray-500 mt-1">Model: <span className="font-medium">{modelDisplayName}</span></p>
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">Interaktywny Raport Pre-screeningowy</h1>
+              <p className="text-lg text-gray-600 mt-1">Analiza Kwalifikacji Pacjenta</p>
+              <p className="text-sm text-gray-500 mt-1">Model: <span className="font-medium">{modelDisplayName}</span></p>
             </div>
             <div className="flex-1 flex justify-end">
               <button
@@ -504,161 +562,176 @@ const App = () => {
                 className="no-print btn-primary flex items-center gap-2"
                 title="Drukuj raport"
               >
-                <Printer size={20} />
+                <Printer size={16} />
                 <span className="hidden sm:inline">Drukuj Raport</span>
               </button>
             </div>
           </div>
-          
-          {analysisError && !patientProfile.isMockData && (
+        
+        {analysisError && !patientProfile.isMockData && (
               <div className="mt-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl inline-block text-sm">
                   <AlertTriangle size={16} className="inline-block mr-2" />
-                  {analysisError}
-              </div>
-          )}
-          {patientProfile.isMockData && (
+                {analysisError}
+            </div>
+        )}
+        {patientProfile.isMockData && (
             <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-xl inline-block">
               <AlertTriangle size={16} className="inline-block mr-2" />
-              Używane są dane testowe - połączenie z AI ({modelDisplayName}) jest niedostępne lub wystąpił błąd.
-              {!isCurrentModelConfigured && ` Sprawdź konfigurację (klucz API, model) dla ${modelDisplayName} w pliku .env.`}
-            </div>
-          )}
-        </header>
+            Używane są dane testowe - połączenie z AI ({modelDisplayName}) jest niedostępne lub wystąpił błąd.
+            {!isCurrentModelConfigured && ` Sprawdź konfigurację (klucz API, model) dla ${modelDisplayName} w pliku .env.`}
+          </div>
+        )}
+      </header>
 
-        <main className="space-y-8">
+        <main className="space-y-6">
           <section className="card-remedy">
-            <div className="flex items-center text-3xl font-bold text-gray-900 mb-6">
-              <div className="icon-circle mr-4">
-                <User size={24} />
+            <div className="flex items-center text-xl font-bold text-gray-900 mb-4">
+              <div className="icon-circle mr-3">
+                <User size={16} />
               </div>
-              <span>Dane Pacjenta: {patientProfile.summary?.id || 'Brak ID'}</span>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-600">
+            <span>Dane Pacjenta: {patientProfile.summary?.id || 'Brak ID'}</span>
+          </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-600 text-sm">
               <p><strong className="font-medium text-gray-900">Wiek:</strong> {patientProfile.summary?.age || 'N/A'} lat</p>
               <p><strong className="font-medium text-gray-900">Główna diagnoza:</strong> {patientProfile.summary?.mainDiagnosis || 'N/A'}</p>
               <div className="md:col-span-2">
                 <strong className="font-medium text-gray-900">Choroby współistniejące:</strong>
                 <ul className="list-disc list-inside ml-4 mt-2 space-y-1">
-                  {(patientProfile.summary?.comorbidities || []).map((com, idx) => <li key={idx}>{com}</li>)}
-                  {(patientProfile.summary?.comorbidities || []).length === 0 && <li>Brak</li>}
-                </ul>
-              </div>
+                {(patientProfile.summary?.comorbidities || []).map((com, idx) => <li key={idx}>{com}</li>)}
+                {(patientProfile.summary?.comorbidities || []).length === 0 && <li>Brak</li>}
+              </ul>
             </div>
-          </section>
+          </div>
+        </section>
 
-          <AccordionItem title="Wizualizacje Danych" icon={<BarChart3 size={24} />} defaultOpen={true}>
-            <div className="grid grid-cols-1 gap-6">
-              <DetailedTrdTimelineChart
-                pharmacotherapy={patientProfile.trdAnalysis?.pharmacotherapy || []}
-              />
-              <div className="lg:col-span-1 mt-6">
-                <CriteriaStatusPieChart criteriaData={allCriteriaForChart} title="Ogólny Status Kryteriów (po zmianach)" />
-              </div>
+          <AccordionItem title="Wizualizacje Danych" icon={<BarChart3 size={16} />} defaultOpen={true}>
+            <div className="grid grid-cols-1 gap-4">
+            <DetailedTrdTimelineChart
+                patientData={patientProfile}
+            />
+              <div className="lg:col-span-1 mt-4">
+              <CriteriaStatusPieChart criteriaData={allCriteriaForChart} title="Ogólny Status Kryteriów (po zmianach)" />
             </div>
-          </AccordionItem>
+          </div>
+        </AccordionItem>
 
-          <AccordionItem title="Szacowanie Początku Obecnego Epizodu Depresyjnego" icon={<CalendarDays size={24} />}>
-            <div className="space-y-4 text-gray-600">
+          <AccordionItem title="Szacowanie Początku Obecnego Epizodu Depresyjnego" icon={<CalendarDays size={16} />}>
+            <div className="space-y-3 text-gray-600 text-sm">
               {(patientProfile.episodeEstimation?.scenarios || []).map(sc => (
-                <div key={sc.id} className="p-4 border border-gray-200 rounded-lg bg-gray-50">
+                <div key={sc.id} className="p-3 border border-gray-200 rounded-lg bg-gray-50">
                   <p><strong className="font-medium text-gray-900">Scenariusz {sc.id}:</strong> {sc.description}</p>
-                  <p className="text-sm text-gray-500 mt-2"><em>Przesłanki:</em> {sc.evidence}</p>
+                  <p className="text-sm text-gray-500 mt-1"><em>Przesłanki:</em> {sc.evidence}</p>
                 </div>
               ))}
-              {(patientProfile.episodeEstimation?.scenarios || []).length === 0 && <p>Brak scenariuszy.</p>}
-              <div className="mt-4 p-4 border-t-2 border-gray-300 bg-blue-50 rounded-lg">
+            {(patientProfile.episodeEstimation?.scenarios || []).length === 0 && <p>Brak scenariuszy.</p>}
+              <div className="mt-3 p-3 border-t-2 border-gray-300 bg-blue-50 rounded-lg">
                 <p><strong className="font-medium text-gray-900">Wnioski dotyczące początku epizodu dla celów badania:</strong></p>
                 <p className="mt-2">{patientProfile.episodeEstimation?.conclusion || 'Brak wniosków.'}</p>
               </div>
-            </div>
-          </AccordionItem>
+          </div>
+        </AccordionItem>
 
-          <AccordionItem title="Analiza TRD (Kryterium IC6) - Podsumowanie" icon={<Pill size={24} />}>
-            <div className="space-y-4">
+          <AccordionItem title="Analiza TRD (Kryterium IC6) - Podsumowanie" icon={<Pill size={16} />}>
+            <div className="space-y-3">
               <p className="text-sm text-gray-500">Poniżej znajduje się podsumowanie wniosków z analizy farmakoterapii. Szczegółowa oś czasu leczenia dostępna jest w sekcji "Wizualizacje Danych".</p>
-              <p className="font-semibold text-gray-900">{patientProfile.trdAnalysis?.conclusion || 'Brak podsumowania analizy TRD.'}</p>
+              <p className="font-semibold text-gray-900 text-sm">{patientProfile.trdAnalysis?.conclusion || 'Brak podsumowania analizy TRD.'}</p>
             </div>
-          </AccordionItem>
+        </AccordionItem>
 
-          <AccordionItem title="Kryteria Włączenia (IC)" icon={<ListChecks size={24} />}>
-            <CriteriaList criteria={patientProfile.inclusionCriteria || []} title="Inclusion" onUpdateCriterion={(id, status, comment) => handleUpdateCriterion('inclusionCriteria', id, status, comment)} />
-          </AccordionItem>
+          <AccordionItem title="Kryteria Włączenia (IC)" icon={<ListChecks size={16} />}>
+          <CriteriaList criteria={patientProfile.inclusionCriteria || []} title="Inclusion" onUpdateCriterion={(id, status, comment) => handleUpdateCriterion('inclusionCriteria', id, status, comment)} />
+        </AccordionItem>
 
-          <AccordionItem title="Psychiatryczne Kryteria Wyłączenia (EC)" icon={<AlertTriangle size={24} />}>
-            <CriteriaList criteria={patientProfile.psychiatricExclusionCriteria || []} title="PsychiatricExclusion" onUpdateCriterion={(id, status, comment) => handleUpdateCriterion('psychiatricExclusionCriteria', id, status, comment)} />
-          </AccordionItem>
+          <AccordionItem title="Psychiatryczne Kryteria Wyłączenia (EC)" icon={<AlertTriangle size={16} />}>
+          <CriteriaList criteria={patientProfile.psychiatricExclusionCriteria || []} title="PsychiatricExclusion" onUpdateCriterion={(id, status, comment) => handleUpdateCriterion('psychiatricExclusionCriteria', id, status, comment)} />
+        </AccordionItem>
 
-          <AccordionItem title="Ogólne Medyczne Kryteria Wyłączenia (GMEC)" icon={<Stethoscope size={24} />}>
-            <CriteriaList criteria={patientProfile.medicalExclusionCriteria || []} title="MedicalExclusion" onUpdateCriterion={(id, status, comment) => handleUpdateCriterion('medicalExclusionCriteria', id, status, comment)} />
-          </AccordionItem>
+          <AccordionItem title="Ogólne Medyczne Kryteria Wyłączenia (GMEC)" icon={<Stethoscope size={16} />}>
+          <CriteriaList criteria={patientProfile.medicalExclusionCriteria || []} title="MedicalExclusion" onUpdateCriterion={(id, status, comment) => handleUpdateCriterion('medicalExclusionCriteria', id, status, comment)} />
+        </AccordionItem>
 
           <section className="card-remedy">
-            <div className="flex items-center text-3xl font-bold text-gray-900 mb-6">
-              <div className="icon-circle mr-4">
-                <Target size={24} />
+            <div className="flex items-center text-xl font-bold text-gray-900 mb-4">
+              <div className="icon-circle mr-3">
+                <Target size={16} />
               </div>
-              <span>Wniosek Dotyczący Kwalifikacji i Prawdopodobieństwo</span>
+            <span>Wniosek Dotyczący Kwalifikacji i Prawdopodobieństwo</span>
+          </div>
+          <div className="space-y-6">
+            <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Ogólna Kwalifikacja:</h3>
+              <p className={`text-lg font-bold ${dynamicConclusion.overallQualification.toLowerCase().includes("nie kwalifikuje") ? "text-red-600" : dynamicConclusion.overallQualification.toLowerCase().includes("kwalifikuje") ? "text-green-600" : "text-yellow-500"}`}>
+                {dynamicConclusion.overallQualification || 'Brak oceny kwalifikacji.'}
+              </p>
             </div>
-            <div className="space-y-8">
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Ogólna Kwalifikacja:</h3>
-                <p className={`text-xl font-bold ${dynamicConclusion.overallQualification.toLowerCase().includes("nie kwalifikuje") ? "text-red-600" : dynamicConclusion.overallQualification.toLowerCase().includes("kwalifikuje") ? "text-green-600" : "text-yellow-500"}`}>
-                  {dynamicConclusion.overallQualification || 'Brak oceny kwalifikacji.'}
-                </p>
-              </div>
               
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Główne Problemy / Potencjalne Przeszkody (wg AI):</h3>
-                {dynamicConclusion.mainIssues && dynamicConclusion.mainIssues.length > 0 ? (
-                  <ul className="list-disc list-inside ml-4 space-y-2 text-gray-600">
-                    {dynamicConclusion.mainIssues.map((issue, idx) => <li key={idx}>{issue}</li>)}
-                  </ul>
-                ) : (
-                  <p className="text-gray-500">Brak zidentyfikowanych problemów</p>
-                )}
-              </div>
+            <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Główne Problemy / Potencjalne Przeszkody (wg AI):</h3>
+              {dynamicConclusion.mainIssues && dynamicConclusion.mainIssues.length > 0 ? (
+                  <ul className="list-disc list-inside ml-4 space-y-1 text-gray-600 text-sm">
+                  {dynamicConclusion.mainIssues.map((issue, idx) => <li key={idx}>{issue}</li>)}
+                </ul>
+              ) : (
+                  <p className="text-gray-500 text-sm">Brak zidentyfikowanych problemów</p>
+              )}
+            </div>
               
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Krytyczne Informacje do Uzyskania/Weryfikacji (wg AI):</h3>
-                {dynamicConclusion.criticalInfoNeeded && dynamicConclusion.criticalInfoNeeded.length > 0 ? (
-                  <ul className="list-disc list-inside ml-4 space-y-2 text-gray-600">
-                    {dynamicConclusion.criticalInfoNeeded.map((info, idx) => <li key={idx}>{info}</li>)}
-                  </ul>
-                ) : (
-                  <p className="text-gray-500">Brak krytycznych informacji do weryfikacji</p>
-                )}
-              </div>
+            <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Krytyczne Informacje do Uzyskania/Weryfikacji (wg AI):</h3>
+              {dynamicConclusion.criticalInfoNeeded && dynamicConclusion.criticalInfoNeeded.length > 0 ? (
+                  <ul className="list-disc list-inside ml-4 space-y-1 text-gray-600 text-sm">
+                  {dynamicConclusion.criticalInfoNeeded.map((info, idx) => <li key={idx}>{info}</li>)}
+                </ul>
+              ) : (
+                  <p className="text-gray-500 text-sm">Brak krytycznych informacji do weryfikacji</p>
+              )}
+            </div>
               
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-4">Szacowane Prawdopodobieństwo Kwalifikacji:</h3>
-                <div className="flex items-center gap-4">
+            <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-3">Szacowane Prawdopodobieństwo Kwalifikacji:</h3>
+              <div className="flex items-center gap-3">
                   <div className="icon-circle flex-shrink-0">
-                    <BarChart3 size={24} />
+                    <BarChart3 size={16} />
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-12 overflow-hidden">
-                    <div className={`h-12 rounded-full flex items-center justify-center text-white font-bold transition-all duration-500 ease-out ${dynamicConclusion.estimatedProbability >= 70 ? 'bg-green-500' : dynamicConclusion.estimatedProbability >=40 ? 'bg-yellow-500' : 'bg-red-500'}`} style={{ width: `${dynamicConclusion.estimatedProbability}%` }}>
+                  <div className="w-full bg-gray-200 rounded-full h-8 overflow-hidden">
+                    <div className={`h-8 rounded-full flex items-center justify-center text-white font-bold transition-all duration-500 ease-out text-sm ${dynamicConclusion.estimatedProbability >= 70 ? 'bg-green-500' : dynamicConclusion.estimatedProbability >=40 ? 'bg-yellow-500' : 'bg-red-500'}`} style={{ width: `${dynamicConclusion.estimatedProbability}%` }}>
                       {dynamicConclusion.estimatedProbability > 10 ? `${dynamicConclusion.estimatedProbability}%` : ''}
                     </div>
                   </div>
-                  {dynamicConclusion.estimatedProbability <= 10 && <span className="text-gray-900 font-bold text-xl ml-2">{dynamicConclusion.estimatedProbability}%</span>}
+                  {dynamicConclusion.estimatedProbability <= 10 && <span className="text-gray-900 font-bold text-sm ml-2">{dynamicConclusion.estimatedProbability}%</span>}
                 </div>
-                <p className="text-sm text-gray-500 mt-3">Prawdopodobieństwo uwzględnia modyfikacje badacza. Ocena początkowa AI ({modelDisplayName}): {patientProfile.reportConclusion?.estimatedProbability || 0}%.</p>
-              </div>
+                <p className="text-xs text-gray-500 mt-2">Prawdopodobieństwo uwzględnia modyfikacje badacza. Ocena początkowa AI ({modelDisplayName}): {patientProfile.reportConclusion?.estimatedProbability || 0}%.</p>
             </div>
-          </section>
-        </main>
+          </div>
+        </section>
+      </main>
         
-        <footer className="mt-20 text-center text-sm text-gray-500 py-6 border-t border-gray-200">
-          <p>&copy; {new Date().getFullYear()} Aplikacja Raportów Pre-screeningowych. Wszelkie prawa zastrzeżone.</p>
-          <p>Wygenerowano: {new Date().toLocaleString('pl-PL', { dateStyle: 'long', timeStyle: 'short' })}</p>
-          <button 
-            onClick={() => { setHasSubmittedData(false); setAnalysisError(null);}} 
-            className="no-print btn-secondary mt-4"
-          >
-            Analizuj nowego pacjenta
-          </button>
-        </footer>
+        <footer className="mt-12 text-center text-sm text-gray-500 py-4 border-t border-gray-200">
+        <p>&copy; {new Date().getFullYear()} Aplikacja Raportów Pre-screeningowych. Wszelkie prawa zastrzeżone.</p>
+        <p>Wygenerowano: {new Date().toLocaleString('pl-PL', { dateStyle: 'long', timeStyle: 'short' })}</p>
+         <button 
+          onClick={() => { setHasSubmittedData(false); setAnalysisError(null);}} 
+            className="no-print btn-secondary mt-3"
+        >
+          Analizuj nowego pacjenta
+        </button>
+      </footer>
       </div>
+      
+      {/* Chat Components - tylko w trybie wieloagentowym i po udanej analizie */}
+      {hasChatSession && (
+        <>
+          <ChatButton 
+            isOpen={isChatOpen}
+            onClick={() => setIsChatOpen(!isChatOpen)}
+            hasNewMessages={false}
+          />
+          <ChatWindow
+            isOpen={isChatOpen}
+            onClose={() => setIsChatOpen(false)}
+          />
+        </>
+      )}
     </div>
   );
 };
