@@ -1,5 +1,6 @@
 import { MultiAgentCoordinatorImpl } from '../agents/coordination/MultiAgentCoordinator';
 import type { PatientData, SupportedAIModel } from '../types/index';
+import { analysisHistoryService } from './AnalysisHistoryService';
 
 let coordinatorInstance: MultiAgentCoordinatorImpl | null = null;
 
@@ -33,10 +34,39 @@ export async function analyzePatientDataMultiAgent(
     console.log('📊 Logi wykonania:', result.executionLog);
     console.log('🔍 Wyniki agentów:', result.agentResults);
     
+    // 💾 ZAPISZ ANALIZĘ WIELOAGENTOWĄ DO HISTORII
+    try {
+      const analysisId = await analysisHistoryService.saveMultiAgentAnalysis(
+        result.finalResult,
+        result.agentResults,
+        medicalHistory,
+        studyProtocol,
+        JSON.stringify(result.executionLog) // logi jako surowa odpowiedź
+      );
+      
+      console.log(`💾 [MultiAgent] Analysis saved to history: ${analysisId}`);
+    } catch (saveError) {
+      console.warn(`⚠️ [MultiAgent] Failed to save analysis to history:`, saveError);
+      // Nie przerywaj analizy jeśli zapis się nie powiódł
+    }
+    
     return result.finalResult;
     
   } catch (error) {
     console.error('❌ Błąd podczas analizy wieloagentowej:', error);
+    
+    // 💾 ZAPISZ NIEUDANĄ ANALIZĘ WIELOAGENTOWĄ
+    try {
+      await analysisHistoryService.saveFailedAnalysis(
+        { modelUsed: selectedModel } as Partial<PatientData>,
+        medicalHistory,
+        studyProtocol,
+        error instanceof Error ? error.message : 'Nieznany błąd',
+        'multi-agent'
+      );
+    } catch (saveError) {
+      console.warn(`⚠️ [MultiAgent] Failed to save failed analysis:`, saveError);
+    }
     
     // Zwróć fallback wynik
     return {

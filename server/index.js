@@ -23,7 +23,7 @@ app.use(cors({
     // Reject other origins
     callback(new Error('Not allowed by CORS'));
   },
-  methods: ['GET', 'POST'],
+  methods: ['GET', 'POST', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json({ limit: '10mb' }));
@@ -291,6 +291,164 @@ app.post('/api/drug-mapping/is-antidepressant', async (req, res) => {
     console.error('💥 [Backend] Antidepressant check error:', error);
     res.status(500).json({ 
       error: 'Antidepressant check failed', 
+      details: error.message 
+    });
+  }
+});
+
+// ============================================================================
+// ENDPOINTY DO ZAPISYWANIA ANALIZ
+// ============================================================================
+
+// Endpoint do zapisywania analizy
+app.post('/api/analysis/save', async (req, res) => {
+  try {
+    console.log('💾 [Backend] Save analysis request');
+    
+    const analysisData = req.body;
+    
+    if (!analysisData) {
+      return res.status(400).json({ error: 'Analysis data is required' });
+    }
+
+    // Dynamiczny import LocalAnalysisStorage
+    const { LocalAnalysisStorage } = await import('./storage/LocalAnalysisStorage.js');
+    const storage = new LocalAnalysisStorage({
+      basePath: '../History',
+      compression: false,
+      maxFileSize: 10 * 1024 * 1024 // 10MB
+    });
+    
+    const analysisId = await storage.save(analysisData);
+    
+    console.log(`✅ [Backend] Analysis saved with ID: ${analysisId}`);
+    res.json({ id: analysisId, success: true });
+    
+  } catch (error) {
+    console.error('💥 [Backend] Save analysis error:', error);
+    res.status(500).json({ 
+      error: 'Failed to save analysis', 
+      details: error.message 
+    });
+  }
+});
+
+// Endpoint do wczytywania analizy
+app.get('/api/analysis/load/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log(`📖 [Backend] Load analysis request: ${id}`);
+    
+    // Dynamiczny import LocalAnalysisStorage
+    const { LocalAnalysisStorage } = await import('./storage/LocalAnalysisStorage.js');
+    const storage = new LocalAnalysisStorage({
+      basePath: '../History',
+      compression: false
+    });
+    
+    const analysis = await storage.load(id);
+    
+    if (!analysis) {
+      return res.status(404).json({ error: 'Analysis not found' });
+    }
+    
+    console.log(`✅ [Backend] Analysis loaded: ${id}`);
+    res.json(analysis);
+    
+  } catch (error) {
+    console.error('💥 [Backend] Load analysis error:', error);
+    res.status(500).json({ 
+      error: 'Failed to load analysis', 
+      details: error.message 
+    });
+  }
+});
+
+// Endpoint do listowania analiz
+app.get('/api/analysis/list', async (req, res) => {
+  try {
+    console.log('📋 [Backend] List analyses request');
+    
+    // Dynamiczny import LocalAnalysisStorage
+    const { LocalAnalysisStorage } = await import('./storage/LocalAnalysisStorage.js');
+    const storage = new LocalAnalysisStorage({
+      basePath: '../History',
+      compression: false
+    });
+    
+    const options = {
+      limit: parseInt(req.query.limit) || 50,
+      offset: parseInt(req.query.offset) || 0,
+      sortBy: req.query.sortBy || 'createdAt',
+      sortOrder: req.query.sortOrder || 'desc'
+    };
+    
+    const analysesList = await storage.list(options);
+    
+    console.log(`✅ [Backend] Listed ${analysesList.analyses.length} analyses`);
+    res.json(analysesList);
+    
+  } catch (error) {
+    console.error('💥 [Backend] List analyses error:', error);
+    res.status(500).json({ 
+      error: 'Failed to list analyses', 
+      details: error.message 
+    });
+  }
+});
+
+// Endpoint do usuwania analizy
+app.delete('/api/analysis/delete/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log(`🗑️ [Backend] Delete analysis request: ${id}`);
+    
+    // Dynamiczny import LocalAnalysisStorage
+    const { LocalAnalysisStorage } = await import('./storage/LocalAnalysisStorage.js');
+    const storage = new LocalAnalysisStorage({
+      basePath: '../History',
+      compression: false
+    });
+    
+    const deleted = await storage.delete(id);
+    
+    if (!deleted) {
+      return res.status(404).json({ error: 'Analysis not found' });
+    }
+    
+    console.log(`✅ [Backend] Analysis deleted: ${id}`);
+    res.json({ success: true });
+    
+  } catch (error) {
+    console.error('💥 [Backend] Delete analysis error:', error);
+    res.status(500).json({ 
+      error: 'Failed to delete analysis', 
+      details: error.message 
+    });
+  }
+});
+
+// Endpoint do statystyk analiz
+app.get('/api/analysis/stats', async (req, res) => {
+  try {
+    console.log('📊 [Backend] Analysis stats request');
+    
+    // Dynamiczny import LocalAnalysisStorage
+    const { LocalAnalysisStorage } = await import('./storage/LocalAnalysisStorage.js');
+    const storage = new LocalAnalysisStorage({
+      basePath: '../History',
+      compression: false
+    });
+    
+    const stats = await storage.getStats();
+    
+    console.log(`✅ [Backend] Stats retrieved: ${stats.total} total analyses`);
+    res.json(stats);
+    
+  } catch (error) {
+    console.error('💥 [Backend] Analysis stats error:', error);
+    res.status(500).json({ 
+      error: 'Failed to get analysis stats', 
       details: error.message 
     });
   }

@@ -3,7 +3,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { 
   ChevronDown, ChevronUp, AlertTriangle, CheckCircle2, XCircle, HelpCircle, 
   User, CalendarDays, Stethoscope, Pill, ListChecks, Target, BarChart3, 
-  Info, Filter, ArrowDownUp, Edit3, Save, RotateCcw, Printer, X, Zap
+  Info, Filter, ArrowDownUp, Edit3, Save, RotateCcw, Printer, X, Zap, FolderOpen
   // Usunięto nieużywane importy: MessageSquare, BrainCircuit
 } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -13,6 +13,9 @@ import { PrintableReport } from './components/PrintableReport';
 import { ChatButton } from './components/ChatButton';
 import { ChatWindow } from './components/ChatWindow';
 import { Logo } from './components/Logo';
+import { SaveAnalysisButton } from './components/SaveAnalysisButton';
+import { SavedAnalysesManager } from './components/SavedAnalysesManager';
+// import { StorageTestButton } from './components/StorageTestButton';
 import { initialPatientData, demoPatientData } from './data/mockData';
 import { analyzePatientData } from './services/ai';
 import { analyzePatientDataMultiAgent, isMultiAgentAvailable } from './services/multiAgentService';
@@ -426,6 +429,12 @@ const App = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [hasChatSession, setHasChatSession] = useState(false);
   const [showDrugDemo, setShowDrugDemo] = useState(false);
+  const [showSavedAnalyses, setShowSavedAnalyses] = useState(false);
+  const [originalAnalysisData, setOriginalAnalysisData] = useState<{
+    medicalHistory: string;
+    studyProtocol: string;
+    agentResults?: Record<string, any>;
+  } | null>(null);
 
   const [dynamicConclusion, setDynamicConclusion] = useState({
     overallQualification: '',
@@ -439,6 +448,13 @@ const App = () => {
     setHasSubmittedData(true); 
     setIsAnalyzing(true);
     setAnalysisError(null); 
+    
+    // Store original data for saving
+    setOriginalAnalysisData({
+      medicalHistory: data.medicalHistory,
+      studyProtocol: data.protocol,
+      agentResults: {}
+    });
     
     try {
       let analysisResult: PatientData;
@@ -459,6 +475,12 @@ const App = () => {
         
         analysisResult = coordinatorResult.finalResult;
         agentResults = coordinatorResult.agentResults;
+        
+        // Update stored data with agent results
+        setOriginalAnalysisData(prev => prev ? {
+          ...prev,
+          agentResults
+        } : null);
         
         // Inicjalizuj sesję chatbota dla analizy wieloagentowej
         try {
@@ -554,6 +576,34 @@ const App = () => {
     }
     
     console.log('✅ Dane demonstracyjne załadowane pomyślnie');
+  };
+
+  // Funkcja do ładowania zapisanej analizy
+  const handleLoadSavedAnalysis = (savedAnalysis: any) => {
+    console.log('📖 Ładowanie zapisanej analizy...');
+    setHasSubmittedData(true);
+    setPatientProfile(savedAnalysis.patientData);
+    setAnalysisError(null);
+    setShowSavedAnalyses(false);
+    
+    // Store original data for potential re-saving
+    setOriginalAnalysisData({
+      medicalHistory: savedAnalysis.medicalHistory || '',
+      studyProtocol: savedAnalysis.studyProtocol || '',
+      agentResults: savedAnalysis.agentResults || {}
+    });
+    
+    if (savedAnalysis.patientData.reportConclusion) {
+      setDynamicConclusion({
+        overallQualification: savedAnalysis.patientData.reportConclusion.overallQualification || '',
+        mainIssues: savedAnalysis.patientData.reportConclusion.mainIssues || [],
+        criticalInfoNeeded: savedAnalysis.patientData.reportConclusion.criticalInfoNeeded || [],
+        estimatedProbability: savedAnalysis.patientData.reportConclusion.estimatedProbability || 0,
+        riskFactors: savedAnalysis.patientData.reportConclusion.riskFactors || []
+      });
+    }
+    
+    console.log('✅ Zapisana analiza załadowana pomyślnie');
   };
 
   const handleUpdateCriterion = (criterionType: keyof Pick<PatientData, 'inclusionCriteria' | 'psychiatricExclusionCriteria' | 'medicalExclusionCriteria'>, criterionId: string, newUserStatus: string | null, newUserComment: string | null) => {
@@ -658,6 +708,7 @@ const App = () => {
       onAIModelChange={setSelectedAIModel}
       isMultiAgentMode={isMultiAgentMode}
       onMultiAgentModeChange={setIsMultiAgentMode}
+      onLoadSavedAnalysis={handleLoadSavedAnalysis}
     />;
   }
 
@@ -801,14 +852,38 @@ const App = () => {
             onClick={() => window.location.reload()}
             className="hover:scale-105 transition-transform duration-300"
           />
-          <button
-            onClick={handlePrint}
-            className="no-print btn-primary flex items-center gap-2"
-            title="Drukuj raport"
-          >
-            <Printer size={16} />
-            <span className="hidden sm:inline">Drukuj Raport</span>
-          </button>
+          <div className="flex items-center gap-3">
+            {/* Save Analysis Button */}
+            {patientProfile && originalAnalysisData && (
+              <SaveAnalysisButton
+                patientData={patientProfile}
+                medicalHistory={originalAnalysisData.medicalHistory}
+                studyProtocol={originalAnalysisData.studyProtocol}
+                isMultiAgentMode={isMultiAgentMode}
+                agentResults={originalAnalysisData.agentResults}
+                className="text-sm"
+              />
+            )}
+            
+            {/* Saved Analyses Button */}
+            <button
+              onClick={() => setShowSavedAnalyses(true)}
+              className="btn-secondary flex items-center gap-2 text-sm"
+              title="Przeglądaj zapisane analizy"
+            >
+              <FolderOpen size={16} />
+              <span className="hidden sm:inline">Zapisane Analizy</span>
+            </button>
+            
+            <button
+              onClick={handlePrint}
+              className="no-print btn-primary flex items-center gap-2"
+              title="Drukuj raport"
+            >
+              <Printer size={16} />
+              <span className="hidden sm:inline">Drukuj Raport</span>
+            </button>
+          </div>
         </div>
 
         {/* Title Section */}
@@ -987,12 +1062,26 @@ const App = () => {
           Analizuj nowego pacjenta
         </button>
         <button
+          onClick={() => setShowSavedAnalyses(true)}
+          className="no-print btn-secondary flex items-center gap-2"
+        >
+          <FolderOpen size={16} />
+          Zapisane Analizy
+        </button>
+        <button
           onClick={() => setShowDrugDemo(true)}
           className="no-print btn-primary"
         >
           🧪 Demo Mapowania Leków
         </button>
       </div>
+      
+      {/* Storage Test Button - tylko w trybie deweloperskim */}
+      {/* {import.meta.env.DEV && (
+        <div className="mt-4 flex justify-center">
+          <StorageTestButton />
+        </div>
+      )} */}
     </footer>
     </div>
     
@@ -1009,6 +1098,14 @@ const App = () => {
           onClose={() => setIsChatOpen(false)}
         />
       </>
+    )}
+    
+    {/* Saved Analyses Manager */}
+    {showSavedAnalyses && (
+      <SavedAnalysesManager
+        onAnalysisSelect={handleLoadSavedAnalysis}
+        onClose={() => setShowSavedAnalyses(false)}
+      />
     )}
   </div>
 );

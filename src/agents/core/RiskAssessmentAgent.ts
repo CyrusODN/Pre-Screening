@@ -20,6 +20,64 @@ export class RiskAssessmentAgent extends AbstractBaseAgent<RiskAssessmentResult>
 3. **Oszacowanie prawdopodobieństwa włączenia** - na podstawie wszystkich czynników
 4. **Rekomendacja końcowa** - include/exclude/further_evaluation
 
+**KRYTYCZNA LOGIKA BEZWZGLĘDNYCH WYKLUCZEŃ:**
+
+**KRYTERIA BEZWZGLĘDNIE WYKLUCZAJĄCE (PRAWDOPODOBIEŃSTWO = 0%):**
+Jeśli pacjent spełnia którekolwiek z poniższych kryteriów, prawdopodobieństwo MUSI być 0%:
+
+1. **Historia rodzinna schizofrenii (EC14)** - nie można zmienić rodziny
+2. **Zaburzenia psychotyczne w wywiadzie (EC2)** - historia nie zmieni się
+3. **Zaburzenia afektywne dwubiegunowe (EC1)** - diagnoza pozostaje
+4. **Ciąża u kobiet (GMEC1)** - jeśli potwierdzona ciąża
+5. **Cukrzyca typu 1 (GMEC6)** - choroba nieuleczalna
+6. **Padaczka (GMEC8)** - choroba przewlekła
+7. **Uzależnienie od substancji w ciągu 12 miesięcy (EC10)** - jeśli potwierdzone
+8. **Znaczące ryzyko samobójcze (EC11)** - bezpieczeństwo pacjenta
+9. **Zaburzenia osobowości wykluczające (EC3, EC4)** - nie zmieniają się
+10. **Nadwrażliwość na badany lek (GMEC12)** - nie można zmienić
+
+**KRYTERIA CZASOWO WYKLUCZAJĄCE (PRAWDOPODOBIEŃSTWO NISKIE, ALE >0%):**
+Można potencjalnie spełnić w przyszłości:
+
+1. **Brak TRD (IC6)** - pacjent może kontynuować leczenie i rozwinąć TRD
+2. **Hospitalizacja <6 miesięcy (EC6)** - czas minie
+3. **TMS <6 miesięcy (EC8)** - czas minie
+4. **Aktywna psychoterapia (EC9)** - można zakończyć/ustabilizować
+5. **Niestabilne choroby (GMEC5, GMEC7)** - można ustabilizować
+6. **Brak odstawienia leków (IC7)** - można odstawić
+7. **Wynik MADRS <20 (IC5)** - może się zmienić
+
+**KRYTERIA WYMAGAJĄCE WERYFIKACJI:**
+Prawdopodobieństwo zależy od szczegółów:
+
+1. **Aktywne OCD (EC5)** - zależy od nasilenia
+2. **Choroby somatyczne** - zależy od kontroli
+3. **Wiek (IC2)** - sprawdź dokładny wiek
+
+**ALGORYTM OCENY PRAWDOPODOBIEŃSTWA:**
+
+1. **SPRAWDŹ BEZWZGLĘDNE WYKLUCZENIA:**
+   - Jeśli JAKIEKOLWIEK kryterium bezwzględnie wykluczające = "spełnione" → PRAWDOPODOBIEŃSTWO = 0%
+   - Wylistuj wszystkie bezwzględne wykluczenia w keyFactors.negative
+   - Rekomendacja = "exclude"
+
+2. **SPRAWDŹ CZASOWE WYKLUCZENIA:**
+   - Policz kryteria czasowo wykluczające
+   - Każde czasowe wykluczenie obniża prawdopodobieństwo o 15-25%
+   - Bazowe prawdopodobieństwo = 70%
+   - Dodaj informacje o możliwości spełnienia w przyszłości
+
+3. **SPRAWDŹ KRYTERIA WYMAGAJĄCE WERYFIKACJI:**
+   - Każde kryterium "weryfikacja" obniża prawdopodobieństwo o 5-10%
+   - Dodaj do keyFactors.neutral
+
+4. **OBLICZ KOŃCOWE PRAWDOPODOBIEŃSTWO:**
+   - Bezwzględne wykluczenie = 0%
+   - Brak TRD + inne problemy = 15-35%
+   - Tylko czasowe problemy = 40-60%
+   - Głównie weryfikacje = 60-80%
+   - Brak problemów = 80-95%
+
 **DOSTĘPNE DANE Z POPRZEDNICH AGENTÓW:**
 - Synteza kliniczna (historia, czynniki ryzyka)
 - Analiza epizodów depresyjnych (ciężkość, przebieg)
@@ -67,7 +125,7 @@ Zwróć JSON z następującą strukturą:
       "neutral": ["Neutralny 1", "Neutralny 2"]
     },
     "recommendation": "include|exclude|further_evaluation",
-    "reasoning": "Szczegółowe uzasadnienie rekomendacji"
+    "reasoning": "Szczegółowe uzasadnienie rekomendacji z wyjaśnieniem logiki bezwzględnych wykluczeń"
   }
 }
 \`\`\`
@@ -80,15 +138,17 @@ Zwróć JSON z następującą strukturą:
 
 **KRYTERIA PRAWDOPODOBIEŃSTWA WŁĄCZENIA:**
 - 80-100: Wysoka - silny kandydat do włączenia
-- 60-79: Średnia - kandydat z zastrzeżeniami
+- 60-79: Średnia - kandydat z zastrzeżeniami  
 - 40-59: Niska - wymaga dodatkowej oceny
-- 0-39: Bardzo niska - prawdopodobnie wykluczenie
+- 20-39: Bardzo niska - znaczące problemy, ale możliwe rozwiązanie
+- 0-19: Praktycznie wykluczone - bezwzględne lub bardzo poważne wykluczenia
 
 **UWAGI SPECJALNE:**
-- Priorytet dla bezpieczeństwa pacjenta
+- **PRIORYTET DLA LOGIKI BEZWZGLĘDNYCH WYKLUCZEŃ** - jeśli nie można zmienić sytuacji, prawdopodobieństwo = 0%
 - Uwzględnij specyfikę badania TRD
 - Oceń realność przestrzegania protokołu
-- Rozważ wpływ na jakość danych badania`,
+- Rozważ wpływ na jakość danych badania
+- **ZAWSZE wyjaśnij w reasoning dlaczego dałeś konkretne prawdopodobieństwo**`,
       dependencies: ['clinical-synthesis', 'episode-analysis', 'pharmacotherapy-analysis', 'trd-assessment', 'criteria-assessment']
     };
     

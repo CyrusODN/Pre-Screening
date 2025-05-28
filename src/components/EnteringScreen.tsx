@@ -1,12 +1,14 @@
 // src/components/EnteringScreen.tsx
 import React, { useState } from 'react';
-import { Upload, FileText, AlertCircle, History, BrainCircuit, PlayCircle, Network, Zap } from 'lucide-react'; // Added Network, Zap
-import { PatientHistory } from './PatientHistory';
+import { Upload, FileText, AlertCircle, History, BrainCircuit, PlayCircle, Network, Zap, FolderOpen } from 'lucide-react'; // Added FolderOpen
 import { ProtocolSelector } from './ProtocolSelector';
 import { Logo } from './Logo';
-import { getHistory, clearHistory } from '../services/patientHistory';
+import { SavedAnalysesManager } from './SavedAnalysesManager'; // Nowy import
+// import { StorageTestButton } from './StorageTestButton';
+// Usunięto import starego systemu historii
 import { isMultiAgentAvailable } from '../services/multiAgentService';
 import type { Protocol, SupportedAIModel } from '../types';
+import type { StoredAnalysis } from '../types/storage'; // Poprawny import
 
 interface EnteringScreenProps {
   onDataSubmit: (data: { protocol: string; medicalHistory: string; selectedAIModel: SupportedAIModel }) => void;
@@ -16,6 +18,7 @@ interface EnteringScreenProps {
   onAIModelChange: (model: SupportedAIModel) => void;
   isMultiAgentMode: boolean;
   onMultiAgentModeChange: (enabled: boolean) => void;
+  onLoadSavedAnalysis?: (analysis: StoredAnalysis) => void; // Nowa prop dla ładowania zapisanych analiz
 }
 
 export const EnteringScreen: React.FC<EnteringScreenProps> = ({ 
@@ -25,7 +28,8 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
     selectedAIModel,
     onAIModelChange,
     isMultiAgentMode,
-    onMultiAgentModeChange
+    onMultiAgentModeChange,
+    onLoadSavedAnalysis
 }) => {
   const [protocol, setProtocol] = useState('');
   const [selectedProtocol, setSelectedProtocol] = useState<Protocol | null>(null);
@@ -33,7 +37,7 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
   const [protocolFile, setProtocolFile] = useState<File | null>(null);
   const [medicalHistoryFile, setMedicalHistoryFile] = useState<File | null>(null);
   const [error, setError] = useState('');
-  const [showHistory, setShowHistory] = useState(false);
+  const [showSavedAnalyses, setShowSavedAnalyses] = useState(false); // Zmieniono z showHistory
 
   const handleFileUpload = async (file: File, type: 'protocol' | 'medicalHistory') => {
     try {
@@ -71,11 +75,13 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
     setProtocolFile(null); 
   };
   
-  const handleClearHistory = () => {
-    clearHistory();
-    setShowHistory(false); 
+  // Nowa funkcja do obsługi ładowania zapisanej analizy
+  const handleLoadSavedAnalysis = (analysis: StoredAnalysis) => {
+    if (onLoadSavedAnalysis) {
+      onLoadSavedAnalysis(analysis);
+      setShowSavedAnalyses(false);
+    }
   };
-
 
   return (
     <div className="min-h-screen bg-gradient-theme-light py-4 px-3 sm:px-4 lg:px-6 font-sans">
@@ -154,11 +160,11 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
 
           <div className="flex gap-2">
             <button
-              onClick={() => setShowHistory(!showHistory)}
+              onClick={() => setShowSavedAnalyses(!showSavedAnalyses)}
               className="btn-secondary flex items-center gap-2 text-sm px-3 py-1.5"
             >
-              <History className="w-4 h-4" />
-              {showHistory ? 'Ukryj historię' : 'Pokaż historię'}
+              <FolderOpen className="w-4 h-4" />
+              {showSavedAnalyses ? 'Ukryj zapisane analizy' : 'Pokaż zapisane analizy'}
             </button>
             {onLoadDemo && (
               <button
@@ -175,12 +181,11 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
         </div>
 
 
-        {showHistory ? (
+        {showSavedAnalyses ? (
           <div className="card-remedy mb-6">
-             <PatientHistory
-              history={getHistory()}
-              onClearHistory={handleClearHistory}
-              onSelectPatient={onSelectHistoricalPatient}
+            <SavedAnalysesManager
+              onAnalysisSelect={handleLoadSavedAnalysis}
+              onClose={() => setShowSavedAnalyses(false)}
             />
           </div>
         ) : (
@@ -241,6 +246,13 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
             </div>
           </form>
         )}
+        
+        {/* Storage Test Button - tylko w trybie deweloperskim */}
+        {/* {import.meta.env.DEV && (
+          <div className="mt-6">
+            <StorageTestButton />
+          </div>
+        )} */}
       </div>
     </div>
   );

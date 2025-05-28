@@ -117,3 +117,42 @@ System składa się z:
 ### Rozwiązanie Problemów CORS
 
 System używa backend proxy server'a do obsługi wywołań API AI, co rozwiązuje problemy CORS występujące przy bezpośrednich wywołaniach z przeglądarki.
+
+## 🔬 Ocena TRD (Treatment-Resistant Depression)
+
+System oferuje dwa tryby oceny TRD:
+
+### 🤖 **System Wieloagentowy** (Rekomendowany)
+- **TRDAssessmentAgent**: Specjalistyczny agent do oceny lekooporności
+- **Weryfikacja**: Automatyczna weryfikacja wyników AI z ujednoliconym serwisem
+- **Protokół**: Ścisłe przestrzeganie kryteriów MGH-ATRQ z protokołu COMP006
+
+### 🧠 **System Monoagentowy** (Legacy)
+- **Pojedynczy prompt**: Kompleksowa analiza w jednym zapytaniu AI
+- **Mniej precyzyjny**: Brak specjalizacji w ocenie TRD
+
+### 🔧 **Ujednolicony Serwis MGH-ATRQ**
+
+**Problem rozwiązany**: Wcześniej AI Insights i system AI używały różnych logik oceny MGH-ATRQ, co prowadziło do niespójnych wyników.
+
+**Rozwiązanie**: Nowy `mghAtrqService.ts` zapewnia:
+- ✅ **Jedną wspólną logikę** dla obu systemów
+- ✅ **Spójne wyniki** między AI Insights a analizą TRD
+- ✅ **Automatyczną weryfikację** wyników AI
+- ✅ **Lepsze parsowanie dawek** (np. "50mg (2x25mg)")
+- ✅ **Dokładne mapowanie leków** polsko-angielskie
+
+**Użycie**:
+```typescript
+import { mghAtrqService } from './services/mghAtrqService';
+
+// Ocena pojedynczej próby
+const singleTrial = mghAtrqService.assessSingleTrial(
+  'Quetiapine', '50mg (2x25mg)', 59, 'augmentacja'
+);
+
+// Kompleksowa ocena TRD
+const trdAssessment = mghAtrqService.assessTRDCompliance(
+  pharmacotherapyData, '2024-06-01'
+);
+```

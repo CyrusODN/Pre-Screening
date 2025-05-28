@@ -105,12 +105,12 @@ export class MedicalChatbotAgent extends AbstractBaseAgent<ChatbotResult> {
 
   protected getErrorFallback(): ChatbotResult {
     return {
-      response: 'Przepraszam, wystąpił błąd podczas przetwarzania Pana/Pani pytania. Proszę spróbować ponownie lub skontaktować się z zespołem medycznym.',
+      response: 'Przepraszam, wystąpił błąd podczas przetwarzania twojego pytania. Proszę spróbować ponownie lub skontaktować się z zespołem medycznym.',
       confidence: 0,
       referencedSections: [],
       suggestedFollowUp: [
-        'Czy może Pan/Pani zadać pytanie w inny sposób?',
-        'Czy potrzebuje Pan/Pani pomocy z konkretnym aspektem analizy?'
+        'Czy możesz zadać pytanie w inny sposób?',
+        'Czy potrzebujesz pomocy z konkretnym aspektem analizy?'
       ]
     };
   }
@@ -213,7 +213,7 @@ Na podstawie powyższych danych, odpowiedz na pytanie użytkownika w sposób pro
 
   private generateSuggestedQuestions(question: string, focusArea?: string): string[] {
     const baseQuestions = [
-      'Czy może Pan wyjaśnić szczegóły tego aspektu?',
+      'Czy możesz wyjaśnić szczegóły tego aspektu?',
       'Jakie są dodatkowe informacje w tym zakresie?',
       'Czy są jakieś dodatkowe zalecenia?'
     ];
@@ -228,14 +228,14 @@ Na podstawie powyższych danych, odpowiedz na pytanie użytkownika w sposób pro
       
       case 'pharmacotherapy':
         return [
-          'Czy może Pan wyjaśnić szczegóły farmakoterapii?',
+          'Czy możesz wyjaśnić szczegóły farmakoterapii?',
           'Jakie są wskaźniki lekooporności?',
           'Czy historia leczenia jest kompletna?'
         ];
       
       case 'episodes':
         return [
-          'Czy może Pan opisać przebieg epizodów?',
+          'Czy możesz opisać przebieg epizodów?',
           'Jakie są alternatywne scenariusze?',
           'Czy chronologia jest pewna?'
         ];

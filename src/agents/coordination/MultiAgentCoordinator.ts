@@ -28,26 +28,52 @@ async function preprocessMedicalHistoryForDrugMapping(medicalHistory: string): P
   const drugMappings: Array<{original: string; mapped: string; confidence: number}> = [];
   let processedHistory = medicalHistory;
   
-  // Wzorce do wykrywania nazw leków w tekście
+  // POPRAWIONE WZORCE - bardziej precyzyjne wykrywanie nazw leków
   const drugPatterns = [
-    // Wzorce dla polskich nazw leków
-    /\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s*(?:\d+\s*mg|\d+mg|tabl|kaps|ml)/gi,
-    // Wzorce dla nazw w nawiasach
-    /\(([^)]+(?:ina|ine|ol|um|an|on|ex|al))\)/gi,
-    // Wzorce dla nazw po "lek:", "preparat:", itp.
-    /(?:lek|preparat|medication|drug):\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)/gi,
-    // Wzorce dla typowych końcówek nazw leków
-    /\b([A-Z][a-z]*(?:ina|ine|ol|um|an|on|ex|al|yl|il))\b/gi
+    // Wzorce dla nazw leków z dawkami (najwyższy priorytet)
+    /\b([A-Z][a-z]{2,}(?:\s+[A-Z][a-z]+)*)\s+(?:\d+(?:[.,]\d+)?\s*(?:mg|mcg|g|ml|IU|j\.m\.))/gi,
+    
+    // Wzorce dla znanych nazw handlowych leków (lista sprawdzonych nazw)
+    /\b(Escitalopram|Elicea|Efevelon|Hydroxyzinum|Lamitrin|Pregabalin|Wellbutrin|Egzysta|Oreos|Lamotrix|Brintellix|Dulsevia|Neurovit|Welbox|Preato|Asertin|Dekristol|Mirtagen)\b/gi,
+    
+    // Wzorce dla nazw z typowymi końcówkami farmaceutycznymi (tylko jeśli mają sens)
+    /\b([A-Z][a-z]{3,}(?:ina|ine|ol|um|an|on|ex|al|yl|il|ium))\b(?=\s+(?:\d+|tabl|kaps|mg|ml|dawka|rano|wieczór|na noc))/gi,
+    
+    // Wzorce dla nazw po słowach kluczowych
+    /(?:lek|preparat|medication|drug|stosuje|przyjmuje|zażywa|podaje)[\s:]+([A-Z][a-z]{3,}(?:\s+[A-Z][a-z]+)*)/gi,
+    
+    // Wzorce dla nazw w nawiasach (tylko jeśli wyglądają jak leki)
+    /\(([A-Z][a-z]{3,}(?:\s+[A-Z][a-z]+)*)\)/gi
   ];
   
   const potentialDrugs = new Set<string>();
+  
+  // Lista słów do wykluczenia (nie są lekami)
+  const excludeWords = new Set([
+    'Centrum', 'Szpital', 'Oddział', 'Gmina', 'Telefon', 'Stan', 'Hemoglobina', 
+    'Cholesterol', 'Kreatynina', 'Witamina', 'Marcina', 'Nadal', 'Roste',
+    'Zawiesina', 'Regon', 'Hormon', 'Kontrola', 'Skan', 'Mail', 'Dialog',
+    'Terapia', 'Centrum', 'Ograniczon', 'Orygina', 'Zmian', 'Wspomina',
+    'Spowodowan', 'Koleina', 'Ealan', 'Trijodotyronina', 'Tyreotropina',
+    'Creatinine', 'Evevelon', 'Dulsevic', 'Elsay', 'Ntrum', 'Orycina'
+  ]);
   
   // Wyciągnij potencjalne nazwy leków
   drugPatterns.forEach(pattern => {
     let match;
     while ((match = pattern.exec(medicalHistory)) !== null) {
       const drugName = match[1].trim();
-      if (drugName.length > 3) { // Ignoruj bardzo krótkie nazwy
+      
+      // Sprawdź czy to nie jest słowo do wykluczenia
+      if (drugName.length > 3 && 
+          !excludeWords.has(drugName) && 
+          !excludeWords.has(drugName.toLowerCase()) &&
+          // Sprawdź czy nie zawiera cyfr (prawdopodobnie nie jest lekiem)
+          !/\d/.test(drugName) &&
+          // Sprawdź czy nie jest zbyt długie (prawdopodobnie fragment tekstu)
+          drugName.length < 25 &&
+          // Sprawdź czy nie zawiera typowych słów niefarmaceutycznych
+          !/(?:pacjent|leczenie|terapia|badanie|wizyta|kontrola|szpital|oddział|centrum|telefon|mail|adres|ulica|miasto)/i.test(drugName)) {
         potentialDrugs.add(drugName);
       }
     }
@@ -60,7 +86,7 @@ async function preprocessMedicalHistoryForDrugMapping(medicalHistory: string): P
     try {
       const mappingResult = await drugMappingClient.mapDrugToStandard(drugName);
       
-      if (mappingResult.found && mappingResult.confidence > 0.6) {
+      if (mappingResult.found && mappingResult.confidence > 0.7) { // Zwiększony próg confidence
         const standardName = mappingResult.standardName;
         const activeSubstance = mappingResult.activeSubstance;
         
@@ -120,109 +146,105 @@ export class MultiAgentCoordinatorImpl implements MultiAgentCoordinator {
     agentResults: Record<string, AgentResult>;
     executionLog: string[];
   }> {
-    this.executionLog.length = 0; // Wyczyść logi
+    this.log(`🚀 Rozpoczynanie analizy wieloagentowej z modelem: ${selectedModel}`);
     
-    try {
-      // NOWE: Preprocessuj historię medyczną dla mapowania leków
-      this.log('🔍 Preprocessing medical history for drug mapping...');
-      const { processedHistory, drugMappings } = await preprocessMedicalHistoryForDrugMapping(medicalHistory);
-      
-      // Dodaj informację o mapowaniu do kontekstu
-      let enhancedHistory = processedHistory;
-      if (drugMappings.length > 0) {
-        enhancedHistory += '\n\n--- INFORMACJE O MAPOWANIU LEKÓW ---\n';
-        enhancedHistory += 'Następujące nazwy handlowe zostały automatycznie zmapowane na substancje czynne:\n';
-        drugMappings.forEach(mapping => {
-          enhancedHistory += `• ${mapping.original} → ${mapping.mapped} (pewność: ${Math.round(mapping.confidence * 100)}%)\n`;
-        });
-        enhancedHistory += 'Proszę używać nazw substancji czynnych w analizie dla większej precyzji.\n';
-      }
-      
-      this.log(`✅ Drug mapping completed. Mapped ${drugMappings.length} drugs.`);
-      
-      // Inicjalizacja kontekstu współdzielonego z przetworzoną historią
-      const context: SharedContext = {
-        medicalHistory: enhancedHistory, // Używamy przetworzonej historii
-        studyProtocol,
-        modelUsed: selectedModel,
-        drugMappingInfo: {
-          mappingsApplied: drugMappings.length,
-          mappings: drugMappings,
-          preprocessedAt: new Date().toISOString()
-        }
-      };
-
-      const agentResults: Record<string, AgentResult> = {};
-
-      // FAZA 1: Analiza podstawowa - sekwencyjna dla zależności
-      this.log('🚀 FAZA 1: Rozpoczynanie analizy podstawowej...');
-      
-      // Krok 1a: Clinical Synthesis (brak zależności)
-      const clinicalResult = await this.executeAgent('clinical-synthesis', context);
-      agentResults['clinical-synthesis'] = clinicalResult;
-      context.clinicalSynthesis = clinicalResult;
-      this.log('✅ Agent Syntezy Klinicznej zakończony pomyślnie');
-
-      // Krok 1b: Episode Analysis (zależy tylko od clinical-synthesis)
-      const episodeResult = await this.executeAgent('episode-analysis', context);
-      agentResults['episode-analysis'] = episodeResult;
-      context.episodeAnalysis = episodeResult;
-      this.log('✅ Agent Analizy Epizodów zakończony pomyślnie');
-
-      // Krok 1c: Pharmacotherapy Analysis (zależy od clinical-synthesis i episode-analysis)
-      const pharmacoResult = await this.executeAgent('pharmacotherapy-analysis', context);
-      agentResults['pharmacotherapy-analysis'] = pharmacoResult;
-      context.pharmacotherapyAnalysis = pharmacoResult;
-      this.log('✅ Agent Farmakoterapii zakończony pomyślnie');
-
-      // FAZA 2: Analiza TRD (zależy od fazy 1)
-      this.log('🔬 FAZA 2: Rozpoczynanie analizy TRD...');
-      
-      const trdResult = await this.executeAgent('trd-assessment', context);
-      agentResults['trd-assessment'] = trdResult;
-      context.trdAssessment = trdResult;
-      this.log('✅ Agent TRD zakończony');
-
-      // FAZA 3: Ocena kryteriów (zależy od faz 1-2)
-      this.log('📋 FAZA 3: Rozpoczynanie oceny kryteriów...');
-      
-      const criteriaResult = await this.executeAgent('criteria-assessment', context);
-      agentResults['criteria-assessment'] = criteriaResult;
-      context.inclusionCriteriaAssessment = criteriaResult;
-      this.log('✅ Agent Oceny Kryteriów zakończony');
-
-      // FAZA 4: Ocena ryzyka (zależy od wszystkich poprzednich)
-      this.log('⚠️ FAZA 4: Rozpoczynanie oceny ryzyka...');
-      
-      const riskResult = await this.executeAgent('risk-assessment', context);
-      agentResults['risk-assessment'] = riskResult;
-      context.riskAssessment = riskResult;
-      this.log('✅ Agent Oceny Ryzyka zakończony');
-
-      // FAZA 5: Synteza końcowa
-      this.log('🎯 FAZA 5: Synteza wyników...');
-      
-      const finalResult = this.synthesizeFinalResult(agentResults, context);
-      
-      // Dodaj informacje o mapowaniu leków do wyniku końcowego
-      finalResult.drugMappingInfo = {
+    // 🔍 PREPROCESSING: Mapowanie leków na początku
+    console.log('🔍 [Multi-Agent] Starting drug mapping preprocessing...');
+    const { processedHistory, drugMappings } = await preprocessMedicalHistoryForDrugMapping(medicalHistory);
+    
+    // 🔍 DODANE LOGOWANIE PREPROCESSINGU
+    console.log('🔍 [Multi-Agent] Preprocessing results:');
+    console.log('📋 Original history length:', medicalHistory.length);
+    console.log('📋 Processed history length:', processedHistory.length);
+    console.log('🔄 Drug mappings found:', drugMappings.length);
+    
+    if (drugMappings.length > 0) {
+      console.log('🔍 [Multi-Agent] Drug mappings from preprocessing:');
+      drugMappings.forEach(mapping => {
+        console.log(`  - ${mapping.original} → ${mapping.mapped} (confidence: ${Math.round(mapping.confidence * 100)}%)`);
+      });
+    } else {
+      console.log('⚠️ [Multi-Agent] No drug mappings found during preprocessing!');
+    }
+    
+    // Utwórz kontekst współdzielony z wzbogaconą historią
+    const sharedContext: SharedContext = {
+      medicalHistory: processedHistory, // Użyj wzbogaconej historii
+      studyProtocol,
+      modelUsed: selectedModel,
+      drugMappingInfo: {
         mappingsApplied: drugMappings.length,
         mappings: drugMappings,
         preprocessedAt: new Date().toISOString()
-      };
-      
-      this.log(`✅ Analiza wieloagentowa zakończona pomyślnie z ${drugMappings.length} mapowaniami leków`);
-      
-      return {
-        finalResult,
-        agentResults,
-        executionLog: [...this.executionLog]
-      };
+      }
+    };
 
-    } catch (error) {
-      this.log(`💥 Krytyczny błąd w pipeline: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      throw error;
-    }
+    const agentResults: Record<string, AgentResult> = {};
+
+    // FAZA 1: Analiza podstawowa - sekwencyjna dla zależności
+    this.log('🚀 FAZA 1: Rozpoczynanie analizy podstawowej...');
+    
+    // Krok 1a: Clinical Synthesis (brak zależności)
+    const clinicalResult = await this.executeAgent('clinical-synthesis', sharedContext);
+    agentResults['clinical-synthesis'] = clinicalResult;
+    sharedContext.clinicalSynthesis = clinicalResult;
+    this.log('✅ Agent Syntezy Klinicznej zakończony pomyślnie');
+
+    // Krok 1b: Episode Analysis (zależy tylko od clinical-synthesis)
+    const episodeResult = await this.executeAgent('episode-analysis', sharedContext);
+    agentResults['episode-analysis'] = episodeResult;
+    sharedContext.episodeAnalysis = episodeResult;
+    this.log('✅ Agent Analizy Epizodów zakończony pomyślnie');
+
+    // Krok 1c: Pharmacotherapy Analysis (zależy od clinical-synthesis i episode-analysis)
+    const pharmacoResult = await this.executeAgent('pharmacotherapy-analysis', sharedContext);
+    agentResults['pharmacotherapy-analysis'] = pharmacoResult;
+    sharedContext.pharmacotherapyAnalysis = pharmacoResult;
+    this.log('✅ Agent Farmakoterapii zakończony pomyślnie');
+
+    // FAZA 2: Analiza TRD (zależy od fazy 1)
+    this.log('🔬 FAZA 2: Rozpoczynanie analizy TRD...');
+    
+    const trdResult = await this.executeAgent('trd-assessment', sharedContext);
+    agentResults['trd-assessment'] = trdResult;
+    sharedContext.trdAssessment = trdResult;
+    this.log('✅ Agent TRD zakończony');
+
+    // FAZA 3: Ocena kryteriów (zależy od faz 1-2)
+    this.log('📋 FAZA 3: Rozpoczynanie oceny kryteriów...');
+    
+    const criteriaResult = await this.executeAgent('criteria-assessment', sharedContext);
+    agentResults['criteria-assessment'] = criteriaResult;
+    sharedContext.inclusionCriteriaAssessment = criteriaResult;
+    this.log('✅ Agent Oceny Kryteriów zakończony');
+
+    // FAZA 4: Ocena ryzyka (zależy od wszystkich poprzednich)
+    this.log('⚠️ FAZA 4: Rozpoczynanie oceny ryzyka...');
+    
+    const riskResult = await this.executeAgent('risk-assessment', sharedContext);
+    agentResults['risk-assessment'] = riskResult;
+    sharedContext.riskAssessment = riskResult;
+    this.log('✅ Agent Oceny Ryzyka zakończony');
+
+    // FAZA 5: Synteza końcowa
+    this.log('🎯 FAZA 5: Synteza wyników...');
+    
+    const finalResult = this.synthesizeFinalResult(agentResults, sharedContext);
+    
+    // Dodaj informacje o mapowaniu leków do wyniku końcowego
+    finalResult.drugMappingInfo = {
+      mappingsApplied: drugMappings.length,
+      mappings: drugMappings,
+      preprocessedAt: new Date().toISOString()
+    };
+    
+    this.log(`✅ Analiza wieloagentowa zakończona pomyślnie z ${drugMappings.length} mapowaniami leków`);
+    
+    return {
+      finalResult,
+      agentResults,
+      executionLog: [...this.executionLog]
+    };
   }
 
   private async executeAgent(agentName: string, context: SharedContext): Promise<AgentResult> {
@@ -385,7 +407,7 @@ export class MultiAgentCoordinatorImpl implements MultiAgentCoordinator {
         id: patientId,
         age: this.extractAge(clinicalSynthesis) || 0,
         mainDiagnosis: clinicalSynthesis?.mainDiagnosis || 'Brak danych o głównym rozpoznaniu',
-        comorbidities: clinicalSynthesis?.comorbidities || []
+        comorbidities: this.extractComorbidities(clinicalSynthesis)
       },
       
       episodeEstimation: {
@@ -942,11 +964,18 @@ export class MultiAgentCoordinatorImpl implements MultiAgentCoordinator {
     });
   }
 
-  private generateOverallQualification(riskAssessment: any, _criteriaAssessment: any): string {
+  private generateOverallQualification(riskAssessment: any, criteriaAssessment: any): string {
     const recommendation = riskAssessment?.inclusionProbability?.recommendation;
     const score = riskAssessment?.inclusionProbability?.score || 0;
     
-    if (recommendation === 'include' && score >= 70) {
+    // Sprawdź czy są bezwzględne wykluczenia
+    const hasAbsoluteExclusions = this.checkForAbsoluteExclusions(criteriaAssessment);
+    
+    if (hasAbsoluteExclusions) {
+      return 'Kandydat nie kwalifikuje się do badania - bezwzględne wykluczenie';
+    } else if (recommendation === 'exclude' || score === 0) {
+      return 'Kandydat nie kwalifikuje się do badania';
+    } else if (recommendation === 'include' && score >= 70) {
       return 'Kandydat kwalifikuje się do badania';
     } else if (recommendation === 'further_evaluation' || (score >= 40 && score < 70)) {
       return 'Kandydat wymaga dodatkowej oceny';
@@ -955,82 +984,105 @@ export class MultiAgentCoordinatorImpl implements MultiAgentCoordinator {
     }
   }
 
+  private checkForAbsoluteExclusions(criteriaAssessment: any): boolean {
+    if (!criteriaAssessment) return false;
+    
+    // Lista kryteriów bezwzględnie wykluczających
+    const absoluteExclusionCriteria = [
+      'EC14', // Historia rodzinna schizofrenii
+      'EC1',  // Zaburzenia afektywne dwubiegunowe
+      'EC2',  // Zaburzenia psychotyczne
+      'GMEC6', // Cukrzyca typu 1
+      'GMEC8', // Padaczka
+      'GMEC12' // Nadwrażliwość na badany lek
+    ];
+    
+    // Sprawdź kryteria psychiatryczne
+    const psychiatricCriteria = criteriaAssessment.psychiatricExclusionCriteria || [];
+    for (const criterion of psychiatricCriteria) {
+      if (absoluteExclusionCriteria.includes(criterion.id) && 
+          criterion.status === 'spełnione' &&
+          criterion.reasoning?.includes('BEZWZGLĘDNE WYKLUCZENIE')) {
+        return true;
+      }
+    }
+    
+    // Sprawdź kryteria medyczne
+    const medicalCriteria = criteriaAssessment.medicalExclusionCriteria || [];
+    for (const criterion of medicalCriteria) {
+      if (absoluteExclusionCriteria.includes(criterion.id) && 
+          criterion.status === 'spełnione' &&
+          criterion.reasoning?.includes('BEZWZGLĘDNE WYKLUCZENIE')) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
+
   private extractMainIssues(riskAssessment: any, criteriaAssessment: any): string[] {
     const issues: string[] = [];
-    const seenIssues = new Set<string>(); // Deduplikacja
     
-    // Dodaj główne problemy z oceny kryteriów
-    if (criteriaAssessment?.overallAssessment?.majorConcerns) {
-      for (const concern of criteriaAssessment.overallAssessment.majorConcerns) {
-        const normalizedConcern = this.normalizeIssueText(concern);
-        if (!seenIssues.has(normalizedConcern)) {
-          seenIssues.add(normalizedConcern);
-          issues.push(concern);
+    // Dodaj bezwzględne wykluczenia na początku
+    if (criteriaAssessment) {
+      const allCriteria = [
+        ...(criteriaAssessment.psychiatricExclusionCriteria || []),
+        ...(criteriaAssessment.medicalExclusionCriteria || [])
+      ];
+      
+      for (const criterion of allCriteria) {
+        if (criterion.status === 'spełnione' && 
+            criterion.reasoning?.includes('BEZWZGLĘDNE WYKLUCZENIE')) {
+          issues.push(`BEZWZGLĘDNE WYKLUCZENIE: ${criterion.name}`);
         }
       }
     }
     
-    // Dodaj negatywne czynniki z oceny ryzyka (tylko jeśli nie są już uwzględnione)
+    // Dodaj inne problemy z oceny ryzyka
     if (riskAssessment?.inclusionProbability?.keyFactors?.negative) {
-      for (const factor of riskAssessment.inclusionProbability.keyFactors.negative) {
-        const normalizedFactor = this.normalizeIssueText(factor);
-        if (!seenIssues.has(normalizedFactor)) {
-          seenIssues.add(normalizedFactor);
-          issues.push(factor);
+      issues.push(...riskAssessment.inclusionProbability.keyFactors.negative);
+    }
+    
+    // Dodaj problemy z kryteriów włączenia
+    if (criteriaAssessment?.inclusionCriteria) {
+      for (const criterion of criteriaAssessment.inclusionCriteria) {
+        if (criterion.status === 'niespełnione') {
+          if (criterion.reasoning?.includes('CZASOWE WYKLUCZENIE')) {
+            issues.push(`Czasowe wykluczenie: ${criterion.name}`);
+          } else {
+            issues.push(`Niespełnione kryterium: ${criterion.name}`);
+          }
         }
       }
     }
     
-    return issues;
+    return issues.slice(0, 5); // Ogranicz do 5 najważniejszych problemów
   }
 
   private extractCriticalInfo(riskAssessment: any, criteriaAssessment: any): string[] {
-    const info: string[] = [];
-    const seenInfo = new Set<string>(); // Deduplikacja
+    const criticalInfo: string[] = [];
     
-    // Dodaj mniejsze problemy z oceny kryteriów
-    if (criteriaAssessment?.overallAssessment?.minorConcerns) {
-      for (const concern of criteriaAssessment.overallAssessment.minorConcerns) {
-        const normalizedConcern = this.normalizeIssueText(concern);
-        if (!seenInfo.has(normalizedConcern)) {
-          seenInfo.add(normalizedConcern);
-          info.push(concern);
+    // Dodaj informacje z oceny ryzyka
+    if (riskAssessment?.inclusionProbability?.keyFactors?.neutral) {
+      criticalInfo.push(...riskAssessment.inclusionProbability.keyFactors.neutral);
+    }
+    
+    // Dodaj kryteria wymagające weryfikacji
+    if (criteriaAssessment) {
+      const allCriteria = [
+        ...(criteriaAssessment.inclusionCriteria || []),
+        ...(criteriaAssessment.psychiatricExclusionCriteria || []),
+        ...(criteriaAssessment.medicalExclusionCriteria || [])
+      ];
+      
+      for (const criterion of allCriteria) {
+        if (criterion.status === 'weryfikacja') {
+          criticalInfo.push(`Weryfikacja wymagana: ${criterion.name}`);
         }
       }
     }
     
-    // Dodaj informacje o wysokim ryzyku samobójczym
-    if (riskAssessment?.patientRiskProfile?.suicidalRisk?.level === 'high' || 
-        riskAssessment?.patientRiskProfile?.suicidalRisk?.level === 'critical') {
-      const riskInfo = 'Wymagana szczegółowa ocena ryzyka samobójczego';
-      const normalizedRisk = this.normalizeIssueText(riskInfo);
-      if (!seenInfo.has(normalizedRisk)) {
-        seenInfo.add(normalizedRisk);
-        info.push(riskInfo);
-      }
-    }
-    
-    // Dodaj pozytywne czynniki jako informacje dodatkowe (nie jako główne problemy)
-    if (riskAssessment?.inclusionProbability?.keyFactors?.positive) {
-      for (const factor of riskAssessment.inclusionProbability.keyFactors.positive) {
-        const normalizedFactor = this.normalizeIssueText(factor);
-        if (!seenInfo.has(normalizedFactor)) {
-          seenInfo.add(normalizedFactor);
-          info.push(`Pozytywny czynnik: ${factor}`);
-        }
-      }
-    }
-    
-    return info;
-  }
-
-  // Nowa metoda pomocnicza do normalizacji tekstu dla deduplikacji
-  private normalizeIssueText(text: string): string {
-    return text
-      .toLowerCase()
-      .replace(/[^\w\s]/g, '') // Usuń znaki interpunkcyjne
-      .replace(/\s+/g, ' ') // Znormalizuj spacje
-      .trim();
+    return criticalInfo.slice(0, 5); // Ogranicz do 5 najważniejszych informacji
   }
 
   private extractRiskFactors(clinicalSynthesis: any, riskAssessment: any): string[] {

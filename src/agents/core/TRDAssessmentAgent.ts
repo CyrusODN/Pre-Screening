@@ -4,6 +4,7 @@ import type {
   SharedContext, 
   TRDAssessmentResult 
 } from '../../types/agents';
+import { mghAtrqService } from '../../services/mghAtrqService';
 
 export class TRDAssessmentAgent extends AbstractBaseAgent<TRDAssessmentResult> {
   constructor() {
@@ -143,8 +144,78 @@ ${context.studyProtocol}
 
 Wykonaj szczegółową ocenę TRD według instrukcji systemowych, uwzględniając najbardziej prawdopodobny scenariusz epizodu i precyzyjną analizę farmakoterapii z poprzednich agentów.`;
 
+    // 🔍 DODANE LOGOWANIE PROMPTU
+    console.log('🔍 [TRD Agent] Prompt content preview:');
+    console.log('📋 Medical History length:', context.medicalHistory?.length || 0);
+    console.log('📋 Previous Agent Results length:', context.previousAgentResults?.length || 0);
+    console.log('📋 Study Protocol length:', context.studyProtocol?.length || 0);
+    
+    // Loguj fragment previousAgentResults, żeby zobaczyć mapowania
+    if (context.previousAgentResults) {
+      const mappingSection = context.previousAgentResults.match(/Mapowania leków:[\s\S]*?(?=\n\n|\n[A-Z]|$)/);
+      if (mappingSection) {
+        console.log('🔍 [TRD Agent] Drug mappings found in context:', mappingSection[0]);
+      } else {
+        console.log('⚠️ [TRD Agent] No drug mappings section found in previousAgentResults');
+      }
+    }
+
     const response = await this.callAI(prompt, this.config.systemPrompt, context.modelUsed);
-    return this.parseJSONResponse<TRDAssessmentResult>(response);
+    const aiResult = this.parseJSONResponse<TRDAssessmentResult>(response);
+    
+    // UJEDNOLICENIE: Weryfikacja wyników AI za pomocą ujednoliconego serwisu
+    const verifiedResult = this.verifyWithUnifiedService(aiResult, pharmacoData?.timeline || []);
+    
+    return verifiedResult;
+  }
+
+  /**
+   * Weryfikuje wyniki AI za pomocą ujednoliconego serwisu MGH-ATRQ
+   */
+  private verifyWithUnifiedService(
+    aiResult: TRDAssessmentResult, 
+    pharmacotherapy: any[]
+  ): TRDAssessmentResult {
+    console.log(`🔄 [TRD Agent] Verifying AI results with unified MGH-ATRQ service`);
+    
+    try {
+      // Użyj ujednoliconego serwisu do weryfikacji
+      const serviceResult = mghAtrqService.assessTRDCompliance(
+        pharmacotherapy,
+        aiResult.episodeStartDate
+      );
+      
+      // Porównaj wyniki
+      const aiFailureCount = aiResult.failureCount;
+      const serviceFailureCount = serviceResult.failureCount || 0;
+      
+      console.log(`🔍 [TRD Verification] AI: ${aiFailureCount} failures, Service: ${serviceFailureCount} failures`);
+      
+      // Jeśli wyniki się różnią znacząco, użyj wyników serwisu jako bardziej wiarygodnych
+      if (Math.abs(aiFailureCount - serviceFailureCount) > 1) {
+        console.warn(`⚠️ [TRD Verification] Significant difference detected. Using service results.`);
+        
+        return {
+          ...aiResult,
+          failureCount: serviceFailureCount,
+          trdStatus: serviceResult.isCompliant ? 'confirmed' : 'not_confirmed',
+          conclusion: serviceResult.reasoning,
+          adequateTrials: serviceResult.adequateTrials || aiResult.adequateTrials
+        };
+      }
+      
+      // Jeśli wyniki są podobne, zachowaj AI reasoning ale zaktualizuj dane techniczne
+      return {
+        ...aiResult,
+        failureCount: serviceFailureCount, // Użyj dokładniejszej liczby z serwisu
+        adequateTrials: serviceResult.adequateTrials || aiResult.adequateTrials
+      };
+      
+    } catch (error) {
+      console.error(`❌ [TRD Verification] Error verifying with service:`, error);
+      // W przypadku błędu, zwróć oryginalne wyniki AI
+      return aiResult;
+    }
   }
 
   protected getErrorFallback(): TRDAssessmentResult {

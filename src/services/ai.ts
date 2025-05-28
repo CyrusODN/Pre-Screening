@@ -388,26 +388,52 @@ async function preprocessMedicalHistoryForDrugMapping(medicalHistory: string): P
   const drugMappings: Array<{original: string; mapped: string; confidence: number}> = [];
   let processedHistory = medicalHistory;
   
-  // Wzorce do wykrywania nazw leków w tekście
+  // POPRAWIONE WZORCE - bardziej precyzyjne wykrywanie nazw leków
   const drugPatterns = [
-    // Wzorce dla polskich nazw leków
-    /\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s*(?:\d+\s*mg|\d+mg|tabl|kaps|ml)/gi,
-    // Wzorce dla nazw w nawiasach
-    /\(([^)]+(?:ina|ine|ol|um|an|on|ex|al))\)/gi,
-    // Wzorce dla nazw po "lek:", "preparat:", itp.
-    /(?:lek|preparat|medication|drug):\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)/gi,
-    // Wzorce dla typowych końcówek nazw leków
-    /\b([A-Z][a-z]*(?:ina|ine|ol|um|an|on|ex|al|yl|il))\b/gi
+    // Wzorce dla nazw leków z dawkami (najwyższy priorytet)
+    /\b([A-Z][a-z]{2,}(?:\s+[A-Z][a-z]+)*)\s+(?:\d+(?:[.,]\d+)?\s*(?:mg|mcg|g|ml|IU|j\.m\.))/gi,
+    
+    // Wzorce dla znanych nazw handlowych leków (lista sprawdzonych nazw)
+    /\b(Escitalopram|Elicea|Efevelon|Hydroxyzinum|Lamitrin|Pregabalin|Wellbutrin|Egzysta|Oreos|Lamotrix|Brintellix|Dulsevia|Neurovit|Welbox|Preato|Asertin|Dekristol|Mirtagen)\b/gi,
+    
+    // Wzorce dla nazw z typowymi końcówkami farmaceutycznymi (tylko jeśli mają sens)
+    /\b([A-Z][a-z]{3,}(?:ina|ine|ol|um|an|on|ex|al|yl|il|ium))\b(?=\s+(?:\d+|tabl|kaps|mg|ml|dawka|rano|wieczór|na noc))/gi,
+    
+    // Wzorce dla nazw po słowach kluczowych
+    /(?:lek|preparat|medication|drug|stosuje|przyjmuje|zażywa|podaje)[\s:]+([A-Z][a-z]{3,}(?:\s+[A-Z][a-z]+)*)/gi,
+    
+    // Wzorce dla nazw w nawiasach (tylko jeśli wyglądają jak leki)
+    /\(([A-Z][a-z]{3,}(?:\s+[A-Z][a-z]+)*)\)/gi
   ];
   
   const potentialDrugs = new Set<string>();
+  
+  // Lista słów do wykluczenia (nie są lekami)
+  const excludeWords = new Set([
+    'Centrum', 'Szpital', 'Oddział', 'Gmina', 'Telefon', 'Stan', 'Hemoglobina', 
+    'Cholesterol', 'Kreatynina', 'Witamina', 'Marcina', 'Nadal', 'Roste',
+    'Zawiesina', 'Regon', 'Hormon', 'Kontrola', 'Skan', 'Mail', 'Dialog',
+    'Terapia', 'Centrum', 'Ograniczon', 'Orygina', 'Zmian', 'Wspomina',
+    'Spowodowan', 'Koleina', 'Ealan', 'Trijodotyronina', 'Tyreotropina',
+    'Creatinine', 'Evevelon', 'Dulsevic', 'Elsay', 'Ntrum', 'Orycina'
+  ]);
   
   // Wyciągnij potencjalne nazwy leków
   drugPatterns.forEach(pattern => {
     let match;
     while ((match = pattern.exec(medicalHistory)) !== null) {
       const drugName = match[1].trim();
-      if (drugName.length > 3) { // Ignoruj bardzo krótkie nazwy
+      
+      // Sprawdź czy to nie jest słowo do wykluczenia
+      if (drugName.length > 3 && 
+          !excludeWords.has(drugName) && 
+          !excludeWords.has(drugName.toLowerCase()) &&
+          // Sprawdź czy nie zawiera cyfr (prawdopodobnie nie jest lekiem)
+          !/\d/.test(drugName) &&
+          // Sprawdź czy nie jest zbyt długie (prawdopodobnie fragment tekstu)
+          drugName.length < 25 &&
+          // Sprawdź czy nie zawiera typowych słów niefarmaceutycznych
+          !/(?:pacjent|leczenie|terapia|badanie|wizyta|kontrola|szpital|oddział|centrum|telefon|mail|adres|ulica|miasto)/i.test(drugName)) {
         potentialDrugs.add(drugName);
       }
     }
@@ -420,7 +446,7 @@ async function preprocessMedicalHistoryForDrugMapping(medicalHistory: string): P
     try {
       const mappingResult = await drugMappingClient.mapDrugToStandard(drugName);
       
-      if (mappingResult.found && mappingResult.confidence > 0.6) {
+      if (mappingResult.found && mappingResult.confidence > 0.7) { // Zwiększony próg confidence
         const standardName = mappingResult.standardName;
         const activeSubstance = mappingResult.activeSubstance;
         

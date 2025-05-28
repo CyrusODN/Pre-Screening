@@ -189,20 +189,36 @@ ODPOWIEDŹ MUSI BYĆ W FORMACIE JSON:
     const clinicalData = context.clinicalSynthesis?.data;
     const episodeData = context.episodeAnalysis?.data;
     
-    const prompt = `Wykonaj szczegółową analizę farmakoterapii na podstawie dostępnych danych:
+    const prompt = `Przeprowadź skrupulatną analizę farmakoterapii:
 
 === HISTORIA MEDYCZNA ===
 ${context.medicalHistory}
 
 ${context.previousAgentResults || ''}
 
-=== PROTOKÓŁ BADANIA (kontekst kryteriów MGH-ATRQ) ===
+=== PROTOKÓŁ BADANIA ===
 ${context.studyProtocol}
 
-Przeprowadź skrupulatną analizę farmakoterapii według instrukcji systemowych. Wykorzystaj wyniki poprzednich agentów do lepszego zrozumienia kontekstu klinicznego i czasowego.`;
+Wykonaj szczegółową analizę farmakoterapii według instrukcji systemowych, uwzględniając najbardziej prawdopodobny scenariusz epizodu z poprzednich agentów.`;
 
     const response = await this.callAI(prompt, this.config.systemPrompt, context.modelUsed);
-    return this.parseJSONResponse<PharmacotherapyAnalysisResult>(response);
+    const result = this.parseJSONResponse<PharmacotherapyAnalysisResult>(response);
+    
+    // 🔍 DODANE LOGOWANIE MAPOWAŃ
+    console.log('🔍 [Pharmacotherapy Agent] Analysis results:');
+    console.log('📊 Timeline items:', result.timeline?.length || 0);
+    console.log('🔄 Drug mappings created:', result.drugMappings?.length || 0);
+    
+    if (result.drugMappings && result.drugMappings.length > 0) {
+      console.log('🔍 [Pharmacotherapy Agent] Drug mappings:');
+      result.drugMappings.forEach(mapping => {
+        console.log(`  - ${mapping.originalName} → ${mapping.standardName}`);
+      });
+    } else {
+      console.log('⚠️ [Pharmacotherapy Agent] No drug mappings created!');
+    }
+    
+    return result;
   }
 
   protected getErrorFallback(): PharmacotherapyAnalysisResult {

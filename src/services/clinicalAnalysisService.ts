@@ -7,9 +7,14 @@ import {
   differenceInDays, 
   isValid 
 } from 'date-fns';
-import type { PharmacotherapyItem, PatientData } from '../types/index';
+import type { PharmacotherapyItem, PatientData, SupportedAIModel } from '../types/index';
 import { PREDEFINED_PROTOCOLS } from '../data/protocols';
 import drugMappingClient from './drugMappingClient';
+// UJEDNOLICENIE: Import z nowego MGH-ATRQ serwisu
+import { mghAtrqService, type MGHATRQAssessmentResult } from './mghAtrqService';
+import { analysisHistoryService } from './AnalysisHistoryService';
+// Import funkcji AI
+import { analyzePatientData as analyzePatientDataAI } from './ai';
 
 // ============================================================================
 // CLINICAL RESEARCH TYPES & INTERFACES
@@ -17,27 +22,12 @@ import drugMappingClient from './drugMappingClient';
 
 // Enhanced clinical analysis interfaces
 export interface ClinicalAnalysisResult {
-  mghAtrqCompliance: MGHATRQAnalysis;
+  mghAtrqCompliance: MGHATRQAssessmentResult;
   adverseEvents: AdverseEventAnalysis;
   treatmentResponse: TreatmentResponseAnalysis;
   protocolEligibility: ProtocolEligibilityAnalysis;
   drugInteractions: DrugInteractionAnalysis;
   clinicalSignificance: ClinicalSignificanceAnalysis;
-}
-
-export interface MGHATRQAnalysis {
-  isCompliant: boolean;
-  confidence: number; // 0-1
-  reasoning: string;
-  minDoseReached: boolean;
-  minDurationReached: boolean;
-  adequateTrial: boolean;
-  specificFindings: {
-    drugFound: boolean;
-    doseAdequate: boolean;
-    durationAdequate: boolean;
-    augmentationUsed: boolean;
-  };
 }
 
 export interface AdverseEventAnalysis {
@@ -312,251 +302,20 @@ export const classifyDrugForClinicalResearch = (drugName: string, dose?: string,
   };
 };
 
-// AI Variable: Extract numeric dose from string
-export const extractDoseFromString = (doseStr: string): number => {
-  if (!doseStr) return 0;
-  
-  // ULEPSZENIE: Lepsze parsowanie dawek w różnych formatach
-  const originalDose = doseStr;
-  
-  // Sprawdź czy jest format typu "50mg (2x25mg)" - weź pierwszą wartość
-  const mainDoseMatch = doseStr.match(/^(\d+(?:[.,]\d+)?)\s*mg/i);
-  if (mainDoseMatch) {
-    const dose = parseFloat(mainDoseMatch[1].replace(',', '.'));
-    console.log(`🔍 [Dose Parsing] "${originalDose}" -> ${dose}mg (main dose format)`);
-    return dose;
-  }
-  
-  // Sprawdź format typu "2x25mg" - pomnóż
-  const multiplyDoseMatch = doseStr.match(/(\d+)\s*x\s*(\d+(?:[.,]\d+)?)\s*mg/i);
-  if (multiplyDoseMatch) {
-    const multiplier = parseInt(multiplyDoseMatch[1]);
-    const singleDose = parseFloat(multiplyDoseMatch[2].replace(',', '.'));
-    const totalDose = multiplier * singleDose;
-    console.log(`🔍 [Dose Parsing] "${originalDose}" -> ${totalDose}mg (${multiplier}x${singleDose}mg)`);
-    return totalDose;
-  }
-  
-  // Fallback do oryginalnej logiki
-  const cleaned = doseStr.toLowerCase()
-    .replace(/mg|ml|g|mcg|μg|units?|iu|tabs?|tabl?\.?/g, '')
-    .replace(/[^\d.,]/g, '');
-  
-  const match = cleaned.match(/(\d+(?:[.,]\d+)?)/);
-  const dose = match ? parseFloat(match[1].replace(',', '.')) : 0;
-  console.log(`🔍 [Dose Parsing] "${originalDose}" -> ${dose}mg (fallback)`);
-  return dose;
-};
+// UJEDNOLICENIE: Delegacja do nowego serwisu MGH-ATRQ
+export const extractDoseFromString = mghAtrqService.extractDoseFromString;
 
 // Advanced MGH-ATRQ compliance analysis with AI variables
+// UJEDNOLICENIE: Delegacja do nowego ujednoliconego serwisu MGH-ATRQ
 export const analyzeMGHATRQCompliance = (
   drugName: string, 
   dose: string, 
   duration: number, 
   notes?: string, 
   patientData?: PatientData
-): MGHATRQAnalysis => {
-  const drugClassification = classifyDrugForClinicalResearch(drugName, dose, notes);
-  
-  // AI Variable: Extract dose from string
-  const extractedDose = extractDoseFromString(dose);
-  const normalizedDrugName = drugName.toLowerCase().replace(/[^a-z]/g, '');
-  
-  console.log(`🔍 [MGH-ATRQ Analysis] Drug: ${drugName}, Dose: ${dose} -> ${extractedDose}mg, Duration: ${duration} days`);
-  
-  // Get MGH-ATRQ medications from COMP006 protocol
-  const comp006Protocol = PREDEFINED_PROTOCOLS['COMP006'];
-  const ic6Criterion = comp006Protocol?.criteria.inclusion?.find((c: any) => c.id === 'IC6');
-  const mghAtrqMedications = ic6Criterion?.mghAtrqPoland?.medications || [];
-  
-  // Check if drug is in MGH-ATRQ list from protocol
-  const matchingMedication = mghAtrqMedications.find((med: any) => {
-    const medName = med.drugName.toLowerCase().replace(/[^a-z]/g, '');
-    const brandName = med.brandName?.toLowerCase().replace(/[^a-z]/g, '') || '';
-    
-    // Create variations for better matching (Polish/English names)
-    const drugVariations = [
-      normalizedDrugName,
-      drugName.toLowerCase().replace(/[^a-z]/g, ''),
-      // Common Polish-English variations
-      normalizedDrugName.replace('wenlafaksyna', 'venlafaxine'),
-      normalizedDrugName.replace('venlafaxine', 'wenlafaksyna'),
-      normalizedDrugName.replace('kwetiapina', 'quetiapine'),
-      normalizedDrugName.replace('quetiapine', 'kwetiapina'),
-      normalizedDrugName.replace('escitalopram', 'escitalopram'), // same in both
-      normalizedDrugName.replace('mirtazapina', 'mirtazapine'),
-      normalizedDrugName.replace('mirtazapine', 'mirtazapina'),
-      // NAPRAWA: Dodanie mapowania dla duloksetyny
-      normalizedDrugName.replace('duloksetyna', 'duloxetine'),
-      normalizedDrugName.replace('duloxetine', 'duloksetyna'),
-      normalizedDrugName.replace('sertralina', 'sertraline'),
-      normalizedDrugName.replace('sertraline', 'sertralina'),
-      normalizedDrugName.replace('fluoksetyna', 'fluoxetine'),
-      normalizedDrugName.replace('fluoxetine', 'fluoksetyna'),
-      normalizedDrugName.replace('paroksetyna', 'paroxetine'),
-      normalizedDrugName.replace('paroxetine', 'paroksetyna'),
-      normalizedDrugName.replace('citalopram', 'citalopram'), // same in both
-      normalizedDrugName.replace('bupropion', 'bupropion'), // same in both
-      normalizedDrugName.replace('trazodon', 'trazodone'),
-      normalizedDrugName.replace('trazodone', 'trazodon')
-    ];
-    
-    return drugVariations.some(variation => 
-      medName.includes(variation) || 
-      variation.includes(medName) ||
-      (brandName && (variation.includes(brandName) || brandName.includes(variation)))
-    );
-  });
-  
-  const drugFound = !!matchingMedication;
-  
-  console.log(`🔍 [MGH-ATRQ] Drug found: ${drugFound}, Matching: ${matchingMedication?.drugName || 'none'}`);
-  
-  // Get minimum required dose from protocol
-  let minRequiredDose = 0;
-  if (matchingMedication) {
-    const minDoseStr = matchingMedication.minDose;
-    // Extract numeric value from dose string (e.g., "150mg/d" -> 150)
-    const doseMatch = minDoseStr.match(/(\d+(?:\.\d+)?)/);
-    if (doseMatch) {
-      minRequiredDose = parseFloat(doseMatch[1]);
-    }
-  }
-  
-  const doseAdequate = extractedDose >= minRequiredDose;
-  
-  console.log(`🔍 [MGH-ATRQ] Dose check: ${extractedDose}mg >= ${minRequiredDose}mg = ${doseAdequate}`);
-  
-  // Duration check (minimum 8 weeks = 56 days)
-  const durationAdequate = duration >= 56;
-  
-  console.log(`🔍 [MGH-ATRQ] Duration check: ${duration} days >= 56 days = ${durationAdequate}`);
-  
-  // AI Variable: Check for augmentation context
-  const augmentationUsed = drugClassification.isAugmentationAgent || 
-    (notes?.toLowerCase().includes('augmentacja') || false) ||
-    (notes?.toLowerCase().includes('wzmocnienie') || false) ||
-    (matchingMedication?.notes?.includes('adjuwantowe') || false);
-  
-  // AI Variable: Analyze clinical notes for compliance indicators
-  let notesBasedCompliance = false;
-  let confidence = 0.5;
-  
-  if (notes) {
-    const notesLower = notes.toLowerCase();
-    
-    // Explicit compliance mentions
-    if (notesLower.includes('adekwatna wg kryt. mgh-atrq') || 
-        notesLower.includes('zgodny z mgh-atrq') ||
-        notesLower.includes('spełnia kryteria mgh-atrq')) {
-      notesBasedCompliance = true;
-      confidence = 0.95;
-    }
-    
-    // Explicit non-compliance mentions
-    if (notesLower.includes('nieadekwatna wg kryt. mgh-atrq') || 
-        notesLower.includes('niezgodny z mgh-atrq') ||
-        notesLower.includes('nie spełnia kryteriów mgh-atrq')) {
-      notesBasedCompliance = false;
-      confidence = 0.95;
-    }
-    
-    // Infer from treatment context
-    if (notesLower.includes('niewystarczająca dawka') || 
-        notesLower.includes('za krótko') ||
-        notesLower.includes('przedwczesne przerwanie')) {
-      confidence = Math.max(confidence, 0.8);
-    }
-  }
-  
-  // AI Variable: Check patient data for AI agent analysis
-  if (patientData && !patientData.isMockData) {
-    const ic6Criterion = patientData.inclusionCriteria?.find(c => c.id === 'IC6');
-    if (ic6Criterion?.details) {
-      const details = ic6Criterion.details.toLowerCase();
-      const drugNameLower = drugName.toLowerCase();
-      
-      if (details.includes(drugNameLower)) {
-        if (details.includes('adekwatna') || details.includes('adequate')) {
-          notesBasedCompliance = true;
-          confidence = 0.98; // High confidence from AI analysis
-        } else if (details.includes('nieadekwatna') || details.includes('inadequate')) {
-          notesBasedCompliance = false;
-          confidence = 0.98;
-        }
-      }
-    }
-  }
-  
-  // Final compliance determination
-  // NAPRAWA: notesBasedCompliance nie może nadpisać rzeczywistej oceny dawki/czasu
-  // Jeśli lek jest znaleziony w protokole, musi spełniać kryteria dawki i czasu
-  let adequateTrial = false;
-  let isCompliant = false;
-  
-  if (drugFound) {
-    // Jeśli lek jest w protokole, musi spełniać wszystkie kryteria
-    adequateTrial = doseAdequate && durationAdequate;
-    isCompliant = adequateTrial;
-    
-    // Notatki kliniczne mogą tylko potwierdzić, ale nie nadpisać rzeczywistej oceny
-    if (notesBasedCompliance && !adequateTrial) {
-      // Konflikt między notatkami a rzeczywistą oceną - priorytet dla rzeczywistej oceny
-      confidence = Math.max(confidence, 0.7);
-    }
-  } else {
-    // Jeśli lek nie jest w protokole, można polegać na notatkach klinicznych
-    adequateTrial = notesBasedCompliance;
-    isCompliant = adequateTrial;
-  }
-  
-  console.log(`🔍 [MGH-ATRQ] Final decision: isCompliant=${isCompliant}, adequateTrial=${adequateTrial}, notesBasedCompliance=${notesBasedCompliance}`);
-  
-  // Generate reasoning
-  let reasoning = '';
-  if (drugFound) {
-    reasoning += `Lek ${drugName} znajduje się w protokole MGH-ATRQ COMP006. `;
-    if (matchingMedication) {
-      reasoning += `Znaleziono jako: ${matchingMedication.drugName} (${matchingMedication.brandName}). `;
-    }
-  } else {
-    reasoning += `Lek ${drugName} nie został znaleziony w protokole MGH-ATRQ COMP006. `;
-  }
-  
-  if (drugFound) {
-    if (doseAdequate) {
-      reasoning += `Dawka ${dose} jest adekwatna (min. ${minRequiredDose}mg). `;
-    } else {
-      reasoning += `Dawka ${dose} jest nieadekwatna (min. ${minRequiredDose}mg). `;
-    }
-  } else {
-    reasoning += `Nie można ocenić adekwatności dawki ${dose} - lek nie znajduje się w protokole MGH-ATRQ. `;
-  }
-  
-  if (durationAdequate) {
-    reasoning += `Czas trwania ${duration} dni jest adekwatny (min. 56 dni). `;
-  } else {
-    reasoning += `Czas trwania ${duration} dni jest nieadekwatny (min. 56 dni). `;
-  }
-  
-  if (notesBasedCompliance) {
-    reasoning += 'Notatki kliniczne wskazują na zgodność z kryteriami. ';
-  }
-  
-  return {
-    isCompliant,
-    confidence,
-    reasoning: reasoning.trim(),
-    minDoseReached: doseAdequate,
-    minDurationReached: durationAdequate,
-    adequateTrial,
-    specificFindings: {
-      drugFound,
-      doseAdequate,
-      durationAdequate,
-      augmentationUsed
-    }
-  };
+): MGHATRQAssessmentResult => {
+  console.log(`🔄 [Clinical Analysis] Delegating MGH-ATRQ assessment to unified service`);
+  return mghAtrqService.assessMGHATRQCompliance(drugName, dose, duration, notes, patientData);
 };
 
 // AI Variable: Analyze adverse events from clinical notes
@@ -946,7 +705,10 @@ export const clinicalAnalysisService = {
   analyzeAdverseEvents,
   analyzeTreatmentResponse,
   performClinicalAnalysis,
-  extractDoseFromString
+  extractDoseFromString,
+  
+  // UJEDNOLICENIE: Referencja do nowego serwisu MGH-ATRQ
+  mghAtrqService
 };
 
 export default clinicalAnalysisService;
@@ -1053,4 +815,53 @@ export async function classifyDrugForClinicalResearchEnhanced(drugName: string):
     confidence: 0.5,
     alternatives: []
   };
+}
+
+// Wrapper function for AI analysis with history saving
+export async function analyzePatientDataWithHistory(
+  medicalHistory: string,
+  studyProtocol: string,
+  modelUsed: SupportedAIModel = 'o3'
+): Promise<PatientData> {
+  try {
+    console.log(`🔬 [ClinicalAnalysis] Starting analysis with model: ${modelUsed}`);
+    
+    // Wywołaj oryginalną funkcję AI
+    const patientData = await analyzePatientDataAI(medicalHistory, studyProtocol, modelUsed);
+    
+    // 💾 ZAPISZ ANALIZĘ DO HISTORII
+    try {
+      const analysisId = await analysisHistoryService.saveSingleAgentAnalysis(
+        patientData,
+        medicalHistory,
+        studyProtocol
+      );
+      
+      console.log(`💾 [ClinicalAnalysis] Analysis saved to history: ${analysisId}`);
+    } catch (saveError) {
+      console.warn(`⚠️ [ClinicalAnalysis] Failed to save analysis to history:`, saveError);
+      // Nie przerywaj analizy jeśli zapis się nie powiódł
+    }
+
+    console.log(`✅ [ClinicalAnalysis] Analysis completed successfully`);
+    return patientData;
+
+  } catch (error) {
+    console.error(`❌ [ClinicalAnalysis] Analysis failed:`, error);
+    
+    // 💾 ZAPISZ NIEUDANĄ ANALIZĘ
+    try {
+      await analysisHistoryService.saveFailedAnalysis(
+        { modelUsed } as Partial<PatientData>,
+        medicalHistory,
+        studyProtocol,
+        error instanceof Error ? error.message : String(error),
+        'single-agent'
+      );
+    } catch (saveError) {
+      console.warn(`⚠️ [ClinicalAnalysis] Failed to save failed analysis:`, saveError);
+    }
+
+    throw error;
+  }
 } 

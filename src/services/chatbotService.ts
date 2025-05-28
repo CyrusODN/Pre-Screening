@@ -70,13 +70,13 @@ Mogę odpowiedzieć na pytania dotyczące:
 
 **Uwaga:** To tylko analiza wstępna. Wszystkie decyzje medyczne wymagają weryfikacji przez lekarza prowadzącego.
 
-Jak mogę Panu/Pani pomóc?`,
+Jak mogę ci pomóc?`,
         timestamp: new Date(),
         confidence: 1.0,
         suggestedFollowUp: [
           'Dlaczego ten pacjent może nie spełniać kryteriów?',
           'Jakie są główne ryzyka dla tego pacjenta?',
-          'Czy może Pan wyjaśnić ocenę TRD?',
+          'Czy możesz wyjaśnić ocenę TRD?',
           'Jakie dodatkowe badania są potrzebne?'
         ]
       }
@@ -122,13 +122,13 @@ Mogę odpowiedzieć na pytania dotyczące:
 
 **Uwaga:** To analiza klasyczna (monoagentowa). Wszystkie decyzje medyczne wymagają weryfikacji przez lekarza prowadzącego.
 
-Jak mogę Panu/Pani pomóc?`,
+Jak mogę ci pomóc?`,
         timestamp: new Date(),
         confidence: 0.8, // Nieco niższa pewność dla analizy monoagentowej
         suggestedFollowUp: [
           'Dlaczego ten pacjent może nie spełniać kryteriów?',
           'Jakie są główne problemy w analizie?',
-          'Czy może Pan wyjaśnić ocenę TRD?',
+          'Czy możesz wyjaśnić ocenę TRD?',
           'Jakie dodatkowe informacje są potrzebne?'
         ]
       }
@@ -353,12 +353,12 @@ Jak mogę Panu/Pani pomóc?`,
       const errorMessage: ChatMessage = {
         id: `bot-error-${Date.now()}`,
         type: 'bot',
-        content: `Przepraszam, wystąpił błąd podczas przetwarzania Pana/Pani pytania: ${error instanceof Error ? error.message : 'Nieznany błąd'}. Proszę spróbować ponownie.`,
+        content: `Przepraszam, wystąpił błąd podczas przetwarzania twojego pytania: ${error instanceof Error ? error.message : 'Nieznany błąd'}. Proszę spróbować ponownie.`,
         timestamp: new Date(),
         confidence: 0,
         suggestedFollowUp: [
-          'Czy może Pan/Pani zadać pytanie w inny sposób?',
-          'Czy potrzebuje Pan/Pani pomocy z konkretnym aspektem?'
+          'Czy możesz zadać pytanie w inny sposób?',
+          'Czy potrzebujesz pomocy z konkretnym aspektem?'
         ]
       };
 
@@ -407,7 +407,7 @@ Jak mogę Panu/Pani pomóc?`,
     const baseQuestions = [
       'Dlaczego ten pacjent może nie spełniać kryteriów włączenia?',
       'Jakie są główne ryzyka związane z tym pacjentem?',
-      'Czy może Pan wyjaśnić szczegóły oceny TRD?',
+      'Czy możesz wyjaśnić szczegóły oceny TRD?',
       'Jakie dodatkowe badania lub informacje są potrzebne?',
       'Jaka jest interpretacja analizy farmakoterapii?',
       'Czy pacjent nadaje się do włączenia do badania?',

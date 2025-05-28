@@ -1,0 +1,14 @@
+{
+  "id": "analysis_mb7y0xu2_pq1kv736b",
+  "patientId": "PAT/202505/760",
+  "analysisType": "multi-agent",
+  "modelUsed": "gemini",
+  "createdAt": "2025-05-28T12:50:29.821Z",
+  "updatedAt": "2025-05-28T13:22:11.108Z",
+  "status": "completed",
+  "version": "1.0.0",
+  "tags": [
+    "multi-agent"
+  ],
+  "notes": "Magdalena W. - Wieloagentowa - 28.05.2025 14:50"
+}

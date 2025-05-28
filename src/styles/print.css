@@ -49,6 +49,21 @@
     page-break-after: avoid;
   }
 
+  /* Specific styles for header title and subtitle */
+  .print-report header h1 {
+    font-size: 14pt !important;
+    margin-bottom: 4pt !important;
+  }
+
+  .print-report header p {
+    font-size: 10pt !important;
+    margin-bottom: 2pt !important;
+  }
+
+  .print-report header p.text-xs {
+    font-size: 8pt !important;
+  }
+
   .print-report h2 {
     font-size: 14pt !important;
     margin-top: 8pt !important;
@@ -242,6 +257,12 @@
   .print-report svg {
     width: 12pt !important;
     height: 12pt !important;
+  }
+
+  /* Exception for header logo - keep original size */
+  .print-report header svg {
+    width: 160px !important;
+    height: 40px !important;
   }
 
   /* Force page breaks */
