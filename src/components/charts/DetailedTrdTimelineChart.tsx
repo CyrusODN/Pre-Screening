@@ -357,13 +357,13 @@ const generatePredictiveAnalytics = (
   // Generate recommended next steps
   const recommendedNextSteps: string[] = [];
   if (pattern.adherencePattern === 'poor') {
-    recommendedNextSteps.push('Implementacja strategii poprawy adherencji');
-  }
-  if (adjustedSuccessRate < 0.4) {
-    recommendedNextSteps.push('Rozważenie terapii eksperymentalnej lub protokołu badawczego');
+    recommendedNextSteps.push('Implementacja strategii poprawy przestrzegania terapii');
   }
   if (baseAdverseRisk > 0.6) {
     recommendedNextSteps.push('Intensywne monitorowanie bezpieczeństwa');
+  }
+  if (adjustedSuccessRate > 0.7) {
+    recommendedNextSteps.push('Kontynuacja obecnej strategii terapeutycznej');
   }
 
   return {
@@ -638,45 +638,38 @@ const getDrugColor = (drugName: string, drugClass?: string): string => {
   
   let color: string;
   
-  // First try drug class colors - these can be shared between drugs of the same class
-  if (drugClass && DRUG_CLASS_COLORS[drugClass as keyof typeof DRUG_CLASS_COLORS]) {
-    color = DRUG_CLASS_COLORS[drugClass as keyof typeof DRUG_CLASS_COLORS];
-    // Don't add drug class colors to usedColors - they can be shared
-    drugColorCache.set(cacheKey, color);
-    return color;
-  } else {
-    // Use improved hash with collision detection for drugs without specific class colors
-    let colorIndex = hashCode(drugName.toLowerCase()) % BASE_COLORS.length;
+  // ZAWSZE używaj nazwy leku do generowania unikalnego koloru
+  // Klasa farmakologiczna jest tylko wskazówką, ale każdy lek ma unikalny kolor
+  let colorIndex = hashCode(drugName.toLowerCase()) % BASE_COLORS.length;
+  color = BASE_COLORS[colorIndex];
+  
+  // Jeśli kolor jest już używany, znajdź następny dostępny
+  let attempts = 0;
+  while (usedColors.has(color) && attempts < BASE_COLORS.length) {
+    colorIndex = (colorIndex + 1) % BASE_COLORS.length;
     color = BASE_COLORS[colorIndex];
-    
-    // If color is already used, try next colors until we find an unused one
-    let attempts = 0;
-    while (usedColors.has(color) && attempts < BASE_COLORS.length) {
-      colorIndex = (colorIndex + 1) % BASE_COLORS.length;
-      color = BASE_COLORS[colorIndex];
-      attempts++;
-    }
-    
-    // If all colors are used, use a variation of the original color
-    if (usedColors.has(color)) {
-      const baseColor = BASE_COLORS[hashCode(drugName.toLowerCase()) % BASE_COLORS.length];
-      // Create a slightly different shade
-      const variation = hashCode(drugName + 'variation') % 3;
-      switch (variation) {
-        case 0:
-          color = baseColor + '99'; // Add transparency
-          break;
-        case 1:
-          color = baseColor + 'CC'; // Different transparency
-          break;
-        default:
-          color = baseColor + '66'; // Another transparency
-      }
-    }
-    
-    // Only add BASE_COLORS to usedColors to prevent conflicts between unclassified drugs
-    usedColors.add(color);
+    attempts++;
   }
+  
+  // Jeśli wszystkie kolory są używane, użyj wariantu oryginalnego koloru
+  if (usedColors.has(color)) {
+    const baseColor = BASE_COLORS[hashCode(drugName.toLowerCase()) % BASE_COLORS.length];
+    // Stwórz lekko inny odcień
+    const variation = hashCode(drugName + 'variation') % 3;
+    switch (variation) {
+      case 0:
+        color = baseColor + '99'; // Dodaj przezroczystość
+        break;
+      case 1:
+        color = baseColor + 'CC'; // Inna przezroczystość
+        break;
+      default:
+        color = baseColor + '66'; // Kolejna przezroczystość
+    }
+  }
+  
+  // Dodaj kolor do używanych kolorów
+  usedColors.add(color);
   
   drugColorCache.set(cacheKey, color);
   return color;
@@ -804,10 +797,24 @@ const TimelineEventBar = memo<{
   }, [event, onClick]);
 
   const handleMouseEnter = useCallback((e: React.MouseEvent) => {
-    const rect = e.currentTarget.getBoundingClientRect();
+    // Get mouse position relative to viewport
+    const mouseX = e.clientX;
+    const mouseY = e.clientY;
+    
     onHover(event, { 
-      x: rect.left + rect.width / 2, 
-      y: rect.top 
+      x: mouseX, 
+      y: mouseY 
+    });
+  }, [event, onHover]);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    // Update tooltip position to follow mouse cursor
+    const mouseX = e.clientX;
+    const mouseY = e.clientY;
+    
+    onHover(event, { 
+      x: mouseX, 
+      y: mouseY 
     });
   }, [event, onHover]);
 
@@ -855,6 +862,7 @@ const TimelineEventBar = memo<{
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       onMouseEnter={handleMouseEnter}
+      onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       tabIndex={0}
       role="button"
@@ -1306,7 +1314,7 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
     if (zoomConfig.density === 'high' || zoomConfig.density === 'very-high' || zoomConfig.density === 'ultra') {
       current = start;
       const getMinorStep = () => {
-        const interval = zoomConfig.minorTickInterval;
+        const interval = zoomConfig.minorTickInterval as 'quarter' | 'month' | 'week' | 'day' | 'hour';
         if (interval === 'quarter') return { months: 3 };
         if (interval === 'month') return { months: 1 };
         if (interval === 'week') return { weeks: 1 };
@@ -1978,7 +1986,7 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
         >
           <div 
             ref={modalRef}
-            className="bg-white rounded-xl shadow-2xl p-6 max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto"
+            className="bg-white rounded-xl shadow-2xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center gap-4 mb-6 pb-4 border-b border-slate-200">
@@ -2043,6 +2051,200 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
                 </div>
               </div>
             )}
+
+            {/* AI-POWERED INSIGHTS SECTION */}
+            {(enableAIAnalysis || enablePredictiveAnalytics) && (
+              <div className="mb-6">
+                <h4 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                  <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                  AI-Powered Insights
+                </h4>
+                
+                {/* Analiza wzorców leczenia */}
+                {enableAIAnalysis && (
+                  <div className="mb-4">
+                    <h5 className="font-medium text-slate-700 mb-2">Analiza wzorców leczenia</h5>
+                    <div className="grid grid-cols-2 gap-3 text-xs">
+                      <div className="bg-blue-50 rounded-lg p-2">
+                        <div className="text-slate-600 mb-1">Wzorzec leczenia</div>
+                        <div className="font-medium text-slate-800">
+                          {selectedEvent.predictiveAnalytics.confidenceLevel > 0.7 ? (
+                            selectedEvent.clinicalAnalysis.treatmentResponse.responseType === 'full_response' ? 'Standardowy' :
+                            selectedEvent.clinicalAnalysis.treatmentResponse.responseType === 'partial_response' ? 'Umiarkowany' :
+                            'Złożony'
+                          ) : 'Nieznany'}
+                        </div>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-2">
+                        <div className="text-slate-600 mb-1">Przestrzeganie terapii</div>
+                        <div className="font-medium text-slate-800">
+                          {selectedEvent.duration > 56 ? 'Dobre' : 
+                           selectedEvent.duration > 28 ? 'Umiarkowane' : 'Słabe'}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Predykcyjna analityka */}
+                {enablePredictiveAnalytics && (
+                  <div className="mb-4">
+                    <h5 className="font-medium text-slate-700 mb-2">Predykcyjna analityka</h5>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-slate-600">Prognoza odpowiedzi na leczenie</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-16 bg-gray-200 rounded-full h-2">
+                            <div 
+                              className="bg-green-500 h-2 rounded-full" 
+                              style={{ width: `${selectedEvent.predictiveAnalytics.treatmentSuccessProbability * 100}%` }}
+                            ></div>
+                          </div>
+                          <span className="text-xs font-medium text-slate-800">
+                            {(selectedEvent.predictiveAnalytics.treatmentSuccessProbability * 100).toFixed(0)}%
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-slate-600">Ryzyko działań niepożądanych</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-16 bg-gray-200 rounded-full h-2">
+                            <div 
+                              className="bg-red-500 h-2 rounded-full" 
+                              style={{ width: `${selectedEvent.predictiveAnalytics.adverseEventRisk * 100}%` }}
+                            ></div>
+                          </div>
+                          <span className="text-xs font-medium text-slate-800">
+                            {(selectedEvent.predictiveAnalytics.adverseEventRisk * 100).toFixed(0)}%
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-xs text-slate-500 italic">
+                        *Analiza oparta na historii działań niepożądanych i profilu farmakologicznym leku
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-slate-600">Zgodność z protokołem</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-16 bg-gray-200 rounded-full h-2">
+                            <div 
+                              className="bg-blue-500 h-2 rounded-full" 
+                              style={{ width: `${selectedEvent.predictiveAnalytics.protocolEligibilityScore * 100}%` }}
+                            ></div>
+                          </div>
+                          <span className="text-xs font-medium text-slate-800">
+                            {(selectedEvent.predictiveAnalytics.protocolEligibilityScore * 100).toFixed(0)}%
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Ocena zgodności z MGH ATRQ */}
+                <div className="mb-4">
+                  <h5 className="font-medium text-slate-700 mb-2">Ocena zgodności z MGH ATRQ</h5>
+                  <div className="bg-slate-50 rounded-lg p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs text-slate-600">Status zgodności</span>
+                      <span className={`text-xs font-medium px-2 py-1 rounded-full ${
+                        selectedEvent.clinicalAnalysis.mghAtrqCompliance.isCompliant 
+                          ? 'bg-green-100 text-green-700' 
+                          : 'bg-red-100 text-red-700'
+                      }`}>
+                        {selectedEvent.clinicalAnalysis.mghAtrqCompliance.isCompliant ? 'Zgodny' : 'Niezgodny'}
+                      </span>
+                    </div>
+                    <div className="text-xs text-slate-600">
+                      Pewność: {(selectedEvent.clinicalAnalysis.mghAtrqCompliance.confidence * 100).toFixed(0)}%
+                    </div>
+                    {selectedEvent.clinicalAnalysis.mghAtrqCompliance.reasoning && (
+                      <div className="text-xs text-slate-500 mt-1">
+                        {selectedEvent.clinicalAnalysis.mghAtrqCompliance.reasoning}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Klasyfikacja leków */}
+                <div className="mb-4">
+                  <h5 className="font-medium text-slate-700 mb-2">Klasyfikacja leków</h5>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="bg-purple-50 rounded-lg p-2">
+                      <div className="text-slate-600 mb-1">Linia terapii</div>
+                      <div className="font-medium text-slate-800">
+                        {selectedEvent.drugClassification.primaryClass === 'SSRI' || selectedEvent.drugClassification.primaryClass === 'SNRI' ? 'I linia' :
+                         selectedEvent.drugClassification.primaryClass === 'TCA' || selectedEvent.drugClassification.primaryClass === 'Atypical' ? 'II linia' :
+                         selectedEvent.drugClassification.primaryClass === 'MAOI' ? 'III linia' :
+                         selectedEvent.drugClassification.isAugmentationAgent ? 'Augmentacja' :
+                         'Inne'}
+                      </div>
+                    </div>
+                    <div className="bg-orange-50 rounded-lg p-2">
+                      <div className="text-slate-600 mb-1">Relevantność protokołu</div>
+                      <div className="font-medium text-slate-800">
+                        {selectedEvent.drugClassification.isProtocolRelevant ? 'Istotny' : 'Nieistotny'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Wskaźniki jakości danych */}
+                <div className="mb-4">
+                  <h5 className="font-medium text-slate-700 mb-2">Wskaźniki jakości danych</h5>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-slate-600">Jakość danych</span>
+                    <div className="flex items-center gap-2">
+                      <div className={`w-3 h-3 rounded-full ${
+                        selectedEvent.dataQuality === 'excellent' ? 'bg-green-500' :
+                        selectedEvent.dataQuality === 'good' ? 'bg-blue-500' :
+                        selectedEvent.dataQuality === 'fair' ? 'bg-yellow-500' :
+                        'bg-red-500'
+                      }`}></div>
+                      <span className="text-xs font-medium text-slate-800 capitalize">
+                        {selectedEvent.dataQuality === 'excellent' ? 'Doskonała' :
+                         selectedEvent.dataQuality === 'good' ? 'Dobra' :
+                         selectedEvent.dataQuality === 'fair' ? 'Przeciętna' :
+                         'Słaba'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="text-xs text-slate-600">Pewność AI</span>
+                    <span className="text-xs font-medium text-slate-800">
+                      {(selectedEvent.aiConfidence * 100).toFixed(0)}%
+                    </span>
+                  </div>
+                </div>
+
+                {/* AI Insights */}
+                {selectedEvent.predictiveAnalytics.aiInsights.length > 0 && (
+                  <div className="mb-4">
+                    <h5 className="font-medium text-slate-700 mb-2">Spostrzeżenia AI</h5>
+                    <div className="space-y-1">
+                      {selectedEvent.predictiveAnalytics.aiInsights.map((insight, index) => (
+                        <div key={index} className="text-xs text-slate-600 bg-blue-50 rounded p-2">
+                          • {insight}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Recommended Next Steps */}
+                {selectedEvent.predictiveAnalytics.recommendedNextSteps.length > 0 && (
+                  <div>
+                    <h5 className="font-medium text-slate-700 mb-2">Zalecane następne kroki</h5>
+                    <div className="space-y-1">
+                      {selectedEvent.predictiveAnalytics.recommendedNextSteps.map((step, index) => (
+                        <div key={index} className="text-xs text-slate-600 bg-green-50 rounded p-2">
+                          • {step}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
             
             <div className="flex gap-3">
               <button
@@ -2059,11 +2261,11 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
       {/* Global Tooltip - Rendered at top level to appear above everything */}
       {hoveredEvent && tooltipPosition && (
         <div 
-          className="fixed px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-xl pointer-events-none z-[9999] min-w-max"
+          className="fixed px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-xl pointer-events-none z-[9999] min-w-max max-w-xs"
           style={{
-            left: tooltipPosition.x,
-            top: tooltipPosition.y - 10,
-            transform: 'translate(-50%, -100%)'
+            left: Math.min(tooltipPosition.x + 15, window.innerWidth - 280), // Offset right and prevent overflow
+            top: Math.max(tooltipPosition.y - 80, 10), // Offset up more to avoid cursor and prevent overflow at top
+            transform: 'none' // Remove transform to use direct positioning
           }}
         >
           <div className="space-y-1">

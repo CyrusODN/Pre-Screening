@@ -5,162 +5,220 @@ import type { PatientData, Criterion, SupportedAIModel, AIConfig, GeminiAIConfig
 import { initialPatientData } from '../data/mockData';
 // Usunięto nieużywany import 'differenceInDays'
 import { addDays, formatISO, isValid, parseISO } from 'date-fns'; 
+import drugMappingClient from './drugMappingClient';
 
 export async function analyzePatientData(
   medicalHistory: string,
   studyProtocol: string,
   selectedModel: SupportedAIModel
 ): Promise<PatientData> {
-  const currentConfig = getAIConfig(selectedModel);
+  console.log(`🤖 [AI Service] Starting patient analysis with model: ${selectedModel}`);
+  
+  try {
+    // NOWE: Preprocessuj historię medyczną dla mapowania leków
+    const { processedHistory, drugMappings } = await preprocessMedicalHistoryForDrugMapping(medicalHistory);
+    
+    // Dodaj informację o mapowaniu do kontekstu
+    let enhancedHistory = processedHistory;
+    if (drugMappings.length > 0) {
+      enhancedHistory += '\n\n--- INFORMACJE O MAPOWANIU LEKÓW ---\n';
+      enhancedHistory += 'Następujące nazwy handlowe zostały automatycznie zmapowane na substancje czynne:\n';
+      drugMappings.forEach(mapping => {
+        enhancedHistory += `• ${mapping.original} → ${mapping.mapped} (pewność: ${Math.round(mapping.confidence * 100)}%)\n`;
+      });
+      enhancedHistory += 'Proszę używać nazw substancji czynnych w analizie dla większej precyzji.\n';
+    }
 
-  if (!currentConfig.apiKey || !currentConfig.model) {
-    console.warn(`Brak pełnej konfiguracji dla modelu ${selectedModel} – używam danych testowych`);
-    return {
-      ...initialPatientData,
-      isMockData: true,
-      analyzedAt: new Date().toISOString(),
-      modelUsed: selectedModel,
-    };
-  }
+    const currentConfig = getAIConfig(selectedModel);
 
-  const systemPrompt = getModelSystemPrompt(selectedModel);
-  const userContent = `Przeanalizuj następującą historię medyczną i protokół badania dla oceny pre-screeningowej:
+    if (!currentConfig.apiKey || !currentConfig.model) {
+      console.warn(`Brak pełnej konfiguracji dla modelu ${selectedModel} – używam danych testowych`);
+      const mockData = {
+        ...initialPatientData,
+        isMockData: true,
+        analyzedAt: new Date().toISOString(),
+        modelUsed: selectedModel,
+        drugMappingInfo: {
+          mappingsApplied: drugMappings.length,
+          mappings: drugMappings,
+          preprocessedAt: new Date().toISOString()
+        }
+      };
+      return mockData;
+    }
+
+    const systemPrompt = `${getModelSystemPrompt(selectedModel)}
+
+WAŻNE: W historii medycznej nazwy handlowe leków zostały automatycznie zmapowane na substancje czynne dla większej precyzji. Używaj nazw substancji czynnych w swojej analizie.`;
+
+    const userContent = `Przeanalizuj następującą historię medyczną i protokół badania dla oceny pre-screeningowej:
               
-Historia Medyczna:
-${medicalHistory}
+Historia Medyczna (z automatycznym mapowaniem leków):
+${enhancedHistory}
 
 Protokół Badania:
 ${studyProtocol}`;
 
-  let requestBody: Record<string, unknown>;
-  let apiUrl: string;
-  let headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
-
-  if (selectedModel === 'gemini') {
-    const geminiConf = currentConfig as GeminiAIConfig;
-    apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${geminiConf.model}:generateContent?key=${geminiConf.apiKey}`;
-    requestBody = {
-      contents: [{
-        role: "user", 
-        parts: [{ text: `${systemPrompt}\n\n${userContent}` }]
-      }],
-      generationConfig: {
-        temperature: geminiConf.temperature,
-        maxOutputTokens: geminiConf.maxOutputTokens,
-        topP: geminiConf.topP,
-        responseMimeType: "application/json",
-      }
+    let requestBody: Record<string, unknown>;
+    let apiUrl: string;
+    let headers: Record<string, string> = {
+      'Content-Type': 'application/json',
     };
-  } else if (selectedModel === 'claude-opus') {
-    const claudeConf = currentConfig as ClaudeAIConfig;
-    apiUrl = '/api/anthropic/v1/messages';
-    headers['x-api-key'] = claudeConf.apiKey;
-    headers['anthropic-version'] = '2023-06-01';
-    headers['anthropic-dangerous-direct-browser-access'] = 'true';
-    
-    requestBody = {
-      model: claudeConf.model,
-      max_tokens: claudeConf.maxTokens,
-      temperature: claudeConf.temperature,
-      top_p: claudeConf.topP,
-      system: systemPrompt,
-      messages: [
-        { role: 'user', content: userContent }
-      ]
-    };
-  } else { 
-    const o3Conf = currentConfig as AIConfig;
-    apiUrl = o3Conf.endpoint;
-    headers['Authorization'] = `Bearer ${o3Conf.apiKey}`;
-    
-    requestBody = {
-      model: o3Conf.model,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userContent },
-      ],
-      max_completion_tokens: o3Conf.maxCompletionTokens, 
-    };
-    const isReasoningModel = /^o[134]/.test(o3Conf.model);
-    if (!isReasoningModel) {
-      requestBody.temperature = o3Conf.temperature;
-      requestBody.top_p = o3Conf.topP;
-      requestBody.frequency_penalty = o3Conf.frequencyPenalty;
-      requestBody.presence_penalty = o3Conf.presencePenalty;
-    }
-    if (o3Conf.model.includes("gpt-3.5-turbo-1106") || o3Conf.model.includes("gpt-4") || o3Conf.model.startsWith("o3") || o3Conf.model.startsWith("o4")) {
-       if(o3Conf.model !== "o3" && o3Conf.model !== "o4"){
-        requestBody.response_format = { type: "json_object" };
-       }
-    }
-  }
-
-  try {
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: headers,
-      body: JSON.stringify(requestBody),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text(); 
-      console.error(`API Error Response Text (${selectedModel}, ${response.status}):`, errorText);
-      let errorData;
-      try {
-        errorData = JSON.parse(errorText);
-      } catch (e) {
-        errorData = { error: { message: errorText || response.statusText }};
-      }
-      const errorMessage = errorData.error?.message || response.statusText;
-      throw new Error(
-        `Błąd API (${selectedModel}): ${response.status} – ${errorMessage}`
-      );
-    }
-
-    const data = await response.json();
-    let processedResponse: PatientData;
 
     if (selectedModel === 'gemini') {
-        if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
-            console.error('Invalid Gemini API response structure:', data);
-            throw new Error('Nieprawidłowa odpowiedź API Gemini: brak oczekiwanej treści.');
+      const geminiConf = currentConfig as GeminiAIConfig;
+      apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${geminiConf.model}:generateContent?key=${geminiConf.apiKey}`;
+      requestBody = {
+        contents: [{
+          role: "user", 
+          parts: [{ text: `${systemPrompt}\n\n${userContent}` }]
+        }],
+        generationConfig: {
+          temperature: geminiConf.temperature,
+          maxOutputTokens: geminiConf.maxOutputTokens,
+          topP: geminiConf.topP,
+          responseMimeType: "application/json",
         }
-        processedResponse = processAIResponse(data.candidates[0].content.parts[0].text, selectedModel);
+      };
     } else if (selectedModel === 'claude-opus') {
-        if (!data.content?.[0]?.text) {
-            console.error('Invalid Claude API response structure:', data);
-            throw new Error('Nieprawidłowa odpowiedź API Claude: brak oczekiwanej treści.');
-        }
-        
-        // Check for refusal stop reason in Claude 4 models
-        if (data.stop_reason === 'refusal') {
-            console.warn('Claude 4 model refused to generate content for safety reasons:', data);
-            throw new Error('Model Claude 4 odmówił wygenerowania odpowiedzi ze względów bezpieczeństwa. Spróbuj zmodyfikować prompt lub dane wejściowe.');
-        }
-        
-        processedResponse = processAIResponse(data.content[0].text, selectedModel);
+      const claudeConf = currentConfig as ClaudeAIConfig;
+      apiUrl = '/api/anthropic/v1/messages';
+      headers['x-api-key'] = claudeConf.apiKey;
+      headers['anthropic-version'] = '2023-06-01';
+      headers['anthropic-dangerous-direct-browser-access'] = 'true';
+      
+      requestBody = {
+        model: claudeConf.model,
+        max_tokens: claudeConf.maxTokens,
+        temperature: claudeConf.temperature,
+        top_p: claudeConf.topP,
+        system: systemPrompt,
+        messages: [
+          { role: 'user', content: userContent }
+        ]
+      };
     } else { 
-        if (!data.choices?.[0]?.message?.content) {
-            console.error('Invalid o3 API response structure:', data);
-            throw new Error('Nieprawidłowa odpowiedź API o3: brak oczekiwanej treści.');
-        }
-        processedResponse = processAIResponse(data.choices[0].message.content, selectedModel);
+      const o3Conf = currentConfig as AIConfig;
+      apiUrl = o3Conf.endpoint;
+      headers['Authorization'] = `Bearer ${o3Conf.apiKey}`;
+      
+      requestBody = {
+        model: o3Conf.model,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userContent },
+        ],
+        max_completion_tokens: o3Conf.maxCompletionTokens, 
+      };
+      const isReasoningModel = /^o[134]/.test(o3Conf.model);
+      if (!isReasoningModel) {
+        requestBody.temperature = o3Conf.temperature;
+        requestBody.top_p = o3Conf.topP;
+        requestBody.frequency_penalty = o3Conf.frequencyPenalty;
+        requestBody.presence_penalty = o3Conf.presencePenalty;
+      }
+      if (o3Conf.model.includes("gpt-3.5-turbo-1106") || o3Conf.model.includes("gpt-4") || o3Conf.model.startsWith("o3") || o3Conf.model.startsWith("o4")) {
+         if(o3Conf.model !== "o3" && o3Conf.model !== "o4"){
+          requestBody.response_format = { type: "json_object" };
+         }
+      }
     }
-    console.log("Final processed PatientData (after processAIResponse):", processedResponse);
-    return { ...processedResponse, modelUsed: selectedModel };
 
-  } catch (error) {
-    console.error(`Error during AI analysis with ${selectedModel}:`, error);
-    if (error instanceof TypeError && error.message.includes('fetch')) {
-      throw new Error(
-        'Błąd połączenia z serwerem AI. Sprawdź połączenie internetowe.'
-      );
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text(); 
+        console.error(`API Error Response Text (${selectedModel}, ${response.status}):`, errorText);
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch (e) {
+          errorData = { error: { message: errorText || response.statusText }};
+        }
+        const errorMessage = errorData.error?.message || response.statusText;
+        throw new Error(
+          `Błąd API (${selectedModel}): ${response.status} – ${errorMessage}`
+        );
+      }
+
+      const data = await response.json();
+      let processedResponse: PatientData;
+
+      if (selectedModel === 'gemini') {
+          if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
+              console.error('Invalid Gemini API response structure:', data);
+              throw new Error('Nieprawidłowa odpowiedź API Gemini: brak oczekiwanej treści.');
+          }
+          processedResponse = processAIResponse(data.candidates[0].content.parts[0].text, selectedModel);
+      } else if (selectedModel === 'claude-opus') {
+          if (!data.content?.[0]?.text) {
+              console.error('Invalid Claude API response structure:', data);
+              throw new Error('Nieprawidłowa odpowiedź API Claude: brak oczekiwanej treści.');
+          }
+          
+          // Check for refusal stop reason in Claude 4 models
+          if (data.stop_reason === 'refusal') {
+              console.warn('Claude 4 model refused to generate content for safety reasons:', data);
+              throw new Error('Model Claude 4 odmówił wygenerowania odpowiedzi ze względów bezpieczeństwa. Spróbuj zmodyfikować prompt lub dane wejściowe.');
+          }
+          
+          processedResponse = processAIResponse(data.content[0].text, selectedModel);
+      } else { 
+          if (!data.choices?.[0]?.message?.content) {
+              console.error('Invalid o3 API response structure:', data);
+              throw new Error('Nieprawidłowa odpowiedź API o3: brak oczekiwanej treści.');
+          }
+          processedResponse = processAIResponse(data.choices[0].message.content, selectedModel);
+      }
+      
+      // Dodaj metadane o mapowaniu leków
+      processedResponse.drugMappingInfo = {
+        mappingsApplied: drugMappings.length,
+        mappings: drugMappings,
+        preprocessedAt: new Date().toISOString()
+      };
+      
+      console.log("Final processed PatientData (after processAIResponse):", processedResponse);
+      console.log(`✅ [AI Service] Analysis completed successfully with ${drugMappings.length} drug mappings applied`);
+      return { ...processedResponse, modelUsed: selectedModel };
+
+    } catch (error) {
+      console.error(`Error during AI analysis with ${selectedModel}:`, error);
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error(
+          'Błąd połączenia z serwerem AI. Sprawdź połączenie internetowe.'
+        );
+      }
+      if (error instanceof Error) throw error; 
+      throw new Error('Wystąpił nieoczekiwany błąd podczas analizy'); 
     }
-    if (error instanceof Error) throw error; 
-    throw new Error('Wystąpił nieoczekiwany błąd podczas analizy'); 
+  } catch (error) {
+    console.error('💥 [AI Service] Error during analysis:', error);
+    throw error;
   }
+}
+
+function createFallbackPatientData(content: string, model: SupportedAIModel): PatientData {
+  return {
+    ...initialPatientData,
+    summary: {
+      ...initialPatientData.summary,
+      id: generatePatientId()
+    },
+    reportConclusion: {
+      ...initialPatientData.reportConclusion,
+      mainIssues: ['Błąd parsowania odpowiedzi AI'],
+      criticalInfoNeeded: ['Ponowna analiza wymagana']
+    },
+    analyzedAt: new Date().toISOString(),
+    modelUsed: model,
+    isMockData: false
+  };
 }
 
 function validateAIResponse(parsedData: any): void {
@@ -316,4 +374,82 @@ function processAIResponse(jsonString: string, modelUsed: SupportedAIModel): Pat
     }
     throw error;
   }
+}
+
+/**
+ * Preprocessuje historię medyczną, mapując nazwy handlowe leków na substancje czynne
+ */
+async function preprocessMedicalHistoryForDrugMapping(medicalHistory: string): Promise<{
+  processedHistory: string;
+  drugMappings: Array<{original: string; mapped: string; confidence: number}>;
+}> {
+  console.log('🔍 [AI Service] Preprocessing medical history for drug mapping...');
+  
+  const drugMappings: Array<{original: string; mapped: string; confidence: number}> = [];
+  let processedHistory = medicalHistory;
+  
+  // Wzorce do wykrywania nazw leków w tekście
+  const drugPatterns = [
+    // Wzorce dla polskich nazw leków
+    /\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s*(?:\d+\s*mg|\d+mg|tabl|kaps|ml)/gi,
+    // Wzorce dla nazw w nawiasach
+    /\(([^)]+(?:ina|ine|ol|um|an|on|ex|al))\)/gi,
+    // Wzorce dla nazw po "lek:", "preparat:", itp.
+    /(?:lek|preparat|medication|drug):\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)/gi,
+    // Wzorce dla typowych końcówek nazw leków
+    /\b([A-Z][a-z]*(?:ina|ine|ol|um|an|on|ex|al|yl|il))\b/gi
+  ];
+  
+  const potentialDrugs = new Set<string>();
+  
+  // Wyciągnij potencjalne nazwy leków
+  drugPatterns.forEach(pattern => {
+    let match;
+    while ((match = pattern.exec(medicalHistory)) !== null) {
+      const drugName = match[1].trim();
+      if (drugName.length > 3) { // Ignoruj bardzo krótkie nazwy
+        potentialDrugs.add(drugName);
+      }
+    }
+  });
+  
+  console.log(`🔍 [AI Service] Found ${potentialDrugs.size} potential drug names:`, Array.from(potentialDrugs));
+  
+  // Mapuj każdą potencjalną nazwę leku
+  for (const drugName of potentialDrugs) {
+    try {
+      const mappingResult = await drugMappingClient.mapDrugToStandard(drugName);
+      
+      if (mappingResult.found && mappingResult.confidence > 0.6) {
+        const standardName = mappingResult.standardName;
+        const activeSubstance = mappingResult.activeSubstance;
+        
+        // Użyj substancji czynnej jako głównej nazwy
+        const mappedName = activeSubstance || standardName;
+        
+        drugMappings.push({
+          original: drugName,
+          mapped: mappedName,
+          confidence: mappingResult.confidence
+        });
+        
+        // Zamień w tekście wszystkie wystąpienia nazwy handlowej na substancję czynną
+        const regex = new RegExp(`\\b${drugName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+        processedHistory = processedHistory.replace(regex, `${mappedName} (${drugName})`);
+        
+        console.log(`✅ [AI Service] Mapped: ${drugName} → ${mappedName} (confidence: ${Math.round(mappingResult.confidence * 100)}%)`);
+      } else {
+        console.log(`⚠️ [AI Service] No mapping found for: ${drugName} (confidence: ${mappingResult.confidence})`);
+      }
+    } catch (error) {
+      console.error(`❌ [AI Service] Error mapping drug ${drugName}:`, error);
+    }
+  }
+  
+  console.log(`✅ [AI Service] Drug mapping completed. Mapped ${drugMappings.length} drugs.`);
+  
+  return {
+    processedHistory,
+    drugMappings
+  };
 }

@@ -12,6 +12,7 @@ import { EnteringScreen } from './components/EnteringScreen';
 import { PrintableReport } from './components/PrintableReport';
 import { ChatButton } from './components/ChatButton';
 import { ChatWindow } from './components/ChatWindow';
+import { Logo } from './components/Logo';
 import { initialPatientData, demoPatientData } from './data/mockData';
 import { analyzePatientData } from './services/ai';
 import { analyzePatientDataMultiAgent, isMultiAgentAvailable } from './services/multiAgentService';
@@ -22,6 +23,7 @@ import { saveToHistory } from './services/patientHistory';
 import type { PatientData, SupportedAIModel, Criterion } from './types'; 
 import { getAIConfig } from './config/aiConfig'; 
 import './styles/print.css';
+import { DrugMappingDemo } from './components/DrugMappingDemo';
 
 const USER_STATUS_OPTIONS = [
   { value: 'spełnione_manual', label: 'Spełnione (ocena badacza)' },
@@ -186,7 +188,17 @@ const CriteriaList: React.FC<{criteria: Criterion[], title: string, onUpdateCrit
 
 const CriteriaStatusPieChart: React.FC<{criteriaData: Array<Criterion & {type: string}>, title: string}> = ({ criteriaData, title }) => {
   if (!criteriaData || criteriaData.length === 0) {
-    return <p className="text-slate-500 text-center py-4">Brak danych do wyświetlenia wykresu dla: {title}</p>;
+    return (
+      <div className="p-6 bg-gradient-to-br from-remedy-light to-white rounded-xl shadow-lg border border-remedy-border">
+        <div className="text-center py-8">
+          <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-remedy-primary/20 to-remedy-accent/20 rounded-full flex items-center justify-center">
+            <BarChart3 className="w-8 h-8 text-remedy-primary" />
+          </div>
+          <p className="text-slate-500 font-medium">Brak danych do wyświetlenia wykresu</p>
+          <p className="text-slate-400 text-sm mt-1">{title}</p>
+        </div>
+      </div>
+    );
   }
 
   const statusCounts = criteriaData.reduce((acc, criterion) => {
@@ -199,43 +211,206 @@ const CriteriaStatusPieChart: React.FC<{criteriaData: Array<Criterion & {type: s
   }, {} as Record<string, number>);
 
   const data = Object.entries(statusCounts).map(([name, value]) => ({ name, value }));
-  const COLORS: Record<string, string> = { 'Pozytywne / OK': '#22c55e', 'Negatywne / Problem': '#ef4444', 'Do Weryfikacji': '#f59e0b' };
+  
+  // Nowoczesne kolory gradientowe zgodne z motywem aplikacji
+  const COLORS: Record<string, string> = { 
+    'Pozytywne / OK': '#10b981', // emerald-500
+    'Negatywne / Problem': '#ef4444', // red-500
+    'Do Weryfikacji': '#f59e0b' // amber-500
+  };
+  
+  // Kolory gradientowe dla lepszego efektu wizualnego
+  const GRADIENT_COLORS: Record<string, string> = {
+    'Pozytywne / OK': 'url(#greenGradient)',
+    'Negatywne / Problem': 'url(#redGradient)', 
+    'Do Weryfikacji': 'url(#amberGradient)'
+  };
+  
   const RADIAN = Math.PI / 180;
   
   interface CustomizedLabelProps {
     cx: number; cy: number; midAngle: number; innerRadius: number; outerRadius: number; percent: number; name: string; value: number;
   }
+  
   const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name, value }: CustomizedLabelProps) => {
-    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    if (percent * 100 < 8) return null; // Ukryj etykiety dla małych segmentów
+    
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.6;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
-    if (percent * 100 < 5) return null;
-    return <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" fontSize="12px" fontWeight="bold">{`${name} (${value})`}</text>;
+    
+    return (
+      <text 
+        x={x} 
+        y={y} 
+        fill="white" 
+        textAnchor={x > cx ? 'start' : 'end'} 
+        dominantBaseline="central" 
+        fontSize="11px" 
+        fontWeight="600"
+        className="drop-shadow-sm"
+      >
+        {`${value}`}
+      </text>
+    );
   };
 
-  if (data.length === 0) return <p className="text-slate-500 text-center py-4">Brak danych do wyświetlenia wykresu dla: {title}</p>;
+  // Niestandardowy tooltip
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0];
+      const total = criteriaData.length;
+      const percentage = ((data.value / total) * 100).toFixed(1);
+      
+      return (
+        <div className="bg-white p-3 rounded-lg shadow-xl border border-remedy-border backdrop-blur-sm">
+          <div className="flex items-center gap-2 mb-1">
+            <div 
+              className="w-3 h-3 rounded-full" 
+              style={{ backgroundColor: COLORS[data.name] }}
+            />
+            <span className="font-semibold text-slate-800 text-sm">{data.name}</span>
+          </div>
+          <div className="text-xs text-slate-600">
+            <div>Liczba: <span className="font-medium text-slate-800">{data.value}</span></div>
+            <div>Procent: <span className="font-medium text-slate-800">{percentage}%</span></div>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  // Niestandardowa legenda
+  const CustomLegend = ({ payload }: any) => {
+    const total = criteriaData.length;
+    
+    return (
+      <div className="flex flex-wrap justify-center gap-4 mt-4">
+        {payload.map((entry: any, index: number) => {
+          const percentage = ((entry.payload.value / total) * 100).toFixed(1);
+          return (
+            <div key={index} className="flex items-center gap-2 bg-gradient-to-r from-remedy-light/50 to-white px-3 py-2 rounded-lg border border-remedy-border/30">
+              <div 
+                className="w-3 h-3 rounded-full shadow-sm" 
+                style={{ backgroundColor: entry.color }}
+              />
+              <div className="text-xs">
+                <div className="font-medium text-slate-800">{entry.value}</div>
+                <div className="text-slate-500">{percentage}%</div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
+  if (data.length === 0) return (
+    <div className="p-6 bg-gradient-to-br from-remedy-light to-white rounded-xl shadow-lg border border-remedy-border">
+      <div className="text-center py-8">
+        <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-remedy-primary/20 to-remedy-accent/20 rounded-full flex items-center justify-center">
+          <BarChart3 className="w-8 h-8 text-remedy-primary" />
+        </div>
+        <p className="text-slate-500 font-medium">Brak danych do wyświetlenia wykresu</p>
+        <p className="text-slate-400 text-sm mt-1">{title}</p>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="p-4 border border-slate-200 rounded-lg bg-white shadow">
-      <h4 className="text-md font-semibold text-slate-700 mb-4 text-center">{title}</h4>
-      <ResponsiveContainer width="100%" height={300}>
+    <div className="p-6 bg-gradient-to-br from-remedy-light via-white to-remedy-secondary/5 rounded-xl shadow-lg border border-remedy-border hover:shadow-xl transition-all duration-300">
+      {/* Header z ikoną */}
+      <div className="flex items-center justify-center mb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-gradient-to-br from-remedy-primary to-remedy-accent rounded-lg flex items-center justify-center shadow-md">
+            <BarChart3 className="w-4 h-4 text-white" />
+          </div>
+          <h4 className="text-lg font-bold text-slate-800 bg-gradient-to-r from-remedy-primary to-remedy-accent bg-clip-text text-transparent">
+            {title}
+          </h4>
+        </div>
+      </div>
+
+      {/* Statystyki podsumowujące */}
+      <div className="grid grid-cols-3 gap-3 mb-6">
+        <div className="text-center p-3 bg-white/60 rounded-lg border border-remedy-border/30">
+          <div className="text-lg font-bold text-slate-800">{criteriaData.length}</div>
+          <div className="text-xs text-slate-600 font-medium">Łącznie</div>
+        </div>
+        <div className="text-center p-3 bg-white/60 rounded-lg border border-remedy-border/30">
+          <div className="text-lg font-bold text-emerald-600">
+            {statusCounts['Pozytywne / OK'] || 0}
+          </div>
+          <div className="text-xs text-slate-600 font-medium">Pozytywne</div>
+        </div>
+        <div className="text-center p-3 bg-white/60 rounded-lg border border-remedy-border/30">
+          <div className="text-lg font-bold text-red-500">
+            {statusCounts['Negatywne / Problem'] || 0}
+          </div>
+          <div className="text-xs text-slate-600 font-medium">Problemy</div>
+        </div>
+      </div>
+
+      {/* Wykres kołowy */}
+      <ResponsiveContainer width="100%" height={320}>
         <PieChart>
-          <Pie data={data}
+          {/* Definicje gradientów */}
+          <defs>
+            <linearGradient id="greenGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#10b981" stopOpacity={1} />
+              <stop offset="100%" stopColor="#059669" stopOpacity={1} />
+            </linearGradient>
+            <linearGradient id="redGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#ef4444" stopOpacity={1} />
+              <stop offset="100%" stopColor="#dc2626" stopOpacity={1} />
+            </linearGradient>
+            <linearGradient id="amberGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#f59e0b" stopOpacity={1} />
+              <stop offset="100%" stopColor="#d97706" stopOpacity={1} />
+            </linearGradient>
+          </defs>
+          
+          <Pie 
+            data={data}
             cx="50%"
             cy="50%"
             labelLine={false}
             label={renderCustomizedLabel}
-            outerRadius={110}
+            outerRadius={120}
+            innerRadius={40} // Dodanie wewnętrznego promienia dla efektu donut
             fill="#8884d8"
             dataKey="value"
             nameKey="name"
+            stroke="white"
+            strokeWidth={3}
+            animationBegin={0}
+            animationDuration={1200}
+            animationEasing="ease-out"
           >
-            {data.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[entry.name] || '#8884d8'} />)}
+            {data.map((entry, index) => (
+              <Cell 
+                key={`cell-${index}`} 
+                fill={GRADIENT_COLORS[entry.name] || COLORS[entry.name] || '#8884d8'}
+                className="hover:opacity-80 transition-opacity duration-200 cursor-pointer"
+              />
+            ))}
           </Pie>
-          <Tooltip formatter={(value: number, name: string) => [value, name]} />
-          <Legend wrapperStyle={{ fontSize: '12px' }} />
+          <Tooltip content={<CustomTooltip />} />
+          <Legend content={<CustomLegend />} />
         </PieChart>
       </ResponsiveContainer>
+
+      {/* Dodatkowe informacje */}
+      <div className="mt-4 p-3 bg-gradient-to-r from-remedy-light/30 to-remedy-secondary/10 rounded-lg border border-remedy-border/30">
+        <div className="flex items-center justify-center gap-2 text-xs text-slate-600">
+          <Info className="w-3 h-3" />
+          <span className="font-medium">
+            Analiza {criteriaData.length} kryteriów • 
+            Sukces: {(((statusCounts['Pozytywne / OK'] || 0) / criteriaData.length) * 100).toFixed(1)}%
+          </span>
+        </div>
+      </div>
     </div>
   );
 };
@@ -250,6 +425,7 @@ const App = () => {
   const [isMultiAgentMode, setIsMultiAgentMode] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [hasChatSession, setHasChatSession] = useState(false);
+  const [showDrugDemo, setShowDrugDemo] = useState(false);
 
   const [dynamicConclusion, setDynamicConclusion] = useState({
     overallQualification: '',
@@ -283,16 +459,8 @@ const App = () => {
         
         analysisResult = coordinatorResult.finalResult;
         agentResults = coordinatorResult.agentResults;
-      } else {
-        console.log('🔧 Rozpoczynanie analizy klasycznej...');
-        analysisResult = await analyzePatientData(data.medicalHistory, data.protocol, data.selectedAIModel);
-      }
-      
-      setPatientProfile(analysisResult);
-      saveToHistory(analysisResult);
-
-      // Inicjalizuj sesję chatbota jeśli była analiza wieloagentowa
-      if (isMultiAgentMode && Object.keys(agentResults).length > 0) {
+        
+        // Inicjalizuj sesję chatbota dla analizy wieloagentowej
         try {
           chatbotService.initializeSession(
             analysisResult,
@@ -301,11 +469,30 @@ const App = () => {
             data.protocol
           );
           setHasChatSession(true);
-          console.log('✅ Sesja chatbota została zainicjalizowana');
+          console.log('✅ Sesja chatbota została zainicjalizowana dla analizy wieloagentowej');
         } catch (error) {
-          console.error('❌ Błąd podczas inicjalizacji chatbota:', error);
+          console.error('❌ Błąd podczas inicjalizacji chatbota dla analizy wieloagentowej:', error);
+        }
+      } else {
+        console.log('🔧 Rozpoczynanie analizy klasycznej...');
+        analysisResult = await analyzePatientData(data.medicalHistory, data.protocol, data.selectedAIModel);
+        
+        // Inicjalizuj sesję chatbota dla analizy monoagentowej
+        try {
+          chatbotService.initializeSessionFromSingleAgent(
+            analysisResult,
+            data.medicalHistory,
+            data.protocol
+          );
+          setHasChatSession(true);
+          console.log('✅ Sesja chatbota została zainicjalizowana dla analizy klasycznej');
+        } catch (error) {
+          console.error('❌ Błąd podczas inicjalizacji chatbota dla analizy klasycznej:', error);
         }
       }
+      
+      setPatientProfile(analysisResult);
+      saveToHistory(analysisResult);
 
       if (analysisResult.reportConclusion) {
         setDynamicConclusion({
@@ -477,24 +664,50 @@ const App = () => {
   if (isAnalyzing) {
     return (
       <div className="min-h-screen bg-gradient-theme-light p-3 sm:p-4 md:p-6 font-sans flex items-center justify-center">
-        <div className="text-center card-remedy max-w-sm">
-          <div className="icon-circle mx-auto mb-4">
-            <div role="status" className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-white border-r-transparent" aria-label="Ładowanie">
-            <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
-              Ładowanie...
-            </span>
+        <div className="text-center max-w-md">
+          {/* Logo */}
+          <div className="mb-8">
+            <Logo 
+              size="lg" 
+              showText={true}
+              className="justify-center"
+            />
           </div>
+
+          {/* Loading Card */}
+          <div className="card-remedy">
+            <div className="icon-circle mx-auto mb-4">
+              <div role="status" className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-white border-r-transparent" aria-label="Ładowanie">
+                <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
+                  Ładowanie...
+                </span>
+              </div>
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Analizowanie danych pacjenta</h2>
+            
+            {/* Analysis Info */}
+            <div className="space-y-3 mb-4">
+              <div className="flex items-center justify-center gap-2 text-sm">
+                <div className="w-2 h-2 bg-remedy-primary rounded-full"></div>
+                <span className="text-gray-600">Model: <span className="font-medium text-gray-800">{
+                  selectedAIModel === 'gemini' ? 'Gemini 2.5 Pro Preview 05-06' : 
+                  selectedAIModel === 'claude-opus' ? 'Claude 4 Opus' :
+                  selectedAIModel.toUpperCase()
+                }</span></span>
+              </div>
+              <div className="flex items-center justify-center gap-2 text-sm">
+                <div className="w-2 h-2 bg-remedy-accent rounded-full"></div>
+                <span className="text-gray-600">Tryb: <span className="font-medium text-gray-800">{isMultiAgentMode ? '🤖 Wieloagentowy' : '🔧 Klasyczny'}</span></span>
+              </div>
+            </div>
+            
+            <p className="text-sm text-gray-500">To może potrwać chwilę...</p>
+            
+            {/* Progress Animation */}
+            <div className="mt-4 w-full bg-gray-200 rounded-full h-2">
+              <div className="bg-gradient-to-r from-remedy-primary to-remedy-accent h-2 rounded-full animate-pulse" style={{ width: '60%' }}></div>
+            </div>
           </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Analizowanie danych pacjenta</h2>
-          <p className="text-gray-600 mb-2 text-sm">Model: {
-            selectedAIModel === 'gemini' ? 'Gemini 2.5 Pro Preview 05-06' : 
-            selectedAIModel === 'claude-opus' ? 'Claude 4 Opus' :
-            selectedAIModel.toUpperCase()
-          }</p>
-          <p className="text-gray-600 mb-2 text-sm">
-            Tryb: {isMultiAgentMode ? '🤖 Wieloagentowy' : '🔧 Klasyczny'}
-          </p>
-          <p className="text-sm text-gray-500">To może potrwać chwilę...</p>
         </div>
       </div>
     );
@@ -503,24 +716,36 @@ const App = () => {
   if (!patientProfile || Object.keys(patientProfile).length === 0) {
     return (
       <div className="min-h-screen bg-gradient-theme-light p-3 sm:p-4 md:p-6 font-sans flex flex-col items-center justify-center">
-        <div className="card-remedy max-w-sm text-center">
+        {/* Logo */}
+        <div className="mb-8">
+          <Logo 
+            size="lg" 
+            showText={true}
+            className="justify-center"
+          />
+        </div>
+
+        {/* Error Card */}
+        <div className="card-remedy max-w-lg text-center">
           <div className="icon-circle mx-auto mb-4">
             <AlertTriangle size={16} className="text-white" />
           </div>
           <h2 className="text-xl font-bold text-gray-900 mb-2">Wystąpił błąd</h2>
           <p className="text-gray-600 mb-3 text-sm">Nie udało się załadować profilu pacjenta. Spróbuj ponownie.</p>
-        {analysisError && (
-              <div className="mt-3 p-3 bg-red-50 border border-red-200 text-red-800 rounded-lg text-sm text-left">
-                  <p className="font-semibold mb-1">Szczegóły błędu:</p>
-                <p>{analysisError}</p>
+          
+          {analysisError && (
+            <div className="mt-3 p-3 bg-red-50 border border-red-200 text-red-800 rounded-lg text-sm text-left">
+              <p className="font-semibold mb-1">Szczegóły błędu:</p>
+              <p>{analysisError}</p>
             </div>
-        )}
-        <button 
-          onClick={() => { setHasSubmittedData(false); setAnalysisError(null);}} 
+          )}
+          
+          <button 
+            onClick={() => { setHasSubmittedData(false); setAnalysisError(null);}} 
             className="btn-primary mt-4"
-        >
-          Powrót do wprowadzania danych
-        </button>
+          >
+            Powrót do wprowadzania danych
+          </button>
         </div>
       </div>
     );
@@ -540,6 +765,25 @@ const App = () => {
     );
   }
 
+  // Jeśli pokazujemy demo mapowania leków
+  if (showDrugDemo) {
+    return (
+      <div className="min-h-screen bg-gradient-theme-light py-8">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="mb-6">
+            <button
+              onClick={() => setShowDrugDemo(false)}
+              className="btn-secondary"
+            >
+              ← Powrót do aplikacji
+            </button>
+          </div>
+          <DrugMappingDemo />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-theme-light py-8 px-3 sm:px-4 lg:px-6 font-sans">
       <style>{`
@@ -548,192 +792,226 @@ const App = () => {
       `}</style>
       
       <div className="max-w-6xl mx-auto">
-      <header className="mb-8 text-center">
-          <div className="flex justify-between items-start mb-6">
-            <div className="flex-1"></div>
-            <div className="flex-1 text-center">
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">Interaktywny Raport Pre-screeningowy</h1>
-              <p className="text-lg text-gray-600 mt-1">Analiza Kwalifikacji Pacjenta</p>
-              <p className="text-sm text-gray-500 mt-1">Model: <span className="font-medium">{modelDisplayName}</span></p>
-            </div>
-            <div className="flex-1 flex justify-end">
-              <button
-                onClick={handlePrint}
-                className="no-print btn-primary flex items-center gap-2"
-                title="Drukuj raport"
-              >
-                <Printer size={16} />
-                <span className="hidden sm:inline">Drukuj Raport</span>
-              </button>
+      <header className="mb-8">
+        {/* Logo Header */}
+        <div className="flex justify-between items-center mb-8">
+          <Logo 
+            size="lg" 
+            showText={true}
+            onClick={() => window.location.reload()}
+            className="hover:scale-105 transition-transform duration-300"
+          />
+          <button
+            onClick={handlePrint}
+            className="no-print btn-primary flex items-center gap-2"
+            title="Drukuj raport"
+          >
+            <Printer size={16} />
+            <span className="hidden sm:inline">Drukuj Raport</span>
+          </button>
+        </div>
+
+        {/* Title Section */}
+        <div className="text-center">
+          <div className="bg-gradient-to-r from-remedy-light via-white to-remedy-secondary/10 rounded-xl p-6 shadow-lg border border-remedy-border/30">
+            <p className="text-xl text-slate-700 font-medium mb-2">Analiza Kwalifikacji Pacjenta</p>
+            <div className="flex items-center justify-center gap-4 text-sm text-slate-600">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-remedy-primary rounded-full"></div>
+                <span>Model: <span className="font-medium text-slate-800">{modelDisplayName}</span></span>
+              </div>
+              <div className="w-1 h-4 bg-slate-300 rounded-full"></div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-remedy-accent rounded-full"></div>
+                <span>Tryb: <span className="font-medium text-slate-800">{isMultiAgentMode ? 'Wieloagentowy' : 'Klasyczny'}</span></span>
+              </div>
             </div>
           </div>
-        
-        {analysisError && !patientProfile.isMockData && (
-              <div className="mt-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl inline-block text-sm">
-                  <AlertTriangle size={16} className="inline-block mr-2" />
-                {analysisError}
-            </div>
-        )}
-        {patientProfile.isMockData && (
-            <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-xl inline-block">
-              <AlertTriangle size={16} className="inline-block mr-2" />
+        </div>
+      </header>
+
+      {/* Error Messages */}
+      {analysisError && !patientProfile.isMockData && (
+        <div className="mb-6 flex justify-center">
+          <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl inline-block text-sm max-w-4xl">
+            <AlertTriangle size={16} className="inline-block mr-2" />
+            {analysisError}
+          </div>
+        </div>
+      )}
+      {patientProfile.isMockData && (
+        <div className="mb-6 flex justify-center">
+          <div className="p-4 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-xl inline-block max-w-4xl">
+            <AlertTriangle size={16} className="inline-block mr-2" />
             Używane są dane testowe - połączenie z AI ({modelDisplayName}) jest niedostępne lub wystąpił błąd.
             {!isCurrentModelConfigured && ` Sprawdź konfigurację (klucz API, model) dla ${modelDisplayName} w pliku .env.`}
           </div>
-        )}
-      </header>
+        </div>
+      )}
 
-        <main className="space-y-6">
-          <section className="card-remedy">
-            <div className="flex items-center text-xl font-bold text-gray-900 mb-4">
-              <div className="icon-circle mr-3">
-                <User size={16} />
-              </div>
-            <span>Dane Pacjenta: {patientProfile.summary?.id || 'Brak ID'}</span>
+      <main className="space-y-6">
+        <section className="card-remedy">
+          <div className="flex items-center text-xl font-bold text-gray-900 mb-4">
+            <div className="icon-circle mr-3">
+              <User size={16} />
+            </div>
+          <span>Dane Pacjenta: {patientProfile.summary?.id || 'Brak ID'}</span>
+        </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-600 text-sm">
+            <p><strong className="font-medium text-gray-900">Wiek:</strong> {patientProfile.summary?.age || 'N/A'} lat</p>
+            <p><strong className="font-medium text-gray-900">Główna diagnoza:</strong> {patientProfile.summary?.mainDiagnosis || 'N/A'}</p>
+            <div className="md:col-span-2">
+              <strong className="font-medium text-gray-900">Choroby współistniejące:</strong>
+              <ul className="list-disc list-inside ml-4 mt-2 space-y-1">
+              {(patientProfile.summary?.comorbidities || []).map((com, idx) => <li key={idx}>{com}</li>)}
+              {(patientProfile.summary?.comorbidities || []).length === 0 && <li>Brak</li>}
+            </ul>
           </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-600 text-sm">
-              <p><strong className="font-medium text-gray-900">Wiek:</strong> {patientProfile.summary?.age || 'N/A'} lat</p>
-              <p><strong className="font-medium text-gray-900">Główna diagnoza:</strong> {patientProfile.summary?.mainDiagnosis || 'N/A'}</p>
-              <div className="md:col-span-2">
-                <strong className="font-medium text-gray-900">Choroby współistniejące:</strong>
-                <ul className="list-disc list-inside ml-4 mt-2 space-y-1">
-                {(patientProfile.summary?.comorbidities || []).map((com, idx) => <li key={idx}>{com}</li>)}
-                {(patientProfile.summary?.comorbidities || []).length === 0 && <li>Brak</li>}
+        </div>
+      </section>
+
+        <AccordionItem title="Wizualizacje Danych" icon={<BarChart3 size={16} />} defaultOpen={true}>
+          <div className="grid grid-cols-1 gap-4">
+          <DetailedTrdTimelineChart
+              patientData={patientProfile}
+              enableAIAnalysis={true}
+              enablePredictiveAnalytics={true}
+              showAdvancedMetrics={true}
+              showClinicalInsights={true}
+          />
+            <div className="lg:col-span-1 mt-4">
+            <CriteriaStatusPieChart criteriaData={allCriteriaForChart} title="Ogólny Status Kryteriów (po zmianach)" />
+          </div>
+        </div>
+      </AccordionItem>
+
+        <AccordionItem title="Szacowanie Początku Obecnego Epizodu Depresyjnego" icon={<CalendarDays size={16} />}>
+          <div className="space-y-3 text-gray-600 text-sm">
+            {(patientProfile.episodeEstimation?.scenarios || []).map(sc => (
+              <div key={sc.id} className="p-3 border border-gray-200 rounded-lg bg-gray-50">
+                <p><strong className="font-medium text-gray-900">Scenariusz {sc.id}:</strong> {sc.description}</p>
+                <p className="text-sm text-gray-500 mt-1"><em>Przesłanki:</em> {sc.evidence}</p>
+              </div>
+            ))}
+          {(patientProfile.episodeEstimation?.scenarios || []).length === 0 && <p>Brak scenariuszy.</p>}
+            <div className="mt-3 p-3 border-t-2 border-gray-300 bg-blue-50 rounded-lg">
+              <p><strong className="font-medium text-gray-900">Wnioski dotyczące początku epizodu dla celów badania:</strong></p>
+              <p className="mt-2">{patientProfile.episodeEstimation?.conclusion || 'Brak wniosków.'}</p>
+            </div>
+        </div>
+      </AccordionItem>
+
+        <AccordionItem title="Analiza TRD (Kryterium IC6) - Podsumowanie" icon={<Pill size={16} />}>
+          <div className="space-y-3">
+            <p className="text-sm text-gray-500">Poniżej znajduje się podsumowanie wniosków z analizy farmakoterapii. Szczegółowa oś czasu leczenia dostępna jest w sekcji "Wizualizacje Danych".</p>
+            <p className="font-semibold text-gray-900 text-sm">{patientProfile.trdAnalysis?.conclusion || 'Brak podsumowania analizy TRD.'}</p>
+          </div>
+      </AccordionItem>
+
+        <AccordionItem title="Kryteria Włączenia (IC)" icon={<ListChecks size={16} />}>
+        <CriteriaList criteria={patientProfile.inclusionCriteria || []} title="Inclusion" onUpdateCriterion={(id, status, comment) => handleUpdateCriterion('inclusionCriteria', id, status, comment)} />
+      </AccordionItem>
+
+        <AccordionItem title="Psychiatryczne Kryteria Wyłączenia (EC)" icon={<AlertTriangle size={16} />}>
+        <CriteriaList criteria={patientProfile.psychiatricExclusionCriteria || []} title="PsychiatricExclusion" onUpdateCriterion={(id, status, comment) => handleUpdateCriterion('psychiatricExclusionCriteria', id, status, comment)} />
+      </AccordionItem>
+
+        <AccordionItem title="Ogólne Medyczne Kryteria Wyłączenia (GMEC)" icon={<Stethoscope size={16} />}>
+        <CriteriaList criteria={patientProfile.medicalExclusionCriteria || []} title="MedicalExclusion" onUpdateCriterion={(id, status, comment) => handleUpdateCriterion('medicalExclusionCriteria', id, status, comment)} />
+      </AccordionItem>
+
+        <section className="card-remedy">
+          <div className="flex items-center text-xl font-bold text-gray-900 mb-4">
+            <div className="icon-circle mr-3">
+              <Target size={16} />
+            </div>
+          <span>Wniosek Dotyczący Kwalifikacji i Prawdopodobieństwo</span>
+        </div>
+        <div className="space-y-6">
+          <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Ogólna Kwalifikacja:</h3>
+            <p className={`text-lg font-bold ${dynamicConclusion.overallQualification.toLowerCase().includes("nie kwalifikuje") ? "text-red-600" : dynamicConclusion.overallQualification.toLowerCase().includes("kwalifikuje") ? "text-green-600" : "text-yellow-500"}`}>
+              {dynamicConclusion.overallQualification || 'Brak oceny kwalifikacji.'}
+            </p>
+          </div>
+            
+          <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Główne Problemy / Potencjalne Przeszkody (wg AI):</h3>
+            {dynamicConclusion.mainIssues && dynamicConclusion.mainIssues.length > 0 ? (
+                <ul className="list-disc list-inside ml-4 space-y-1 text-gray-600 text-sm">
+                {dynamicConclusion.mainIssues.map((issue, idx) => <li key={idx}>{issue}</li>)}
               </ul>
-            </div>
+            ) : (
+                <p className="text-gray-500 text-sm">Brak zidentyfikowanych problemów</p>
+            )}
           </div>
-        </section>
-
-          <AccordionItem title="Wizualizacje Danych" icon={<BarChart3 size={16} />} defaultOpen={true}>
-            <div className="grid grid-cols-1 gap-4">
-            <DetailedTrdTimelineChart
-                patientData={patientProfile}
-            />
-              <div className="lg:col-span-1 mt-4">
-              <CriteriaStatusPieChart criteriaData={allCriteriaForChart} title="Ogólny Status Kryteriów (po zmianach)" />
-            </div>
+            
+          <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Krytyczne Informacje do Uzyskania/Weryfikacji (wg AI):</h3>
+            {dynamicConclusion.criticalInfoNeeded && dynamicConclusion.criticalInfoNeeded.length > 0 ? (
+                <ul className="list-disc list-inside ml-4 space-y-1 text-gray-600 text-sm">
+                {dynamicConclusion.criticalInfoNeeded.map((info, idx) => <li key={idx}>{info}</li>)}
+              </ul>
+            ) : (
+                <p className="text-gray-500 text-sm">Brak krytycznych informacji do weryfikacji</p>
+            )}
           </div>
-        </AccordionItem>
-
-          <AccordionItem title="Szacowanie Początku Obecnego Epizodu Depresyjnego" icon={<CalendarDays size={16} />}>
-            <div className="space-y-3 text-gray-600 text-sm">
-              {(patientProfile.episodeEstimation?.scenarios || []).map(sc => (
-                <div key={sc.id} className="p-3 border border-gray-200 rounded-lg bg-gray-50">
-                  <p><strong className="font-medium text-gray-900">Scenariusz {sc.id}:</strong> {sc.description}</p>
-                  <p className="text-sm text-gray-500 mt-1"><em>Przesłanki:</em> {sc.evidence}</p>
+            
+          <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-3">Szacowane Prawdopodobieństwo Kwalifikacji:</h3>
+            <div className="flex items-center gap-3">
+                <div className="icon-circle flex-shrink-0">
+                  <BarChart3 size={16} />
                 </div>
-              ))}
-            {(patientProfile.episodeEstimation?.scenarios || []).length === 0 && <p>Brak scenariuszy.</p>}
-              <div className="mt-3 p-3 border-t-2 border-gray-300 bg-blue-50 rounded-lg">
-                <p><strong className="font-medium text-gray-900">Wnioski dotyczące początku epizodu dla celów badania:</strong></p>
-                <p className="mt-2">{patientProfile.episodeEstimation?.conclusion || 'Brak wniosków.'}</p>
-              </div>
-          </div>
-        </AccordionItem>
-
-          <AccordionItem title="Analiza TRD (Kryterium IC6) - Podsumowanie" icon={<Pill size={16} />}>
-            <div className="space-y-3">
-              <p className="text-sm text-gray-500">Poniżej znajduje się podsumowanie wniosków z analizy farmakoterapii. Szczegółowa oś czasu leczenia dostępna jest w sekcji "Wizualizacje Danych".</p>
-              <p className="font-semibold text-gray-900 text-sm">{patientProfile.trdAnalysis?.conclusion || 'Brak podsumowania analizy TRD.'}</p>
-            </div>
-        </AccordionItem>
-
-          <AccordionItem title="Kryteria Włączenia (IC)" icon={<ListChecks size={16} />}>
-          <CriteriaList criteria={patientProfile.inclusionCriteria || []} title="Inclusion" onUpdateCriterion={(id, status, comment) => handleUpdateCriterion('inclusionCriteria', id, status, comment)} />
-        </AccordionItem>
-
-          <AccordionItem title="Psychiatryczne Kryteria Wyłączenia (EC)" icon={<AlertTriangle size={16} />}>
-          <CriteriaList criteria={patientProfile.psychiatricExclusionCriteria || []} title="PsychiatricExclusion" onUpdateCriterion={(id, status, comment) => handleUpdateCriterion('psychiatricExclusionCriteria', id, status, comment)} />
-        </AccordionItem>
-
-          <AccordionItem title="Ogólne Medyczne Kryteria Wyłączenia (GMEC)" icon={<Stethoscope size={16} />}>
-          <CriteriaList criteria={patientProfile.medicalExclusionCriteria || []} title="MedicalExclusion" onUpdateCriterion={(id, status, comment) => handleUpdateCriterion('medicalExclusionCriteria', id, status, comment)} />
-        </AccordionItem>
-
-          <section className="card-remedy">
-            <div className="flex items-center text-xl font-bold text-gray-900 mb-4">
-              <div className="icon-circle mr-3">
-                <Target size={16} />
-              </div>
-            <span>Wniosek Dotyczący Kwalifikacji i Prawdopodobieństwo</span>
-          </div>
-          <div className="space-y-6">
-            <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">Ogólna Kwalifikacja:</h3>
-              <p className={`text-lg font-bold ${dynamicConclusion.overallQualification.toLowerCase().includes("nie kwalifikuje") ? "text-red-600" : dynamicConclusion.overallQualification.toLowerCase().includes("kwalifikuje") ? "text-green-600" : "text-yellow-500"}`}>
-                {dynamicConclusion.overallQualification || 'Brak oceny kwalifikacji.'}
-              </p>
-            </div>
-              
-            <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">Główne Problemy / Potencjalne Przeszkody (wg AI):</h3>
-              {dynamicConclusion.mainIssues && dynamicConclusion.mainIssues.length > 0 ? (
-                  <ul className="list-disc list-inside ml-4 space-y-1 text-gray-600 text-sm">
-                  {dynamicConclusion.mainIssues.map((issue, idx) => <li key={idx}>{issue}</li>)}
-                </ul>
-              ) : (
-                  <p className="text-gray-500 text-sm">Brak zidentyfikowanych problemów</p>
-              )}
-            </div>
-              
-            <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">Krytyczne Informacje do Uzyskania/Weryfikacji (wg AI):</h3>
-              {dynamicConclusion.criticalInfoNeeded && dynamicConclusion.criticalInfoNeeded.length > 0 ? (
-                  <ul className="list-disc list-inside ml-4 space-y-1 text-gray-600 text-sm">
-                  {dynamicConclusion.criticalInfoNeeded.map((info, idx) => <li key={idx}>{info}</li>)}
-                </ul>
-              ) : (
-                  <p className="text-gray-500 text-sm">Brak krytycznych informacji do weryfikacji</p>
-              )}
-            </div>
-              
-            <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-3">Szacowane Prawdopodobieństwo Kwalifikacji:</h3>
-              <div className="flex items-center gap-3">
-                  <div className="icon-circle flex-shrink-0">
-                    <BarChart3 size={16} />
+                <div className="w-full bg-gray-200 rounded-full h-8 overflow-hidden">
+                  <div className={`h-8 rounded-full flex items-center justify-center text-white font-bold transition-all duration-500 ease-out text-sm ${dynamicConclusion.estimatedProbability >= 70 ? 'bg-green-500' : dynamicConclusion.estimatedProbability >=40 ? 'bg-yellow-500' : 'bg-red-500'}`} style={{ width: `${dynamicConclusion.estimatedProbability}%` }}>
+                    {dynamicConclusion.estimatedProbability > 10 ? `${dynamicConclusion.estimatedProbability}%` : ''}
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-8 overflow-hidden">
-                    <div className={`h-8 rounded-full flex items-center justify-center text-white font-bold transition-all duration-500 ease-out text-sm ${dynamicConclusion.estimatedProbability >= 70 ? 'bg-green-500' : dynamicConclusion.estimatedProbability >=40 ? 'bg-yellow-500' : 'bg-red-500'}`} style={{ width: `${dynamicConclusion.estimatedProbability}%` }}>
-                      {dynamicConclusion.estimatedProbability > 10 ? `${dynamicConclusion.estimatedProbability}%` : ''}
-                    </div>
-                  </div>
-                  {dynamicConclusion.estimatedProbability <= 10 && <span className="text-gray-900 font-bold text-sm ml-2">{dynamicConclusion.estimatedProbability}%</span>}
                 </div>
-                <p className="text-xs text-gray-500 mt-2">Prawdopodobieństwo uwzględnia modyfikacje badacza. Ocena początkowa AI ({modelDisplayName}): {patientProfile.reportConclusion?.estimatedProbability || 0}%.</p>
-            </div>
+                {dynamicConclusion.estimatedProbability <= 10 && <span className="text-gray-900 font-bold text-sm ml-2">{dynamicConclusion.estimatedProbability}%</span>}
+              </div>
+              <p className="text-xs text-gray-500 mt-2">Prawdopodobieństwo uwzględnia modyfikacje badacza. Ocena początkowa AI ({modelDisplayName}): {patientProfile.reportConclusion?.estimatedProbability || 0}%.</p>
           </div>
-        </section>
-      </main>
-        
-        <footer className="mt-12 text-center text-sm text-gray-500 py-4 border-t border-gray-200">
-        <p>&copy; {new Date().getFullYear()} Aplikacja Raportów Pre-screeningowych. Wszelkie prawa zastrzeżone.</p>
-        <p>Wygenerowano: {new Date().toLocaleString('pl-PL', { dateStyle: 'long', timeStyle: 'short' })}</p>
-         <button 
+        </div>
+      </section>
+    </main>
+      
+      <footer className="mt-12 text-center text-sm text-gray-500 py-4 border-t border-gray-200">
+      <p>&copy; {new Date().getFullYear()} Aplikacja Raportów Pre-screeningowych. Wszelkie prawa zastrzeżone.</p>
+      <p>Wygenerowano: {new Date().toLocaleString('pl-PL', { dateStyle: 'long', timeStyle: 'short' })}</p>
+      <div className="flex justify-center gap-4 mt-3">
+        <button 
           onClick={() => { setHasSubmittedData(false); setAnalysisError(null);}} 
-            className="no-print btn-secondary mt-3"
+          className="no-print btn-secondary"
         >
           Analizuj nowego pacjenta
         </button>
-      </footer>
+        <button
+          onClick={() => setShowDrugDemo(true)}
+          className="no-print btn-primary"
+        >
+          🧪 Demo Mapowania Leków
+        </button>
       </div>
-      
-      {/* Chat Components - tylko w trybie wieloagentowym i po udanej analizie */}
-      {hasChatSession && (
-        <>
-          <ChatButton 
-            isOpen={isChatOpen}
-            onClick={() => setIsChatOpen(!isChatOpen)}
-            hasNewMessages={false}
-          />
-          <ChatWindow
-            isOpen={isChatOpen}
-            onClose={() => setIsChatOpen(false)}
-          />
-        </>
-      )}
+    </footer>
     </div>
-  );
+    
+    {/* Chat Components - tylko w trybie wieloagentowym i po udanej analizie */}
+    {hasChatSession && (
+      <>
+        <ChatButton 
+          isOpen={isChatOpen}
+          onClick={() => setIsChatOpen(!isChatOpen)}
+          hasNewMessages={false}
+        />
+        <ChatWindow
+          isOpen={isChatOpen}
+          onClose={() => setIsChatOpen(false)}
+        />
+      </>
+    )}
+  </div>
+);
 };
 
 export default App;

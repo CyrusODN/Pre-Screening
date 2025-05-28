@@ -16,8 +16,8 @@ export class MedicalChatbotAgent extends AbstractBaseAgent<ChatbotResult> {
       systemPrompt: `Jesteś doświadczonym lekarzem psychiatrą i specjalistą badań klinicznych. Twoim zadaniem jest odpowiadanie na pytania użytkowników dotyczące przeprowadzonej analizy pre-screeningowej pacjenta.
 
 **TWOJA ROLA:**
-- Odpowiadasz na pytania w sposób profesjonalny i zrozumiały
-- Odwołujesz się do konkretnych wyników z analizy
+- Odpowiadasz na pytania w sposób profesjonalny i zrozumiały w JĘZYKU NATURALNYM
+- Odwołujesz się do konkretnych wyników z analizy i CYTUJESZ notatki lekarza
 - Wyjaśniasz medyczne terminy w przystępny sposób
 - Sugerujesz dalsze kroki jeśli to właściwe
 - Zachowujesz ostrożność w formułowaniu diagnoz i prognoz
@@ -26,28 +26,24 @@ export class MedicalChatbotAgent extends AbstractBaseAgent<ChatbotResult> {
 - Kompletna analiza wieloagentowa pacjenta
 - Wyniki wszystkich agentów (synteza kliniczna, epizody, farmakoterapia, TRD, kryteria, ryzyko)
 - Historia choroby i protokół badania
+- Notatki lekarza z dokumentacji medycznej
 
 **ZASADY ODPOWIEDZI:**
-1. **Precyzja** - odwołuj się do konkretnych danych z analizy
-2. **Przejrzystość** - wyjaśniaj skomplikowane pojęcia
-3. **Bezpieczeństwo** - zawsze podkreślaj potrzebę weryfikacji przez lekarza
-4. **Kompletność** - odpowiadaj wyczerpująco, ale zwięźle
-5. **Profesjonalizm** - zachowuj medyczny standard komunikacji
+1. **Język naturalny** - odpowiadaj jak lekarz w rozmowie z kolegą
+2. **Cytowanie źródeł** - w miarę możliwości cytuj fragmenty notatek lekarza używając cudzysłowów
+3. **Precyzja** - odwołuj się do konkretnych danych z analizy
+4. **Przejrzystość** - wyjaśniaj skomplikowane pojęcia
+5. **Bezpieczeństwo** - zawsze podkreślaj potrzebę weryfikacji przez lekarza
+6. **Kompletność** - odpowiadaj wyczerpująco na pytania o szczegóły historii leczenia
 
-**FORMAT ODPOWIEDZI:**
-Zwróć JSON z następującą strukturą:
-\`\`\`json
-{
-  "response": "Szczegółowa odpowiedź na pytanie użytkownika",
-  "confidence": 0.85,
-  "referencedSections": ["Sekcja 1", "Sekcja 2"],
-  "suggestedFollowUp": ["Pytanie 1", "Pytanie 2"]
-}
-\`\`\`
+**SPOSÓB CYTOWANIA:**
+- Używaj cudzysłowów: "pacjent zgłasza nasilenie objawów depresyjnych"
+- Wskazuj źródło: "jak wynika z notatki z dnia 15.03.2024"
+- Odwołuj się do konkretnych fragmentów dokumentacji
 
 **PRZYKŁADOWE OBSZARY PYTAŃ:**
 - Wyjaśnienie kryteriów włączenia/wyłączenia
-- Szczegóły dotyczące farmakoterapii
+- Szczegóły dotyczące farmakoterapii i historii leczenia
 - Interpretacja oceny TRD
 - Wyjaśnienie ryzyk i zaleceń
 - Prawdopodobieństwo kwalifikacji
@@ -57,7 +53,10 @@ Zwróć JSON z następującą strukturą:
 - Zawsze podkreślaj, że to analiza wstępna
 - Zachęcaj do konsultacji z lekarzem prowadzącym
 - Nie formułuj ostatecznych diagnoz
-- Bądź empatyczny wobec obaw pacjenta/rodziny`,
+- Bądź empatyczny wobec obaw pacjenta/rodziny
+- Odpowiadaj w języku polskim, profesjonalnie ale przystępnie
+
+**WAŻNE:** Odpowiadaj TYLKO tekstem w języku naturalnym, NIE używaj formatu JSON!`,
       dependencies: ['clinical-synthesis', 'episode-analysis', 'pharmacotherapy-analysis', 'trd-assessment', 'criteria-assessment', 'risk-assessment']
     };
     
@@ -72,23 +71,30 @@ Zwróć JSON z następującą strukturą:
   ): Promise<ChatbotResult> {
     const prompt = this.buildChatbotPrompt(question, context, focusArea);
     
-    const response = await this.callAI(prompt, this.config.systemPrompt, context.modelUsed);
-    
     try {
-      const result = JSON.parse(response);
-      this.validateChatbotResult(result);
-      return result;
-    } catch (error) {
-      // Fallback do prostej odpowiedzi tekstowej
+      const response = await this.callAI(prompt, this.config.systemPrompt, context.modelUsed);
+      
+      // Teraz oczekujemy odpowiedzi w języku naturalnym, nie JSON
+      // Tworzymy strukturę ChatbotResult z otrzymanej odpowiedzi
       return {
-        response: response,
-        confidence: 0.7,
-        referencedSections: ['Analiza ogólna'],
-        suggestedFollowUp: [
-          'Czy może Pan/Pani doprecyzować pytanie?',
-          'Czy interesuje Pana/Panią konkretny aspekt analizy?'
-        ]
+        response: response.trim(),
+        confidence: 0.8, // Domyślna pewność
+        referencedSections: this.extractReferencedSections(response, context),
+        suggestedFollowUp: this.generateSuggestedQuestions(question, focusArea)
       };
+    } catch (error) {
+      console.error(`[MedicalChatbotAgent] Błąd podczas odpowiadania na pytanie:`, error);
+      
+      // Sprawdź czy to błąd rate limit Claude
+      const isClaudeRateLimit = context.modelUsed === 'claude-opus' && 
+        error instanceof Error && error.message.includes('rate_limit_error');
+      
+      if (isClaudeRateLimit) {
+        console.log(`[MedicalChatbotAgent] Claude rate limit detected, fallback will be handled by BaseAgent`);
+      }
+      
+      // Zwróć fallback response
+      return this.getErrorFallback();
     }
   }
 
@@ -171,6 +177,78 @@ Na podstawie powyższych danych, odpowiedz na pytanie użytkownika w sposób pro
     
     if (!Array.isArray(result.suggestedFollowUp)) {
       throw new Error('suggestedFollowUp musi być tablicą');
+    }
+  }
+
+  private extractReferencedSections(response: string, context: SharedContext): string[] {
+    const sections: string[] = [];
+    
+    // Sprawdź które sekcje analizy są prawdopodobnie referencowane w odpowiedzi
+    if (response.toLowerCase().includes('kryteria') || response.toLowerCase().includes('kwalifikacja')) {
+      sections.push('Kryteria włączenia/wyłączenia');
+    }
+    
+    if (response.toLowerCase().includes('farmakoterapia') || response.toLowerCase().includes('lek')) {
+      sections.push('Analiza farmakoterapii');
+    }
+    
+    if (response.toLowerCase().includes('trd') || response.toLowerCase().includes('lekoopora')) {
+      sections.push('Ocena TRD');
+    }
+    
+    if (response.toLowerCase().includes('ryzyko') || response.toLowerCase().includes('bezpieczeństwo')) {
+      sections.push('Ocena ryzyka');
+    }
+    
+    if (response.toLowerCase().includes('epizod') || response.toLowerCase().includes('przebieg')) {
+      sections.push('Analiza epizodów');
+    }
+    
+    if (sections.length === 0) {
+      sections.push('Synteza kliniczna');
+    }
+    
+    return sections;
+  }
+
+  private generateSuggestedQuestions(question: string, focusArea?: string): string[] {
+    const baseQuestions = [
+      'Czy może Pan wyjaśnić szczegóły tego aspektu?',
+      'Jakie są dodatkowe informacje w tym zakresie?',
+      'Czy są jakieś dodatkowe zalecenia?'
+    ];
+
+    switch (focusArea) {
+      case 'criteria':
+        return [
+          'Które kryteria wymagają dodatkowej weryfikacji?',
+          'Jakie badania mogą potwierdzić kwalifikowalność?',
+          'Czy są alternatywne interpretacje kryteriów?'
+        ];
+      
+      case 'pharmacotherapy':
+        return [
+          'Czy może Pan wyjaśnić szczegóły farmakoterapii?',
+          'Jakie są wskaźniki lekooporności?',
+          'Czy historia leczenia jest kompletna?'
+        ];
+      
+      case 'episodes':
+        return [
+          'Czy może Pan opisać przebieg epizodów?',
+          'Jakie są alternatywne scenariusze?',
+          'Czy chronologia jest pewna?'
+        ];
+      
+      case 'risk':
+        return [
+          'Jakie są główne czynniki ryzyka?',
+          'Jak można zminimalizować ryzyko?',
+          'Czy są dodatkowe środki ostrożności?'
+        ];
+      
+      default:
+        return baseQuestions;
     }
   }
 } 

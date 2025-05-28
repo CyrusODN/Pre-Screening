@@ -114,6 +114,11 @@ export interface PatientData {
   analyzedAt?: string;
   isMockData?: boolean;
   modelUsed?: SupportedAIModel;
+  drugMappingInfo?: {
+    mappingsApplied: number;
+    mappings: Array<{original: string; mapped: string; confidence: number}>;
+    preprocessedAt: string;
+  };
 }
 
 export interface PatientHistoryEntry {

@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Upload, FileText, AlertCircle, History, BrainCircuit, PlayCircle, Network, Zap } from 'lucide-react'; // Added Network, Zap
 import { PatientHistory } from './PatientHistory';
 import { ProtocolSelector } from './ProtocolSelector';
+import { Logo } from './Logo';
 import { getHistory, clearHistory } from '../services/patientHistory';
 import { isMultiAgentAvailable } from '../services/multiAgentService';
 import type { Protocol, SupportedAIModel } from '../types';
@@ -33,7 +34,6 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
   const [medicalHistoryFile, setMedicalHistoryFile] = useState<File | null>(null);
   const [error, setError] = useState('');
   const [showHistory, setShowHistory] = useState(false);
-  const [showCustomProtocol, setShowCustomProtocol] = useState(false);
 
   const handleFileUpload = async (file: File, type: 'protocol' | 'medicalHistory') => {
     try {
@@ -69,7 +69,6 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
     setSelectedProtocol(protocolObj);
     setProtocol(''); 
     setProtocolFile(null); 
-    setShowCustomProtocol(false); 
   };
   
   const handleClearHistory = () => {
@@ -79,21 +78,35 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
 
 
   return (
-    <div className="min-h-screen bg-gradient-theme-light py-8 px-3 sm:px-4 lg:px-6 font-sans">
+    <div className="min-h-screen bg-gradient-theme-light py-4 px-3 sm:px-4 lg:px-6 font-sans">
       <div className="max-w-6xl mx-auto">
-        <header className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900 mb-3">
-            Interaktywny Raport Pre-screeningowy
-          </h1>
-          <p className="text-lg text-gray-600">
-            Wprowadź dane do analizy kwalifikacji pacjenta
-          </p>
+        <header className="mb-6">
+          {/* Logo Header */}
+          <div className="flex justify-center mb-4">
+            <Logo 
+              size="lg" 
+              showText={false}
+              className="hover:scale-105 transition-transform duration-300"
+            />
+          </div>
+
+          {/* Title Section */}
+          <div className="text-center mb-4">
+            <div className="bg-gradient-to-r from-remedy-light via-white to-remedy-secondary/10 rounded-xl p-4 shadow-lg border border-remedy-border/30">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-remedy-primary via-remedy-accent to-remedy-secondary bg-clip-text text-transparent mb-2">
+                Remedius Pre-Screening system
+              </h1>
+              <p className="text-lg text-slate-700 font-medium">
+                Wprowadź dane do analizy kwalifikacji pacjenta
+              </p>
+            </div>
+          </div>
         </header>
 
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-3">
-          <div className="flex flex-col sm:flex-row items-center gap-3">
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-2">
+          <div className="flex flex-col sm:flex-row items-center gap-2">
             {/* AI Model Selector */}
-            <div className="flex items-center gap-2 card-remedy">
+            <div className="flex items-center gap-2 card-remedy py-2 px-3">
               <div className="icon-circle">
                 <BrainCircuit className="w-4 h-4" />
               </div>
@@ -104,7 +117,7 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
               id="ai-model-select"
               value={selectedAIModel}
               onChange={(e) => onAIModelChange(e.target.value as SupportedAIModel)}
-                className="p-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-remedy-accent focus:border-remedy-accent transition-all"
+                className="p-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-remedy-accent focus:border-remedy-accent transition-all"
             >
               <option value="o3">o3 (OpenAI-like)</option>
               <option value="gemini">Gemini 2.5 Pro Preview 05-06</option>
@@ -113,7 +126,7 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
             </div>
 
             {/* Multi-Agent Mode Toggle */}
-            <div className="flex items-center gap-2 card-remedy">
+            <div className="flex items-center gap-2 card-remedy py-2 px-3">
               <div className="icon-circle">
                 <Network className="w-4 h-4" />
               </div>
@@ -139,17 +152,10 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
             </div>
           </div>
 
-          <div className="flex gap-3">
-            <button
-              onClick={() => setShowCustomProtocol(!showCustomProtocol)}
-              className="btn-secondary flex items-center gap-2"
-            >
-              <FileText className="w-4 h-4" />
-              {showCustomProtocol ? 'Wybierz predefiniowany' : 'Własny protokół'}
-            </button>
+          <div className="flex gap-2">
             <button
               onClick={() => setShowHistory(!showHistory)}
-              className="btn-secondary flex items-center gap-2"
+              className="btn-secondary flex items-center gap-2 text-sm px-3 py-1.5"
             >
               <History className="w-4 h-4" />
               {showHistory ? 'Ukryj historię' : 'Pokaż historię'}
@@ -157,7 +163,7 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
             {onLoadDemo && (
               <button
                 onClick={onLoadDemo}
-                className="btn-primary flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                className="btn-primary flex items-center gap-2 bg-gradient-to-r from-remedy-primary to-remedy-accent hover:from-remedy-accent hover:to-remedy-secondary shadow-lg hover:shadow-xl transition-all duration-300 text-sm px-3 py-1.5"
                 title="Załaduj przykładowe dane z bogatą historią farmakoterapii"
               >
                 <Zap className="w-4 h-4" />
@@ -170,7 +176,7 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
 
 
         {showHistory ? (
-          <div className="card-remedy mb-8">
+          <div className="card-remedy mb-6">
              <PatientHistory
               history={getHistory()}
               onClearHistory={handleClearHistory}
@@ -178,9 +184,9 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
             />
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="bg-red-50 border border-red-200 p-4 mb-4 rounded-lg">
+              <div className="bg-red-50 border border-red-200 p-3 mb-3 rounded-lg">
                 <div className="flex items-center">
                   <AlertCircle className="text-red-500 mr-2" size={16} />
                   <p className="text-red-700 font-medium text-sm">{error}</p>
@@ -188,61 +194,21 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
               </div>
             )}
 
-            {showCustomProtocol ? (
-              <div className="card-remedy space-y-4">
-                <div>
-                  <label className="block text-lg font-bold text-gray-900 mb-3">
-                    Własny Protokół Badania
-                  </label>
-                  <div className="space-y-4">
-                    <textarea
-                      value={protocol}
-                      onChange={(e) => {
-                        setProtocol(e.target.value);
-                        if (selectedProtocol) setSelectedProtocol(null); 
-                      }}
-                      className="w-full h-40 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-remedy-accent focus:border-remedy-accent transition-all resize-none text-sm"
-                      placeholder="Wprowadź lub wklej protokół badania (w formacie JSON lub tekstowym)..."
-                    />
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2 text-gray-600">
-                        <FileText size={16} />
-                        <span className="font-medium text-sm">{protocolFile ? protocolFile.name : 'Nie wybrano pliku'}</span>
-                      </div>
-                      <label className="btn-primary cursor-pointer flex items-center gap-2">
-                        <Upload size={16} />
-                        <span>Wczytaj z pliku</span>
-                        <input
-                          type="file"
-                          accept=".txt,.json,.doc,.docx"
-                          className="hidden"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) handleFileUpload(file, 'protocol');
-                          }}
-                        />
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <ProtocolSelector
-                selectedProtocol={selectedProtocol}
-                onProtocolSelect={handleProtocolSelect}
-              />
-            )}
+            <ProtocolSelector
+              selectedProtocol={selectedProtocol}
+              onProtocolSelect={handleProtocolSelect}
+            />
 
-            <div className="card-remedy space-y-4">
+            <div className="card-remedy space-y-3">
               <div>
-                <label className="block text-lg font-bold text-gray-900 mb-3">
+                <label className="block text-lg font-bold text-gray-900 mb-2">
                   Historia Choroby
                 </label>
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <textarea
                     value={medicalHistory}
                     onChange={(e) => setMedicalHistory(e.target.value)}
-                    className="w-full h-40 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-remedy-accent focus:border-remedy-accent transition-all resize-none text-sm"
+                    className="w-full h-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-remedy-accent focus:border-remedy-accent transition-all resize-none text-sm"
                     placeholder="Wprowadź lub wklej historię choroby..."
                   />
                   <div className="flex items-center justify-between">
@@ -269,7 +235,7 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
             </div>
 
             <div className="text-center">
-              <button type="submit" className="btn-primary text-lg px-8 py-3">
+              <button type="submit" className="btn-primary text-base px-6 py-2">
                 Rozpocznij Analizę
               </button>
             </div>

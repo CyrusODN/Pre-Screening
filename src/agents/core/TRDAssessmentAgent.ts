@@ -27,6 +27,41 @@ Twoja ocena lekooporności (kryterium IC6) MUSI opierać się WYŁĄCZNIE na inf
 **DEFINICJA "ADEKWATNEJ PRÓBY LECZENIA":**
 "Adekwatna próba leczenia" jest zdefiniowana WYŁĄCZNIE przez listę leków, ich minimalne dawki (minDose) i minimalny czas trwania (minTrialDurationWeeks) określone w "Kryteriach MGH-ATRQ Badania" (obiekt mghAtrqPoland wewnątrz kryterium IC6 protokołu).
 
+**KRYTYCZNA ZASADA: ANALIZA TYLKO OBECNEGO EPIZODU DEPRESYJNEGO**
+
+⚠️ **NAJWAŻNIEJSZA REGUŁA TRD:** Lekooporność (TRD) może być stwierdzona TYLKO na podstawie niepowodzeń leczenia w OBECNYM epizodzie depresyjnym. Próby leczenia z poprzednich epizodów NIE MOGĄ być uwzględniane w ocenie TRD dla obecnego epizodu.
+
+**KROK 1: OKREŚL OBECNY EPIZOD DEPRESYJNY**
+- Wykorzystaj wyniki EpisodeAnalysisAgent do określenia daty rozpoczęcia obecnego epizodu
+- Jeśli EpisodeAnalysisAgent wskazuje epizod od czerwca 2024, to TYLKO leczenie od czerwca 2024 może być uwzględnione
+- Próby leczenia z 2019, 2020, 2021 itp. to POPRZEDNIE epizody - NIE MOGĄ być liczone do TRD obecnego epizodu
+
+**KROK 2: FILTRUJ PRÓBY LECZENIA WEDŁUG DAT**
+- Sprawdź datę rozpoczęcia każdej próby leczenia z PharmacotherapyAgent
+- Uwzględnij TYLKO próby, które rozpoczęły się w obecnym epizodzie lub po jego rozpoczęciu
+- Odrzuć wszystkie próby z poprzednich epizodów, nawet jeśli były adekwatne
+
+**PRZYKŁAD POPRAWNEJ ANALIZY:**
+
+EpisodeAnalysisAgent: "Obecny epizod od czerwca 2024"
+PharmacotherapyAgent próby:
+- Wenlafaksyna 150mg/12tyg (2019-02-20 do 2019-05-15) → ODRZUĆ (poprzedni epizod)
+- Escitalopram 10mg/16tyg (2020-02-27 do 2020-06-17) → ODRZUĆ (poprzedni epizod)  
+- Duloksetyna 60mg/43tyg (2024-05-20 do 2025-03-21) → SPRAWDŹ (może być częściowo w obecnym epizodzie)
+
+POPRAWNA ANALIZA TRD:
+- Jeśli obecny epizod od czerwca 2024, to tylko część leczenia Duloksetyną (od czerwca 2024) może być uwzględniona
+- Wynik: Maksymalnie 1 próba w obecnym epizodzie → TRD NIE POTWIERDZONE
+
+**KROK 3: WERYFIKUJ LOGIKĘ CZASOWĄ**
+- Sprawdź czy daty prób leczenia są logiczne względem daty rozpoczęcia obecnego epizodu
+- Jeśli próba rozpoczęła się przed obecnym epizodem, ale trwała w jego trakcie, uwzględnij tylko część w obecnym epizodzie
+- Dokumentuj dokładnie, dlaczego każda próba została uwzględniona lub odrzucona
+
+**BŁĘDNE PODEJŚCIE (DO UNIKANIA):**
+❌ "Pacjent miał 5 adekwatnych prób: 2019, 2020, 2021, 2024, 2024 → TRD potwierdzone"
+✅ "Obecny epizod od czerwca 2024. W obecnym epizodzie: 1 próba (Duloksetyna od czerwca 2024) → TRD NIE potwierdzone"
+
 **SPRAWDZANIE KAŻDEGO LEKU:**
 - Sprawdź KAŻDY lek przeciwdepresyjny przyjmowany przez pacjenta w obecnym epizodzie depresyjnym
 - Porównaj go z listą leków w "Kryteriach MGH-ATRQ Badania" 
@@ -38,7 +73,7 @@ Twoja ocena lekooporności (kryterium IC6) MUSI opierać się WYŁĄCZNIE na inf
 - Próba jest "adekwatna" TYLKO jeśli oba warunki (dawka i czas) są spełnione
 
 **LICZENIE NIEPOWODZEŃ TERAPEUTYCZNYCH:**
-Pacjent spełnia kryterium IC6, jeśli doświadczył niepowodzenia co najmniej DWÓCH (2) RÓŻNYCH, "adekwatnych prób leczenia" w obecnym epizodzie depresyjnym.
+Pacjent spełnia kryterium IC6, jeśli doświadczył niepowodzenia co najmniej DWÓCH (2) RÓŻNYCH ale mniej niż  PIĘCIU (5), "adekwatnych prób leczenia" w obecnym epizodzie depresyjnym.
 
 **"RÓŻNE PRÓBY LECZENIA" oznaczają:**
 - Zmianę leku na inny z listy w "Kryteriach MGH-ATRQ Badania"

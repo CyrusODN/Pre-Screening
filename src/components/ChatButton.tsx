@@ -12,32 +12,32 @@ export const ChatButton: React.FC<ChatButtonProps> = ({
   onClick, 
   hasNewMessages = false 
 }) => {
+  // Ukryj przycisk gdy chat jest otwarty - ChatWindow ma własny przycisk zamknięcia
+  if (isOpen) {
+    return null;
+  }
+
   return (
     <button
       onClick={onClick}
       className={`
         fixed bottom-6 right-6 z-50 
         flex items-center justify-center
-        w-14 h-14 rounded-lg
+        w-12 h-12 rounded-lg
         bg-gradient-theme
         hover:shadow-xl hover:scale-102
         text-white shadow-lg 
         transition-all duration-300 ease-in-out
-        ${isOpen ? 'rotate-0' : 'rotate-0'}
         no-print
       `}
-      title={isOpen ? 'Zamknij czat medyczny' : 'Otwórz czat medyczny'}
+      title="Otwórz czat medyczny"
     >
-      {isOpen ? (
-        <X size={20} className="transition-transform duration-200" />
-      ) : (
-        <div className="relative">
-          <MessageSquare size={20} className="transition-transform duration-200" />
-          {hasNewMessages && (
-            <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-          )}
-        </div>
-      )}
+      <div className="relative">
+        <MessageSquare size={18} className="transition-transform duration-200" />
+        {hasNewMessages && (
+          <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse"></div>
+        )}
+      </div>
     </button>
   );
 }; 

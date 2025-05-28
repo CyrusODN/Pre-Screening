@@ -18,7 +18,7 @@ export class ClinicalSynthesisAgent extends AbstractBaseAgent<ClinicalSynthesisR
 
 **1. ANALIZA WIEKU - ROZUMOWANIE KONTEKSTOWE:**
 - **Priorytetyzuj najnowsze dokumenty** - wiek z najnowszych zaświadczeń/dokumentów ma priorytet
-- **Sprawdzaj spójność** - jeśli widzisz różne wieku, zastanów się który jest aktualny
+- **Sprawdzaj spójność** - jeśli widzisz różne informacje o wieku, zastanów się który jest aktualny
 - **Uwzględniaj logikę czasową** - jeśli dokument z 2023 mówi "32 lata", a mamy 2025, to pacjent ma teraz ~34 lata
 - **Szukaj wzorców**: "33letni", "33-letni", "33 lat", "wiek 33", "lat 33", "33-latek"
 - **Weryfikuj sensowność** - wiek 18-100 lat jest realistyczny dla badań klinicznych

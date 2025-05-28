@@ -6,6 +6,7 @@ import type {
   AgentResult
 } from '../../types/agents';
 import type { PatientData, SupportedAIModel } from '../../types/index';
+import drugMappingClient from '../../services/drugMappingClient';
 
 // Import wszystkich agentów
 import { ClinicalSynthesisAgent } from '../core/ClinicalSynthesisAgent';
@@ -15,10 +16,89 @@ import { TRDAssessmentAgent } from '../core/TRDAssessmentAgent';
 import { CriteriaAssessmentAgent } from '../core/CriteriaAssessmentAgent';
 import { RiskAssessmentAgent } from '../core/RiskAssessmentAgent';
 
+/**
+ * Preprocessuje historię medyczną, mapując nazwy handlowe leków na substancje czynne
+ */
+async function preprocessMedicalHistoryForDrugMapping(medicalHistory: string): Promise<{
+  processedHistory: string;
+  drugMappings: Array<{original: string; mapped: string; confidence: number}>;
+}> {
+  console.log('🔍 [Multi-Agent] Preprocessing medical history for drug mapping...');
+  
+  const drugMappings: Array<{original: string; mapped: string; confidence: number}> = [];
+  let processedHistory = medicalHistory;
+  
+  // Wzorce do wykrywania nazw leków w tekście
+  const drugPatterns = [
+    // Wzorce dla polskich nazw leków
+    /\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s*(?:\d+\s*mg|\d+mg|tabl|kaps|ml)/gi,
+    // Wzorce dla nazw w nawiasach
+    /\(([^)]+(?:ina|ine|ol|um|an|on|ex|al))\)/gi,
+    // Wzorce dla nazw po "lek:", "preparat:", itp.
+    /(?:lek|preparat|medication|drug):\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)/gi,
+    // Wzorce dla typowych końcówek nazw leków
+    /\b([A-Z][a-z]*(?:ina|ine|ol|um|an|on|ex|al|yl|il))\b/gi
+  ];
+  
+  const potentialDrugs = new Set<string>();
+  
+  // Wyciągnij potencjalne nazwy leków
+  drugPatterns.forEach(pattern => {
+    let match;
+    while ((match = pattern.exec(medicalHistory)) !== null) {
+      const drugName = match[1].trim();
+      if (drugName.length > 3) { // Ignoruj bardzo krótkie nazwy
+        potentialDrugs.add(drugName);
+      }
+    }
+  });
+  
+  console.log(`🔍 [Multi-Agent] Found ${potentialDrugs.size} potential drug names:`, Array.from(potentialDrugs));
+  
+  // Mapuj każdą potencjalną nazwę leku
+  for (const drugName of potentialDrugs) {
+    try {
+      const mappingResult = await drugMappingClient.mapDrugToStandard(drugName);
+      
+      if (mappingResult.found && mappingResult.confidence > 0.6) {
+        const standardName = mappingResult.standardName;
+        const activeSubstance = mappingResult.activeSubstance;
+        
+        // Użyj substancji czynnej jako głównej nazwy
+        const mappedName = activeSubstance || standardName;
+        
+        drugMappings.push({
+          original: drugName,
+          mapped: mappedName,
+          confidence: mappingResult.confidence
+        });
+        
+        // Zamień w tekście wszystkie wystąpienia nazwy handlowej na substancję czynną
+        const regex = new RegExp(`\\b${drugName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+        processedHistory = processedHistory.replace(regex, `${mappedName} (${drugName})`);
+        
+        console.log(`✅ [Multi-Agent] Mapped: ${drugName} → ${mappedName} (confidence: ${Math.round(mappingResult.confidence * 100)}%)`);
+      } else {
+        console.log(`⚠️ [Multi-Agent] No mapping found for: ${drugName} (confidence: ${mappingResult.confidence})`);
+      }
+    } catch (error) {
+      console.error(`❌ [Multi-Agent] Error mapping drug ${drugName}:`, error);
+    }
+  }
+  
+  console.log(`✅ [Multi-Agent] Drug mapping completed. Mapped ${drugMappings.length} drugs.`);
+  
+  return {
+    processedHistory,
+    drugMappings
+  };
+}
+
 export class MultiAgentCoordinatorImpl implements MultiAgentCoordinator {
   private readonly agents: Map<string, any> = new Map();
   private readonly executionLog: string[] = [];
-  private readonly RATE_LIMIT_DELAY = 25000; // 25 sekund między agentami - zwiększone z powodu rate limiting
+  private readonly RATE_LIMIT_DELAY = 45000; // 45 sekund między agentami - zwiększone z powodu rate limiting Claude
+  private readonly CLAUDE_RATE_LIMIT_DELAY = 60000; // 60 sekund specjalnie dla Claude
   private readonly MAX_RETRIES = 3;
 
   constructor() {
@@ -42,16 +122,38 @@ export class MultiAgentCoordinatorImpl implements MultiAgentCoordinator {
   }> {
     this.executionLog.length = 0; // Wyczyść logi
     
-    // Inicjalizacja kontekstu współdzielonego
-    const context: SharedContext = {
-      medicalHistory,
-      studyProtocol,
-      modelUsed: selectedModel
-    };
-
-    const agentResults: Record<string, AgentResult> = {};
-
     try {
+      // NOWE: Preprocessuj historię medyczną dla mapowania leków
+      this.log('🔍 Preprocessing medical history for drug mapping...');
+      const { processedHistory, drugMappings } = await preprocessMedicalHistoryForDrugMapping(medicalHistory);
+      
+      // Dodaj informację o mapowaniu do kontekstu
+      let enhancedHistory = processedHistory;
+      if (drugMappings.length > 0) {
+        enhancedHistory += '\n\n--- INFORMACJE O MAPOWANIU LEKÓW ---\n';
+        enhancedHistory += 'Następujące nazwy handlowe zostały automatycznie zmapowane na substancje czynne:\n';
+        drugMappings.forEach(mapping => {
+          enhancedHistory += `• ${mapping.original} → ${mapping.mapped} (pewność: ${Math.round(mapping.confidence * 100)}%)\n`;
+        });
+        enhancedHistory += 'Proszę używać nazw substancji czynnych w analizie dla większej precyzji.\n';
+      }
+      
+      this.log(`✅ Drug mapping completed. Mapped ${drugMappings.length} drugs.`);
+      
+      // Inicjalizacja kontekstu współdzielonego z przetworzoną historią
+      const context: SharedContext = {
+        medicalHistory: enhancedHistory, // Używamy przetworzonej historii
+        studyProtocol,
+        modelUsed: selectedModel,
+        drugMappingInfo: {
+          mappingsApplied: drugMappings.length,
+          mappings: drugMappings,
+          preprocessedAt: new Date().toISOString()
+        }
+      };
+
+      const agentResults: Record<string, AgentResult> = {};
+
       // FAZA 1: Analiza podstawowa - sekwencyjna dla zależności
       this.log('🚀 FAZA 1: Rozpoczynanie analizy podstawowej...');
       
@@ -102,7 +204,14 @@ export class MultiAgentCoordinatorImpl implements MultiAgentCoordinator {
       
       const finalResult = this.synthesizeFinalResult(agentResults, context);
       
-      this.log('✅ Analiza wieloagentowa zakończona pomyślnie');
+      // Dodaj informacje o mapowaniu leków do wyniku końcowego
+      finalResult.drugMappingInfo = {
+        mappingsApplied: drugMappings.length,
+        mappings: drugMappings,
+        preprocessedAt: new Date().toISOString()
+      };
+      
+      this.log(`✅ Analiza wieloagentowa zakończona pomyślnie z ${drugMappings.length} mapowaniami leków`);
       
       return {
         finalResult,
@@ -127,8 +236,10 @@ export class MultiAgentCoordinatorImpl implements MultiAgentCoordinator {
     
     // Dodaj opóźnienie przed wykonaniem agenta (oprócz pierwszego)
     if (agentName !== 'clinical-synthesis') {
-      this.log(`⏳ Oczekiwanie ${this.RATE_LIMIT_DELAY/1000}s przed wykonaniem ${agentName} (rate limiting Claude API)...`);
-      await this.sleep(this.RATE_LIMIT_DELAY);
+      // Użyj dłuższego opóźnienia dla Claude
+      const delay = context.modelUsed === 'claude-opus' ? this.CLAUDE_RATE_LIMIT_DELAY : this.RATE_LIMIT_DELAY;
+      this.log(`⏳ Oczekiwanie ${delay/1000}s przed wykonaniem ${agentName} (rate limiting ${context.modelUsed} API)...`);
+      await this.sleep(delay);
     }
     
     // USPRAWNIENIE: Wzbogać kontekst o wyniki poprzednich agentów w czytelnej formie
@@ -153,8 +264,10 @@ export class MultiAgentCoordinatorImpl implements MultiAgentCoordinator {
            error.message.includes('rate limit'));
         
         if (isRateLimit && attempt < this.MAX_RETRIES) {
-          const retryDelay = this.RATE_LIMIT_DELAY * attempt * 1.5; // Zwiększaj opóźnienie z każdą próbą
-          this.log(`⚠️ ${agentName} - rate limit Claude API (próba ${attempt}/${this.MAX_RETRIES}). Oczekiwanie ${retryDelay/1000}s przed ponowną próbą...`);
+          // Zwiększ opóźnienie eksponencjalnie dla kolejnych prób
+          const baseDelay = context.modelUsed === 'claude-opus' ? this.CLAUDE_RATE_LIMIT_DELAY : this.RATE_LIMIT_DELAY;
+          const retryDelay = baseDelay * attempt * 1.5;
+          this.log(`⚠️ ${agentName} - rate limit ${context.modelUsed} API (próba ${attempt}/${this.MAX_RETRIES}). Oczekiwanie ${retryDelay/1000}s przed ponowną próbą...`);
           await this.sleep(retryDelay);
           continue;
         } else {
@@ -168,6 +281,12 @@ export class MultiAgentCoordinatorImpl implements MultiAgentCoordinator {
     const duration = Date.now() - startTime;
     this.log(`💥 Agent ${agentName} zakończony błędem po ${duration}ms: ${lastError?.message || 'Unknown error'}`);
     
+    // Sprawdź czy to błąd rate limit Claude - jeśli tak, zasugeruj użycie innego modelu
+    const isClaudeRateLimit = context.modelUsed === 'claude-opus' && lastError?.message?.includes('rate_limit_error');
+    if (isClaudeRateLimit) {
+      this.log(`💡 Sugestia: Rozważ użycie modelu 'gemini' lub 'o3' zamiast 'claude-opus' aby uniknąć limitów API`);
+    }
+    
     // Zamiast rzucać błąd dalej, zwracamy fallback result
     console.error(`[MultiAgentCoordinator] Szczegóły błędu ${agentName}:`, lastError);
     
@@ -175,7 +294,7 @@ export class MultiAgentCoordinatorImpl implements MultiAgentCoordinator {
       agentName: agentName,
       data: agent.getErrorFallback(),
       confidence: 0,
-      warnings: [`Błąd w ${agentName}: ${lastError?.message || 'Unknown error'}`],
+      warnings: [`Błąd w ${agentName}: ${lastError?.message || 'Unknown error'}${isClaudeRateLimit ? ' (Claude rate limit - spróbuj inny model)' : ''}`],
       processingTime: duration,
       timestamp: new Date().toISOString()
     };

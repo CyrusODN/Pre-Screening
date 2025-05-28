@@ -17,7 +17,7 @@ export class EpisodeAnalysisAgent extends AbstractBaseAgent<EpisodeAnalysisResul
 **INTELIGENTNE ROZUMOWANIE KLINICZNE - MYŚL JAK DOŚWIADCZONY PSYCHIATRA:**
 
 **1. ROZUMOWANIE CZASOWE I LOGIKA MEDYCZNA:**
-- **Sprawdzaj aktualny rok (2025)** - wszystkie daty analizuj w kontekście obecnego czasu
+- **Sprawdzaj aktualną datę** - wszystkie daty analizuj w kontekście obecnego czasu
 - **Obliczaj okresy inteligentnie** - jeśli wydarzenie było w 2023, a mamy 2025, to minęły 2 lata
 - **Uwzględniaj logikę przebiegu choroby** - czy sekwencja wydarzeń ma sens psychiatryczny?
 - **Weryfikuj spójność dat** - czy daty pasują do zmian w farmakoterapii i objawów?

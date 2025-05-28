@@ -15,6 +15,13 @@ export default {
         'remedy-mint': '#68BFB3',
         'remedy-accent': '#46B7C6',
         'remedy-accent-hover': '#3A8A9E',
+        'remedy-primary': '#4A90B9',
+        'remedy-secondary': '#68BFB3',
+        'remedy-light': '#F0F8FF',
+        'remedy-border': '#E2E8F0',
+        'remedy-success': '#22C55E',
+        'remedy-warning': '#F59E0B',
+        'remedy-danger': '#EF4444',
       },
       backgroundImage: {
         'gradient-theme': 'linear-gradient(135deg, #4A90B9 0%, #5BA6B6 50%, #68BFB3 100%)',

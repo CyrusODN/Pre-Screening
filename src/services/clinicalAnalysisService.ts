@@ -8,6 +8,8 @@ import {
   isValid 
 } from 'date-fns';
 import type { PharmacotherapyItem, PatientData } from '../types/index';
+import { PREDEFINED_PROTOCOLS } from '../data/protocols';
+import drugMappingClient from './drugMappingClient';
 
 // ============================================================================
 // CLINICAL RESEARCH TYPES & INTERFACES
@@ -146,105 +148,8 @@ export interface DataQualityAssessment {
 // CLINICAL RESEARCH CONSTANTS
 // ============================================================================
 
-// Protocol-specific drug classifications
-const COMP006_DRUG_CLASSIFICATIONS = {
-  // SSRI medications from MGH-ATRQ
-  ssri: [
-    'escitalopram', 'lexapro', 'fluvoxamine', 'luvox', 'paroxetine', 'paxil',
-    'fluoxetine', 'prozac', 'sertraline', 'zoloft', 'citalopram', 'celexa'
-  ],
-  
-  // SNRI medications from MGH-ATRQ
-  snri: [
-    'venlafaxine', 'effexor', 'duloxetine', 'cymbalta', 'desvenlafaxine', 'pristiq',
-    'milnacipran', 'savella', 'levomilnacipran', 'fetzima'
-  ],
-  
-  // TCA medications from MGH-ATRQ
-  tca: [
-    'doxepin', 'adapin', 'sinequan', 'clomipramine', 'anafranil', 'amoxapine', 'asendin',
-    'amitriptyline', 'endep', 'elavil', 'maprotiline', 'ludiomil', 'desipramine', 'norpramin',
-    'nortriptyline', 'pamelor', 'trimipramine', 'surmontil', 'imipramine', 'tofranil',
-    'protriptyline', 'vivactil', 'pipofezine', 'azafen', 'noxiptiline', 'agedal', 'elronon'
-  ],
-  
-  // MAOI medications from MGH-ATRQ
-  maoi: [
-    'isocarboxazid', 'marplan', 'phenelzine', 'nardil', 'tranylcypromine', 'parnate',
-    'selegiline', 'emsam', 'moclobemide', 'aurorix', 'pirlindole', 'pirazidol'
-  ],
-  
-  // Atypical antidepressants from MGH-ATRQ
-  atypical: [
-    'trazodone', 'desyrel', 'nefazodone', 'serzone', 'bupropion', 'wellbutrin',
-    'mirtazapine', 'remeron', 'agomelatine', 'valdoxan', 'tianeptine', 'stablon',
-    'reboxetine', 'edronax', 'mianserin', 'bolvidon', 'depnon', 'norval', 'tolvon',
-    'opipramol', 'insidon', 'vilazodone', 'viibryd', 'vortioxetine', 'brintellix'
-  ],
-  
-  // Augmentation agents (Poland-specific)
-  augmentation: [
-    'kwetiapina', 'quetiapine', 'seroquel', 'lithium', 'aripiprazole', 'abilify',
-    'olanzapine', 'zyprexa', 'risperidone', 'risperdal'
-  ]
-} as const;
-
-// MGH-ATRQ minimum doses (from protocol)
-const MGH_ATRQ_MIN_DOSES = {
-  // Tricyclic Antidepressants
-  'doxepin': 150,
-  'clomipramine': 150,
-  'amoxapine': 150,
-  'amitriptyline': 150,
-  'maprotiline': 150,
-  'desipramine': 150,
-  'nortriptyline': 75,
-  'trimipramine': 150,
-  'imipramine': 150,
-  'protriptyline': 30,
-  'pipofezine': 150,
-  'noxiptiline': 100,
-  
-  // MAOIs
-  'isocarboxazid': 30,
-  'phenelzine': 45,
-  'tranylcypromine': 30,
-  'selegiline': 6, // mg/24hrs patch
-  'moclobemide': 300,
-  'pirlindole': 200,
-  
-  // SSRIs
-  'escitalopram': 10,
-  'fluvoxamine': 50,
-  'paroxetine': 20, // or 25
-  'fluoxetine': 20,
-  'sertraline': 50,
-  'citalopram': 20,
-  
-  // SNRIs
-  'venlafaxine': 150,
-  'duloxetine': 60,
-  'desvenlafaxine': 50,
-  'milnacipran': 100,
-  'levomilnacipran': 40,
-  
-  // Atypical
-  'trazodone': 300,
-  'nefazodone': 300,
-  'bupropion': 300,
-  'mirtazapine': 15,
-  'agomelatine': 25,
-  'tianeptine': 37.5,
-  'reboxetine': 4,
-  'mianserin': 30,
-  'opipramol': 150,
-  'vilazodone': 40,
-  'vortioxetine': 10,
-  
-  // Poland-specific augmentation
-  'kwetiapina': 150,
-  'quetiapine': 150
-} as const;
+// MGH-ATRQ minimum doses (from protocol) - DEPRECATED: Now using protocol data directly
+// This constant is kept for reference but analyzeMGHATRQCompliance now uses protocol data
 
 // ============================================================================
 // ADVANCED CLINICAL ANALYSIS FUNCTIONS
@@ -255,6 +160,11 @@ export const classifyDrugForClinicalResearch = (drugName: string, dose?: string,
   const name = drugName.toLowerCase().trim();
   const normalizedName = name.replace(/[^a-z]/g, '');
   
+  // Get medications from COMP006 protocol instead of hardcoded lists
+  const comp006Protocol = PREDEFINED_PROTOCOLS['COMP006'];
+  const ic6Criterion = comp006Protocol?.criteria.inclusion?.find((c: any) => c.id === 'IC6');
+  const mghAtrqMedications = ic6Criterion?.mghAtrqPoland?.medications || [];
+  
   // Check against COMP006 protocol classifications
   let primaryClass = 'Unknown';
   let isAntidepressant = false;
@@ -263,70 +173,111 @@ export const classifyDrugForClinicalResearch = (drugName: string, dose?: string,
   let mechanism: string[] = [];
   let confidence = 0.5;
   
-  // SSRI Classification
-  if (COMP006_DRUG_CLASSIFICATIONS.ssri.some(drug => 
-    normalizedName.includes(drug.replace(/[^a-z]/g, '')) || 
-    name.includes(drug))) {
-    primaryClass = 'SSRI';
-    isAntidepressant = true;
+  // Create variations for better matching (Polish/English names)
+  const drugVariations = [
+    normalizedName,
+    drugName.toLowerCase().replace(/[^a-z]/g, ''),
+    // Common Polish-English variations
+    normalizedName.replace('wenlafaksyna', 'venlafaxine'),
+    normalizedName.replace('venlafaxine', 'wenlafaksyna'),
+    normalizedName.replace('kwetiapina', 'quetiapine'),
+    normalizedName.replace('quetiapine', 'kwetiapina'),
+    normalizedName.replace('escitalopram', 'escitalopram'), // same in both
+    normalizedName.replace('mirtazapina', 'mirtazapine'),
+    normalizedName.replace('mirtazapine', 'mirtazapina'),
+    // NAPRAWA: Dodanie mapowania dla duloksetyny
+    normalizedName.replace('duloksetyna', 'duloxetine'),
+    normalizedName.replace('duloxetine', 'duloksetyna'),
+    normalizedName.replace('sertralina', 'sertraline'),
+    normalizedName.replace('sertraline', 'sertralina'),
+    normalizedName.replace('fluoksetyna', 'fluoxetine'),
+    normalizedName.replace('fluoxetine', 'fluoksetyna'),
+    normalizedName.replace('paroksetyna', 'paroxetine'),
+    normalizedName.replace('paroxetine', 'paroksetyna'),
+    normalizedName.replace('citalopram', 'citalopram'), // same in both
+    normalizedName.replace('bupropion', 'bupropion'), // same in both
+    normalizedName.replace('trazodon', 'trazodone'),
+    normalizedName.replace('trazodone', 'trazodon')
+  ];
+  
+  // Find matching medication in protocol
+  const matchingMedication = mghAtrqMedications.find((med: any) => {
+    const medName = med.drugName.toLowerCase().replace(/[^a-z]/g, '');
+    const brandName = med.brandName?.toLowerCase().replace(/[^a-z]/g, '') || '';
+    
+    return drugVariations.some(variation => 
+      medName.includes(variation) || 
+      variation.includes(medName) ||
+      (brandName && (variation.includes(brandName) || brandName.includes(variation)))
+    );
+  });
+  
+  if (matchingMedication) {
     isProtocolRelevant = true;
-    mechanism = ['Selective Serotonin Reuptake Inhibition'];
     confidence = 0.95;
-  }
-  
-  // SNRI Classification
-  else if (COMP006_DRUG_CLASSIFICATIONS.snri.some(drug => 
-    normalizedName.includes(drug.replace(/[^a-z]/g, '')) || 
-    name.includes(drug))) {
-    primaryClass = 'SNRI';
-    isAntidepressant = true;
-    isProtocolRelevant = true;
-    mechanism = ['Serotonin-Norepinephrine Reuptake Inhibition'];
-    confidence = 0.95;
-  }
-  
-  // TCA Classification
-  else if (COMP006_DRUG_CLASSIFICATIONS.tca.some(drug => 
-    normalizedName.includes(drug.replace(/[^a-z]/g, '')) || 
-    name.includes(drug))) {
-    primaryClass = 'TCA';
-    isAntidepressant = true;
-    isProtocolRelevant = true;
-    mechanism = ['Tricyclic Antidepressant', 'Multiple Neurotransmitter Systems'];
-    confidence = 0.95;
-  }
-  
-  // MAOI Classification
-  else if (COMP006_DRUG_CLASSIFICATIONS.maoi.some(drug => 
-    normalizedName.includes(drug.replace(/[^a-z]/g, '')) || 
-    name.includes(drug))) {
-    primaryClass = 'MAOI';
-    isAntidepressant = true;
-    isProtocolRelevant = true;
-    mechanism = ['Monoamine Oxidase Inhibition'];
-    confidence = 0.95;
-  }
-  
-  // Atypical Antidepressants
-  else if (COMP006_DRUG_CLASSIFICATIONS.atypical.some(drug => 
-    normalizedName.includes(drug.replace(/[^a-z]/g, '')) || 
-    name.includes(drug))) {
-    primaryClass = 'Atypical';
-    isAntidepressant = true;
-    isProtocolRelevant = true;
-    mechanism = ['Atypical Antidepressant Mechanism'];
-    confidence = 0.90;
-  }
-  
-  // Augmentation Agents
-  else if (COMP006_DRUG_CLASSIFICATIONS.augmentation.some(drug => 
-    normalizedName.includes(drug.replace(/[^a-z]/g, '')) || 
-    name.includes(drug))) {
-    primaryClass = 'Antipsychotic';
-    isAugmentationAgent = true;
-    isProtocolRelevant = true;
-    mechanism = ['Dopamine Receptor Antagonism', 'Augmentation Strategy'];
-    confidence = 0.90;
+    
+    // Classify based on notes in protocol
+    const medNotes = matchingMedication.notes?.toLowerCase() || '';
+    const drugNameLower = matchingMedication.drugName.toLowerCase();
+    
+    if (medNotes.includes('ssri')) {
+      primaryClass = 'SSRI';
+      isAntidepressant = true;
+      mechanism = ['Selective Serotonin Reuptake Inhibition'];
+    } else if (medNotes.includes('snri')) {
+      primaryClass = 'SNRI';
+      isAntidepressant = true;
+      mechanism = ['Serotonin-Norepinephrine Reuptake Inhibition'];
+    } else if (medNotes.includes('maoi')) {
+      primaryClass = 'MAOI';
+      isAntidepressant = true;
+      mechanism = ['Monoamine Oxidase Inhibition'];
+    } else if (drugNameLower.includes('kwetiapina') || drugNameLower.includes('quetiapine') || 
+               medNotes.includes('adjuwantowe')) {
+      primaryClass = 'Antipsychotic';
+      isAugmentationAgent = true;
+      mechanism = ['Dopamine Receptor Antagonism', 'Augmentation Strategy'];
+    } else {
+      // NAPRAWA: Lepsze mapowanie dla leków bez explicit notes
+      if (drugNameLower.includes('mirtazapine') || drugNameLower.includes('mirtazapina')) {
+        primaryClass = 'NaSSA';
+        isAntidepressant = true;
+        mechanism = ['Noradrenergic and Specific Serotonergic Antidepressant'];
+      } else if (drugNameLower.includes('bupropion')) {
+        primaryClass = 'NDRI';
+        isAntidepressant = true;
+        mechanism = ['Norepinephrine-Dopamine Reuptake Inhibition'];
+      } else if (drugNameLower.includes('trazodone') || drugNameLower.includes('trazodon')) {
+        primaryClass = 'SARI';
+        isAntidepressant = true;
+        mechanism = ['Serotonin Antagonist and Reuptake Inhibitor'];
+      } else if (drugNameLower.includes('agomelatine')) {
+        primaryClass = 'Melatonergic';
+        isAntidepressant = true;
+        mechanism = ['Melatonin Receptor Agonist, 5-HT2C Antagonist'];
+      } else if (drugNameLower.includes('tianeptine')) {
+        primaryClass = 'Atypical';
+        isAntidepressant = true;
+        mechanism = ['Atypical Antidepressant Mechanism'];
+      } else if (drugNameLower.includes('reboxetine')) {
+        primaryClass = 'NRI';
+        isAntidepressant = true;
+        mechanism = ['Norepinephrine Reuptake Inhibition'];
+      } else if (drugNameLower.includes('mianserin')) {
+        primaryClass = 'TeCA';
+        isAntidepressant = true;
+        mechanism = ['Tetracyclic Antidepressant'];
+      } else if (drugNameLower.includes('opipramol')) {
+        primaryClass = 'Tricyclic';
+        isAntidepressant = true;
+        mechanism = ['Tricyclic Antidepressant'];
+      } else {
+        // Default for other antidepressants in protocol
+        primaryClass = 'Antidepressant';
+        isAntidepressant = true;
+        mechanism = ['Antidepressant Mechanism'];
+      }
+    }
   }
   
   // AI Variable: Detect from clinical notes if classification is unclear
@@ -365,13 +316,36 @@ export const classifyDrugForClinicalResearch = (drugName: string, dose?: string,
 export const extractDoseFromString = (doseStr: string): number => {
   if (!doseStr) return 0;
   
-  // Remove common units and extract first number
+  // ULEPSZENIE: Lepsze parsowanie dawek w różnych formatach
+  const originalDose = doseStr;
+  
+  // Sprawdź czy jest format typu "50mg (2x25mg)" - weź pierwszą wartość
+  const mainDoseMatch = doseStr.match(/^(\d+(?:[.,]\d+)?)\s*mg/i);
+  if (mainDoseMatch) {
+    const dose = parseFloat(mainDoseMatch[1].replace(',', '.'));
+    console.log(`🔍 [Dose Parsing] "${originalDose}" -> ${dose}mg (main dose format)`);
+    return dose;
+  }
+  
+  // Sprawdź format typu "2x25mg" - pomnóż
+  const multiplyDoseMatch = doseStr.match(/(\d+)\s*x\s*(\d+(?:[.,]\d+)?)\s*mg/i);
+  if (multiplyDoseMatch) {
+    const multiplier = parseInt(multiplyDoseMatch[1]);
+    const singleDose = parseFloat(multiplyDoseMatch[2].replace(',', '.'));
+    const totalDose = multiplier * singleDose;
+    console.log(`🔍 [Dose Parsing] "${originalDose}" -> ${totalDose}mg (${multiplier}x${singleDose}mg)`);
+    return totalDose;
+  }
+  
+  // Fallback do oryginalnej logiki
   const cleaned = doseStr.toLowerCase()
     .replace(/mg|ml|g|mcg|μg|units?|iu|tabs?|tabl?\.?/g, '')
     .replace(/[^\d.,]/g, '');
   
   const match = cleaned.match(/(\d+(?:[.,]\d+)?)/);
-  return match ? parseFloat(match[1].replace(',', '.')) : 0;
+  const dose = match ? parseFloat(match[1].replace(',', '.')) : 0;
+  console.log(`🔍 [Dose Parsing] "${originalDose}" -> ${dose}mg (fallback)`);
+  return dose;
 };
 
 // Advanced MGH-ATRQ compliance analysis with AI variables
@@ -388,26 +362,81 @@ export const analyzeMGHATRQCompliance = (
   const extractedDose = extractDoseFromString(dose);
   const normalizedDrugName = drugName.toLowerCase().replace(/[^a-z]/g, '');
   
-  // Check if drug is in MGH-ATRQ list
-  const drugFound = Object.keys(MGH_ATRQ_MIN_DOSES).some(drug => 
-    normalizedDrugName.includes(drug.replace(/[^a-z]/g, ''))
-  );
+  console.log(`🔍 [MGH-ATRQ Analysis] Drug: ${drugName}, Dose: ${dose} -> ${extractedDose}mg, Duration: ${duration} days`);
   
-  // Get minimum required dose
-  const minDoseKey = Object.keys(MGH_ATRQ_MIN_DOSES).find(drug => 
-    normalizedDrugName.includes(drug.replace(/[^a-z]/g, ''))
-  );
+  // Get MGH-ATRQ medications from COMP006 protocol
+  const comp006Protocol = PREDEFINED_PROTOCOLS['COMP006'];
+  const ic6Criterion = comp006Protocol?.criteria.inclusion?.find((c: any) => c.id === 'IC6');
+  const mghAtrqMedications = ic6Criterion?.mghAtrqPoland?.medications || [];
   
-  const minRequiredDose = minDoseKey ? MGH_ATRQ_MIN_DOSES[minDoseKey as keyof typeof MGH_ATRQ_MIN_DOSES] : 0;
+  // Check if drug is in MGH-ATRQ list from protocol
+  const matchingMedication = mghAtrqMedications.find((med: any) => {
+    const medName = med.drugName.toLowerCase().replace(/[^a-z]/g, '');
+    const brandName = med.brandName?.toLowerCase().replace(/[^a-z]/g, '') || '';
+    
+    // Create variations for better matching (Polish/English names)
+    const drugVariations = [
+      normalizedDrugName,
+      drugName.toLowerCase().replace(/[^a-z]/g, ''),
+      // Common Polish-English variations
+      normalizedDrugName.replace('wenlafaksyna', 'venlafaxine'),
+      normalizedDrugName.replace('venlafaxine', 'wenlafaksyna'),
+      normalizedDrugName.replace('kwetiapina', 'quetiapine'),
+      normalizedDrugName.replace('quetiapine', 'kwetiapina'),
+      normalizedDrugName.replace('escitalopram', 'escitalopram'), // same in both
+      normalizedDrugName.replace('mirtazapina', 'mirtazapine'),
+      normalizedDrugName.replace('mirtazapine', 'mirtazapina'),
+      // NAPRAWA: Dodanie mapowania dla duloksetyny
+      normalizedDrugName.replace('duloksetyna', 'duloxetine'),
+      normalizedDrugName.replace('duloxetine', 'duloksetyna'),
+      normalizedDrugName.replace('sertralina', 'sertraline'),
+      normalizedDrugName.replace('sertraline', 'sertralina'),
+      normalizedDrugName.replace('fluoksetyna', 'fluoxetine'),
+      normalizedDrugName.replace('fluoxetine', 'fluoksetyna'),
+      normalizedDrugName.replace('paroksetyna', 'paroxetine'),
+      normalizedDrugName.replace('paroxetine', 'paroksetyna'),
+      normalizedDrugName.replace('citalopram', 'citalopram'), // same in both
+      normalizedDrugName.replace('bupropion', 'bupropion'), // same in both
+      normalizedDrugName.replace('trazodon', 'trazodone'),
+      normalizedDrugName.replace('trazodone', 'trazodon')
+    ];
+    
+    return drugVariations.some(variation => 
+      medName.includes(variation) || 
+      variation.includes(medName) ||
+      (brandName && (variation.includes(brandName) || brandName.includes(variation)))
+    );
+  });
+  
+  const drugFound = !!matchingMedication;
+  
+  console.log(`🔍 [MGH-ATRQ] Drug found: ${drugFound}, Matching: ${matchingMedication?.drugName || 'none'}`);
+  
+  // Get minimum required dose from protocol
+  let minRequiredDose = 0;
+  if (matchingMedication) {
+    const minDoseStr = matchingMedication.minDose;
+    // Extract numeric value from dose string (e.g., "150mg/d" -> 150)
+    const doseMatch = minDoseStr.match(/(\d+(?:\.\d+)?)/);
+    if (doseMatch) {
+      minRequiredDose = parseFloat(doseMatch[1]);
+    }
+  }
+  
   const doseAdequate = extractedDose >= minRequiredDose;
+  
+  console.log(`🔍 [MGH-ATRQ] Dose check: ${extractedDose}mg >= ${minRequiredDose}mg = ${doseAdequate}`);
   
   // Duration check (minimum 8 weeks = 56 days)
   const durationAdequate = duration >= 56;
   
+  console.log(`🔍 [MGH-ATRQ] Duration check: ${duration} days >= 56 days = ${durationAdequate}`);
+  
   // AI Variable: Check for augmentation context
   const augmentationUsed = drugClassification.isAugmentationAgent || 
     (notes?.toLowerCase().includes('augmentacja') || false) ||
-    (notes?.toLowerCase().includes('wzmocnienie') || false);
+    (notes?.toLowerCase().includes('wzmocnienie') || false) ||
+    (matchingMedication?.notes?.includes('adjuwantowe') || false);
   
   // AI Variable: Analyze clinical notes for compliance indicators
   let notesBasedCompliance = false;
@@ -460,21 +489,48 @@ export const analyzeMGHATRQCompliance = (
   }
   
   // Final compliance determination
-  const adequateTrial = (drugFound && doseAdequate && durationAdequate) || notesBasedCompliance;
-  const isCompliant = adequateTrial;
+  // NAPRAWA: notesBasedCompliance nie może nadpisać rzeczywistej oceny dawki/czasu
+  // Jeśli lek jest znaleziony w protokole, musi spełniać kryteria dawki i czasu
+  let adequateTrial = false;
+  let isCompliant = false;
+  
+  if (drugFound) {
+    // Jeśli lek jest w protokole, musi spełniać wszystkie kryteria
+    adequateTrial = doseAdequate && durationAdequate;
+    isCompliant = adequateTrial;
+    
+    // Notatki kliniczne mogą tylko potwierdzić, ale nie nadpisać rzeczywistej oceny
+    if (notesBasedCompliance && !adequateTrial) {
+      // Konflikt między notatkami a rzeczywistą oceną - priorytet dla rzeczywistej oceny
+      confidence = Math.max(confidence, 0.7);
+    }
+  } else {
+    // Jeśli lek nie jest w protokole, można polegać na notatkach klinicznych
+    adequateTrial = notesBasedCompliance;
+    isCompliant = adequateTrial;
+  }
+  
+  console.log(`🔍 [MGH-ATRQ] Final decision: isCompliant=${isCompliant}, adequateTrial=${adequateTrial}, notesBasedCompliance=${notesBasedCompliance}`);
   
   // Generate reasoning
   let reasoning = '';
   if (drugFound) {
-    reasoning += `Lek ${drugName} znajduje się w protokole MGH-ATRQ. `;
+    reasoning += `Lek ${drugName} znajduje się w protokole MGH-ATRQ COMP006. `;
+    if (matchingMedication) {
+      reasoning += `Znaleziono jako: ${matchingMedication.drugName} (${matchingMedication.brandName}). `;
+    }
   } else {
-    reasoning += `Lek ${drugName} nie został znaleziony w standardowym protokole MGH-ATRQ. `;
+    reasoning += `Lek ${drugName} nie został znaleziony w protokole MGH-ATRQ COMP006. `;
   }
   
-  if (doseAdequate) {
-    reasoning += `Dawka ${dose} jest adekwatna (min. ${minRequiredDose}mg). `;
+  if (drugFound) {
+    if (doseAdequate) {
+      reasoning += `Dawka ${dose} jest adekwatna (min. ${minRequiredDose}mg). `;
+    } else {
+      reasoning += `Dawka ${dose} jest nieadekwatna (min. ${minRequiredDose}mg). `;
+    }
   } else {
-    reasoning += `Dawka ${dose} może być nieadekwatna (min. ${minRequiredDose}mg). `;
+    reasoning += `Nie można ocenić adekwatności dawki ${dose} - lek nie znajduje się w protokole MGH-ATRQ. `;
   }
   
   if (durationAdequate) {
@@ -609,7 +665,7 @@ export const analyzeTreatmentResponse = (notes: string, duration: number, attemp
       responseType,
       timeToResponse: Math.floor(duration * 0.3),
       sustainedResponse: duration > 84,
-      reasonForDiscontinuation: 'brak danych',
+      reasonForDiscontinuation: 'Brak szczegółowych danych klinicznych. Analiza oparta na numerze próby leczenia i czasie trwania.',
       efficacyScore: attemptGroup > 3 ? 3 : attemptGroup > 1 ? 5 : 7,
       confidence: 0.4
     };
@@ -623,6 +679,9 @@ export const analyzeTreatmentResponse = (notes: string, duration: number, attemp
   let efficacyScore = 5;
   let confidence = 0.5;
   
+  // ULEPSZENIE: Bardziej szczegółowa analiza uwag klinicznych
+  const clinicalObservations: string[] = [];
+  
   // AI Variable: Response pattern recognition
   if (notesLower.includes('remisja') || 
       notesLower.includes('pełna odpowiedź') ||
@@ -631,6 +690,7 @@ export const analyzeTreatmentResponse = (notes: string, duration: number, attemp
     responseType = 'full_response';
     efficacyScore = 8 + Math.random() * 2;
     confidence = 0.9;
+    clinicalObservations.push('Dokumentowana pełna odpowiedź na leczenie');
   } else if (notesLower.includes('częściowa odpowiedź') || 
              notesLower.includes('minimalna poprawa') ||
              notesLower.includes('niewielka poprawa') ||
@@ -638,6 +698,7 @@ export const analyzeTreatmentResponse = (notes: string, duration: number, attemp
     responseType = 'partial_response';
     efficacyScore = 4 + Math.random() * 3;
     confidence = 0.85;
+    clinicalObservations.push('Częściowa odpowiedź na leczenie z ograniczoną poprawą');
   } else if (notesLower.includes('brak odpowiedzi') || 
              notesLower.includes('bez poprawy') ||
              notesLower.includes('pogorszenie') ||
@@ -645,35 +706,80 @@ export const analyzeTreatmentResponse = (notes: string, duration: number, attemp
     responseType = 'no_response';
     efficacyScore = 1 + Math.random() * 3;
     confidence = 0.9;
+    clinicalObservations.push('Brak odpowiedzi terapeutycznej lub pogorszenie stanu');
+  }
+  
+  // ULEPSZENIE: Analiza specyficznych objawów i poprawy
+  if (notesLower.includes('poprawa nastroju')) {
+    clinicalObservations.push('Poprawa nastroju');
+  }
+  if (notesLower.includes('zmniejszenie lęku')) {
+    clinicalObservations.push('Redukcja objawów lękowych');
+  }
+  if (notesLower.includes('poprawa snu')) {
+    clinicalObservations.push('Normalizacja wzorca snu');
+  }
+  if (notesLower.includes('zwiększenie energii')) {
+    clinicalObservations.push('Wzrost poziomu energii');
+  }
+  if (notesLower.includes('poprawa apetytu')) {
+    clinicalObservations.push('Normalizacja apetytu');
+  }
+  if (notesLower.includes('poprawa koncentracji')) {
+    clinicalObservations.push('Poprawa funkcji poznawczych');
   }
   
   // AI Variable: Time to response extraction
-  if (notesLower.includes('po tygodniu')) timeToResponse = 7;
-  else if (notesLower.includes('po 2 tygodniach')) timeToResponse = 14;
-  else if (notesLower.includes('po miesiącu')) timeToResponse = 30;
-  else if (notesLower.includes('po 6 tygodniach')) timeToResponse = 42;
-  else if (notesLower.includes('po 8 tygodniach')) timeToResponse = 56;
+  if (notesLower.includes('po tygodniu')) {
+    timeToResponse = 7;
+    clinicalObservations.push('Szybka odpowiedź (1 tydzień)');
+  } else if (notesLower.includes('po 2 tygodniach')) {
+    timeToResponse = 14;
+    clinicalObservations.push('Wczesna odpowiedź (2 tygodnie)');
+  } else if (notesLower.includes('po miesiącu')) {
+    timeToResponse = 30;
+    clinicalObservations.push('Standardowy czas odpowiedzi (4 tygodnie)');
+  } else if (notesLower.includes('po 6 tygodniach')) {
+    timeToResponse = 42;
+    clinicalObservations.push('Opóźniona odpowiedź (6 tygodni)');
+  } else if (notesLower.includes('po 8 tygodniach')) {
+    timeToResponse = 56;
+    clinicalObservations.push('Późna odpowiedź (8 tygodni)');
+  }
   
   // AI Variable: Sustained response indicators
   sustainedResponse = duration > 84 && (responseType === 'full_response' || responseType === 'partial_response');
   if (notesLower.includes('utrzymująca się poprawa') || 
       notesLower.includes('stabilna odpowiedź')) {
     sustainedResponse = true;
+    clinicalObservations.push('Utrzymująca się stabilna odpowiedź');
   }
   
-  // AI Variable: Reason for discontinuation
+  // ULEPSZENIE: Szczegółowa analiza powodów przerwania leczenia
   if (notesLower.includes('działania niepożądane')) {
-    reasonForDiscontinuation = 'działania niepożądane';
+    reasonForDiscontinuation = 'Przerwanie z powodu działań niepożądanych';
+    if (notesLower.includes('nudności')) clinicalObservations.push('Nietolerowane nudności');
+    if (notesLower.includes('senność')) clinicalObservations.push('Nadmierna sedacja');
+    if (notesLower.includes('przyrost masy')) clinicalObservations.push('Niepożądany przyrost masy ciała');
+    if (notesLower.includes('dysfunkcja seksualna')) clinicalObservations.push('Dysfunkcja seksualna');
   } else if (notesLower.includes('brak skuteczności')) {
-    reasonForDiscontinuation = 'brak skuteczności';
+    reasonForDiscontinuation = 'Przerwanie z powodu braku skuteczności po adekwatnej próbie';
+    clinicalObservations.push('Potwierdzona lekooporność');
   } else if (notesLower.includes('decyzja pacjenta')) {
-    reasonForDiscontinuation = 'decyzja pacjenta';
+    reasonForDiscontinuation = 'Przerwanie na życzenie pacjenta';
+    clinicalObservations.push('Niezgoda pacjenta na kontynuację');
   } else if (notesLower.includes('zmiana protokołu')) {
-    reasonForDiscontinuation = 'zmiana protokołu leczenia';
+    reasonForDiscontinuation = 'Zmiana strategii leczenia zgodnie z protokołem';
+    clinicalObservations.push('Planowa modyfikacja terapii');
   } else if (notesLower.includes('koniec leczenia')) {
-    reasonForDiscontinuation = 'planowe zakończenie';
+    reasonForDiscontinuation = 'Planowe zakończenie po osiągnięciu celów terapeutycznych';
+    clinicalObservations.push('Sukces terapeutyczny');
+  } else if (notesLower.includes('przerwanie') || notesLower.includes('odstawienie')) {
+    reasonForDiscontinuation = 'Przerwanie leczenia - przyczyna niespecyfikowana w dokumentacji';
   } else {
-    reasonForDiscontinuation = 'nieznany powód';
+    reasonForDiscontinuation = clinicalObservations.length > 0 ? 
+      `Analiza kliniczna: ${clinicalObservations.join(', ')}` : 
+      'Nieznany powód przerwania - wymagana weryfikacja dokumentacji';
   }
   
   return {
@@ -843,4 +949,108 @@ export const clinicalAnalysisService = {
   extractDoseFromString
 };
 
-export default clinicalAnalysisService; 
+export default clinicalAnalysisService;
+
+/**
+ * Enhanced drug classification using local drug database
+ */
+export async function classifyDrugForClinicalResearchEnhanced(drugName: string): Promise<{
+  primaryClass: string;
+  isAntidepressant: boolean;
+  mechanism: string[];
+  atcCode: string;
+  standardName: string;
+  confidence: number;
+  alternatives: string[];
+}> {
+  try {
+    // Najpierw spróbuj mapowania przez lokalną bazę danych
+    const mappingResult = await drugMappingClient.mapDrugToStandard(drugName);
+    
+    if (mappingResult.found && mappingResult.confidence > 0.7) {
+      // Użyj danych z lokalnej bazy
+      const isAntidepressant = mappingResult.atcCode.startsWith('N06A');
+      
+      let primaryClass = 'Unknown';
+      let mechanism: string[] = [];
+      
+      if (isAntidepressant) {
+        // Klasyfikuj na podstawie kodu ATC
+        if (mappingResult.atcCode.startsWith('N06AA')) {
+          primaryClass = 'Tricyclic';
+          mechanism = ['Tricyclic Antidepressant'];
+        } else if (mappingResult.atcCode.startsWith('N06AB')) {
+          primaryClass = 'SSRI';
+          mechanism = ['Selective Serotonin Reuptake Inhibition'];
+        } else if (mappingResult.atcCode.startsWith('N06AC')) {
+          primaryClass = 'TeCA';
+          mechanism = ['Tetracyclic Antidepressant'];
+        } else if (mappingResult.atcCode.startsWith('N06AD')) {
+          primaryClass = 'MAOI';
+          mechanism = ['Monoamine Oxidase Inhibition'];
+        } else if (mappingResult.atcCode.startsWith('N06AF')) {
+          primaryClass = 'MAOI-A';
+          mechanism = ['Monoamine Oxidase A Inhibition'];
+        } else if (mappingResult.atcCode.startsWith('N06AG')) {
+          primaryClass = 'MAOI-A';
+          mechanism = ['Monoamine Oxidase A Inhibition'];
+        } else if (mappingResult.atcCode.startsWith('N06AX')) {
+          // Inne leki przeciwdepresyjne - sprawdź substancję czynną
+          const substanceLower = mappingResult.activeSubstance.toLowerCase();
+          
+          if (substanceLower.includes('venlafaxine') || substanceLower.includes('wenlafaksyna')) {
+            primaryClass = 'SNRI';
+            mechanism = ['Serotonin-Norepinephrine Reuptake Inhibition'];
+          } else if (substanceLower.includes('duloxetine') || substanceLower.includes('duloksetyna')) {
+            primaryClass = 'SNRI';
+            mechanism = ['Serotonin-Norepinephrine Reuptake Inhibition'];
+          } else if (substanceLower.includes('mirtazapine') || substanceLower.includes('mirtazapina')) {
+            primaryClass = 'NaSSA';
+            mechanism = ['Noradrenergic and Specific Serotonergic Antidepressant'];
+          } else if (substanceLower.includes('bupropion')) {
+            primaryClass = 'NDRI';
+            mechanism = ['Norepinephrine-Dopamine Reuptake Inhibition'];
+          } else if (substanceLower.includes('trazodone') || substanceLower.includes('trazodon')) {
+            primaryClass = 'SARI';
+            mechanism = ['Serotonin Antagonist and Reuptake Inhibitor'];
+          } else if (substanceLower.includes('agomelatine') || substanceLower.includes('agomelatyna')) {
+            primaryClass = 'Melatonergic';
+            mechanism = ['Melatonin Receptor Agonist and 5-HT2C Antagonist'];
+          } else if (substanceLower.includes('reboxetine') || substanceLower.includes('reboksetyna')) {
+            primaryClass = 'NRI';
+            mechanism = ['Norepinephrine Reuptake Inhibition'];
+          } else {
+            primaryClass = 'Other Antidepressant';
+            mechanism = ['Other Antidepressant Mechanism'];
+          }
+        }
+      } else {
+        // Nie jest lekiem przeciwdepresyjnym
+        primaryClass = 'Non-Antidepressant';
+        mechanism = ['Non-Antidepressant Medication'];
+      }
+      
+      return {
+        primaryClass,
+        isAntidepressant,
+        mechanism,
+        atcCode: mappingResult.atcCode,
+        standardName: mappingResult.standardName,
+        confidence: mappingResult.confidence,
+        alternatives: mappingResult.alternatives
+      };
+    }
+  } catch (error) {
+    console.warn('Enhanced drug classification failed, falling back to legacy method:', error);
+  }
+  
+  // Fallback do starej metody jeśli nowa nie zadziała
+  const legacyResult = classifyDrugForClinicalResearch(drugName);
+  return {
+    ...legacyResult,
+    atcCode: '',
+    standardName: drugName,
+    confidence: 0.5,
+    alternatives: []
+  };
+} 

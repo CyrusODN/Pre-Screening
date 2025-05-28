@@ -176,6 +176,13 @@ export interface SharedContext {
   studyProtocol: string;
   modelUsed: SupportedAIModel;
   
+  // Informacje o mapowaniu leków
+  drugMappingInfo?: {
+    mappingsApplied: number;
+    mappings: Array<{original: string; mapped: string; confidence: number}>;
+    preprocessedAt: string;
+  };
+  
   // Wyniki z poprzednich agentów
   clinicalSynthesis?: AgentResult<ClinicalSynthesisResult>;
   episodeAnalysis?: AgentResult<EpisodeAnalysisResult>;

@@ -11,7 +11,18 @@ const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:5176', 'http://localhost:5177', 'http://localhost:5178', 'http://localhost:5179'],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Allow any localhost port
+    if (origin.match(/^http:\/\/localhost:\d+$/)) {
+      return callback(null, true);
+    }
+    
+    // Reject other origins
+    callback(new Error('Not allowed by CORS'));
+  },
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
@@ -158,6 +169,129 @@ app.post('/api/ai/chat', async (req, res) => {
       error: 'AI API Error', 
       message: error.message,
       timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Endpoint do mapowania leków
+app.post('/api/drug-mapping/search', async (req, res) => {
+  try {
+    console.log('🔍 [Backend] Drug mapping search request:', req.body.drugName);
+    
+    const { drugName } = req.body;
+    
+    if (!drugName) {
+      return res.status(400).json({ error: 'Drug name is required' });
+    }
+
+    // Dynamiczny import serwisu
+    const { default: drugMappingService } = await import('../src/services/drugMappingService.js');
+    const result = await drugMappingService.mapDrugToStandard(drugName);
+    
+    console.log(`✅ [Backend] Drug mapping completed for: ${drugName}, found: ${result.found}`);
+    res.json(result);
+    
+  } catch (error) {
+    console.error('💥 [Backend] Drug mapping error:', error);
+    res.status(500).json({ 
+      error: 'Drug mapping failed', 
+      details: error.message 
+    });
+  }
+});
+
+// Endpoint do wyszukiwania leków
+app.post('/api/drug-mapping/detailed-search', async (req, res) => {
+  try {
+    console.log('🔍 [Backend] Detailed drug search request:', req.body.searchTerm);
+    
+    const { searchTerm } = req.body;
+    
+    if (!searchTerm) {
+      return res.status(400).json({ error: 'Search term is required' });
+    }
+
+    // Dynamiczny import serwisu
+    const { default: drugMappingService } = await import('../src/services/drugMappingService.js');
+    const result = await drugMappingService.searchDrugs(searchTerm);
+    
+    console.log(`✅ [Backend] Detailed search completed for: ${searchTerm}, matches: ${result.exactMatches.length + result.partialMatches.length + result.substanceMatches.length}`);
+    res.json(result);
+    
+  } catch (error) {
+    console.error('💥 [Backend] Detailed drug search error:', error);
+    res.status(500).json({ 
+      error: 'Drug search failed', 
+      details: error.message 
+    });
+  }
+});
+
+// Endpoint do pobierania statystyk bazy danych leków
+app.get('/api/drug-mapping/stats', async (req, res) => {
+  try {
+    console.log('📊 [Backend] Drug database stats request');
+    
+    // Dynamiczny import serwisu
+    const { default: drugMappingService } = await import('../src/services/drugMappingService.js');
+    const stats = await drugMappingService.getDatabaseStats();
+    
+    console.log(`✅ [Backend] Stats retrieved: ${stats.totalDrugs} drugs, ${stats.uniqueSubstances} substances`);
+    res.json(stats);
+    
+  } catch (error) {
+    console.error('💥 [Backend] Drug stats error:', error);
+    res.status(500).json({ 
+      error: 'Failed to get drug database stats', 
+      details: error.message 
+    });
+  }
+});
+
+// Endpoint do pobierania leków przeciwdepresyjnych
+app.get('/api/drug-mapping/antidepressants', async (req, res) => {
+  try {
+    console.log('💊 [Backend] Antidepressants request');
+    
+    // Dynamiczny import serwisu
+    const { default: drugMappingService } = await import('../src/services/drugMappingService.js');
+    const antidepressants = await drugMappingService.getAntidepressants();
+    
+    console.log(`✅ [Backend] Found ${antidepressants.length} antidepressants`);
+    res.json(antidepressants);
+    
+  } catch (error) {
+    console.error('💥 [Backend] Antidepressants error:', error);
+    res.status(500).json({ 
+      error: 'Failed to get antidepressants', 
+      details: error.message 
+    });
+  }
+});
+
+// Endpoint do sprawdzania czy lek jest przeciwdepresyjny
+app.post('/api/drug-mapping/is-antidepressant', async (req, res) => {
+  try {
+    console.log('🔍 [Backend] Is antidepressant check:', req.body.drugName);
+    
+    const { drugName } = req.body;
+    
+    if (!drugName) {
+      return res.status(400).json({ error: 'Drug name is required' });
+    }
+
+    // Dynamiczny import serwisu
+    const { default: drugMappingService } = await import('../src/services/drugMappingService.js');
+    const isAntidepressant = await drugMappingService.isAntidepressant(drugName);
+    
+    console.log(`✅ [Backend] Antidepressant check completed for: ${drugName}, result: ${isAntidepressant}`);
+    res.json({ drugName, isAntidepressant });
+    
+  } catch (error) {
+    console.error('💥 [Backend] Antidepressant check error:', error);
+    res.status(500).json({ 
+      error: 'Antidepressant check failed', 
+      details: error.message 
     });
   }
 });
