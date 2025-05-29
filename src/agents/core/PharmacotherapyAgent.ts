@@ -110,22 +110,11 @@ INTELIGENTNE ROZUMOWANIE:
 - **1, 2, 3...** = kolejne adekwatne próby leczenia w obecnym epizodzie
 - **Augmentacja** = nowa próba (np. dodanie kwetiapiny do wenlafaksyny)
 
-**MAPOWANIE LEKÓW - KLUCZOWE ZASADY:**
-1. **Jeśli rozpoznajesz nazwę handlową** - zamień na substancję czynną
-2. **Jeśli nazwa jest już substancją czynną** - zostaw bez zmian
-3. **Jeśli nie jesteś pewien** - zaznacz w notes i zostaw oryginalną nazwę
-4. **Zawsze sprawdzaj benzodiazepiny** - błędne mapowanie może wpłynąć na kryteria wykluczenia
-5. **W drugMappings zapisuj** wszystkie dokonane mapowania
-
-**PRZYKŁADY MAPOWANIA (wykorzystuj swoją wiedzę dla innych leków):**
-- Cipralex/Lexapro → escitalopram
-- Effexor/Velaxin → wenlafaksyna  
-- Seroquel/Kwetaplex → kwetiapina
-- Xanax → alprazolam
-- Tranxene → klorazepat (UWAGA: to NIE jest alprazolam!)
-- Ativan → lorazepam
-- Wellbutrin/Elontril → bupropion
-- Remeron/Mirzaten → mirtazapina
+**MAPOWANIE LEKÓW - UŻYWAJ PRZEKAZANYCH MAPOWAŃ:**
+- **ZAWSZE używaj mapowań przekazanych w kontekście** - nie zgaduj nazw samodzielnie
+- **Jeśli mapowanie nie zostało przekazane** - zostaw oryginalną nazwę i zaznacz w notes
+- **W drugMappings zapisuj** wszystkie użyte mapowania (zarówno przekazane jak i ewentualne własne)
+- **Benzodiazepiny sprawdzaj szczególnie dokładnie** - błędne mapowanie może wpłynąć na kryteria wykluczenia
 
 **ANALIZA CZASOWA Z LOGIKĄ FARMAKOLOGICZNĄ:**
 - **Stwórz osobny obiekt** dla każdego okresu przyjmowania leku
@@ -192,13 +181,29 @@ ODPOWIEDŹ MUSI BYĆ W FORMACIE JSON:
     const clinicalData = context.clinicalSynthesis?.data;
     const episodeData = context.episodeAnalysis?.data;
     
+    // Przygotuj mapowania leków z preprocessing'u
+    let drugMappingsSection = '';
+    if (context.drugMappingInfo?.mappings && context.drugMappingInfo.mappings.length > 0) {
+      drugMappingsSection = `\n=== MAPOWANIA LEKÓW Z PREPROCESSING ===
+Używaj następujących mapowań (nie zgaduj samodzielnie):
+${context.drugMappingInfo.mappings.map(m => `- ${m.original} → ${m.mapped} (confidence: ${Math.round(m.confidence * 100)}%)`).join('\n')}
+`;
+
+      console.log(`🔄 [Pharmacotherapy Agent] Otrzymano ${context.drugMappingInfo.mappings.length} mapowań z preprocessing'u:`);
+      context.drugMappingInfo.mappings.forEach(mapping => {
+        console.log(`  - ${mapping.original} → ${mapping.mapped} (${Math.round(mapping.confidence * 100)}%)`);
+      });
+    } else {
+      console.log('⚠️ [Pharmacotherapy Agent] Brak mapowań z preprocessing\'u');
+    }
+    
     const prompt = `Przeprowadź skrupulatną analizę farmakoterapii:
 
 === HISTORIA MEDYCZNA ===
 ${context.medicalHistory}
 
 ${context.previousAgentResults || ''}
-
+${drugMappingsSection}
 === PROTOKÓŁ BADANIA ===
 ${context.studyProtocol}
 
