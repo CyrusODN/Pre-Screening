@@ -149,7 +149,8 @@ ODPOWIEDŹ MUSI BYĆ W FORMACIE JSON:
       "startDate": "YYYY-MM-DD",
       "endDate": "YYYY-MM-DD", 
       "evidence": "string - dowody na rzeczywistą remisję (nie zmianę leku)",
-      "confidence": number
+      "confidence": number,
+      "notes": "string - dodatkowe uwagi kliniczne o okresie remisji"
     }
   ]
 }
@@ -250,12 +251,14 @@ Wykonaj szczegółową analizę epizodów depresyjnych według instrukcji system
         typeof scenario.description === 'string' &&
         typeof scenario.evidence === 'string' &&
         typeof scenario.confidence === 'number' &&
-        scenario.confidence >= 0 && scenario.confidence <= 1
+        scenario.confidence >= 0 && scenario.confidence <= 1 &&
+        (typeof scenario.startDate === 'string' || scenario.startDate === null) &&
+        (typeof scenario.endDate === 'string' || scenario.endDate === null)
       ) &&
       Array.isArray(result.remissionPeriods) &&
       result.remissionPeriods.every(period => 
-        typeof period.startDate === 'string' || period.startDate === null &&
-        typeof period.endDate === 'string' || period.endDate === null &&
+        (typeof period.startDate === 'string' || period.startDate === null) &&
+        (typeof period.endDate === 'string' || period.endDate === null) &&
         typeof period.evidence === 'string' &&
         typeof period.confidence === 'number' &&
         period.confidence >= 0 && period.confidence <= 1 &&

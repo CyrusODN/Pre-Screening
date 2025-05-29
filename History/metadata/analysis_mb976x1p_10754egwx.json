@@ -1,0 +1,14 @@
+{
+  "id": "analysis_mb976x1p_10754egwx",
+  "patientId": "PAT/202505/630",
+  "analysisType": "multi-agent",
+  "modelUsed": "gemini",
+  "createdAt": "2025-05-29T09:54:51.459Z",
+  "updatedAt": "2025-05-29T09:54:51.491Z",
+  "status": "completed",
+  "version": "0.1.0",
+  "tags": [
+    "multi-agent"
+  ],
+  "notes": "MW Updated PAT/202505/630 - Wieloagentowa - 29.05.2025 11:54"
+}

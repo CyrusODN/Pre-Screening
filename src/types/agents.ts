@@ -252,4 +252,32 @@ export enum ExecutionStrategy {
   SEQUENTIAL = 'sequential',
   PARALLEL = 'parallel',
   CONDITIONAL = 'conditional'
-} 
+}
+
+// ===== TYPY DLA SANITYZACJI DANYCH FARMAKOTERAPII =====
+
+export interface ClinicalContext {
+  currentYear: number;
+  mostLikelyEpisode: any | null;
+  allEpisodes: any[];
+  remissionPeriods: any[];
+  clinicalTimeline: string[];
+  treatmentHistory: string;
+  mainDiagnosis: string;
+}
+
+export interface EpisodeTimelineEntry {
+  id: number;
+  description: string;
+  startDate: string | null;
+  endDate: string | null;
+  confidence: number;
+  evidence: string;
+}
+
+export interface DateInference {
+  date: string;
+  reasoning: string;
+}
+
+// ===== WYNIKI AGENTÓW ===== 
