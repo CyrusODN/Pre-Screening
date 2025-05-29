@@ -17,9 +17,10 @@
     "cors": "^2.8.5",
     "csv-parse": "^5.6.0",
     "date-fns": "^2.30.0",
-    "dotenv": "^16.3.1",
+    "dotenv": "^16.5.0",
     "express": "^4.18.2",
     "lucide-react": "^0.344.0",
+    "openai": "^4.103.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "recharts": "^2.12.2"

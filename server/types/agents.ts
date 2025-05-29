@@ -76,6 +76,12 @@ export interface PharmacotherapyAnalysisResult {
     status: 'compliant' | 'violation' | 'verification';
   }>;
   clinicalClaimsVerification: string;
+  historicalContext?: {
+    previousMedications: string;
+    familyHistory: string;
+    otherTreatments: string;
+    patientBackground: string;
+  };
 }
 
 export interface TRDAssessmentResult {

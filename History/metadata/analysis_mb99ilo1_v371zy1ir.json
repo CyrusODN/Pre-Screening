@@ -1,0 +1,14 @@
+{
+  "id": "analysis_mb99ilo1_v371zy1ir",
+  "patientId": "PAT/202505/304",
+  "analysisType": "multi-agent",
+  "modelUsed": "gemini",
+  "createdAt": "2025-05-29T10:59:55.800Z",
+  "updatedAt": "2025-05-29T10:59:55.858Z",
+  "status": "completed",
+  "version": "0.1.0",
+  "tags": [
+    "multi-agent"
+  ],
+  "notes": "MW Wieloagentowa "
+}

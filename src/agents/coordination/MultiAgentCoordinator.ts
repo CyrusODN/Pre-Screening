@@ -229,7 +229,7 @@ export class MultiAgentCoordinatorImpl implements MultiAgentCoordinator {
     // FAZA 5: Synteza końcowa
     this.log('🎯 FAZA 5: Synteza wyników...');
     
-    const finalResult = this.synthesizeFinalResult(agentResults, sharedContext);
+    const finalResult = await this.synthesizeFinalResult(agentResults, sharedContext);
     
     // Dodaj informacje o mapowaniu leków do wyniku końcowego
     finalResult.drugMappingInfo = {
@@ -386,10 +386,10 @@ export class MultiAgentCoordinatorImpl implements MultiAgentCoordinator {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  private synthesizeFinalResult(
+  private async synthesizeFinalResult(
     agentResults: Record<string, AgentResult>, 
     context: SharedContext
-  ): PatientData {
+  ): Promise<PatientData> {
     // Pobierz wyniki z agentów
     const clinicalSynthesis = agentResults['clinical-synthesis']?.data;
     const episodeAnalysis = agentResults['episode-analysis']?.data;
@@ -407,7 +407,7 @@ export class MultiAgentCoordinatorImpl implements MultiAgentCoordinator {
         id: patientId,
         age: this.extractAge(clinicalSynthesis) || 0,
         mainDiagnosis: clinicalSynthesis?.mainDiagnosis || 'Brak danych o głównym rozpoznaniu',
-        comorbidities: this.extractComorbidities(clinicalSynthesis)
+        comorbidities: await this.extractComorbidities(clinicalSynthesis)
       },
       
       episodeEstimation: {
@@ -439,6 +439,9 @@ export class MultiAgentCoordinatorImpl implements MultiAgentCoordinator {
         estimatedProbability: riskAssessment?.inclusionProbability?.score || 0,
         riskFactors: this.extractRiskFactors(clinicalSynthesis, riskAssessment)
       },
+
+      // Kopiuj kontekst historyczny z analizy farmakoterapii
+      historicalContext: pharmacotherapyAnalysis?.historicalContext,
 
       analyzedAt: new Date().toISOString(),
       isMockData: false,
@@ -770,163 +773,151 @@ export class MultiAgentCoordinatorImpl implements MultiAgentCoordinator {
     return context.trim();
   }
 
-  private extractComorbidities(clinicalSynthesis: any): string[] {
+  private async extractComorbidities(clinicalSynthesis: any): Promise<string[]> {
     if (!clinicalSynthesis) return [];
     
-    const comorbidities: string[] = [];
     const mainDiagnosis = this.extractMainDiagnosis(clinicalSynthesis);
-    
     console.log('[DEBUG] extractComorbidities - Główne rozpoznanie:', mainDiagnosis);
     
-    const textToSearch = [
+    const clinicalText = [
       clinicalSynthesis.patientOverview || '',
       ...(clinicalSynthesis.keyObservations || []),
       clinicalSynthesis.treatmentHistory || ''
-    ].join(' ').toLowerCase();
+    ].join(' ').trim();
     
-    // INTELIGENTNE ROZPOZNAWANIE CHORÓB Z KONTEKSTU
-    // Wzorce dla identyfikacji chorób towarzyszących
-    const diseasePatterns = [
-      // Wzorce bezpośredniego wymienienia chorób
-      /(?:choruje na|cierpi na|ma|rozpoznano|stwierdza się|w wywiadzie)\s+([^,.;()]+?)(?:\s+(?:i|oraz|,|;|\.|$))/gi,
-      /(?:współistniejące|towarzyszące|dodatkowe)\s+(?:choroby|schorzenia|rozpoznania)[:\s]+([^,.;()]+)/gi,
-      /(?:dodatkowo|również|ponadto|w toku|w trakcie)\s+(?:choruje na|ma|cierpi na|rozpoznano|stwierdzono)\s+([^,.;()]+)/gi,
+    try {
+      const prompt = this.buildComorbiditiesExtractionPrompt(clinicalText, mainDiagnosis);
+      const response = await this.callAIForComorbidities(prompt, this.getComorbiditiesSystemPrompt());
       
-      // Wzorce z kodami ICD-10 (wszystkie)
-      /([A-Z]\d+(?:\.\d+)?)\s*[:-]?\s*([^,.;()]+)/gi,
+      console.log('[DEBUG] extractComorbidities - AI response:', response);
       
-      // Wzorce opisowe
-      /(?:w wywiadzie|w przeszłości|wcześniej)\s+(?:leczony z powodu|chorował na|miał)\s+([^,.;()]+)/gi,
-      /(?:przyjmuje|stosuje|zażywa)\s+(?:leki na|z powodu)\s+([^,.;()]+)/gi
-    ];
-    
-    for (const pattern of diseasePatterns) {
-      let match;
-      while ((match = pattern.exec(textToSearch)) !== null) {
-        const potentialDisease = match[1] || match[2];
-        if (potentialDisease) {
-          const cleanedDisease = this.cleanAndValidateDisease(potentialDisease.trim());
-          console.log('[DEBUG] extractComorbidities - Potencjalna choroba:', potentialDisease, '-> po czyszczeniu:', cleanedDisease);
-          if (cleanedDisease && !comorbidities.includes(cleanedDisease)) {
-            // KLUCZOWE: Sprawdź czy to nie jest główne rozpoznanie
-            const isSame = this.isSameDiagnosis(cleanedDisease, mainDiagnosis);
-            console.log('[DEBUG] extractComorbidities - Czy to samo co główne rozpoznanie?', cleanedDisease, 'vs', mainDiagnosis, '=', isSame);
-            if (!isSame) {
-              comorbidities.push(cleanedDisease);
-              console.log('[DEBUG] extractComorbidities - Dodano do chorób towarzyszących:', cleanedDisease);
-            } else {
-              console.log('[DEBUG] extractComorbidities - Pominięto (to główne rozpoznanie):', cleanedDisease);
-            }
-          }
-        }
-      }
+      // Parse JSON response
+      const parsed = JSON.parse(response.replace(/```json|```/g, '').trim());
+      const comorbidities = Array.isArray(parsed.comorbidities) ? parsed.comorbidities : [];
+      
+      console.log('[DEBUG] extractComorbidities - Finalne choroby towarzyszące (AI):', comorbidities);
+      return comorbidities;
+      
+    } catch (error) {
+      console.error('[ERROR] extractComorbidities - AI extraction failed:', error);
+      console.warn('[WARNING] extractComorbidities - Falling back to empty array');
+      return [];
     }
-    
-    // Dodaj kody ICD-10 inne niż główne rozpoznanie
-    const icdMatches = textToSearch.match(/[A-Z]\d+(?:\.\d+)?/gi);
-    if (icdMatches) {
-      console.log('[DEBUG] extractComorbidities - Znalezione kody ICD-10:', icdMatches);
-      for (const code of icdMatches) {
-        const codeUpper = code.toUpperCase();
-        const isSame = this.isSameDiagnosis(codeUpper, mainDiagnosis);
-        console.log('[DEBUG] extractComorbidities - Kod ICD-10:', codeUpper, 'vs główne:', mainDiagnosis, '= czy to samo?', isSame);
-        if (!comorbidities.includes(codeUpper) && !isSame) {
-          comorbidities.push(codeUpper);
-          console.log('[DEBUG] extractComorbidities - Dodano kod ICD-10:', codeUpper);
-        } else {
-          console.log('[DEBUG] extractComorbidities - Pominięto kod ICD-10:', codeUpper, '(duplikat lub główne rozpoznanie)');
-        }
-      }
-    }
-    
-    console.log('[DEBUG] extractComorbidities - Finalne choroby towarzyszące:', comorbidities);
-    
-    return comorbidities;
   }
 
-  private isSameDiagnosis(diagnosis1: string | null, diagnosis2: string | null): boolean {
-    if (!diagnosis1 || !diagnosis2) return false;
-    
-    const d1 = diagnosis1.toLowerCase().trim();
-    const d2 = diagnosis2.toLowerCase().trim();
-    
-    // Dokładne dopasowanie
-    if (d1 === d2) return true;
-    
-    // Sprawdź czy jeden zawiera drugi (dla różnych form tego samego rozpoznania)
-    if (d1.includes(d2) || d2.includes(d1)) return true;
-    
-    // Sprawdź kody ICD-10 (podstawowe kody bez podkategorii)
-    const icd1 = d1.match(/([A-Z]\d+)/i)?.[1];
-    const icd2 = d2.match(/([A-Z]\d+)/i)?.[1];
-    if (icd1 && icd2 && icd1.toLowerCase() === icd2.toLowerCase()) return true;
-    
-    // ROZSZERZONE SPRAWDZENIE KODÓW DEPRESYJNYCH
-    const depressionCodes = ['f30', 'f31', 'f32', 'f33', 'f34', 'f38', 'f39'];
-    const isD1DepressionCode = depressionCodes.some(code => d1.includes(code));
-    const isD2DepressionCode = depressionCodes.some(code => d2.includes(code));
-    if (isD1DepressionCode && isD2DepressionCode) return true;
-    
-    // Sprawdź synonimy dla depresji (rozszerzone)
-    const depressionTerms = ['depresj', 'trd', 'lekoopora', 'f3', 'nawracaj', 'epizod depresyjny'];
-    const isD1Depression = depressionTerms.some(term => d1.includes(term));
-    const isD2Depression = depressionTerms.some(term => d2.includes(term));
-    if (isD1Depression && isD2Depression) return true;
-    
-    // Sprawdź synonimy dla OCD
-    const ocdTerms = ['obsesyjn', 'kompulsyjn', 'ocd', 'f42'];
-    const isD1OCD = ocdTerms.some(term => d1.includes(term));
-    const isD2OCD = ocdTerms.some(term => d2.includes(term));
-    if (isD1OCD && isD2OCD) return true;
-    
-    return false;
+  private buildComorbiditiesExtractionPrompt(clinicalText: string, mainDiagnosis: string | null): string {
+    return `
+**GŁÓWNE ROZPOZNANIE:** ${mainDiagnosis || 'nie ustalono'}
+
+**TEKST KLINICZNY DO ANALIZY:**
+${clinicalText}
+
+**ZADANIE:** Wyekstraktuj choroby współistniejące zgodnie z instrukcjami systemowymi.
+Zwróć wynik w formacie JSON zgodnie z przykładami.
+    `.trim();
   }
 
-  private cleanAndValidateDisease(disease: string): string | null {
-    // Oczyść tekst z niepotrzebnych słów
-    let cleaned = disease
-      .replace(/^(na|z powodu|przez|od|do)\s+/i, '')
-      .replace(/\s+(i|oraz|a także|,|;).*$/i, '')
-      .replace(/\d+[\s-]*letni[a]?/gi, '')
-      .replace(/kawaler|bezdzietny|wykształcenie|mieszka|pracuje/gi, '')
-      .trim();
+  private getComorbiditiesSystemPrompt(): string {
+    return `
+Jesteś doświadczonym lekarzem specjalistą z 20-letnim doświadczeniem w analizie dokumentacji medycznej. Twoim zadaniem jest precyzyjna ekstrakcja chorób współistniejących z polskiej dokumentacji klinicznej.
+
+**ROLA I ODPOWIEDZIALNOŚĆ:**
+- Analizujesz dokumentację medyczną pod kątem chorób towarzyszących
+- Odróżniasz choroby od metod leczenia z pełną precyzją kliniczną
+- Dostarczasz standardowe nazewnictwo medyczne zgodne z ICD-10
+
+**DEFINICJE KLUCZOWE:**
+• CHOROBA WSPÓŁISTNIEJĄCA = schorzenie inne niż główne rozpoznanie, które występuje u pacjenta
+• METODA LECZENIA = sposób terapii, farmakoterapia, interwencje medyczne (NIE są chorobami)
+
+**PRZYKŁADY EKSTRAKCJI:**
+
+**PRZYKŁAD 1 - POZYTYWNY:**
+Tekst: "Pacjent cierpi na F84 - Całościowe zaburzenia rozwojowe, F90 - Zaburzenia hiperkinetyczne, w wywiadzie cukrzyca typu 2"
+Główne: "zaburzenia depresyjne"
+→ {"comorbidities": ["Zaburzenia ze spektrum autyzmu (F84)", "Zespół nadpobudliwości psychoruchowej/ADHD (F90)", "Cukrzyca typu 2"]}
+
+**PRZYKŁAD 2 - NEGATYWNY (wykluczenie leczenia):**
+Tekst: "Z uwagi na niepowodzenie leczenia epizodu depresyjnego kilkoma lekami przeciwdepresyjnymi i stwierdzoną lekooporność"
+Główne: "zaburzenia depresyjne"
+→ {"comorbidities": []}
+UZASADNIENIE: "lekami przeciwdepresyjnymi" to METODA LECZENIA, nie choroba
+
+**PRZYKŁAD 3 - MIESZANY:**
+Tekst: "Pacjent choruje na nadciśnienie tętnicze, leczony sertraliną, farmakoterapia fluoksetyną"
+Główne: "zaburzenia depresyjne"
+→ {"comorbidities": ["Nadciśnienie tętnicze"]}
+UZASADNIENIE: nadciśnienie to choroba, sertralina i fluoksetyna to leki (wykluczamy)
+
+**ZASADY EKSTRAKCJI:**
+
+1. **WŁĄCZAJ (choroby):**
+   ✅ Kody ICD-10 z opisami (F84 → "Zaburzenia ze spektrum autyzmu (F84)")
+   ✅ Nazwy chorób ("cukrzyca", "nadciśnienie", "astma")
+   ✅ Opisy po słowach kluczowych: "cierpi na", "w wywiadzie", "rozpoznano"
+
+2. **WYKLUCZAJ (nie są chorobami):**
+   ❌ Nazwy leków i metody leczenia ("sertraliną", "lekami przeciwdepresyjnymi")
+   ❌ Procedury medyczne ("farmakoterapia", "terapia", "leczenie")
+   ❌ Główne rozpoznanie (jeśli podane)
+   ❌ Objawy ("ból głowy", "nudności") - tylko jeśli nie są nazwami chorób
+
+3. **MAPOWANIE ICD-10 NA NAZWY:**
+   • F84 → "Zaburzenia ze spektrum autyzmu (F84)"
+   • F90 → "Zespół nadpobudliwości psychoruchowej/ADHD (F90)"
+   • F42 → "Zaburzenia obsesyjno-kompulsyjne (F42)"
+   • E11 → "Cukrzyca typu 2 (E11)"
+   • I10 → "Nadciśnienie tętnicze pierwotne (I10)"
+
+4. **KRYTERIUM JAKOŚCI:**
+   - Każda pozycja to rzeczywista CHOROBA (nie leczenie)
+   - Nazwy pełne i klinicznie precyzyjne
+   - Brak duplikatów i głównego rozpoznania
+
+**FORMAT ODPOWIEDZI:**
+Zawsze zwracaj TYLKO poprawny JSON w formacie:
+{"comorbidities": ["nazwa choroby 1", "nazwa choroby 2"]}
+
+**WALIDACJA FINALNA:**
+Przed zwróceniem wyniku zadaj sobie pytanie: "Czy każda pozycja to rzeczywiście CHOROBA, a nie metoda leczenia?"
+    `.trim();
+  }
+
+  // Pomocnicza metoda do wywołania AI (używana przez extractComorbidities)
+  private async callAIForComorbidities(userPrompt: string, systemPrompt: string): Promise<string> {
+    const backendUrl = 'http://localhost:3001';
     
-    // Odrzuć jeśli to nie wygląda na chorobę
-    if (cleaned.length < 3) return null;
-    
-    // Odrzuć czynniki psychosocjalne (nie są chorobami)
-    const psychosocialKeywords = /(?:sytuacja|warunki|problemy|wsparcia|izolacja|bezrobocie|konflikt|przemoc|uzależnienie|alkohol|narkotyki|mieszka|pracuje|rodzina|związek)/i;
-    if (psychosocialKeywords.test(cleaned)) return null;
-    
-    // Odrzuć zbyt ogólne terminy
-    const tooGeneral = /^(choroby|schorzenia|problemy|zaburzenia|stan|objawy|leczenie|terapia)$/i;
-    if (tooGeneral.test(cleaned)) return null;
-    
-    // Mapowanie popularnych skrótów i nazw potocznych na pełne nazwy
-    const diseaseMapping: Record<string, string> = {
-      'nt': 'nadciśnienie tętnicze',
-      'dm': 'cukrzyca',
-      'dm2': 'cukrzyca typu 2',
-      'dm1': 'cukrzyca typu 1',
-      'pochp': 'przewlekła obturacyjna choroba płuc',
-      'chns': 'przewlekła choroba nerek',
-      'mi': 'zawał serca',
-      'af': 'migotanie przedsionków',
-      'hf': 'niewydolność serca',
-      'copd': 'przewlekła obturacyjna choroba płuc',
-      'gerd': 'refluks żołądkowo-przełykowy',
-      'ibs': 'zespół jelita drażliwego',
-      'ra': 'reumatoidalne zapalenie stawów',
-      'sle': 'toczeń rumieniowaty układowy',
-      'ocd': 'zaburzenia obsesyjno-kompulsyjne'
-    };
-    
-    const lowerCleaned = cleaned.toLowerCase();
-    if (diseaseMapping[lowerCleaned]) {
-      return diseaseMapping[lowerCleaned];
+    try {
+      console.log(`🔄 [MultiAgentCoordinator] Calling AI for comorbidities extraction with model: gemini`);
+      
+      const response = await fetch(`${backendUrl}/api/ai/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'gemini',
+          systemPrompt,
+          userPrompt,
+          temperature: 0.1, // Niska temperatura dla precyzji medycznej
+          maxTokens: 2000
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Backend API Error: ${response.status} - ${errorData.message || JSON.stringify(errorData)}`);
+      }
+
+      const data = await response.json();
+      console.log(`✅ [MultiAgentCoordinator] AI response received for comorbidities extraction`);
+      
+      return data.content || '';
+      
+    } catch (error) {
+      console.error(`💥 [MultiAgentCoordinator] AI call failed:`, error);
+      throw error;
     }
-    
-    return cleaned;
   }
 
   private extractEpisodeStartDate(episodeAnalysis: any, _trdAssessment: any): string | null {

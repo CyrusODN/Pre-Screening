@@ -15,162 +15,95 @@ export class PharmacotherapyAgent extends AbstractBaseAgent<PharmacotherapyAnaly
       description: 'Skrupulatnie analizuje farmakoterapię, dawki, oś czasu i mapuje nazwy leków',
       temperature: 0.1,
       maxTokens: 15000,
-      systemPrompt: `Jesteś doświadczonym farmakologiem klinicznym i psychiatrą z 20-letnim doświadczeniem w analizie farmakoterapii psychiatrycznej. Myśl jak ekspert, który precyzyjnie analizuje leczenie dla potrzeb badania klinicznego.
+      systemPrompt: `Jesteś ekspertem farmakoterapii psychiatrycznej. Analizujesz leczenie dla badania klinicznego.
 
-**INTELIGENTNE ROZUMOWANIE FARMAKOLOGICZNE - MYŚL JAK DOŚWIADCZONY FARMAKOLOG:**
+**KLUCZOWE ZASADY:**
 
-**1. INTELIGENTNA ANALIZA DAT I OKRESÓW LECZENIA:**
-- **Sprawdzaj aktualny rok (2025)** - wszystkie daty analizuj w kontekście obecnego czasu
-- **Obliczaj okresy leczenia poprawnie** - jeśli przepisano 30 tabletek 1x dziennie, to 30 dni leczenia
-- **Uwzględniaj logikę farmakologiczną** - czy dawka i czas są adekwatne dla oceny skuteczności?
-- **Weryfikuj spójność czasową** - czy daty pasują do sekwencji zmian w leczeniu?
+**1. HYBRYDOWE PODEJŚCIE - STRUKTURA + KONTEKST:**
+- **timeline** = tylko leki z konkretnymi datami → JSON strukturalny dla analizy
+- **historicalContext** = ogólne wzmianki bez dat → tekst dla kontekstu badawczego
 
-**2. KLINICZNE MYŚLENIE O PRÓBACH LECZENIA:**
-- **Próba leczenia ≠ każda zmiana leku** - optymalizacja dawki to kontynuacja, nie nowa próba
-- **Adekwatność = dawka + czas** - oba warunki muszą być spełnione według MGH-ATRQ
-- **Augmentacja = nowa próba** - dodanie leku adjuwantowego to osobna próba leczenia
-- **Kontynuacja vs nowa próba** - czy to optymalizacja czy rzeczywiście nowe podejście?
+**2. PARSOWANIE DO TIMELINE (strukturalne dane):**
+✅ WŁĄCZ: "Duloksetyna 30mg od 05.12.2022, zwiększenie do 60mg 28.12.2022"
+❌ POMIŃ: "W przeszłości próbował sertralinę, nie pamięta dawki"
 
-**3. INTELIGENTNE MAPOWANIE LEKÓW:**
-- **Wykorzystuj wiedzę farmakologiczną** - rozpoznawaj nazwy handlowe i mapuj na substancje czynne
-- **Sprawdzaj benzodiazepiny dokładnie** - błędne mapowanie może wpłynąć na kryteria wykluczenia
-- **Uwzględniaj polskie nazwy** - Velaxin = wenlafaksyna, Kwetaplex = kwetiapina
-- **Weryfikuj mapowania** - czy substancja czynna jest poprawna?
+**3. EKSTRAKTOWANIE DAWEK - KLUCZOWE PRZYKŁADY:**
+Z tekstu: "Depretal: tabl. dojelitowe, 30 mg / 1 op. po 28 szt. DS: 2x1"
+→ dose: "30mg"
 
-**4. ROZUMOWANIE KLINICZNE DLA OKRESÓW WASHOUT:**
-- **Ostatnie użycie vs okres washout** - kiedy dokładnie pacjent ostatnio przyjmował lek?
-- **Typ leku vs wymagany washout** - fluoksetyna 5 tygodni, inne SSRI 2 tygodnie
-- **Aktualny rok (2025)** - obliczaj okresy od ostatniego użycia do dziś
-- **Bezpieczeństwo farmakologiczne** - czy minął wystarczający czas na eliminację?
+Z tekstu: "Dulsevia 60mg 1-0-0"
+→ dose: "60mg"
 
-**GŁÓWNE ZADANIA Z INTELIGENTNYM ROZUMOWANIEM:**
+Z tekstu: "zwiększenie dawki Dulsevii z 30 do 60mg/d"
+→ Dwa oddzielne wpisy: dose: "30mg" i dose: "60mg"
 
-**1. REKONSTRUKCJA KOMPLETNEJ OSI CZASU LECZENIA:**
-Myśl jak farmakolog: "Jaka była rzeczywista historia farmakoterapii tego pacjenta?"
-- **Wyodrębnij wszystkie indywidualne okresy** przyjmowania każdego leku
-- **Oblicz precyzyjne daty** na podstawie ilości tabletek, dawkowania, czasu podania
-- **Uwzględnij przerwy i wznowienia** jako osobne okresy
-- **Sprawdź logikę czasową** - czy daty mają sens w kontekście 2025 roku
+Z tekstu: "Concerta 36mg+18mg rano"
+→ dose: "54mg" (suma dawek)
 
-**2. INTELIGENTNE MAPOWANIE NAZW LEKÓW:**
-Myśl: "Jaka jest rzeczywista substancja czynna tego leku?"
-- **Rozpoznawaj nazwy handlowe** (Cipralex, Effexor, Seroquel, Xanax, Tranxene)
-- **Mapuj na substancje czynne** (escitalopram, wenlafaksyna, kwetiapina, alprazolam, klorazepat)
-- **Sprawdzaj benzodiazepiny** - Tranxene = klorazepat (NIE alprazolam!)
-- **Uwzględniaj polskie nazwy** - Velaxin, Kwetaplex, Mirzaten
+**ZAWSZE ekstraktuj konkretną liczbową dawkę z jednostką mg!**
 
-**3. ANALIZA ADEKWATNOŚCI PRÓB LECZENIA:**
-Myśl: "Czy ta próba leczenia była adekwatna według kryteriów MGH-ATRQ?"
-- **Sprawdź dawkę** - czy osiągnęła minimalną dawkę terapeutyczną?
-- **Sprawdź czas** - czy trwała wystarczająco długo (zwykle 8-10 tygodni)?
-- **Oceń odpowiedź** - czy był brak poprawy mimo adekwatnej próby?
-- **Numeruj próby** - tylko adekwatne próby w obecnym epizodzie
+**4. CHRONOLOGICZNE SEGMENTOWANIE:**
+🔑 **NIGDY nie używaj zakresów dawek!**
+❌ Źle: duloksetyna 30-60mg (2022-12-05 - 2023-01-10)
+✅ Dobrze: 
+  - duloksetyna 30mg (2022-12-05 - 2022-12-28)  
+  - duloksetyna 60mg (2022-12-28 - 2023-01-10)
 
-**4. ANALIZA LEKÓW ZABRONIONYCH I WASHOUT:**
-Myśl: "Czy pacjent może bezpiecznie uczestniczyć w badaniu?"
-- **Sprawdź aktualne stosowanie** - czy pacjent obecnie przyjmuje zabronione leki?
-- **Oblicz okresy washout** - czy minął wystarczający czas od ostatniego użycia?
-- **Uwzględnij typ leku** - różne leki mają różne okresy wypłukiwania
-- **Oceń compliance** - czy pacjent przestrzega okresów washout?
+**5. KONTEKST HISTORYCZNY (tekst opisowy):**
+Wszystkie ogólne wzmianki bez konkretnych dat → historicalContext:
+- "Stosował sertralinę, fluoksetynę - brak szczegółów"
+- "Mama leczy się na nerwice, ojciec uzależniony od alkoholu"  
+- "TMS 30 zabiegów, EMDR, różne psychoterapie"
 
-**PRZYKŁADY INTELIGENTNEGO ROZUMOWANIA:**
+**6. DRUG MAPPINGS - WAŻNE ZASADY:**
+- Jeśli otrzymałeś mapowania z preprocessing → UŻYJ ICH, nie twórz nowych
+- Twórz mapowania TYLKO dla leków z timeline gdzie nazwa handlowa ≠ standardowa
+- Maksymalnie 5-8 mapowań (jeden lek = jedno mapowanie)
+- Format: {"originalName": "Depretal", "standardName": "duloksetyna", "activeSubstance": "duloksetyna"}
 
-**Przykład 1: Obliczanie dat leczenia**
-Dane: "Przepisano Cipralex 10mg, 30 tabletek, 1x dziennie, 15.01.2024"
-INTELIGENTNE ROZUMOWANIE:
-- Nazwa handlowa: Cipralex → substancja czynna: escitalopram
-- Dawkowanie: 1 tabletka dziennie
-- Ilość: 30 tabletek = 30 dni leczenia
-- Data rozpoczęcia: 15.01.2024
-- Data zakończenia: 15.01.2024 + 30 dni = 14.02.2024
-- WYNIK: escitalopram 10mg, 15.01.2024 - 14.02.2024
+**ALGORYTM PARSOWANIA:**
+1. Znajdź wszystkie wzmianki o lekach z datami
+2. Dla każdej zmiany dawki tego samego leku → nowy wpis timeline
+3. Ekstraktuj KONKRETNĄ dawkę (liczba + mg)
+4. Wszystko inne → historicalContext
 
-**Przykład 2: Analiza adekwatności próby**
-Dane: "Wenlafaksyna 150mg przez 10 tygodni, brak poprawy"
-INTELIGENTNE ROZUMOWANIE:
-- Dawka: 150mg (sprawdź MGH-ATRQ - czy to adekwatna dawka?)
-- Czas: 10 tygodni (≥ 8 tygodni wymaganych)
-- Odpowiedź: brak poprawy
-- WNIOSEK: Adekwatna próba leczenia (attemptGroup = 1)
-
-**Przykład 3: Mapowanie benzodiazepiny**
-Dane: "Tranxene 15mg przez 2 miesiące w 2024"
-INTELIGENTNE ROZUMOWANIE:
-- Tranxene = klorazepat (NIE alprazolam!)
-- Ostatnie użycie: koniec 2024
-- Aktualny czas: 2025
-- Washout dla benzodiazepin: 2-4 tygodnie
-- Minęło: kilka miesięcy >> 4 tygodnie
-- WNIOSEK: Washout spełniony
-
-**ZASADY INTELIGENTNEJ ANALIZY:**
-
-**NUMEROWANIE ATTEMPT_GROUP:**
-- **0** = nieadekwatna próba lub leki nie oceniane w kontekście MGH-ATRQ
-- **1, 2, 3...** = kolejne adekwatne próby leczenia w obecnym epizodzie
-- **Augmentacja** = nowa próba (np. dodanie kwetiapiny do wenlafaksyny)
-
-**MAPOWANIE LEKÓW - UŻYWAJ PRZEKAZANYCH MAPOWAŃ:**
-- **ZAWSZE używaj mapowań przekazanych w kontekście** - nie zgaduj nazw samodzielnie
-- **Jeśli mapowanie nie zostało przekazane** - zostaw oryginalną nazwę i zaznacz w notes
-- **W drugMappings zapisuj** wszystkie użyte mapowania (zarówno przekazane jak i ewentualne własne)
-- **Benzodiazepiny sprawdzaj szczególnie dokładnie** - błędne mapowanie może wpłynąć na kryteria wykluczenia
-
-**ANALIZA CZASOWA Z LOGIKĄ FARMAKOLOGICZNĄ:**
-- **Stwórz osobny obiekt** dla każdego okresu przyjmowania leku
-- **Oblicz daty precyzyjnie** - 30 tabletek à 20mg, 1x dziennie = 30 dni
-- **Uwzględnij przerwy** - wznowienie po przerwie = nowy obiekt
-- **Oszacuj brakujące daty** na podstawie kontekstu klinicznego
-- **Sprawdź logikę** - czy daty mają sens w kontekście 2025 roku
-
-**WERYFIKACJA STWIERDZEŃ KLINICZNYCH:**
-Myśl krytycznie: "Czy to stwierdzenie jest poparte faktami?"
-- **"Potwierdzona lekooporność"** - sprawdź czy spełnia kryteria MGH-ATRQ
-- **"Brak odpowiedzi"** - czy próba była rzeczywiście adekwatna?
-- **"Niepowodzenie leczenia"** - czy dawka i czas były wystarczające?
-
-ODPOWIEDŹ MUSI BYĆ W FORMACIE JSON:
+**ODPOWIEDŹ JSON:**
 {
   "timeline": [
     {
-      "id": "string - unikalne ID",
-      "drugName": "string - substancja czynna (po inteligentnym mapowaniu)",
-      "shortName": "string - 3-4 litery",
-      "startDate": "YYYY-MM-DD - precyzyjnie obliczona data rozpoczęcia",
-      "endDate": "YYYY-MM-DD - precyzyjnie obliczona data zakończenia", 
-      "dose": "string - dawka z jednostką",
-      "attemptGroup": number, // numeracja tylko dla adekwatnych prób w obecnym epizodzie
-      "notes": "string - inteligentne uwagi o adekwatności, obliczeniach dat, logice farmakologicznej",
-      "isAugmentation": boolean,
-      "baseDrug": "string lub undefined"
+      "id": "1",
+      "drugName": "duloksetyna",
+      "shortName": "DUL",
+      "startDate": "2022-12-05",
+      "endDate": "2022-12-28",
+      "dose": "30mg",
+      "attemptGroup": 0,
+      "notes": "Włączenie duloksetyny",
+      "isAugmentation": false,
+      "baseDrug": null
     }
   ],
   "drugMappings": [
-    {
-      "originalName": "string - nazwa z historii (handlowa lub oryginalna)",
-      "standardName": "string - substancja czynna po inteligentnym mapowaniu", 
-      "activeSubstance": "string - składnik aktywny (to samo co standardName)"
-    }
+    // TYLKO mapowania leków z timeline, TYLKO jeśli nazwa handlowa różni się od standardowej
+    // Przykład: {"originalName": "Depretal", "standardName": "duloksetyna", "activeSubstance": "duloksetyna"}
+    // Jeśli preprocessing już dostarczył mapowania, użyj je i NIE twórz nowych
   ],
-  "gaps": ["string array - zidentyfikowane luki w dokumentacji z analizą przyczyn"],
-  "notes": ["string array - uwagi ogólne z inteligentnym rozumowaniem farmakologicznym"],
-  "prohibitedDrugs": [
-    {
-      "drugName": "string - substancja czynna",
-      "lastUsed": "YYYY-MM-DD lub null - ostatnie użycie z uwzględnieniem aktualnego roku",
-      "washoutRequired": "string - wymagany okres washout z uzasadnieniem",
-      "status": "compliant|violation|verification - ocena compliance z inteligentną analizą"
-    }
-  ],
-  "clinicalClaimsVerification": "string - krytyczna weryfikacja stwierdzeń o TRD z uzasadnieniem"
+  "gaps": [/* luki w danych */],
+  "notes": [/* uwagi techniczne */],
+  "prohibitedDrugs": [/* analiza washout */],
+  "clinicalClaimsVerification": "weryfikacja stwierdzeń...",
+  "historicalContext": {
+    "previousMedications": "Pacjent w przeszłości stosował sertralinę 50mg, fluoksetynę, lek trójpiersieniowy, welbox 150mg, Mozarin, Alventa 75-112.5mg, Brintellix, Pregabalin 100mg - brak dokładnych dat i okresów stosowania",
+    "familyHistory": "Mama leczy się na nerwice, przyjmowała setaloft. Ojciec uzależniony od alkoholu",
+    "otherTreatments": "TMS 30 zabiegów, EMDR, różne psychoterapie: psychoanalityczna, CBT, grupowa",
+    "patientBackground": "Pochodzi ze wschodniej granicy Polski, dysfunkcyjna rodzina alkoholowa"
+  }
 }
 
-**UWAGI KOŃCOWE:**
-- **Myśl jak doświadczony farmakolog kliniczny** - uwzględniaj logikę farmakoterapii
-- **Sprawdzaj aktualny rok (2025)** - obliczaj okresy czasowe poprawnie
-- **Weryfikuj mapowania leków** - szczególnie benzodiazepiny
-- **Analizuj adekwatność prób** - nie każda zmiana leku to nowa próba
-- **Priorytetyzuj bezpieczeństwo** - dokładnie sprawdzaj leki zabronione i washout`,
+**UWAGA:** Zawsze wypełnij pole "dose" konkretną dawką! Jeśli nie możesz ustalić dawki, użyj "dawka nieznana", ale NIE zostawiaj pustego pola.
+
+**INSTRUKCJE WYJŚCIOWE:**
+Zwróć TYLKO czysty JSON bez żadnych dodatków, markdown czy komentarzy. Pierwszym znakiem odpowiedzi musi być "{", ostatnim "}".`,
       dependencies: ['clinical-synthesis', 'episode-analysis']
     };
     
@@ -267,9 +200,26 @@ Wykonaj szczegółową analizę farmakoterapii według instrukcji systemowych, u
       
       // Sprawdź i napraw drugName
       if (!sanitizedItem.drugName || typeof sanitizedItem.drugName !== 'string') {
-        sanitizedItem.drugName = `Nieznany lek ${index + 1}`;
+        // Próbuj znaleźć nazwę leku w innych polach
+        const itemAsAny = sanitizedItem as any;
+        const possibleNames = [
+          itemAsAny.medicationName,
+          itemAsAny.medication,
+          itemAsAny.drug,
+          itemAsAny.name
+        ].filter(name => name && typeof name === 'string');
+        
+        if (possibleNames.length > 0) {
+          sanitizedItem.drugName = possibleNames[0];
+          // Znajdź które pole zostało użyte
+          const sourceField = ['medicationName', 'medication', 'drug', 'name']
+            .find(field => itemAsAny[field] === possibleNames[0]);
+          console.log(`🔧 [Sanitizer] Zmapowano ${sourceField} na drugName: ${possibleNames[0]}`);
+        } else {
+          sanitizedItem.drugName = `Nieznany lek ${index + 1}`;
+          console.log(`🔧 [Sanitizer] Wygenerowano drugName dla item[${index}]: ${sanitizedItem.drugName}`);
+        }
         hasChanges = true;
-        console.log(`🔧 [Sanitizer] Wygenerowano drugName dla item[${index}]: ${sanitizedItem.drugName}`);
       }
       
       // Sprawdź i napraw shortName
@@ -340,6 +290,37 @@ Wykonaj szczegółową analizę farmakoterapii według instrukcji systemowych, u
     
     // 2. WALIDACJA SPÓJNOŚCI CZASOWEJ
     result.timeline = this.validateTimelineConsistency(result.timeline, context);
+    
+    // 3. SANITYZACJA DRUG MAPPINGS - odfiltruj niepoprawne mapowania
+    if (Array.isArray(result.drugMappings)) {
+      const originalLength = result.drugMappings.length;
+      result.drugMappings = result.drugMappings.filter((mapping, index) => {
+        if (!mapping || typeof mapping !== 'object') {
+          console.log(`🧹 [Sanitizer] Usuwam niepoprawne mapowanie[${index}]: nie jest obiektem`);
+          return false;
+        }
+        if (!mapping.originalName || typeof mapping.originalName !== 'string') {
+          console.log(`🧹 [Sanitizer] Usuwam niepoprawne mapowanie[${index}]: brak originalName`);
+          return false;
+        }
+        if (!mapping.standardName || typeof mapping.standardName !== 'string') {
+          console.log(`🧹 [Sanitizer] Usuwam niepoprawne mapowanie[${index}]: brak standardName`);
+          return false;
+        }
+        if (!mapping.activeSubstance || typeof mapping.activeSubstance !== 'string') {
+          console.log(`🧹 [Sanitizer] Usuwam niepoprawne mapowanie[${index}]: brak activeSubstance`);
+          return false;
+        }
+        return true;
+      });
+      
+      if (result.drugMappings.length !== originalLength) {
+        console.log(`🧹 [Sanitizer] Usunięto ${originalLength - result.drugMappings.length} niepoprawnych mapowań`);
+      }
+    } else {
+      result.drugMappings = [];
+      console.log(`🧹 [Sanitizer] drugMappings nie było tablicą, ustawiono pustą tablicę`);
+    }
     
     console.log('✅ [Pharmacotherapy Sanitizer] Sanityzacja zakończona');
     return result;
@@ -825,7 +806,13 @@ Wykonaj szczegółową analizę farmakoterapii według instrukcji systemowych, u
       gaps: ['Błąd systemowy - używam danych demonstracyjnych'],
       notes: ['Błąd podczas analizy farmakoterapii - używam danych demonstracyjnych do testowania wykresu'],
       prohibitedDrugs: [],
-      clinicalClaimsVerification: 'Błąd analizy - nie można zweryfikować stwierdzeń klinicznych'
+      clinicalClaimsVerification: 'Błąd analizy - nie można zweryfikować stwierdzeń klinicznych',
+      historicalContext: {
+        previousMedications: 'Pacjent w przeszłości stosował...',
+        familyHistory: 'Mama leczy się na nerwice...',
+        otherTreatments: 'TMS 30 zabiegów, EMDR...',
+        patientBackground: 'Kontekst życiowy i społeczny...'
+      }
     };
   }
 

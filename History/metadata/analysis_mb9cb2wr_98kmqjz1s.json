@@ -1,0 +1,16 @@
+{
+  "id": "analysis_mb9cb2wr_98kmqjz1s",
+  "patientId": "PAT/202505/027",
+  "analysisType": "multi-agent",
+  "modelUsed": "gemini",
+  "createdAt": "2025-05-29T12:18:03.749Z",
+  "updatedAt": "2025-05-29T12:18:03.796Z",
+  "status": "completed",
+  "version": "0.1.0",
+  "tags": [
+    "Zespół nadpobudliwości psychoruchowej/ADHD (F90)",
+    "Zaburzenia ze spektrum autyzmu (F84)",
+    "multi-agent"
+  ],
+  "notes": "MK Po naprawieniu chorob wspolistniejacych"
+}

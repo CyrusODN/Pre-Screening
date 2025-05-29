@@ -111,6 +111,12 @@ export interface PatientData {
     estimatedProbability: number;
     riskFactors?: string[];
   };
+  historicalContext?: {
+    previousMedications: string;
+    familyHistory: string;
+    otherTreatments: string;
+    patientBackground: string;
+  };
   analyzedAt?: string;
   isMockData?: boolean;
   modelUsed?: SupportedAIModel;

@@ -54,10 +54,17 @@ import {
   TrophyIcon,
   LightBulbIcon,
   FireIcon,
-  StarIcon
+  StarIcon,
+  ArrowsUpDownIcon,
+  AdjustmentsHorizontalIcon,
+  CogIcon
 } from '@heroicons/react/24/outline';
+import { 
+  ArrowsPointingInIcon
+} from '@heroicons/react/24/solid';
 import type { PharmacotherapyItem, PatientData } from '../../types/index';
 import { PREDEFINED_PROTOCOLS } from '../../data/protocols';
+import { HistoricalContext } from '../HistoricalContext';
 
 // Import the enhanced clinical analysis service
 import { 
@@ -824,10 +831,10 @@ const TimelineEventBar = memo<{
 
   // Enhanced visual indicators based on AI analysis
   const getEventBorderStyle = () => {
-    if (event.protocolRelevance === 'critical') return '3px solid #10B981';
-    if (event.clinicalSignificance === 'critical') return '3px solid #EF4444';
-    if (event.aiConfidence > 0.8) return '2px solid #8B5CF6';
-    return '1px solid rgba(0,0,0,0.1)';
+    if (event.protocolRelevance === 'critical') return '3px solid #22C55E'; // remedy-success equivalent
+    if (event.clinicalSignificance === 'critical') return '3px solid #EF4444'; // remedy-danger
+    if (event.aiConfidence > 0.8) return '2px solid #4A90B9'; // remedy-primary
+    return '1px solid rgba(255,255,255,0.3)';
   };
 
   const getEventOpacity = () => {
@@ -846,18 +853,20 @@ const TimelineEventBar = memo<{
 
   return (
     <div
-      className={`absolute rounded-lg shadow-lg cursor-pointer transition-all duration-300 ${
-        isHighlighted ? 'ring-4 ring-blue-300 ring-opacity-50 z-30' : 'hover:shadow-xl hover:z-20'
+      className={`absolute rounded-xl shadow-lg cursor-pointer transition-all duration-300 transform-gpu ${
+        isHighlighted 
+          ? 'ring-4 ring-remedy-primary/40 ring-opacity-50 z-30 scale-105 shadow-2xl' 
+          : 'hover:shadow-2xl hover:z-20 hover:scale-102'
       }`}
       style={{
         left: `${event.x}%`,
         top: event.y,
         width: `${event.width}%`,
         height: event.height,
-        backgroundColor: event.color,
+        background: `linear-gradient(135deg, ${event.color} 0%, ${event.color}CC 100%)`,
         border: getEventBorderStyle(),
         opacity: getEventOpacity(),
-        transform: isHighlighted ? 'scale(1.05)' : 'scale(1)',
+        backdropFilter: 'blur(1px)',
       }}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
@@ -869,25 +878,28 @@ const TimelineEventBar = memo<{
       aria-label={`${event.drugName} - ${event.dose} - ${format(event.startDate, 'dd.MM.yyyy')} do ${format(event.endDate, 'dd.MM.yyyy')}`}
     >
       {/* Enhanced content with AI indicators */}
-      <div className="h-full flex items-center justify-between px-2 text-white text-xs font-medium">
-        <div className="flex items-center gap-1 min-w-0 flex-1">
-          <span className="truncate">{event.shortName}</span>
+      <div className="h-full flex items-center justify-between px-3 text-white text-xs font-medium relative overflow-hidden">
+        {/* Subtle inner glow effect */}
+        <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-transparent to-white/5 rounded-xl"></div>
+        
+        <div className="flex items-center gap-1.5 min-w-0 flex-1 relative z-10">
+          <span className="truncate font-semibold text-shadow-sm">{event.shortName}</span>
           {event.mghAtrqCompliant && (
-            <CheckCircleIcon className="w-3 h-3 text-green-300 flex-shrink-0" />
+            <CheckCircleIcon className="w-3.5 h-3.5 text-green-300 drop-shadow-sm flex-shrink-0" />
           )}
           {showAdvancedMetrics && getAIConfidenceIcon()}
         </div>
         
         {/* Clinical significance indicators */}
-        <div className="flex items-center gap-1 flex-shrink-0">
+        <div className="flex items-center gap-1.5 flex-shrink-0 relative z-10">
           {event.clinicalSignificance === 'critical' && (
-            <ExclamationTriangleIcon className="w-3 h-3 text-red-300" />
+            <ExclamationTriangleIcon className="w-3.5 h-3.5 text-red-300 drop-shadow-sm" />
           )}
           {event.protocolRelevance === 'critical' && (
-            <TrophyIcon className="w-3 h-3 text-green-300" />
+            <TrophyIcon className="w-3.5 h-3.5 text-green-300 drop-shadow-sm" />
           )}
           {event.predictiveAnalytics.treatmentSuccessProbability > 0.8 && (
-            <FireIcon className="w-3 h-3 text-orange-300" />
+            <FireIcon className="w-3.5 h-3.5 text-orange-300 drop-shadow-sm" />
           )}
         </div>
       </div>
@@ -1700,9 +1712,11 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
   
   if (drugGroups.length === 0) {
       return (
-      <div className={`bg-white p-8 rounded-xl shadow-lg border border-slate-200 ${className}`}>
+      <div className={`bg-white p-8 rounded-xl shadow-lg border border-remedy-border ${className}`}>
         <div className="text-center py-12">
-          <InformationCircleIcon className="w-16 h-16 text-slate-400 mx-auto mb-4" />
+          <div className="w-16 h-16 bg-gradient-to-br from-remedy-secondary to-remedy-accent rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <InformationCircleIcon className="w-8 h-8 text-white" />
+          </div>
           <h3 className="text-lg font-semibold text-slate-700 mb-2">Brak danych farmakoterapii</h3>
           <p className="text-slate-500">Nie znaleziono prawidłowych danych do wizualizacji na osi czasu.</p>
         </div>
@@ -1715,39 +1729,45 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
   // ============================================================================
   
   return (
-    <div className={`bg-white rounded-xl shadow-xl border border-slate-200 overflow-visible ${isFullscreen ? 'fixed inset-4 z-50' : ''} ${className}`}>
+    <div className={`bg-white rounded-xl shadow-xl border border-remedy-border overflow-visible ${isFullscreen ? 'fixed inset-4 z-50' : ''} ${className}`}>
       {/* Optimized header */}
-      <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border-b border-slate-200 p-4">
+      <div className="bg-gradient-to-r from-remedy-light via-remedy-secondary/10 to-remedy-primary/10 border-b border-remedy-border p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <ClockIcon className="w-6 h-6 text-blue-600" />
+            <div className="w-10 h-10 bg-gradient-to-br from-remedy-primary to-remedy-accent rounded-xl flex items-center justify-center shadow-lg">
+              <ClockIcon className="w-6 h-6 text-white" />
+            </div>
             <div>
-              <h3 className="text-xl font-bold text-slate-800">Oś Czasu Farmakoterapii</h3>
-              <p className="text-sm text-slate-600">Zoptymalizowana analiza z AI-powered insights</p>
+              <h3 className="text-xl font-bold bg-gradient-to-r from-remedy-primary to-remedy-accent bg-clip-text text-transparent">
+                Oś Czasu Farmakoterapii
+              </h3>
+              <p className="text-sm text-slate-600">Zaawansowana analiza z AI-powered insights</p>
             </div>
           </div>
           
           <div className="flex items-center gap-2">
-            <span className="text-sm text-slate-600">Zoom: {ZOOM_LEVELS[zoomLevel].name}</span>
+            <span className="text-sm text-slate-600 bg-remedy-light px-3 py-1 rounded-full">
+              Zoom: {ZOOM_LEVELS[zoomLevel].name}
+            </span>
             <button
               onClick={() => setZoomLevel(Math.max(0, zoomLevel - 1))}
               disabled={zoomLevel === 0}
-              className="p-2 rounded-lg bg-white shadow-sm hover:bg-slate-50 disabled:opacity-50 transition-colors"
+              className="p-2 rounded-lg bg-white shadow-md hover:bg-remedy-light hover:shadow-lg disabled:opacity-50 transition-all duration-200 border border-remedy-border"
               aria-label="Oddal"
             >
-              <MagnifyingGlassMinusIcon className="w-4 h-4" />
+              <MagnifyingGlassMinusIcon className="w-4 h-4 text-remedy-primary" />
             </button>
             <button
               onClick={() => setZoomLevel(Math.min(ZOOM_LEVELS.length - 1, zoomLevel + 1))}
               disabled={zoomLevel === ZOOM_LEVELS.length - 1}
-              className="p-2 rounded-lg bg-white shadow-sm hover:bg-slate-50 disabled:opacity-50 transition-colors"
+              className="p-2 rounded-lg bg-white shadow-md hover:bg-remedy-light hover:shadow-lg disabled:opacity-50 transition-all duration-200 border border-remedy-border"
               aria-label="Przybliż"
             >
-              <MagnifyingGlassPlusIcon className="w-4 h-4" />
+              <MagnifyingGlassPlusIcon className="w-4 h-4 text-remedy-primary" />
             </button>
             <button
               onClick={() => setIsFullscreen(!isFullscreen)}
-              className="p-2 rounded-lg bg-white shadow-sm hover:bg-slate-50 transition-colors"
+              className="p-2 rounded-lg bg-gradient-to-r from-remedy-primary to-remedy-accent text-white shadow-md hover:shadow-lg transition-all duration-200"
               aria-label={isFullscreen ? "Zamknij pełny ekran" : "Pełny ekran"}
             >
               {isFullscreen ? <XMarkIcon className="w-4 h-4" /> : <ArrowsPointingOutIcon className="w-4 h-4" />}
@@ -1759,9 +1779,9 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
       {/* Timeline content */}
       <div className="relative">
         {/* Time markers header */}
-        <div className="flex h-10 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-300">
+        <div className="flex h-10 bg-gradient-to-r from-remedy-light to-remedy-secondary/20 border-b border-remedy-border">
           <div 
-            className="bg-gradient-to-r from-slate-100 to-slate-200 border-r border-slate-300 flex items-center px-4 flex-shrink-0"
+            className="bg-gradient-to-r from-remedy-secondary/30 to-remedy-primary/20 border-r border-remedy-border flex items-center px-4 flex-shrink-0 shadow-inner"
             style={{ width: SIDEBAR_WIDTH }}
           >
             <span className="text-sm font-semibold text-slate-700">
@@ -1789,8 +1809,8 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
                   className="absolute top-0 h-full flex items-center"
                   style={{ left: `${marker.x}%` }}
                 >
-                  <div className="w-px h-full bg-slate-400"></div>
-                  <span className="absolute top-1 left-1 whitespace-nowrap text-xs font-medium text-slate-700">
+                  <div className="w-px h-full bg-remedy-primary/40"></div>
+                  <span className="absolute top-1 left-1 whitespace-nowrap text-xs font-medium text-slate-700 bg-white/80 backdrop-blur-sm px-1 rounded">
                     {marker.label}
                   </span>
                 </div>
@@ -1807,7 +1827,7 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
         }}>
           {/* Sidebar */}
           <div 
-            className="bg-gradient-to-b from-slate-50 to-slate-100 border-r border-slate-300 shadow-lg flex-shrink-0 overflow-x-hidden"
+            className="bg-gradient-to-b from-remedy-light via-white to-remedy-secondary/10 border-r border-remedy-border shadow-lg flex-shrink-0 overflow-x-hidden"
             style={{ width: SIDEBAR_WIDTH, height: totalContentHeight /* Content height */ }}
           >
             <div 
@@ -1825,8 +1845,10 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
                     <div key={group.drugName}>
                       {/* Drug header */}
                       <div
-                        className={`border-b border-slate-200 transition-all duration-200 ${
-                          highlightedDrug === group.drugName ? 'bg-blue-50 shadow-md' : 'bg-white hover:bg-slate-50'
+                        className={`border-b border-remedy-border transition-all duration-200 ${
+                          highlightedDrug === group.drugName 
+                            ? 'bg-gradient-to-r from-remedy-primary/10 to-remedy-accent/10 shadow-md border-remedy-primary/30' 
+                            : 'bg-white hover:bg-gradient-to-r hover:from-remedy-light hover:to-white'
                         }`}
                         onMouseEnter={() => setHighlightedDrug(group.drugName)}
                         onMouseLeave={() => setHighlightedDrug(null)}
@@ -1835,7 +1857,7 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
                           <div className="flex items-center gap-1">
                             <button
                               onClick={() => toggleDrugExpansion(group.drugName)}
-                              className="p-1 rounded hover:bg-slate-200 transition-colors"
+                              className="p-1 rounded-lg hover:bg-remedy-secondary/20 transition-all duration-200 hover:shadow-sm"
                               aria-label="Rozwiń/zwiń"
                             >
                               {group.isExpanded ? (
@@ -1848,23 +1870,23 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
 
                           <div className="flex items-center gap-3 flex-1 min-w-0">
                             <div
-                              className="w-4 h-4 rounded-full shadow-sm border border-white"
+                              className="w-4 h-4 rounded-full shadow-md border-2 border-white ring-1 ring-remedy-border"
                               style={{ backgroundColor: group.color }}
                             />
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">
-                                <span className="font-semibold text-slate-800 text-sm truncate" title={group.drugName}>
+                                <span className="font-semibold text-slate-800 text-sm truncate hover:text-remedy-primary transition-colors" title={group.drugName}>
                                   {group.shortName}
                                 </span>
                                 {group.mghAtrqCompliant && (
-                                  <CheckCircleIcon className="w-3 h-3 text-green-600" title="Zgodne z MGH ATRQ" />
+                                  <CheckCircleIcon className="w-3 h-3 text-remedy-success" title="Zgodne z MGH ATRQ" />
                                 )}
                               </div>
                               <div className="flex items-center gap-3">
-                                <span className="text-xs text-slate-500">
+                                <span className="text-xs text-slate-500 bg-slate-100/50 px-2 py-0.5 rounded-full">
                                   {group.episodes.length} epizod{group.episodes.length > 1 ? 'ów' : ''}
                                 </span>
-                                <span className="text-xs text-slate-500">
+                                <span className="text-xs text-slate-500 bg-slate-100/50 px-2 py-0.5 rounded-full">
                                   {group.totalDuration} dni
                                 </span>
                               </div>
@@ -1875,7 +1897,7 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
 
                       {/* Expanded episodes by dose */}
                       {group.isExpanded && (
-                        <div className="bg-slate-50">
+                        <div className="bg-gradient-to-r from-remedy-light/50 to-white">
                           {(() => {
                             const episodesByDose = new Map<string, ProcessedDrugEpisode[]>();
                             group.episodes.forEach(episode => {
@@ -1887,29 +1909,19 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
                             });
 
                             return Array.from(episodesByDose.entries()).map(([dose, episodes]) => (
-                              <div key={dose} className="border-b border-slate-200 last:border-b-0">
+                              <div key={dose} className="border-b border-remedy-border/50 last:border-b-0 hover:bg-remedy-light/30 transition-colors">
                                 <div className="flex items-center gap-3 px-8" style={{ height: LAYOUT.EPISODE_HEIGHT + 8 }}>
                                   <div
                                     className="w-3 h-3 rounded-full shadow-sm border border-white"
                                     style={{ backgroundColor: group.color, opacity: 0.8 }}
                                   />
                                   <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2">
-                                      <span className="font-medium text-slate-700 text-xs">
-                                        {dose}
-                                      </span>
-                                      {episodes.some(ep => ep.clinicalAnalysis.mghAtrqCompliance.isCompliant) && (
-                                        <CheckCircleIcon className="w-3 h-3 text-green-600" title="Zgodne z MGH ATRQ" />
-                                      )}
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                      <span className="text-xs text-slate-400">
-                                        {episodes.length} okres{episodes.length > 1 ? 'ów' : ''}
-                                      </span>
-                                      <span className="text-xs text-slate-400">
-                                        {episodes.reduce((sum, ep) => sum + differenceInDays(ep.parsedEndDate, ep.parsedStartDate), 0)} dni
-                                      </span>
-                                    </div>
+                                    <span className="text-xs font-medium text-slate-700 bg-white px-2 py-1 rounded-full shadow-sm">
+                                      {dose}
+                                    </span>
+                                    <span className="text-xs text-slate-500 ml-2">
+                                      {episodes.length} wystąpień
+                                    </span>
                                   </div>
                                 </div>
                               </div>
@@ -2282,6 +2294,15 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
           </div>
           <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
         </div>
+      )}
+
+      {/* Sekcja Kontekstu Historycznego - NOWY KOMPONENT */}
+      {patientData.trdAnalysis?.pharmacotherapy && 
+       patientData.historicalContext && (
+        <HistoricalContext 
+          data={patientData.historicalContext}
+          variant="default"
+        />
       )}
     </div>
   );

@@ -1,6 +1,7 @@
 import React from 'react';
 import { CheckCircle2, XCircle, HelpCircle, AlertTriangle, Info } from 'lucide-react';
 import type { PatientData, Criterion } from '../types';
+import { HistoricalContext } from './HistoricalContext';
 
 interface PrintableReportProps {
   patientProfile: PatientData;
@@ -249,6 +250,14 @@ export const PrintableReport: React.FC<PrintableReportProps> = ({
           )}
         </div>
       </section>
+
+      {/* Historical Context - Added for comprehensive analysis */}
+      {patientProfile.historicalContext && (
+        <HistoricalContext 
+          data={patientProfile.historicalContext}
+          variant="print"
+        />
+      )}
 
       {/* Episode Estimation */}
       {patientProfile.episodeEstimation && (

@@ -1,0 +1,17 @@
+{
+  "id": "analysis_mb9afiiw_5vmjcfyr9",
+  "patientId": "PAT/202505/339",
+  "analysisType": "multi-agent",
+  "modelUsed": "gemini",
+  "createdAt": "2025-05-29T11:25:31.390Z",
+  "updatedAt": "2025-05-29T11:25:31.428Z",
+  "status": "completed",
+  "version": "0.1.0",
+  "tags": [
+    "lekami przeciwdepresyjnymi",
+    "F84",
+    "F90",
+    "multi-agent"
+  ],
+  "notes": "MK Wieloagent dziwne"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "analysis_mb9e7xru_d3xsazi81",
+  "patientId": "PAT/202505/870",
+  "analysisType": "multi-agent",
+  "modelUsed": "gemini",
+  "createdAt": "2025-05-29T13:11:36.366Z",
+  "updatedAt": "2025-05-29T13:11:36.401Z",
+  "status": "completed",
+  "version": "0.1.0",
+  "tags": [
+    "Zespół nadpobudliwości psychoruchowej/ADHD (F90)",
+    "Zaburzenia ze spektrum autyzmu (F84)",
+    "Zaburzenia lękowe",
+    "multi-agent"
+  ],
+  "notes": "MK poprawiony1 - Wieloagentowa - 29.05.2025 15:11"
+}

@@ -11,7 +11,7 @@ export class TRDAssessmentAgent extends AbstractBaseAgent<TRDAssessmentResult> {
     const config: AgentConfig = {
       name: 'trd-assessment',
       description: 'Analizuje lekooporność według kryteriów MGH-ATRQ dla każdego scenariusza',
-      temperature: 0.05,
+      temperature: 0.15,
       maxTokens: 12000,
       systemPrompt: `Jesteś specjalistą w ocenie lekooporności (TRD) według kryteriów MGH-ATRQ. Twoim zadaniem jest precyzyjna analiza spełnienia kryteriów IC6.
 
