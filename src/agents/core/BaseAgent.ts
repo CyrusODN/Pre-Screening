@@ -207,7 +207,8 @@ export abstract class AbstractBaseAgent<TResult = any> implements BaseAgent<TRes
       case 'claude-opus':
         return Math.min(this.config.maxTokens || 32000, 32000); // Claude ma limit 32k
       case 'gemini':
-        return Math.min(this.config.maxTokens || 65000, 65000); // Gemini ma wyższy limit
+        // NAPRAWIONO: Drastycznie zmniejszony limit dla Gemini żeby uniknąć obcinania JSONów
+        return Math.min(this.config.maxTokens || 8000, 8000); // Bardzo niski limit dla pełnych odpowiedzi
       case 'o3':
         return Math.min(this.config.maxTokens || 65000, 65000); // O3 ma wysokie limity
       default:
@@ -217,90 +218,159 @@ export abstract class AbstractBaseAgent<TResult = any> implements BaseAgent<TRes
 
   // Pomocnicza metoda do parsowania JSON z obsługą błędów
   protected parseJSONResponse<T>(jsonString: string): T {
-    try {
-      console.log(`🔍 [${this.name}] Parsowanie odpowiedzi JSON...`);
+    console.log(`🔍 [${this.name}] Parsowanie odpowiedzi JSON (${jsonString.length} znaków)...`);
+    
+    if (!jsonString || jsonString.trim().length === 0) {
+      throw new Error(`Pusta odpowiedź JSON z agenta ${this.name}`);
+    }
+
+    let cleanedJson = jsonString;
+    
+    // KROK 1: Wyciągnij JSON z markdown
+    const jsonMatch = cleanedJson.match(/```(?:json)?\s*\n?([\s\S]*?)\n?```/);
+    if (jsonMatch) {
+      cleanedJson = jsonMatch[1];
+      console.log(`🔍 [${this.name}] Znaleziono blok JSON w markdown`);
+    }
+
+    // KROK 2: PODSTAWOWE CZYSZCZENIE
+    console.log(`🔧 [${this.name}] Podstawowe naprawy JSON...`);
+    
+    // Usuń BOM i control characters
+    cleanedJson = cleanedJson.replace(/^\uFEFF/, '');
+    cleanedJson = cleanedJson.replace(/[\u0000-\u001F\u007F-\u009F]/g, '');
+    cleanedJson = cleanedJson.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    
+    // KROK 3: NAPRAW ESCAPE'OWANIE STRINGÓW
+    cleanedJson = cleanedJson.replace(/"((?:[^"\\]|\\.)*)"/g, (match, content) => {
+      if (!content) return '""';
       
-      // Usuń białe znaki na początku i końcu
-      let cleanedString = jsonString.trim();
-      
-      // Znajdź i wytnij JSON z bloków markdown ```json```
-      const jsonBlockRegex = /```json\s*([\s\S]*?)\s*```/;
-      const jsonMatch = cleanedString.match(jsonBlockRegex);
-      
-      if (jsonMatch) {
-        cleanedString = jsonMatch[1].trim();
-        console.log(`🔍 [${this.name}] Znaleziono blok JSON w markdown`);
-      } else {
-        // Spróbuj znaleźć JSON między nawiasami klamrowymi
-        const jsonObjectRegex = /\{[\s\S]*\}/;
-        const objectMatch = cleanedString.match(jsonObjectRegex);
+      let escaped = content
+        .replace(/\\\\/g, '\\')     // Napraw podwójne escape'y
+        .replace(/\\/g, '\\\\')     // Escape backslashes
+        .replace(/"/g, '\\"')       // Escape quotes
+        .replace(/\n/g, ' ')        // Zamień newlines
+        .replace(/\r/g, ' ')        // Zamień returns
+        .replace(/\t/g, ' ')        // Zamień tabs
+        .replace(/[\x00-\x1F\x7F]/g, ''); // Usuń control chars
         
-        if (objectMatch) {
-          cleanedString = objectMatch[0];
-          console.log(`🔍 [${this.name}] Znaleziono obiekt JSON w tekście`);
-        }
+      if (escaped.length > 300) {
+        escaped = escaped.substring(0, 297) + '...';
       }
       
-      // NAPRAW PROBLEM Z UNDEFINED - zamień na null
-      cleanedString = cleanedString.replace(/:\s*undefined\b/g, ': null');
-      cleanedString = cleanedString.replace(/,\s*undefined\b/g, ', null');
-      cleanedString = cleanedString.replace(/\[\s*undefined\b/g, '[null');
-      cleanedString = cleanedString.replace(/undefined\s*,/g, 'null,');
-      cleanedString = cleanedString.replace(/undefined\s*\]/g, 'null]');
+      return `"${escaped}"`;
+    });
+    
+    // KROK 4: NAPRAW PODSTAWOWE BŁĘDY SKŁADNI
+    cleanedJson = cleanedJson.replace(/":\s*(\d+)"/g, '": $1');
+    cleanedJson = cleanedJson.replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":');
+    cleanedJson = cleanedJson.replace(/,(\s*[}\]])/g, '$1');
+    
+    // KROK 5: NAPRAW PRZECINKI W TABLICACH I OBIEKTACH
+    cleanedJson = cleanedJson.replace(/"\s*\n\s*"/g, '",\n    "');
+    cleanedJson = cleanedJson.replace(/\}\s*\n\s*\{/g, '},\n    {');
+    cleanedJson = cleanedJson.replace(/\}\s*\n\s*"/g, '},\n    "');
+    cleanedJson = cleanedJson.replace(/\]\s*\n\s*"/g, '],\n    "');
+    
+    // KROK 6: NAPRAW NIEDOMKNIĘTE STRINGI W TABLICACH
+    cleanedJson = cleanedJson.replace(/([^"])\)\s*,?\s*\n/g, '$1)",\n');
+    cleanedJson = cleanedJson.replace(/([^"]\)")\s*(?=,|\])/g, '$1');
+    
+    // KROK 6.5: SPECJALNA NAPRAWA NIEDOMKNIĘTYCH STRINGÓW Z CUDZYSŁOWAMI WEWNĘTRZNYMI
+    // Napraw fragmenty jak: "tekst \"escaped\" bez końcowego cudzysłowu),
+    cleanedJson = cleanedJson.replace(/("[^"]*\\")([^"]*)\),?\s*(?=\n|\]|,)/g, '$1$2"),');
+    
+    console.log(`🔍 [${this.name}] Oczyszczony JSON (pierwsze 500 znaków): ${cleanedJson.substring(0, 500)}...`);
+
+    // KROK 7: Próba parsowania
+    try {
+      const parsed = JSON.parse(cleanedJson);
+      console.log(`✅ [${this.name}] JSON sparsowany pomyślnie`);
+      return parsed;
+    } catch (error) {
+      console.log(`🔧 [${this.name}] Podstawowe parsowanie nie powiodło się, desperackie naprawy...`);
+      console.log(`🔧 [${this.name}] Błąd parsowania: ${(error as Error).message}`);
       
-      console.log(`🔍 [${this.name}] Oczyszczony JSON:`, cleanedString.substring(0, 200) + '...');
+      // KROK 8: DESPERACKIE NAPRAWY
+      let desperateJson = this.desperateJsonFix(cleanedJson);
       
       try {
-        const parsed = JSON.parse(cleanedString);
-        console.log(`✅ [${this.name}] JSON sparsowany pomyślnie`);
+        const parsed = JSON.parse(desperateJson);
+        console.log(`✅ [${this.name}] JSON naprawiony przez desperackie naprawy`);
         return parsed;
-      } catch (parseError) {
-        // PRÓBA NAPRAWY: Jeśli JSON jest uszkodzony, spróbuj obciąć na ostatnim poprawnym miejscu
-        console.log(`🔧 [${this.name}] Próba naprawy uszkodzonego JSON...`);
+      } catch (finalError) {
+        const finalErr = finalError as Error;
+        console.log(`💥 [${this.name}] Błąd parsowania JSON: ${finalErr.constructor.name}: ${finalErr.message}`);
+        console.log(`💥 [${this.name}] Oryginalna odpowiedź (pierwsze 1000 znaków): ${jsonString.substring(0, 1000)}...`);
         
-        // Znajdź ostatni poprawny nawias zamykający
-        const lastValidBrace = this.findLastValidJsonEnd(cleanedString);
-        if (lastValidBrace > 0) {
-          const repairedJson = cleanedString.substring(0, lastValidBrace + 1);
-          console.log(`🔧 [${this.name}] Próba parsowania naprawionego JSON (${repairedJson.length} znaków)`);
-          
-          try {
-            const parsed = JSON.parse(repairedJson);
-            console.log(`✅ [${this.name}] Naprawiony JSON sparsowany pomyślnie`);
-            return parsed;
-          } catch (repairError) {
-            console.log(`❌ [${this.name}] Naprawa JSON nie powiodła się`);
-          }
+        const position = finalErr.message.match(/position (\d+)/);
+        if (position) {
+          const pos = parseInt(position[1]);
+          console.log(`💥 [${this.name}] Błąd w pozycji ${pos}: ${cleanedJson.substring(Math.max(0, pos-30), pos+30)}`);
         }
         
-        throw parseError;
+        throw new Error(`Błąd parsowania odpowiedzi ${this.name}: ${finalErr.message}`);
       }
-      
-    } catch (error) {
-      console.error(`💥 [${this.name}] Błąd parsowania JSON:`, error);
-      console.error(`💥 [${this.name}] Oryginalna odpowiedź:`, jsonString.substring(0, 500) + '...');
-      throw new Error(`Błąd parsowania odpowiedzi ${this.name}: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
-  // Pomocnicza metoda do znajdowania ostatniego poprawnego końca JSON
-  private findLastValidJsonEnd(jsonString: string): number {
-    let braceCount = 0;
-    let lastValidEnd = -1;
+  // NOWA FUNKCJA: Desperackie naprawy JSON
+  private desperateJsonFix(json: string): string {
+    console.log(`🆘 [${this.name}] Desperackie naprawy JSON`);
     
-    for (let i = 0; i < jsonString.length; i++) {
-      const char = jsonString[i];
-      
-      if (char === '{') {
-        braceCount++;
-      } else if (char === '}') {
-        braceCount--;
-        if (braceCount === 0) {
-          lastValidEnd = i;
-        }
+    let fixed = json;
+    
+    // 1. Usuń wszystko po ostatnim poprawnym } lub ]
+    const lastValidEnd = Math.max(
+      fixed.lastIndexOf('"}'),
+      fixed.lastIndexOf('"}]'),
+      fixed.lastIndexOf('"}}}'),
+      fixed.lastIndexOf('"}}')
+    );
+    
+    if (lastValidEnd > 0 && lastValidEnd < fixed.length - 10) {
+      console.log(`🔧 [${this.name}] Obcinam JSON od pozycji ${lastValidEnd + 2}`);
+      fixed = fixed.substring(0, lastValidEnd + 2);
+    }
+    
+    // 2. Upewnij się że JSON kończy się poprawnie
+    if (!fixed.endsWith('}') && !fixed.endsWith(']')) {
+      if (fixed.includes('{')) {
+        fixed += '}';
+      } else if (fixed.includes('[')) {
+        fixed += ']';
       }
     }
     
-    return lastValidEnd;
+    // 3. Usuń niepełne linie na końcu
+    const lines = fixed.split('\n');
+    while (lines.length > 0) {
+      const lastLine = lines[lines.length - 1].trim();
+      if (lastLine === '' || 
+          lastLine.endsWith(',') || 
+          lastLine.endsWith(':') ||
+          (lastLine.includes('"') && !lastLine.includes(':'))) {
+        lines.pop();
+      } else {
+        break;
+      }
+    }
+    
+    fixed = lines.join('\n');
+    
+    // 4. Dodaj brakujące nawiasy
+    const openBraces = (fixed.match(/\{/g) || []).length;
+    const closeBraces = (fixed.match(/\}/g) || []).length;
+    const openBrackets = (fixed.match(/\[/g) || []).length;
+    const closeBrackets = (fixed.match(/\]/g) || []).length;
+    
+    for (let i = 0; i < openBraces - closeBraces; i++) {
+      fixed += '}';
+    }
+    for (let i = 0; i < openBrackets - closeBrackets; i++) {
+      fixed += ']';
+    }
+    
+    return fixed;
   }
 } 

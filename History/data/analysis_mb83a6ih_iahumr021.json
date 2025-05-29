@@ -1,0 +1,604 @@
+{
+  "metadata": {
+    "id": "analysis_mb83a6ih_iahumr021",
+    "patientId": "Krzysztof Gos",
+    "analysisType": "single-agent",
+    "modelUsed": "gemini",
+    "createdAt": "2025-05-28T15:17:39.056Z",
+    "updatedAt": "2025-05-28T15:17:39.082Z",
+    "status": "completed",
+    "version": "1.0.0",
+    "tags": [
+      "Łagodne zaburzenia poznawcze",
+      "Prawdopodobna łagodna hiperplazja prostaty (przyjmuje Tamsulosin)",
+      "single-agent"
+    ],
+    "notes": "Krzysztof G. - Klasyczna - 28.05.2025 17:17"
+  },
+  "patientData": {
+    "summary": {
+      "id": "Krzysztof Gos",
+      "age": 63,
+      "mainDiagnosis": "F33 - Zaburzenia depresyjne nawracające",
+      "comorbidities": [
+        "Łagodne zaburzenia poznawcze",
+        "Prawdopodobna łagodna hiperplazja prostaty (przyjmuje Tamsulosin)"
+      ]
+    },
+    "episodeEstimation": {
+      "scenarios": [
+        {
+          "id": 1,
+          "description": "Obecny epizod depresyjny jest długotrwałym pogorszeniem stanu psychicznego, które było widoczne już przed pierwszą odnotowaną wizytą w tej dokumentacji (2023-08-08).",
+          "evidence": "Notatka z wizyty 2023-08-08: 'Aktualnie - czuje stopniowe systematyczne pogarszanie sie stanu psychicznego na przestrzeni lat. Bez znacznych zaostrzen objawów depresyjnych, stopniowe pogarszanie funkcjonowania'. Wizyta ta była 'pierwszorazowa' w tej placówce, co sugeruje poszukiwanie pomocy z powodu trwającego problemu."
+        }
+      ],
+      "conclusion": "Na podstawie dostępnej dokumentacji, obecny epizod depresyjny pacjenta rozpoczął się znacząco przed sierpniem 2023 roku. Dla celów oceny leczenia w ramach kryteriów MGH-ATRQ, sekwencja analizowanych prób leczenia rozpoczyna się od interwencji udokumentowanych od wizyty 2023-08-08."
+    },
+    "trdAnalysis": {
+      "episodeStartDate": "2023-08-08",
+      "pharmacotherapy": [
+        {
+          "id": "WEN-P1",
+          "drugName": "Wenlafaksyna",
+          "shortName": "WEN",
+          "startDate": "2023-08-08",
+          "endDate": "2023-09-04",
+          "dose": "37.5mg ER kaps.",
+          "attemptGroup": 0,
+          "notes": "Nieadekwatna wg kryt. MGH-ATRQ badania: dawka (37.5mg) < minDose (150mg) oraz czas trwania (4 tyg.) < minTrialDuration (8 tyg.)."
+        },
+        {
+          "id": "WOR-P1",
+          "drugName": "Wortioksetyna",
+          "shortName": "WOR",
+          "startDate": "2023-09-05",
+          "endDate": "2023-10-31",
+          "dose": "5mg tabl.",
+          "attemptGroup": 0,
+          "notes": "Nieadekwatna wg kryt. MGH-ATRQ badania: dawka (5mg) < minDose (10mg). Czas trwania ~8.1 tyg."
+        },
+        {
+          "id": "OPI-P1",
+          "drugName": "Opipramol",
+          "shortName": "OPI",
+          "startDate": "2023-11-01",
+          "endDate": "2024-02-20",
+          "dose": "50mg tabl.",
+          "attemptGroup": 0,
+          "notes": "Nieadekwatna wg kryt. MGH-ATRQ badania: dawka (50mg) < minDose (150mg). Prawdopodobnie stosowany na lęk/sen."
+        },
+        {
+          "id": "WOR-P2",
+          "drugName": "Wortioksetyna",
+          "shortName": "WOR",
+          "startDate": "2023-11-01",
+          "endDate": "2024-03-05",
+          "dose": "10mg tabl.",
+          "attemptGroup": 1,
+          "notes": "Adekwatna wg kryt. MGH-ATRQ badania: Wortioksetyna 10mg/d (minDose 10mg) przez 18 tygodni (minTrialDuration 8 tyg.). Brak wystarczającej odpowiedzi, prowadzący do zwiększenia dawki."
+        },
+        {
+          "id": "OPI-P2",
+          "drugName": "Opipramol",
+          "shortName": "OPI",
+          "startDate": "2024-02-21",
+          "endDate": "2024-06-11",
+          "dose": "50mg tabl.",
+          "attemptGroup": 0,
+          "notes": "Kontynuacja. Nieadekwatna wg kryt. MGH-ATRQ badania: dawka (50mg) < minDose (150mg)."
+        },
+        {
+          "id": "WOR-P3",
+          "drugName": "Wortioksetyna",
+          "shortName": "WOR",
+          "startDate": "2024-03-06",
+          "endDate": "2024-08-19",
+          "dose": "15mg tabl.",
+          "attemptGroup": 0,
+          "notes": "Kontynuacja Wortioksetyny w wyższej dawce (15mg > minDose 10mg) przez >8 tygodni. Brak znaczącej poprawy. Nie liczone jako nowa, odrębna próba MGH-ATRQ, lecz jako kontynuacja niepowodzenia Wortioksetyny. Bupropion dołączony 2024-06-25. endDate szacowana na koniec przepisanej ilości."
+        },
+        {
+          "id": "ALP-P1",
+          "drugName": "Alprazolam",
+          "shortName": "ALP",
+          "startDate": "2024-06-11",
+          "endDate": "2024-06-25",
+          "dose": "0.5mg tabl. PRN",
+          "attemptGroup": 0,
+          "notes": "Benzodiazepina, doraźnie, max 2 tygodnie. Nie dotyczy MGH-ATRQ. endDate szacowana."
+        },
+        {
+          "id": "OPI-P3",
+          "drugName": "Opipramol",
+          "shortName": "OPI",
+          "startDate": "2024-06-12",
+          "endDate": "2024-08-06",
+          "dose": "50mg tabl.",
+          "attemptGroup": 0,
+          "notes": "Kontynuacja. Nieadekwatna wg kryt. MGH-ATRQ badania: dawka (50mg) < minDose (150mg)."
+        },
+        {
+          "id": "BUP-P1",
+          "drugName": "Bupropion",
+          "shortName": "BUP",
+          "startDate": "2024-06-25",
+          "endDate": "2025-02-19",
+          "dose": "150mg tabl. o zmodyf. uwalnianiu",
+          "attemptGroup": 0,
+          "notes": "Dołączony do Wortioksetyny, później prawdopodobnie jako główny lek. Nieadekwatna wg kryt. MGH-ATRQ badania: dawka (150mg) < minDose (300mg). startDate szacowana."
+        },
+        {
+          "id": "BUP-P2",
+          "drugName": "Bupropion",
+          "shortName": "BUP",
+          "startDate": "2025-02-20",
+          "endDate": "2025-04-05",
+          "dose": "300mg tabl. o zmodyf. uwalnianiu",
+          "attemptGroup": 0,
+          "notes": "Próba zwiększenia dawki. Nieadekwatna wg kryt. MGH-ATRQ badania: czas trwania (~6 tyg.) < minTrialDuration (8 tyg.). Brak odpowiedzi. Daty szacowane na podstawie opisu wizyty."
+        },
+        {
+          "id": "BUP-P3",
+          "drugName": "Bupropion",
+          "shortName": "BUP",
+          "startDate": "2025-04-06",
+          "endDate": "2025-06-27",
+          "dose": "150mg tabl. o zmodyf. uwalnianiu",
+          "attemptGroup": 0,
+          "notes": "Powrót do niższej dawki po niepowodzeniu próby 300mg. Nieadekwatna wg kryt. MGH-ATRQ badania: dawka (150mg) < minDose (300mg). endDate szacowana na koniec obecnej recepty."
+        },
+        {
+          "id": "TAM-P1",
+          "drugName": "Tamsulosyna",
+          "shortName": "TAM",
+          "startDate": "2025-01-01",
+          "endDate": "2025-05-01",
+          "dose": "0.4mg",
+          "attemptGroup": 0,
+          "notes": "Lek na łagodny przerost prostaty, nie dotyczy MGH-ATRQ. Przyjmowany od 'kilku miesięcy' przed 2025-04-29. endDate jest datą screeningu, lek prawdopodobnie kontynuowany."
+        },
+        {
+          "id": "KWE-P1",
+          "drugName": "Kwetapina",
+          "shortName": "KWE",
+          "startDate": "2025-04-30",
+          "endDate": "2025-05-01",
+          "dose": "50mg XR tabl.",
+          "attemptGroup": 0,
+          "notes": "Augmentacja Bupropionu. Faza miareczkowania."
+        },
+        {
+          "id": "KWE-P2",
+          "drugName": "Kwetapina",
+          "shortName": "KWE",
+          "startDate": "2025-05-02",
+          "endDate": "2025-05-03",
+          "dose": "100mg XR tabl.",
+          "attemptGroup": 0,
+          "notes": "Augmentacja Bupropionu. Faza miareczkowania."
+        },
+        {
+          "id": "KWE-P3",
+          "drugName": "Kwetapina",
+          "shortName": "KWE",
+          "startDate": "2025-05-04",
+          "endDate": "2025-07-02",
+          "dose": "150mg XR tabl.",
+          "attemptGroup": 0,
+          "notes": "Augmentacja Bupropionu. Dawka docelowa (150mg) zgodna z minDose (150mg) dla augmentacji wg MGH-ATRQ badania. Próba potencjalnie adekwatna, jeśli kontynuowana przez >=8 tygodni i nie przyniesie poprawy. Obecnie zbyt wcześnie by ocenić jako niepowodzenie. endDate szacowana na koniec przepisanej ilości."
+        }
+      ],
+      "conclusion": "Na podstawie Kryteriów MGH-ATRQ Badania, zidentyfikowano 1 nieudaną, adekwatną próbę leczenia w obecnym epizodzie depresyjnym:\n- Próba 1: Wortioksetyna 10mg/d przez 18 tygodni.\nInne próby leczenia przeciwdepresyjnego były nieadekwatne pod względem dawki lub czasu trwania (Wenlafaksyna 37.5mg, Wortioksetyna 5mg, Bupropion 150mg, Bupropion 300mg przez 6 tyg., Opipramol 50mg). Próba augmentacji Kwetiapiną 150mg jest obecnie w toku i nie może być jeszcze oceniona jako niepowodzenie. Pacjent obecnie nie spełnia kryterium TRD (wymagane co najmniej 2 niepowodzenia)."
+    },
+    "inclusionCriteria": [
+      {
+        "id": "IC1",
+        "name": "Zgoda na udział w badaniu (ICF)",
+        "status": "weryfikacja",
+        "details": "Podpisanie świadomej zgody jest wymagane na wizycie przesiewowej. Brak informacji w dostarczonej historii.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "IC2",
+        "name": "Wiek ≥18 lat",
+        "status": "spełnione",
+        "details": "Pacjent urodzony w 1962 roku, ma 63 lata (zakładając datę screeningu w maju 2025), co spełnia kryterium wieku ≥18 lat.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "IC3",
+        "name": "Diagnoza dużej depresji",
+        "status": "spełnione",
+        "details": "Pacjent ma konsekwentnie dokumentowane rozpoznanie F33 - Zaburzenia depresyjne nawracające. Brak udokumentowanych objawów psychotycznych. Wymagane potwierdzenie diagnozy MDD za pomocą MINI 7.0.2 na wizycie przesiewowej.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "IC4",
+        "name": "Czas trwania pierwszego epizodu",
+        "status": "spełnione",
+        "details": "Kryterium dotyczy sytuacji, gdy obecny epizod jest pierwszym w życiu. Historia pacjenta wskazuje na wcześniejsze epizody depresyjne ('pierwszy epizod podczas przygotowywania rozprawy doktorskiej'), więc obecny epizod nie jest pierwszym. Zatem ograniczenia czasowe dla pierwszego epizodu nie mają zastosowania.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "IC5",
+        "name": "Wynik MADRS ≥20",
+        "status": "weryfikacja",
+        "details": "Brak wyniku skali MADRS w dostarczonej historii medycznej. Wymagana ocena na wizycie przesiewowej i początkowej.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "IC6",
+        "name": "Lekooporność (TRD) wg MGH-ATRQ (specyficzne dla badania)",
+        "status": "niespełnione",
+        "details": "Analiza historii leczenia w obecnym epizodzie, zgodnie ze specyficznymi kryteriami MGH-ATRQ dla tego badania, wykazała jedno niepowodzenie adekwatnej próby leczenia (Wortioksetyna 10mg/d przez 18 tygodni). Protokół wymaga co najmniej dwóch niepowodzeń. Próba augmentacji Kwetiapiną 150mg jest w toku i nie może być jeszcze zakwalifikowana jako niepowodzenie. Inne leki (Wenlafaksyna, Wortioksetyna 5mg, Bupropion w różnych dawkach, Opipramol) nie spełniły kryteriów adekwatności (dawka lub czas trwania) zgodnie z MGH-ATRQ badania.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "IC7",
+        "name": "Odstawienie leków",
+        "status": "weryfikacja",
+        "details": "Pacjent aktualnie przyjmuje Bupropion, Kwetiapinę, Opipramol oraz Tamsulosynę. Wymagana jest zgoda na odstawienie leków zabronionych zgodnie z protokołem i potwierdzenie ich odstawienia. Należy sprawdzić, które z obecnych leków są zabronione i jakie są wymagane okresy wypłukiwania.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "IC8",
+        "name": "Zdolność do udziału",
+        "status": "spełnione",
+        "details": "Na podstawie dokumentacji pacjent jest w stanie uczestniczyć w wizytach i procedurach. Aktywnie uczestniczy w leczeniu.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      }
+    ],
+    "psychiatricExclusionCriteria": [
+      {
+        "id": "EC1",
+        "name": "Historia zaburzeń afektywnych dwubiegunowych",
+        "status": "spełnione",
+        "details": "Wywiad w kierunku manii/hipomanii był kilkukrotnie przeprowadzany i dał wynik ujemny (np. wizyty 2023-10-31, 2025-04-29). Brak historii ChAD.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC2",
+        "name": "Zaburzenia psychotyczne",
+        "status": "spełnione",
+        "details": "Brak historii i objawów zaburzeń psychotycznych w dokumentacji. Pacjent neguje objawy psychotyczne.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC3",
+        "name": "Zaburzenia osobowości (paranoiczne, schizoidalne, schizotypowe, histrioniczne, narcystyczne)",
+        "status": "spełnione",
+        "details": "Brak diagnozy tych zaburzeń osobowości. W badaniu z 2023-08-08 odnotowano 'Osobowość zwarta'.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC4",
+        "name": "Zaburzenie osobowości typu borderline",
+        "status": "spełnione",
+        "details": "Brak diagnozy ani cech sugerujących zaburzenie osobowości z pogranicza. Wymagane potwierdzenie wywiadem lub modułem MINI plus na screeningu.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC5",
+        "name": "Aktywne zaburzenia współistniejące (PTSD, OCD, anoreksja)",
+        "status": "spełnione",
+        "details": "Brak informacji o aktywnym PTSD, OCD lub anoreksji. Pacjent ma diagnozę łagodnych zaburzeń poznawczych, która nie jest wymieniona jako kryterium wykluczające w tej kategorii.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC6",
+        "name": "Hospitalizacja psychiatryczna (<6m)",
+        "status": "weryfikacja",
+        "details": "Pacjent był hospitalizowany psychiatrycznie '1x - UCK'. Data hospitalizacji nie jest podana. Jeśli hospitalizacja miała miejsce w ciągu ostatnich 6 miesięcy przed screeningiem, kryterium byłoby niespełnione. Zakładając, że była dawniej, status jest 'spełnione', ale wymaga to potwierdzenia.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC7",
+        "name": "Historia leczenia inwazyjnego (ECT, DBS, VNS) w obecnym epizodzie",
+        "status": "spełnione",
+        "details": "Brak informacji o stosowaniu ECT, DBS lub VNS w obecnym epizodzie depresyjnym.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC8",
+        "name": "Historia leczenia nieinwazyjnego (TMS) <6m",
+        "status": "spełnione",
+        "details": "Brak informacji o stosowaniu TMS w ciągu ostatnich 6 miesięcy.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC9",
+        "name": "Aktywna psychoterapia (niestabilna)",
+        "status": "weryfikacja",
+        "details": "Pacjent 'Korzystał z psychoterapii ok 10 lat'. Nie jest jasne, czy psychoterapia jest aktualnie prowadzona i czy jej program jest stabilny. Jeśli jest aktywna i niestabilna, kryterium byłoby niespełnione.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC10",
+        "name": "Uzależnienia (<12m)",
+        "status": "spełnione",
+        "details": "Pacjent neguje uzależnienia od substancji psychoaktywnych. Alkohol spożywa okazjonalnie. Brak diagnozy uzależnienia w ciągu ostatnich 12 miesięcy.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC11",
+        "name": "Ryzyko samobójcze",
+        "status": "spełnione",
+        "details": "Pacjent neguje myśli i zamiary samobójcze oraz próby samobójcze. Odnotowano 'myśli rezygnacyjne' (2025-04-29), ale bez myśli samobójczych. Wymaga starannej oceny na wizycie przesiewowej, ale na podstawie dokumentacji nie wskazuje na 'znaczące ryzyko' wg typowych kryteriów protokołów.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC12",
+        "name": "Depresja wtórna",
+        "status": "spełnione",
+        "details": "Diagnoza główna to F33 (zaburzenia depresyjne nawracające). Brak dowodów na to, że depresja jest wtórna do przyczyn medycznych lub polekowych.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC13",
+        "name": "Przeciwwskazania osobiste",
+        "status": "spełnione",
+        "details": "Brak informacji o okolicznościach osobistych lub zachowaniu uniemożliwiającym bezpieczny udział w badaniu.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC14",
+        "name": "Historia rodzinna (schizofrenia, ChAD I)",
+        "status": "spełnione",
+        "details": "Pacjent neguje choroby psychiczne w rodzinie (rodzice/rodzeństwo). Córki mają Zespół Aspergera i dziecięce porażenie mózgowe, które nie są wymienione w tym kryterium.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC15",
+        "name": "Ekspozycja na psychodeliki (<1y)",
+        "status": "spełnione",
+        "details": "Brak informacji o stosowaniu klasycznych psychodelików.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      }
+    ],
+    "medicalExclusionCriteria": [
+      {
+        "id": "GMEC1",
+        "name": "Ciąża lub karmienie",
+        "status": "spełnione",
+        "details": "Nie dotyczy, pacjent jest mężczyzną.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC2",
+        "name": "Antykoncepcja",
+        "status": "weryfikacja",
+        "details": "Jeśli pacjent jest aktywny seksualnie z partnerką zdolną do zajścia w ciążę, wymagana jest zgoda na stosowanie skutecznej antykoncepcji. Brak informacji w dokumentacji.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC3",
+        "name": "Testy ciążowe",
+        "status": "spełnione",
+        "details": "Nie dotyczy, pacjent jest mężczyzną.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC4",
+        "name": "Dawstwo nasienia",
+        "status": "weryfikacja",
+        "details": "Należy zapytać pacjenta, czy planuje oddawanie nasienia w określonym czasie. Brak informacji w dokumentacji.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC5",
+        "name": "Choroby układu krążenia",
+        "status": "spełnione",
+        "details": "Brak historii udaru, zawału serca. Brak informacji o niekontrolowanym nadciśnieniu, tachykardii, wydłużonym QT czy arytmii. Wymagane EKG na wizycie przesiewowej.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC6",
+        "name": "Cukrzyca",
+        "status": "spełnione",
+        "details": "Brak diagnozy cukrzycy w dokumentacji. Wymagane badanie HbA1c na wizycie przesiewowej.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC7",
+        "name": "Choroby tarczycy",
+        "status": "spełnione",
+        "details": "Brak informacji o chorobach tarczycy. Wymagane badania TSH, fT3, fT4 na wizycie przesiewowej.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC8",
+        "name": "Padaczka",
+        "status": "spełnione",
+        "details": "Pacjent neguje występowanie zaburzeń drgawkowych.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC9",
+        "name": "Wyniki badań",
+        "status": "weryfikacja",
+        "details": "Wymagane wykonanie badań laboratoryjnych na wizycie przesiewowej w celu oceny ewentualnych istotnych klinicznie nieprawidłowości.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC10",
+        "name": "Inne choroby",
+        "status": "spełnione",
+        "details": "Pacjent ma łagodne zaburzenia poznawcze oraz prawdopodobnie łagodny przerost prostaty (przyjmuje Tamsulosynę). Należy ocenić, czy te stany są stabilne i nie wpływają na bezpieczeństwo udziału ani interpretację wyników. Na podstawie dostępnych informacji wydają się nie być wykluczające.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC11",
+        "name": "Udział w innych badaniach",
+        "status": "spełnione",
+        "details": "Brak informacji o aktualnym udziale w innym badaniu interwencyjnym.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC12",
+        "name": "Nadwrażliwość",
+        "status": "weryfikacja",
+        "details": "Nadwrażliwość na badany lek lub substancje pomocnicze jest nieznana. Do oceny po ujawnieniu badanego produktu.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      }
+    ],
+    "reportConclusion": {
+      "overallQualification": "Prawdopodobnie nie kwalifikuje się",
+      "mainIssues": [
+        "Niespełnione kryterium IC6 (Lekooporność TRD): Zidentyfikowano tylko jedno niepowodzenie adekwatnej próby leczenia (Wortioksetyna 10mg), podczas gdy protokół wymaga co najmniej dwóch. Trwająca próba augmentacji Kwetiapiną jest zbyt wczesna do oceny."
+      ],
+      "criticalInfoNeeded": [
+        "Wynik skali MADRS (IC5).",
+        "Data ostatniej hospitalizacji psychiatrycznej (EC6).",
+        "Status obecnej psychoterapii i jej stabilność (EC9).",
+        "Zgoda na odstawienie obecnych leków psychotropowych i ewentualny okres wypłukiwania (IC7).",
+        "Informacje dotyczące antykoncepcji i planów dawstwa nasienia (GMEC2, GMEC4).",
+        "Wyniki badań laboratoryjnych i EKG (GMEC5, GMEC6, GMEC7, GMEC9).",
+        "Ocena nadwrażliwości na badany lek (GMEC12).",
+        "Podpisanie świadomej zgody na udział w badaniu (IC1)."
+      ],
+      "estimatedProbability": 20
+    },
+    "analyzedAt": "2025-05-28T15:14:47.363Z",
+    "isMockData": false,
+    "modelUsed": "gemini",
+    "drugMappingInfo": {
+      "mappingsApplied": 12,
+      "mappings": [
+        {
+          "original": "brintellix do",
+          "mapped": "Vortioxetini hydrobromidum 5 mg",
+          "confidence": 0.8
+        },
+        {
+          "original": "tab dz",
+          "mapped": "Acidum acetylsalicylicum 450 mg + Coffeinum 50 mg",
+          "confidence": 0.8
+        },
+        {
+          "original": "Przyjmuje bupropion",
+          "mapped": "Bupropioni hydrochloridum 150 mg",
+          "confidence": 0.8
+        },
+        {
+          "original": "zwiekszenia BUP do",
+          "mapped": "Buprenorphini hydrochloridum 324 mcg (buprenorfina 300 mcg)",
+          "confidence": 0.8
+        },
+        {
+          "original": "umowa bupropion do",
+          "mapped": "Bupropioni hydrochloridum 150 mg",
+          "confidence": 0.8
+        },
+        {
+          "original": "wne\nBupropion",
+          "mapped": "Bupropioni hydrochloridum 150 mg",
+          "confidence": 0.8
+        },
+        {
+          "original": "Welbox",
+          "mapped": "Bupropioni hydrochloridum 150 mg",
+          "confidence": 0.95
+        },
+        {
+          "original": "Brintellix",
+          "mapped": "Vortioxetini hydrobromidum 5 mg",
+          "confidence": 0.95
+        },
+        {
+          "original": "brintellix",
+          "mapped": "Vortioxetini hydrobromidum 5 mg",
+          "confidence": 0.95
+        },
+        {
+          "original": "bupropion",
+          "mapped": "Bupropioni hydrochloridum 150 mg",
+          "confidence": 0.8
+        },
+        {
+          "original": "Bupropion",
+          "mapped": "Bupropioni hydrochloridum 150 mg",
+          "confidence": 0.8
+        },
+        {
+          "original": "przed budzikiem",
+          "mapped": "Tamsulosini hydrochloridum 0.4 mg",
+          "confidence": 0.8
+        }
+      ],
+      "preprocessedAt": "2025-05-28T15:14:47.363Z"
+    }
+  },
+  "medicalHistory": "CALMA Klinika Terapli - CALMA Centrum Medyezne SZAFARNIA\nSzafaria 5/U9, 80-755 Gdans\nNIP: 5871486942, REGON: 52310835600011, tel. 587423323\nNumer ksiegi rejestrowej: 000000255100\nod res. cz. VIII/VII/V: 1700/ 002/02\nKarta pacjenta: Krzysztof Gos\nData urodzenia 1962 rok \nStrona 1 z 6\nPrzepisane leki\nN a z w a Postaé Opakowanie Wypisano Odplatnose\nKwetaplex XR, 60 szt. tabl. o przedt. uwalnianiu 1 op. 12025-04-29 100%\nWelbox, 30 szt. tabl. o zmodyf. uwalnianiu 2 op. 2025-04-29 100%\nKwetaplex XR, 30 szt. tabl. o przedt. uwalnianiu 1 op. 2025-04-29 100%\nWelbox, 30 szt. tabl. o zmodyf. uwalnianiu 2 op. 2025-02-04 100%\nWelbox, 30 szt. tabl. o zmodyf. uwalnianiu 2 op. 2024-11-26 100%\nWelbox, 30 szt. tabl. o zmodyf. uwalnianiu 2 op. 2024-11-26 100%\nBrintellix, 56 szt. tabl. powl. 1 op. 2024-06-11 30%\nBrintellix, 56 szt. tabl. powl. 1 op. 2024-06-11 30%\nPramolan®, 56 szt. tabl. powl. 1 op. 2024-06-11 100%\nAfobam®, 30 szt. tabl. 1 op. 2024-06-11 100%\nWelbox, 30 szt. tabl. o zmodyf. uwalnianiu 12 op. 2024-06-11 100%\nPramolan®, 56 szt. tabl. powl. | 2 op. 2024-03-05 • 100%\nBrintellix, 56 szt. tabl. powl. 1 2 op.\n| 2024-03-05 30%\nBrintellix, 56 szt. tabl. powl. 12 op. 2024-03-05 30%\nPramolan®, 56 szt. tabl. powl. 2 op.\n2023-10-31 ¡ 100%\nBrintellix, 56 szt. tabl. powl. 2 op. 2023-10-31\n, 30%\nBrintellix, 28 szt. tabl. powl. 1 op. 2023-08-08 30%\nBrintellix, 28 szt. tabl. powl. 1 op. 2023-08-08 30%\nVelaxin® ER 37,5, 28 szt. kaps. o przedt. uwalnianiu 1 op. 2023-08-08 30%\nHistoria wizyt\nLekarz:\nData:\nGregorz Kuczynski (3604871)\n8 sierpnia 2 0 2 3\nGabinet:\nGodzina:\nGabinet no.1 SZAFARNIA - CALMA Centrum\nMedyczne SZAFARNIA\n19:20 - 20:00\nCALMA Klinika Terapli - CALMA Centrum Medyczne SZAFARNIA\nSzafarnia 5/U9, 80-755 Gdansk\nNIP: 5871486942, REGON: 52310835600011, tel. 587423322\nNumer ksiegi rejestrowej: 000000255100\nKod res. cz. VIIIVII/V: 1700/ 002/02\nStrona 2 z 6\nStan:\nS k i e r o w a n i e\ni Archiwalna\nNie\nWizyta pierwszorazowa\nTyp wizyty: BRAK\nAlergie - neguje\nZabiegi, urazy - neguje\nEpi, urazy glowy, utraty przytomnosci, neuroinfekcje - neguje\nWywiad rodzinny Choroby psychiczne - neguje, 2 córki - jedna ma Z Aspergera, druga dzieciece porazenie mózgowe\nUzaleznienia - neguje\nSamobójstwa, próby samobójcze -neguje\nWywiad:\nHistoria psychiatryczna\nzaburzenia rozwojowe - neguje\nzaburzenia psychotyczne - neguje\nzaburzenia nastroju i lekowe - pierwszy epizod podczas przygotowywania rozprawy doktorskiej i choroby dziecka\n- anergia, anhedonia; pózniej systematyczne (2-3 razy w roku) kilkutygodniowe epizody depresji;\npodejmowane próby samobójcze, samookaleczenia - neguje\nzaburzenia odzywiania - neguje\nleczenie szpitalne psychiatryczne 1x- UCK\nKorzystat z psychoterapii ok 10 lat\nleczenie odwykowe - neguje\nUwazat sie za introwertyka. Czuje sie dobrze albo éle, uwaza, ze nie ma stanów posrednich.\nUwaza, ze nie dba o siebie w sensie zdrowotnym. pochtaniaja go rzeczy na zewnatrz. Gdy koncza sie leki\nprzestaje je brac, nie umawia sie na kolejne wizyty, chyba, ze zadba o to zona.\nZ wyksztatcenia jest biologiem, botanikiem. Ma duzo zainteresowan. Pracowat naukowo, prowadzit zajecia na\nuczelni. Z powodu choroby zajat sie etatem technicznym, porzucit kariere naukowa.\nOpisuje narastajace problemy z podejmowaniem decyzji - co przektada sie na porzucanie, przektadanie\nobowiazków, mimo konsekwencji (np niepodlewanie roslin w ogrodzie). W wiekszosci wypadków nie przynosi to\njednak znaczacych konsekwencji (np zawodowych), ale powoduje to w nim dyskomfort. Zauwaza, ze problem\npostepuje i dodatkowo przestaje mu na wielu rzeczach zalezec.\nDo dzisiaj nie pogodzit sie z faktem choroby i niepetnosprawnosci córek. Martwi sie o zabezpieczenie ich\nprzysztosci.\nAktualnie - czuje stopniowe systematyczne pogarszanie sie stanu psychicznego na przestrzeni lat. Bez znacznych\nzaostrzen objawów depresyjnych, stopniowe pogarszanie funkcjonowania - mniejsze zaangazowanie, skupienie\nuwagi. Nie wie czy leki pomagaja, czy nie. Czasem sie koncza i przestaje je brac - zona wtedy zauwaza\npogorszenia. Opisuje pogorszenie pamieci swiezej.\nSen - dobry. Apetyt - dobry.\nNeguje wystepowanie objawów somatycznych leku.\nUzywki\nPapierosy - nie pali\nAlkohol - o k a z j o n a l n i e\nSPA - nie zazywa\nOmówiono plan leczenia - 1) zmiana na wortioksetyne (potencjalne dziatanie prokognitywne), 2) wskazane\nwykonanie badania funkcji poznawczych.\nSwiadomosé jasna, orientacja pelna, kontakt logiczny, wypowiedzi wyczerpujace, nieco zbyt obszerne, nastrój\nnieznacznie obnizony, naped w normie, afekt moduluje, dostosowany. Skargi na stopniowe ograniczanie\nBadanie: zainteresowan, pogarszanie funkcjonowania, zniechecenie. Zaburzen formalnych myslenia, ani objawów\npsychotycznych nie ujawnia. Osobowost zwarta. Intelekt badaniem orientacyjnym w normie. Funkcje poznawcze\ndeklaratywnie obnizone - wskazane badanie. Uzaleznieniom przeczy. Sen, apetyt w normie. Obecnosci mysli i\nzamiarów samobójczych przeczy, tendencji nie ujawnia.\nRozpoznanie: F33 - Zaburzenia depresyine nawracajace - nieprzewlekte glówne\nCALMA Klinika Terapli - CALMA Centrum Medyczne SZAFARNIA\nSzafarnia 5/U9, B0-755 Gdahst\nNIP: 5871486942, REGON: 52310835600011, tel. 587423321\nlumer ksiegi rejestrowej: 000000255100\niod res. cz. VIIIVII/V: 1700/ 002/02\nStrona 3 z 6\nKod e-Recepty: 5917 - realizacja od teraz\nVelaxin® ER 37,5: kaps. o przedt. uwalnianiu, 37,5 mg / 1 op. po 28 szt.\nDS: 1 tab rano\nOdptatnosc: 30%\nZalecenia:\nBrintellix: tabl. powl., 5 mg / 1 op. po 28 szt.\nDS: 1 tab rano.\nOdptatnosé: 30%\nBrintellix: tabl. powl., 10 mg / 1 op. po 28 szt.\nDS: 1 tab rano.\nOdptatnost: 30%\n, Ustugi\n¡ prywatne:\n• konsultacja psychiatryczna (pierwsza wizyta) - 1 szt.\nLekarz: , Grzegorz Kuczynski (3604871)\nData:\n31 pazdziernika 2023\nGabinet: Gabinet no.1 SZAFARNIA - CALMA Centrum\nMedyczne SZAFARNIA\nGodzina: 16:00 - 16:20\nStan:\nArchiwalna\nTyp wizyty: Wizyta lekarska kolejna\nSkierowanie\nNie\nPrzyjmuje Brintellix i Pramolan wieczorem\nMiat zapas leku od córki. Wydaje mu sie, ze jest lepiej, ogólne samopoczucie sie poprawito. Nadal nie zalezy mu\nna wielu sprawach, opisuje problemy motywacyjne, obojetnosé konsekwencji zaniechania róznych powinnosci.\n(podtoze psychologiczne?)\nTolerancja leczenia dobra.\nSen dobry. Apetyt dobry, m.c. stabilna\nWywiad:\nWywiad w kierunku manii/hipomanii - opisuje sezonowo pojawiajace sie nagle zainteresowanie konkretnymi\ntematami, neguje aby miato to wptyw negatywny na inne jego obszary aktywnosci, nie zauwazyt zmniejszenia\npotrzeby snu, podejmowania dziatan impulsywnych, niezgodnych z jego charakterem, czy nastepujacych\nokresów pogorszenia samopoczucia\nNastrój dobry, naped w normie, afekt syntymiczny. Skargi jak uprzednio (motywacja, szybkie znuzenie\nniepodejmowanie dzialan mimo znanych konsekwencji). Sen i apetyt w normie\nRozpoznanie: | F3 - Zaburzenia depresyjne nawracajace - nieprzewlekte gtówne\nBrintellix jak dotad\nSkierowano na ocene funkcji poznawczych do neuropsychologa\nWizyta za ok 3 mce, lub wczesniej w razie potrzeby omówienia wyniku/ pogorszenia samopoczucia\nKod e-Recepty: 4348 - realizacja od teraz\nZalecenia: Pramolan®: tabl. powl., 50 mg / 2 op. po 56 szt.\nDS: 0-0-1 tabl.\nOdptatnost: 100%\nKod e-Recepty: 6290 - realizacja od teraz\nBrintellix: tabl. powl., 10 mg / 2 op. po 56 szt.\nDS: 1-0-0 tabl.\nOdplatnosé: 30%\n• wizyta lekarska kolejna - 1 szt.\nUstugi\nprywatne:\nLekarz: Aleksandra Arciszewska-Leszczuk\nData:\n14 listopada 2023\nArchiwalna\nGabinet: Gabinet no.5 SZAFARNIA - CALMA Centrum\nMedyczne SZAFARNIA\n, Godzina: |10:30 - 11:30\nTyp wizyty: Konsultacja neuropsychologiczna\nStan:\nSkierowanie Nie\nWywiad:\ni konsultacja neuropsychologiczna\nRozpoznanie: F33 - Zaburzenia depresyine nawracajace - nieprzewlekte glówne\nCALMA Klinika Terapil • CALMA Centrum Medyczne SZAFARNIA\nSzafarnia 5/U9, 80-755 Gdansk\nNIP: 5871486942, REGON: 52310835600011, tel. 587423322\nNumer ksiegi rejestrowej: 000000255100\nKod res. cz. VIII/VIIN: 1700/ 002/02\n• konsultacja neuropsychologiczna - 1 szt.\nStrona 4 z 6\nUstugi\nprywatne:\nLekarz: A l e k s a n d r a Arciszewska-Leszczuk\nData:\nStan:\n28 listopada 2023\n, Archiwalna\nGabinet: Gabinet no.5 SZAFARNIA - CALMA Centrum\nMedyczne SZAFARNIA\nGodzina: 10:00 - 11:30\nTyp wizyty: Konsultacja neuropsychologiczna\nSkierowanie\nN i e\nWywiad:\nkonsultacja neuropsychologiczna\nRozpoznanie: • F33 - Zaburzenia depresyjne nawracajace - nieprzewlekte glówne\nUstugi\np r y w a t n e :\n• konsultacja neuropsychologiczna - 1 szt.\nLekarz: Grzegorz Kuczynski (3604871)\nGabinet:\nGabinet no.1 SZAFARNIA - CALMA Centrun\nledyczne SZAFARNIA\nData:\n5 m a r c a 2 0 2 4\nGodzina:\n1 9 : 2 0 - 1 9 : 4 0\nStan:\nArchiwalna\nTyp wizyty: | BRAK\nSkierowanie\nNie\nWywiad:\nNykonat badanie neuropsychologiczne - roxzpoznano tagodne zaburzenia poznawcze\nSkarzy sie na brak decyzyjnosci, co skutkuje paralizem. Odktada wykonywanie dziatan, rezygnuje z nich celowo\nMa wrazenie narastania problemu od lat.\nrawie nic nie chcialby juz robié. Uwaza, ze niewiele mu czasu juz zostato. Nie ma przyjemnosci, ze posadzi sobi\nakies drzewo, bo nie dozyje juz, zeby zobaczyé je w rozkwicie. Przyttacza go presja, ze zmierza do konca swoia\ndni.\nJak sie uda zaczac, to pracuje.\nW obrazie dominuje zniechecenie, problemy wolicyjne. Nastrój obnizony wtórnie?\nLek neguje. MTS neguje.\nRozpoznanie: F33 - Zaburzenia depresyjne nawracajace - nieprzewlekte gtówne\nZwiekszyé brintellix do 15 mg/d\nKod e-Recepty: 8947 - realizacja od teraz\nZalecenia:\nPramolan®: tabl. powl., 50 mg / 2 op. po 56 szt.\nDS: 0-0-1 tabl.\nOdptatnosé: 100%\nKod e-Recepty: 8113 - realizacja od teraz\nBrintellix: tabl. powl., 10 mg / 2 op. po 56 szt.\nDS: 1-0-0 tabl.\nOdplatnost: 30%\nBrintellix: tabl. powl., 5 mg / 2 op. po 56 szt.\nDS: 1-0-0 tabl.\nOdplatnosc: 30%\nUstugi\nprywatne:\n• konsultacja psychiatryczna (kolejna wizyta) - 1 szt.\nLekarz: Grzegorz Kuczynski (3604871) Gabinet: Gabinet no.1 SZAFARNIA - CALMA Centrum\nMedyczne SZAFARNIA\nData: 11 czerwca 2024\nGodzina:\n1 6 : 4 0 - 1 7 : 0 0\nStan: Archiwalna\nSkierowanie Nie\nTyp wizyty: | BRAK\nWywiad: Kilka dni temu padt ofiara oszustwa - zostat okradziony przez bankowosé elektroniczna. Poddenerwowany.\nNie poczut znaczacej róznicy po zwiekszeniu dawki brintellixu.\nNadal skargi obejmuja gtownie sfere motywacji i aktywnosci.\nAktywny zawodowo.\nNastrój obnizony, naped w normie. Bez MTS.\nCALMA Klinika Terapil - CALMA Centrum Medyczne SZAFARNIA\nSzafarnia 5/U9, 80-755 Gdansk\nNIP: 5871486942, REGON: 52310835600011, tel. 587423322\nNumer ksiegi rejestrowej: 000000255100\nKod res. cz. VIil/VII/V: 1700/ 002/02\nStrona 5 z 6\nRozpoznanie: F33 - Zaburzenia depresyjne nawracajace - nieprzewlekte gtówne\nDotaczenie do leczenia bupropionu, po opanowaniu niepokoju\n1 tab dz 150 mg\npoza tym b/z\nDodatkowo doraznie afobam 0,5 mg max 2 tab na dz, max 2 tyg, stosowac przerwy\nPouczono o obnizaniu sprawnosci psychomotorycznej.\nKontrola za 8 tyg.\nKod e-Recepty: 7865 - realizacja od teraz\nPramolan®: tabl. powl., 50 mg / 1 op. po 56 szt.\nDS: 0-0-1 tabl.\nOdptatnosc: 100%\nKod e-Recepty: 4936 - realizacja od teraz\nZalecenia:\nAfobam®: tabl., 0,5 mg / 1 op. po 30 szt.\nDS: doraznie do 2 tab/d\nOdptatnosé: 100%\nKod e-Recepty: 7998 - realizacja od teraz\nBrintellix: tabl. powl., 5 mg / 1 op. po 56 szt.\nDS: 1-0-0 tabl.\nOdplatnosc: 30%\nBrintellix: tabl. powl., 10 mg / 1 op. po 56 szt.\nDS: 1-0-0 tabl.\nO d p l a t n o s C : 3 0 %\nWelbox: tabl. o zmodyf. uwalnianiu, 150 mg / 2 op. po 30 szt.\nDS: 1-0-0 tabl.\nO d p l a t n o s t : 1 0 0 %\n• konsultacja psychiatryczna (kolejna wizyta) - 1 szt.\nUstugi\nprywatne:\nLekarz: Grzegorz Kuczynski (3604871) Gabinet:\nData:\n26 listopada 2024\nStan:\nA r c h i w a l n a\nGabinet no.1 SZAFARNIA - CALMA Centrum\nMedyczne SZAFARNIA\nGodzina: 19:40 - 20:00\nTyp wizyty: BRAK\nSkierowanie ;Nie\nWywiad: Przyjmuje bupropion 150 mg. Zauwaza, ze jest troche lepiej - \"ogólny poziom nastroju, wiecej energii\". To nie jest\nradykalna poprawa, ale zauwaza róznice. Pod koniec roku zawsze czuje sie gorzej w zwiazku z pora roku.\nSamopoczucie ocenia 5/10. Bez pogorszenia zwiazanego z jesienia byto 6/10.\nNadal ma problemy z mobilizacja, stara sie odsuwaé obowiazki do granic mozliwosci wydtuzania czasu.\nSen przewaznie dobry, czasem dtugo nie idzie spac, bo czymé sie zajmuje.\nOmówiono opcje terapeutyczne. Pacjent chce spróbowaé zwiekszenia BUP do 300 mg, ale nie w okresie\npogorszenia nastroju jesienia, aby mieé \"czysta sytuacje w celu przeanalizowania zwiazku ewentualnej poprawy\nze zwiekszeniem dawki leku\".\nRozpoznanie: F33 - Zaburzenia depresyjne nawracajace - nieprzewlekte gtówne\nKod e-Recepty: 9677 - realizacja od 26.11\nWelbox: tabl. o zmodyf. uwalnianiu, 150 m g / 2 op. po 30 szt.\nDS: 1x1 szt.\nOdptatnosc: 100%\nZalecenia:\nK o d e - R e c e p t y : 8 9 2 1 - realizacja o d 0 1 . 0 1\nWelbox: tabl. o zmodyf. uwalnianiu, 150 mg / 2 op. po 30 szt.\nDS: 1x1 szt.\nOdptatnost: 100%\n• konsultacja psychiatryczna (kolejna wizyta) - 1 szt.\nUstugi\nprywatne:\nCyl\"s\nCALMA Klinika Terapli • CALMA Centrum Medyczne SZAFARNIA\nSzafaria 5/U9, 80-755 Gdansk\nNIP: 5871486942, REGON: 52310835600011, tel. 587423322\nNumer ksiegi rejestrowej: 000000255100\nK o o res. cz. V I l / V I I V: 4 / 0 0 / 0 0 2 / 0 2\nStrona 6 z 6\nLekarz: Grzegorz Kuczynski (3604871)\nData:\nStan:\nSkierowanie\n4 lutego 2025\n| Zakonczona\nNie\nGabinet: Gabinet no.1 SZAFARNIA - CALMA Centrum\n, Medyczne SZAFARNIA\nGodzina: 19:40 - 19:45\nTyp wizyty: BRAK\nWywiad: : Pacjent skontaktowat sie z rejestracja z prosba o powtórna recepte.\nWydano.\nRozpoznanie: Z76.0 - Wydanie powtórnej recepty - nieprzewlekte glówne\nKod e-Recepty: 5460 - realizacja od 04.02\nZalecenia: Welbox: tabl. o zmodyf. uwalnianiu, 150 mg / 2 op. po 30 szt.\nDS: 1x1 szt.\nOdptatnosé: 100%\nLekarz:\nData:\n1 Stan:\nGrzegorz Kuczynski (3604871)\n1 29 kwietnia 2025\nZakonczona\nGabinet: Gabinet no.1 SZAFARNIA - CALMA Centrun\nMedyczne SZAFARNI/\nGodzina: 19:40 - 20:00\nTyp wizyty: BRAK\nSkierowanie\nWywiad:\nNie\nZwiekszyt zgodnie z umowa bupropion do 300 mg/d i nie odczut zadnej róznicy. Po 1,5 mca wrócit do nizszej\ndawki.\nFunkcjonuje, ale ma ciagle trudnosé z motywacja. Zdarzaja sie wahania nastroju (w dót) na przestrzeni dni. Mysli,\n,ze moze to miec zwiazek z czynnikami reaktywnymi.\nWywiad w kierunku hipomanii ujemny.\nOdczuwa raz na jakis czas lek egzystencjalny - podsumowuje zycie, nie widzi perspektyw.\nZdarzaja sie mysli rezygnacyjne, neguje mysli samobójcze.\nKiedy wydarzy sie cos dobrego nastrój poprawia sie, ale pacjent zaznacza, ze na godziny, a nie na dni.\nOd kilku miesiecy skrócenie snu do 5h, budzi sie o 5 (przed budzikiem).\nApetyt ma.\nNes skrocony, wy nadzanie pranae Aetyy ma. OoP nie luja, Aiatia negia, niedostatek motywaci do dzialania.\nRozpoznanie: | F33 - Zaburzenia depresyjne nawracajace - nieprzewlekte glówne\nBupropion 150 mg rano\nKwetaplex XR 1-2 dni 50 mg wieczorem, 3-4 dzien 100 mg, od 5 dnia 150 mg\nKontrola za 6-8 tyg. lub wezesniej w razie potrzeby\nKod e-Recepty: 2006 - realizacja od 29.04\nWelbox: tabl. o zmodyf, uwalnianiu, 150 mg / 2 op. po 30 szt.\nDS: 1x1 szt.\nOdplatnost: 100%\nZalecenia:\nKwetaplex XR: tabl. o przedt. uwalnianiu, 50 mg / 1 op. po 30 szt.\nDS: 1 tab/dz wieczorem\nOdplatnosé: 100%\nKwetaplex XR: tabl. o przedt. uwalnianiu, 150 mg / 1 op. po 60 szt.\nDS: 1x1 szt.\nOdptatnosé: 100%\nUstugi\nprywatne:\n• konsultacja psychiatryczna (kolejna wizyta) - 1 szt.\n",
+  "studyProtocol": "{\n  \"inclusion\": [\n    {\n      \"id\": \"IC1\",\n      \"name\": \"Zgoda na udział w badaniu (ICF)\",\n      \"details\": \"Pacjent musi podpisać świadomą zgodę na udział w badaniu.\"\n    },\n    {\n      \"id\": \"IC2\",\n      \"name\": \"Wiek ≥18 lat\",\n      \"details\": \"Pacjent musi mieć ukończone 18 lat w momencie screeningu.\"\n    },\n    {\n      \"id\": \"IC3\",\n      \"name\": \"Diagnoza dużej depresji\",\n      \"details\": \"Duża depresja bez objawów psychotycznych (pojedynczy lub nawracający epizod wg DSM-5) potwierdzona przez MINI 7.0.2.\"\n    },\n    {\n      \"id\": \"IC4\",\n      \"name\": \"Czas trwania pierwszego epizodu\",\n      \"details\": \"Jeśli obecny epizod jest pierwszym w życiu, musi trwać ≥6 miesięcy i ≤2 lata w momencie screeningu.\"\n    },\n    {\n      \"id\": \"IC5\",\n      \"name\": \"Wynik MADRS ≥20\",\n      \"details\": \"Całkowity wynik w skali MADRS ≥20 podczas screeningu i wizyty początkowej.\"\n    },\n    {\n      \"id\": \"IC6\",\n      \"name\": \"Lekooporność (TRD) wg MGH-ATRQ (specyficzne dla badania)\",\n      \"details\": \"Niepowodzenie co najmniej dwóch (2) do czterech (4) różnych, adekwatnych prób leczenia przeciwdepresyjnego (monoterapia lub leczenie adjuwantowe) w obecnym epizodzie depresyjnym. Adekwatność próby leczenia oceniana jest wyłącznie na podstawie specyficznego dla tego badania formularza MGH-ATRQ (minimalna dawka i czas trwania). Dodatkowo, dla Polski, uwzględnia się Kwetiapinę 150mg jako leczenie adjuwantowe. Szczegóły poniżej.\",\n      \"mghAtrqPoland\": {\n        \"minTrialDurationWeeks\": \"co najmniej 8 lub 10 tygodni\",\n        \"medications\": [\n          {\n            \"drugName\": \"Doxepin\",\n            \"brandName\": \"Adapin\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Clomipramine\",\n            \"brandName\": \"Anafranil\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Amoxapine\",\n            \"brandName\": \"Asendin\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Amitriptyline\",\n            \"brandName\": \"Endep/Elavil\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Maprotiline\",\n            \"brandName\": \"Ludiomil\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Desipramine\",\n            \"brandName\": \"Norpramin\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Nortriptyline\",\n            \"brandName\": \"Pamelor\",\n            \"minDose\": \"75mg/d\"\n          },\n          {\n            \"drugName\": \"Doxepin \",\n            \"brandName\": \"Sinequan\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Trimipramine\",\n            \"brandName\": \"Surmontil\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Imipramine\",\n            \"brandName\": \"Tofranil\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Protriptyline\",\n            \"brandName\": \"Vivactil\",\n            \"minDose\": \"30mg/d\"\n          },\n          {\n            \"drugName\": \"Pipofezine\",\n            \"brandName\": \"Azafen\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Noxiptiline\",\n            \"brandName\": \"Agedal/Elronon\",\n            \"minDose\": \"100mg/d\"\n          },\n          {\n            \"drugName\": \"Isocarboxazid\",\n            \"brandName\": \"Marplan\",\n            \"minDose\": \"30mg/d\",\n            \"notes\": \"MAOI\"\n          },\n          {\n            \"drugName\": \"Phenelzine\",\n            \"brandName\": \"Nardil\",\n            \"minDose\": \"45mg/d\",\n            \"notes\": \"MAOI\"\n          },\n          {\n            \"drugName\": \"Tranylcypromine\",\n            \"brandName\": \"Parnate\",\n            \"minDose\": \"30mg/d\",\n            \"notes\": \"MAOI\"\n          },\n          {\n            \"drugName\": \"Selegiline patch\",\n            \"brandName\": \"Emsam\",\n            \"minDose\": \"6 mg/24 hrs\",\n            \"notes\": \"MAOI\"\n          },\n          {\n            \"drugName\": \"Moclobemide\",\n            \"brandName\": \"Aurorix\",\n            \"minDose\": \"300 mg/d\",\n            \"notes\": \"MAOI (RIMA)\"\n          },\n          {\n            \"drugName\": \"Pirlindole\",\n            \"brandName\": \"Pirazidol\",\n            \"minDose\": \"200 mg/d\",\n            \"notes\": \"MAOI (RIMA)\"\n          },\n          {\n            \"drugName\": \"Escitalopram\",\n            \"brandName\": \"Lexapro\",\n            \"minDose\": \"10mg/d\",\n            \"notes\": \"SSRI\"\n          },\n          {\n            \"drugName\": \"Fluvoxamine\",\n            \"brandName\": \"Luvox\",\n            \"minDose\": \"50mg/d\",\n            \"notes\": \"SSRI\"\n          },\n          {\n            \"drugName\": \"Paroxetine\",\n            \"brandName\": \"Paxil\",\n            \"minDose\": \"20/25mg/d\",\n            \"notes\": \"SSRI - dawka 20 LUB 25 mg/d\"\n          },\n          {\n            \"drugName\": \"Fluoxetine\",\n            \"brandName\": \"Prozac\",\n            \"minDose\": \"20mg/d\",\n            \"notes\": \"SSRI\"\n          },\n          {\n            \"drugName\": \"Sertraline\",\n            \"brandName\": \"Zoloft\",\n            \"minDose\": \"50mg/d\",\n            \"notes\": \"SSRI\"\n          },\n          {\n            \"drugName\": \"Citalopram\",\n            \"brandName\": \"Celexa\",\n            \"minDose\": \"20mg/d\",\n            \"notes\": \"SSRI\"\n          },\n          {\n            \"drugName\": \"Vilazodone\",\n            \"brandName\": \"Viibryd\",\n            \"minDose\": \"40mg/d\"\n          },\n          {\n            \"drugName\": \"Vortioxetine\",\n            \"brandName\": \"Brintellix\",\n            \"minDose\": \"10mg/d\"\n          },\n          {\n            \"drugName\": \"Venlafaxine\",\n            \"brandName\": \"Effexor\",\n            \"minDose\": \"150mg/d\",\n            \"notes\": \"SNRI\"\n          },\n          {\n            \"drugName\": \"Duloxetine\",\n            \"brandName\": \"Cymbalta\",\n            \"minDose\": \"60mg/d\",\n            \"notes\": \"SNRI\"\n          },\n          {\n            \"drugName\": \"Desvenlafaxine\",\n            \"brandName\": \"Pristiq\",\n            \"minDose\": \"50mg/d\",\n            \"notes\": \"SNRI\"\n          },\n          {\n            \"drugName\": \"Milnacipran\",\n            \"brandName\": \"Savella\",\n            \"minDose\": \"100mg/d\",\n            \"notes\": \"SNRI\"\n          },\n          {\n            \"drugName\": \"Levomilnacipran\",\n            \"brandName\": \"Fetzima\",\n            \"minDose\": \"40mg/d\",\n            \"notes\": \"SNRI\"\n          },\n          {\n            \"drugName\": \"Trazodone\",\n            \"brandName\": \"Desyrel\",\n            \"minDose\": \"300mg/d\"\n          },\n          {\n            \"drugName\": \"Nefazodone\",\n            \"brandName\": \"Serzone\",\n            \"minDose\": \"300mg/d\"\n          },\n          {\n            \"drugName\": \"Bupropion\",\n            \"brandName\": \"Wellbutrin\",\n            \"minDose\": \"300mg/d\"\n          },\n          {\n            \"drugName\": \"Mirtazapine\",\n            \"brandName\": \"Remeron\",\n            \"minDose\": \"15mg/d\"\n          },\n          {\n            \"drugName\": \"Agomelatine\",\n            \"brandName\": \"Valdoxan\",\n            \"minDose\": \"25mg/d\"\n          },\n          {\n            \"drugName\": \"Tianeptine\",\n            \"brandName\": \"Stablon\",\n            \"minDose\": \"37.5mg/d\"\n          },\n          {\n            \"drugName\": \"Reboxetine\",\n            \"brandName\": \"Edronax\",\n            \"minDose\": \"4 mg/d\"\n          },\n          {\n            \"drugName\": \"Mianserin\",\n            \"brandName\": \"Bolvidon/Depnon, Norval/Tolvon\",\n            \"minDose\": \"30 mg/d\"\n          },\n          {\n            \"drugName\": \"Opipramol\",\n            \"brandName\": \"Insidon\",\n            \"minDose\": \"150 mg/d\"\n          },\n          {\n            \"drugName\": \"Kwetiapina (jako leczenie adjuwantowe)\",\n            \"minDose\": \"150 mg/dzień\",\n            \"notes\": \"Specyficzne dla Polski, leczenie adjuwantowe przez co najmniej 8 lub 10 tygodni.\"\n          }\n        ],\n        \"generalNotes\": [\n          \"Powyższa lista leków i dawek opiera się wyłącznie na specyficznym formularzu MGH-ATRQ dostarczonym dla tego badania.\",\n          \"Za adekwatną próbę leczenia uznaje się stosowanie leku w określonej minimalnej dawce (lub wyższej) przez co najmniej 8 lub 10 tygodni.\",\n          \"Kwetiapina 150mg/dzień jest uznawana w Polsce jako adekwatne leczenie adjuwantowe trwające co najmniej 8 lub 10 tygodni.\",\n          \"Ocena powinna ściśle bazować na powyższych kryteriach. Należy zwrócić uwagę na instrukcję na formularzu MGH-ATRQ dotyczącą sprawdzania, czy lek był dodany w celu augmentacji/wzmocnienia efektu antydepresyjnego.\"\n        ]\n      }\n    },\n    {\n      \"id\": \"IC7\",\n      \"name\": \"Odstawienie leków\",\n      \"details\": \"Zgoda na odstawienie wszystkich zabronionych leków i potwierdzenie ich odstawienia przed wizytą początkową.\"\n    },\n    {\n      \"id\": \"IC8\",\n      \"name\": \"Zdolność do udziału\",\n      \"details\": \"Możliwość wykonania wszystkich procedur bez pomocy i zgoda na przestrzeganie harmonogramu wizyt.\"\n    }\n  ],\n  \"psychiatricExclusion\": [\n    {\n      \"id\": \"EC1\",\n      \"name\": \"Historia zaburzeń afektywnych dwubiegunowych\",\n      \"details\": \"Obecność lub historia zaburzeń afektywnych dwubiegunowych.\"\n    },\n    {\n      \"id\": \"EC2\",\n      \"name\": \"Zaburzenia psychotyczne\",\n      \"details\": \"Obecność lub historia schizofrenii, zaburzenia schizofreniformnego, schizoafektywnego lub innych zaburzeń psychotycznych.\"\n    },\n    {\n      \"id\": \"EC3\",\n      \"name\": \"Zaburzenia osobowości\",\n      \"details\": \"Zaburzenia osobowości: paranoiczne, schizoidalne, schizotypowe, histrioniczne, narcystyczne lub inne poważne współistniejące zaburzenia psychiatryczne.\"\n    },\n    {\n      \"id\": \"EC4\",\n      \"name\": \"Zaburzenie osobowości typu borderline\",\n      \"details\": \"Zaburzenie osobowości z pogranicza potwierdzone wywiadem lub modułem MINI plus.\"\n    },\n    {\n      \"id\": \"EC5\",\n      \"name\": \"Aktywne zaburzenia współistniejące\",\n      \"details\": \"Aktywne PTSD, OCD lub anoreksja potwierdzone wywiadem i MINI 7.0.2.\"\n    },\n    {\n      \"id\": \"EC6\",\n      \"name\": \"Hospitalizacja psychiatryczna\",\n      \"details\": \"Hospitalizacja psychiatryczna w ciągu 6 miesięcy przed screeningiem.\"\n    },\n    {\n      \"id\": \"EC7\",\n      \"name\": \"Historia leczenia inwazyjnego\",\n      \"details\": \"Stosowanie inwazyjnych metod leczenia (ECT, DBS, VNS) w obecnym epizodzie.\"\n    },\n    {\n      \"id\": \"EC8\",\n      \"name\": \"Historia leczenia nieinwazyjnego\",\n      \"details\": \"Stosowanie nieinwazyjnych metod leczenia (TMS) w ciągu 6 miesięcy przed screeningiem.\"\n    },\n    {\n      \"id\": \"EC9\",\n      \"name\": \"Aktywna psychoterapia\",\n      \"details\": \"Udział w programie psychoterapii, który nie pozostanie stabilny przez 9 tygodni.\"\n    },\n    {\n      \"id\": \"EC10\",\n      \"name\": \"Uzależnienia\",\n      \"details\": \"Uzależnienie od alkoholu lub substancji psychoaktywnych w ciągu 12 miesięcy przed screeningiem.\"\n    },\n    {\n      \"id\": \"EC11\",\n      \"name\": \"Ryzyko samobójcze\",\n      \"details\": \"Znaczące ryzyko samobójcze według określonych kryteriów.\"\n    },\n    {\n      \"id\": \"EC12\",\n      \"name\": \"Depresja wtórna\",\n      \"details\": \"Depresja wtórna do przyczyn medycznych lub polekowych.\"\n    },\n    {\n      \"id\": \"EC13\",\n      \"name\": \"Przeciwwskazania osobiste\",\n      \"details\": \"Okoliczności osobiste lub zachowanie uniemożliwiające bezpieczny udział.\"\n    },\n    {\n      \"id\": \"EC14\",\n      \"name\": \"Historia rodzinna\",\n      \"details\": \"Występowanie schizofrenii, zaburzenia schizoafektywnego lub ChAD I w rodzinie.\"\n    },\n    {\n      \"id\": \"EC15\",\n      \"name\": \"Ekspozycja na psychodeliki\",\n      \"details\": \"Stosowanie klasycznych psychodelików w ciągu ostatniego roku lub obecnego epizodu.\"\n    }\n  ],\n  \"medicalExclusion\": [\n    {\n      \"id\": \"GMEC1\",\n      \"name\": \"Ciąża lub karmienie\",\n      \"details\": \"Pacjentki w ciąży, karmiące lub planujące ciążę.\"\n    },\n    {\n      \"id\": \"GMEC2\",\n      \"name\": \"Antykoncepcja\",\n      \"details\": \"Brak zgody na stosowanie skutecznej antykoncepcji podczas badania.\"\n    },\n    {\n      \"id\": \"GMEC3\",\n      \"name\": \"Testy ciążowe\",\n      \"details\": \"Brak negatywnego wyniku testu ciążowego przed rozpoczęciem badania.\"\n    },\n    {\n      \"id\": \"GMEC4\",\n      \"name\": \"Dawstwo nasienia\",\n      \"details\": \"Planowane oddawanie nasienia w ciągu 3 miesięcy po zakończeniu badania.\"\n    },\n    {\n      \"id\": \"GMEC5\",\n      \"name\": \"Choroby układu krążenia\",\n      \"details\": \"Historia udaru, zawału, niekontrolowane nadciśnienie, tachykardia, wydłużony QT lub arytmia.\"\n    },\n    {\n      \"id\": \"GMEC6\",\n      \"name\": \"Cukrzyca\",\n      \"details\": \"Cukrzyca typu 1 lub niekontrolowana typu 2 (HbA1c >8%).\"\n    },\n    {\n      \"id\": \"GMEC7\",\n      \"name\": \"Choroby tarczycy\",\n      \"details\": \"Niestabilna choroba tarczycy lub nieprawidłowe wyniki badań.\"\n    },\n    {\n      \"id\": \"GMEC8\",\n      \"name\": \"Padaczka\",\n      \"details\": \"Występowanie zaburzeń drgawkowych.\"\n    },\n    {\n      \"id\": \"GMEC9\",\n      \"name\": \"Wyniki badań\",\n      \"details\": \"Istotne klinicznie nieprawidłowości w badaniach laboratoryjnych.\"\n    },\n    {\n      \"id\": \"GMEC10\",\n      \"name\": \"Inne choroby\",\n      \"details\": \"Inne istotne schorzenia mogące wpływać na interpretację wyników.\"\n    },\n    {\n      \"id\": \"GMEC11\",\n      \"name\": \"Udział w innych badaniach\",\n      \"details\": \"Aktualny udział w innym badaniu interwencyjnym.\"\n    },\n    {\n      \"id\": \"GMEC12\",\n      \"name\": \"Nadwrażliwość\",\n      \"details\": \"Nadwrażliwość na badany lek lub substancje pomocnicze.\"\n    }\n  ]\n}"
+}

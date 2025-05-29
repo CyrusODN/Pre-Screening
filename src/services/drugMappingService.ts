@@ -300,6 +300,16 @@ class DrugMappingService {
   }
 
   /**
+   * Pobiera WSZYSTKIE leki z bazy danych (nie tylko przeciwdepresyjne)
+   * NOWA METODA: Skalowalne rozwiązanie dla mapowania wszystkich leków
+   */
+  public async getAllDrugs(): Promise<DrugRecord[]> {
+    await this.initialize();
+
+    return this.drugDatabase; // Zwróć wszystkie leki z polskiego rejestru
+  }
+
+  /**
    * Sprawdza czy lek jest przeciwdepresyjny
    */
   public async isAntidepressant(drugName: string): Promise<boolean> {

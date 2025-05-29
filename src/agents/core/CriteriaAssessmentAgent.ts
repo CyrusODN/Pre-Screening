@@ -213,44 +213,54 @@ W reasoning dla czasowych wykluczeń ZAWSZE dodaj:
 - riskLevel = "medium"
 
 ODPOWIEDŹ MUSI BYĆ W FORMACIE JSON:
+
+**WAŻNE INSTRUKCJE FORMATOWANIA JSON:**
+1. **NIE UŻYWAJ** znaków przerwania linii (\n) wewnątrz stringów
+2. **NIE UŻYWAJ** znaków tabulacji (\t) w stringach  
+3. **UŻYWAJ** tylko standardowych znaków ASCII i polskich liter
+4. **OGRANICZ** długość każdego stringa do maksymalnie 150 znaków
+5. **UŻYJ** trzech kropek (...) jeśli tekst jest za długi
+6. **ESCAPE'UJ** cudzysłowy wewnątrz stringów za pomocą \"
+7. **KAŻDY STRING** musi kończyć się przed końcem linii JSON
+
 {
   "inclusionCriteria": [
     {
-      "id": "IC1", 
-      "name": "...", 
-      "status": "spełnione|niespełnione|weryfikacja", 
-      "confidence": 0.95, 
-      "reasoning": "string - inteligentne rozumowanie kliniczne z uwzględnieniem logiki medycznej", 
-      "evidenceFromHistory": ["string - konkretne dowody z historii medycznej"]
+      "id": "IC1",
+      "name": "string - nazwa kryterium (max 80 znaków)",
+      "status": "spełnione",
+      "confidence": 0.95,
+      "reasoning": "string - uzasadnienie (max 150 znaków)",
+      "evidenceFromHistory": ["string - dowody (max 100 znaków)"]
     }
   ],
   "psychiatricExclusionCriteria": [
     {
-      "id": "EC1", 
-      "name": "...", 
-      "status": "spełnione|niespełnione|weryfikacja", 
-      "confidence": 0.85, 
-      "reasoning": "string - analiza aktualnego statusu i nasilenia z uwzględnieniem bezpieczeństwa", 
-      "evidenceFromHistory": ["string - dowody wspierające ocenę"], 
-      "riskLevel": "low|medium|high"
+      "id": "EC1",
+      "name": "string - nazwa kryterium (max 80 znaków)",
+      "status": "niespełnione", 
+      "confidence": 0.85,
+      "reasoning": "string - uzasadnienie (max 150 znaków)",
+      "evidenceFromHistory": ["string - dowody (max 100 znaków)"],
+      "riskLevel": "low"
     }
   ],
   "medicalExclusionCriteria": [
     {
-      "id": "MC1", 
-      "name": "...", 
-      "status": "spełnione|niespełnione|weryfikacja", 
-      "confidence": 0.90, 
-      "reasoning": "string - ocena kontroli schorzenia i wpływu na bezpieczeństwo badania", 
-      "evidenceFromHistory": ["string - informacje o leczeniu i kontroli"], 
-      "riskLevel": "low|medium|high"
+      "id": "MC1",
+      "name": "string - nazwa kryterium (max 80 znaków)",
+      "status": "niespełnione",
+      "confidence": 0.90,
+      "reasoning": "string - uzasadnienie (max 150 znaków)",
+      "evidenceFromHistory": ["string - dowody (max 100 znaków)"],
+      "riskLevel": "low"
     }
   ],
   "overallAssessment": {
-    "eligibilityScore": 75, 
-    "majorConcerns": ["string - główne problemy wymagające rozwiązania"], 
-    "minorConcerns": ["string - mniejsze problemy do monitorowania"], 
-    "strengthsForInclusion": ["string - czynniki wspierające włączenie do badania"]
+    "eligibilityScore": 75,
+    "majorConcerns": ["string - główne problemy (max 100 znaków)"],
+    "minorConcerns": ["string - mniejsze problemy (max 100 znaków)"],
+    "strengthsForInclusion": ["string - mocne strony (max 100 znaków)"]
   }
 }
 

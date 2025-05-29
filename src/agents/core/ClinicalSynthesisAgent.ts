@@ -107,19 +107,29 @@ INTELIGENTNE ROZUMOWANIE:
 - "F42 towarzyszące 2024-11-21" → Choroba towarzysząca: Zaburzenia obsesyjno-kompulsyjne (F42) ✅
 
 ODPOWIEDŹ MUSI BYĆ W FORMACIE JSON:
+
+**WAŻNE INSTRUKCJE FORMATOWANIA JSON:**
+1. **NIE UŻYWAJ** znaków przerwania linii (\n) wewnątrz stringów
+2. **NIE UŻYWAJ** znaków tabulacji (\t) w stringach  
+3. **UŻYWAJ** tylko standardowych znaków ASCII i polskich liter
+4. **OGRANICZ** długość każdego stringa do maksymalnie 250 znaków
+5. **UŻYJ** trzech kropek (...) jeśli tekst jest za długi
+6. **ESCAPE'UJ** cudzysłowy wewnątrz stringów za pomocą \"
+7. **KAŻDY STRING** musi kończyć się przed końcem linii JSON
+
 {
-  "patientOverview": "string - kompleksowy przegląd pacjenta z POPRAWNYM WIEKIEM i kluczowymi informacjami",
-  "mainDiagnosis": "string - główne rozpoznanie na podstawie inteligentnej analizy najnowszych danych",
-  "comorbidities": ["string - choroby towarzyszące z pełnymi nazwami i kodami ICD-10"],
+  "patientOverview": "string - kompleksowy przegląd pacjenta z POPRAWNYM WIEKIEM i kluczowymi informacjami (max 250 znaków)",
+  "mainDiagnosis": "string - główne rozpoznanie na podstawie inteligentnej analizy najnowszych danych (max 100 znaków)",
+  "comorbidities": ["string - choroby towarzyszące z pełnymi nazwami i kodami ICD-10 (każdy max 80 znaków)"],
   "clinicalTimeline": [
-    "string - chronologiczne wydarzenia z POPRAWNYMI DATAMI i inteligentną analizą czasową"
+    "string - chronologiczne wydarzenia z POPRAWNYMI DATAMI i inteligentną analizą czasową (każdy max 150 znaków)"
   ],
   "keyObservations": [
-    "string - kluczowe obserwacje z inteligentnym rozumowaniem klinicznym"
+    "string - kluczowe obserwacje z inteligentnym rozumowaniem klinicznym (każdy max 120 znaków)"
   ],
-  "treatmentHistory": "string - historia leczenia z uwzględnieniem logiki czasowej i medycznej",
+  "treatmentHistory": "string - historia leczenia z uwzględnieniem logiki czasowej i medycznej (max 250 znaków)",
   "riskFactors": [
-    "string - czynniki ryzyka psychosocjalne (NIE choroby medyczne)"
+    "string - czynniki ryzyka psychosocjalne - NIE choroby medyczne (każdy max 80 znaków)"
   ]
 }
 

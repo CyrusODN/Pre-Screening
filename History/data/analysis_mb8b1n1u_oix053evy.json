@@ -1,0 +1,876 @@
+{
+  "metadata": {
+    "id": "analysis_mb8b1n1u_oix053evy",
+    "patientId": "Mszanka",
+    "analysisType": "single-agent",
+    "modelUsed": "gemini",
+    "createdAt": "2025-05-28T18:54:57.513Z",
+    "updatedAt": "2025-05-28T18:54:57.541Z",
+    "status": "completed",
+    "version": "1.0.0",
+    "tags": [
+      "Osobowość unikająca (diagnoza z wywiadu)",
+      "F84 - Całościowe zaburzenia rozwojowe (ASD)",
+      "F90 - Zaburzenia hiperkinetyczne (ADHD)",
+      "Objawy lękowe",
+      "Problemy ze snem",
+      "Podwyższone wartości ciśnienia tętniczego w przeszłości (do 147/92 mmHg)",
+      "single-agent"
+    ],
+    "notes": "Mariusz K. Klasyczny - 28.05.2025 20:54"
+  },
+  "patientData": {
+    "summary": {
+      "id": "Mszanka",
+      "age": 36,
+      "mainDiagnosis": "F33.2 - Zaburzenie depresyjne nawracające, obecnie epizod depresji ciężkiej bez objawów psychotycznych",
+      "comorbidities": [
+        "Osobowość unikająca (diagnoza z wywiadu)",
+        "F84 - Całościowe zaburzenia rozwojowe (ASD)",
+        "F90 - Zaburzenia hiperkinetyczne (ADHD)",
+        "Objawy lękowe",
+        "Problemy ze snem",
+        "Podwyższone wartości ciśnienia tętniczego w przeszłości (do 147/92 mmHg)"
+      ]
+    },
+    "episodeEstimation": {
+      "scenarios": [
+        {
+          "id": 1,
+          "description": "Obecny epizod depresyjny rozpoczął się znacząco przed grudniem 2022 roku.",
+          "evidence": "Pacjent zgłasza problemy depresyjne 'od nastoletnich lat'. W wizycie z 05-12-2022 jest 'bez leków', ale już 16-12-2022 odnotowano 'niepowodzenie leczenia epizodu depresyjnego kilkoma lekami przeciwdepresyjnymi i stwierdzoną lekooporność', co wskazuje na wcześniejsze, nieudane próby leczenia w ramach tego samego, trwającego epizodu. Leki wymienione anegdotycznie (Sertralina, Fluoksetyna, TLPD, Bupropion, Escitalopram, Wenlafaksyna, Wortioksetyna) były stosowane przed grudniem 2022."
+        }
+      ],
+      "conclusion": "Na podstawie dostępnych danych, obecny, ciągły epizod depresyjny rozpoczął się przed grudniem 2022 roku. Dokładna data nie jest możliwa do ustalenia, ale liczne próby farmakoterapii miały miejsce przed pierwszym udokumentowanym wpisem z 05-12-2022."
+    },
+    "trdAnalysis": {
+      "episodeStartDate": "Nieustalona, przed 2022-12-05",
+      "pharmacotherapy": [
+        {
+          "id": "SER-hist-1",
+          "drugName": "Sertralina",
+          "shortName": "SER",
+          "startDate": null,
+          "endDate": null,
+          "dose": "50mg/d",
+          "attemptGroup": 0,
+          "notes": "Historia zgłoszona przez pacjenta (05-12-2022). Dawka 50mg jest adekwatna wg MGH-ATRQ badania, ale czas trwania nieznany. 'Najlepsza poprawa', ale ostatecznie nieskuteczna. Nie można potwierdzić adekwatności próby.; Nieprawidłowa lub brakująca data rozpoczęcia."
+        },
+        {
+          "id": "FLX-hist-1",
+          "drugName": "Fluoksetyna",
+          "shortName": "FLX",
+          "startDate": null,
+          "endDate": null,
+          "dose": "Nieznana",
+          "attemptGroup": 0,
+          "notes": "Historia zgłoszona przez pacjenta (05-12-2022). 'Nic nie dało, skutki uboczne'. Dawka i czas trwania nieznane. Nie można potwierdzić adekwatności próby.; Nieprawidłowa lub brakująca data rozpoczęcia."
+        },
+        {
+          "id": "TCA-hist-1",
+          "drugName": "Trójpierścieniowy lek przeciwdepresyjny (TLPD)",
+          "shortName": "TCA",
+          "startDate": null,
+          "endDate": null,
+          "dose": "Nieznana",
+          "attemptGroup": 0,
+          "notes": "Historia zgłoszona przez pacjenta (05-12-2022). Nazwa nieznana. 'Dużo skutków ubocznych'. Dawka i czas trwania nieznane. Nie można potwierdzić adekwatności próby.; Nieprawidłowa lub brakująca data rozpoczęcia."
+        },
+        {
+          "id": "BUP-hist-1",
+          "drugName": "Bupropion",
+          "shortName": "BUP",
+          "startDate": null,
+          "endDate": null,
+          "dose": "150mg/d",
+          "attemptGroup": 0,
+          "notes": "Historia zgłoszona przez pacjenta (05-12-2022). 'Bez efektu'. Nieadekwatna wg kryt. MGH-ATRQ badania: dawka za niska (wymagane 300mg/d).; Nieprawidłowa lub brakująca data rozpoczęcia."
+        },
+        {
+          "id": "ESC-hist-1",
+          "drugName": "Escitalopram",
+          "shortName": "ESC",
+          "startDate": null,
+          "endDate": null,
+          "dose": "Nieznana",
+          "attemptGroup": 0,
+          "notes": "Historia zgłoszona przez pacjenta (05-12-2022, jako Mozarin). Dawka i czas trwania nieznane. Nie można potwierdzić adekwatności próby.; Nieprawidłowa lub brakująca data rozpoczęcia."
+        },
+        {
+          "id": "VEN-hist-1",
+          "drugName": "Wenlafaksyna",
+          "shortName": "VEN",
+          "startDate": null,
+          "endDate": null,
+          "dose": "75mg, potem 112.5mg/d",
+          "attemptGroup": 0,
+          "notes": "Historia zgłoszona przez pacjenta (05-12-2022, jako Alventa). 'Bez poprawy'. Nieadekwatna wg kryt. MGH-ATRQ badania: dawka za niska (wymagane 150mg/d).; Nieprawidłowa lub brakująca data rozpoczęcia."
+        },
+        {
+          "id": "VOR-hist-1",
+          "drugName": "Wortioksetyna",
+          "shortName": "VOR",
+          "startDate": null,
+          "endDate": null,
+          "dose": "5mg/d",
+          "attemptGroup": 0,
+          "notes": "Historia zgłoszona przez pacjenta (05-12-2022, jako Brintellix). Nieadekwatna wg kryt. MGH-ATRQ badania: dawka za niska (wymagane 10mg/d).; Nieprawidłowa lub brakująca data rozpoczęcia."
+        },
+        {
+          "id": "PRE-hist-1",
+          "drugName": "Pregabalina",
+          "shortName": "PRE",
+          "startDate": null,
+          "endDate": null,
+          "dose": "100mg/d",
+          "attemptGroup": 0,
+          "notes": "Historia zgłoszona przez pacjenta (05-12-2022). Stosowana na lęk. Nie jest oceniana w kontekście MGH-ATRQ dla depresji.; Nieprawidłowa lub brakująca data rozpoczęcia."
+        },
+        {
+          "id": "DLX-1",
+          "drugName": "Duloksetyna",
+          "shortName": "DLX",
+          "startDate": "2022-12-05",
+          "endDate": "2022-12-18",
+          "dose": "60mg/d (2x30mg)",
+          "attemptGroup": 0,
+          "notes": "Recepta z 05-12-2022 (Depratal 30mg, 1op/28szt, DS:2x1). Nieadekwatna wg kryt. MGH-ATRQ badania: za krótko (14 dni)."
+        },
+        {
+          "id": "DLX-2",
+          "drugName": "Duloksetyna",
+          "shortName": "DLX",
+          "startDate": "2022-12-19",
+          "endDate": "2022-12-28",
+          "dose": "30mg/d",
+          "attemptGroup": 0,
+          "notes": "Zmiana/klaryfikacja dawki z 16-12-2022 (Dulsevia 30mg 1-0-0). Nieadekwatna wg kryt. MGH-ATRQ badania: dawka za niska (min 60mg) i za krótko (10 dni)."
+        },
+        {
+          "id": "KET-1",
+          "drugName": "Ketamina",
+          "shortName": "KET",
+          "startDate": "2022-12-16",
+          "endDate": "2023-03-03",
+          "dose": "Wlewy IV (45-110mg)",
+          "attemptGroup": 0,
+          "notes": "Seria 12 wlewów IV. Nie dotyczy MGH-ATRQ. Potencjalne kryterium wyłączenia EC7."
+        },
+        {
+          "id": "DEX-1",
+          "drugName": "Deksametazon",
+          "shortName": "DEX",
+          "startDate": "2022-12-30",
+          "endDate": "2023-03-03",
+          "dose": "4mg IV (wielokrotnie)",
+          "attemptGroup": 0,
+          "notes": "Premedykacja przed wlewami ketaminy. Nie dotyczy MGH-ATRQ."
+        },
+        {
+          "id": "DLX-3",
+          "drugName": "Duloksetyna",
+          "shortName": "DLX",
+          "startDate": "2022-12-29",
+          "endDate": "2023-03-30",
+          "dose": "60mg/d",
+          "attemptGroup": 1,
+          "notes": "Zwiększenie dawki 28-12-2022. Adekwatna wg kryt. MGH-ATRQ badania: Duloksetyna 60mg/d przez ~13 tygodni. Brak poprawy (dawka zwiększona)."
+        },
+        {
+          "id": "OND-1",
+          "drugName": "Ondansetron",
+          "shortName": "OND",
+          "startDate": "2023-01-04",
+          "endDate": "2023-01-11",
+          "dose": "4mg IV (wielokrotnie)",
+          "attemptGroup": 0,
+          "notes": "Leczenie nudności po ketaminie. Nie dotyczy MGH-ATRQ."
+        },
+        {
+          "id": "TRZ-1",
+          "drugName": "Trazodon",
+          "shortName": "TRZ",
+          "startDate": "2023-02-24",
+          "endDate": "2023-03-25",
+          "dose": "25-50mg na noc",
+          "attemptGroup": 0,
+          "notes": "Na sen. Recepta na 30 dni. Nieadekwatna wg kryt. MGH-ATRQ badania: dawka za niska dla efektu antydepresyjnego (min 300mg)."
+        },
+        {
+          "id": "DLX-4",
+          "drugName": "Duloksetyna",
+          "shortName": "DLX",
+          "startDate": "2023-03-31",
+          "endDate": "2023-06-18",
+          "dose": "120mg/d (2x60mg)",
+          "attemptGroup": 0,
+          "notes": "Zwiększenie dawki. Poprzednia dawka 60mg była już adekwatną, nieudaną próbą. Brak poprawy. Nie liczone jako nowa próba MGH-ATRQ."
+        },
+        {
+          "id": "PRA-1",
+          "drugName": "Pramipeksol",
+          "shortName": "PRA",
+          "startDate": "2023-04-27",
+          "endDate": "2023-06-18",
+          "dose": "Titracja do 1.05mg/d",
+          "attemptGroup": 0,
+          "notes": "Leczenie off-label. Nie dotyczy MGH-ATRQ. Brak poprawy na 1.05mg."
+        },
+        {
+          "id": "DLX-5",
+          "drugName": "Duloksetyna",
+          "shortName": "DLX",
+          "startDate": "2023-06-19",
+          "endDate": "2023-07-16",
+          "dose": "Stopniowa redukcja ze 120mg do 60mg/d",
+          "attemptGroup": 0,
+          "notes": "Stopniowe zmniejszanie dawki Duloksetyny."
+        },
+        {
+          "id": "PRA-2",
+          "drugName": "Pramipeksol",
+          "shortName": "PRA",
+          "startDate": "2023-06-19",
+          "endDate": "2023-09-18",
+          "dose": "Titracja z 1.05mg do 2.1mg/d (lub więcej)",
+          "attemptGroup": 0,
+          "notes": "Leczenie off-label, zwiększanie dawki. Nie dotyczy MGH-ATRQ. Brak efektu. Rozpoczęto odstawianie przed 19-09-2023."
+        },
+        {
+          "id": "DLX-6",
+          "drugName": "Duloksetyna",
+          "shortName": "DLX",
+          "startDate": "2023-07-17",
+          "endDate": "2024-12-02",
+          "dose": "60mg/d",
+          "attemptGroup": 0,
+          "notes": "Kontynuacja Duloksetyny 60mg/d. Wcześniej oceniona jako niepowodzenie w ramach Próby 1."
+        },
+        {
+          "id": "PRA-3",
+          "drugName": "Pramipeksol",
+          "shortName": "PRA",
+          "startDate": "2023-09-19",
+          "endDate": "2023-09-30",
+          "dose": "Odstawianie (z dawki 1.05mg/d)",
+          "attemptGroup": 0,
+          "notes": "Odstawianie Pramipeksolu. Nie dotyczy MGH-ATRQ. endDate szacowana."
+        },
+        {
+          "id": "MPH-1",
+          "drugName": "Metylofenidat",
+          "shortName": "MPH",
+          "startDate": "2023-09-19",
+          "endDate": "2023-10-23",
+          "dose": "Concerta, titracja do 54mg/d",
+          "attemptGroup": 0,
+          "notes": "Concerta. Leczenie ADHD/off-label. Nie dotyczy MGH-ATRQ."
+        },
+        {
+          "id": "MPH-2",
+          "drugName": "Metylofenidat",
+          "shortName": "MPH",
+          "startDate": "2023-10-24",
+          "endDate": "2024-01-22",
+          "dose": "Concerta 54mg/d",
+          "attemptGroup": 0,
+          "notes": "Concerta 54mg/d. Brak wyraźnej poprawy. Nie dotyczy MGH-ATRQ."
+        },
+        {
+          "id": "TRZ-2",
+          "drugName": "Trazodon",
+          "shortName": "TRZ",
+          "startDate": "2023-10-24",
+          "endDate": "2024-01-22",
+          "dose": "25mg na noc",
+          "attemptGroup": 0,
+          "notes": "Na sen. Nieadekwatna wg kryt. MGH-ATRQ badania: dawka za niska. endDate szacowana (przed Kwetiapiną)."
+        },
+        {
+          "id": "MEL-1",
+          "drugName": "Melatonina",
+          "shortName": "MEL",
+          "startDate": "2023-10-24",
+          "endDate": "2024-02-29",
+          "dose": "5mg na noc",
+          "attemptGroup": 0,
+          "notes": "Na sen. Nie dotyczy MGH-ATRQ. endDate szacowana."
+        },
+        {
+          "id": "MPH-3",
+          "drugName": "Metylofenidat",
+          "shortName": "MPH",
+          "startDate": "2024-01-23",
+          "endDate": "2024-05-13",
+          "dose": "Medikinet CR (do 40mg/d) / Medikinet IR",
+          "attemptGroup": 0,
+          "notes": "Zmiana na Medikinet CR/IR. Poprawa na CR 40mg. Nie dotyczy MGH-ATRQ."
+        },
+        {
+          "id": "KWE-1",
+          "drugName": "Kwetapina",
+          "shortName": "KWE",
+          "startDate": "2024-01-23",
+          "endDate": "2024-07-31",
+          "dose": "12.5mg do 50mg na noc",
+          "attemptGroup": 0,
+          "notes": "Na sen. Nieadekwatna wg kryt. MGH-ATRQ badania: dawka za niska dla efektu adjuwantowego (min 150mg). endDate szacowana."
+        },
+        {
+          "id": "MPH-4",
+          "drugName": "Metylofenidat",
+          "shortName": "MPH",
+          "startDate": "2024-05-14",
+          "endDate": "2024-06-17",
+          "dose": "Symkinet MR 40mg/d + Medikinet IR 10mg/d",
+          "attemptGroup": 0,
+          "notes": "Zmiana na Symkinet MR + Medikinet IR. Nie dotyczy MGH-ATRQ."
+        },
+        {
+          "id": "MPH-5",
+          "drugName": "Metylofenidat",
+          "shortName": "MPH",
+          "startDate": "2024-06-18",
+          "endDate": "2024-08-20",
+          "dose": "Medikinet CR 60mg/d",
+          "attemptGroup": 0,
+          "notes": "Powrót do Medikinet CR, dawka 60mg/d. Utrata efektu. Odstawienie. Nie dotyczy MGH-ATRQ."
+        },
+        {
+          "id": "BUP-1a",
+          "drugName": "Bupropion",
+          "shortName": "BUP",
+          "startDate": "2024-08-20",
+          "endDate": "2024-09-02",
+          "dose": "150mg/d",
+          "attemptGroup": 0,
+          "notes": "Dawka początkowa. Nieadekwatna wg kryt. MGH-ATRQ badania: dawka za niska (min 300mg)."
+        },
+        {
+          "id": "BUP-1b",
+          "drugName": "Bupropion",
+          "shortName": "BUP",
+          "startDate": "2024-09-03",
+          "endDate": "2024-12-03",
+          "dose": "300mg/d",
+          "attemptGroup": 2,
+          "notes": "Adekwatna wg kryt. MGH-ATRQ badania: Bupropion 300mg/d przez ~12.8 tygodni. Brak poprawy."
+        },
+        {
+          "id": "DLX-7",
+          "drugName": "Duloksetyna",
+          "shortName": "DLX",
+          "startDate": "2024-12-03",
+          "endDate": "2024-12-15",
+          "dose": "Stopniowa redukcja z 60mg/d i odstawienie",
+          "attemptGroup": 0,
+          "notes": "Odstawianie Duloksetyny. endDate szacowana."
+        },
+        {
+          "id": "BUP-2",
+          "drugName": "Bupropion",
+          "shortName": "BUP",
+          "startDate": "2024-12-04",
+          "endDate": "2024-12-04",
+          "dose": "Odstawiony",
+          "attemptGroup": 0,
+          "notes": "Odstawienie Bupropionu."
+        },
+        {
+          "id": "ALP-1",
+          "drugName": "Alprazolam",
+          "shortName": "ALP",
+          "startDate": "2024-12-03",
+          "endDate": "2025-01-01",
+          "dose": "0.25mg/d",
+          "attemptGroup": 0,
+          "notes": "Benzodiazepina. Recepta na 30 dni. Nie dotyczy MGH-ATRQ. Istotne dla washout."
+        },
+        {
+          "id": "ATX-1",
+          "drugName": "Atomoksetyna",
+          "shortName": "ATX",
+          "startDate": "2024-12-16",
+          "endDate": "2025-01-08",
+          "dose": "Titracja od 25mg do 75mg/d",
+          "attemptGroup": 0,
+          "notes": "Leczenie ADHD. Nie dotyczy MGH-ATRQ. Czas trwania i efekt niejasne. endDate szacowana (przed pełnym wdrożeniem Elvanse)."
+        },
+        {
+          "id": "LIS-1",
+          "drugName": "Lisdeksamfetamina",
+          "shortName": "LIS",
+          "startDate": "2024-12-13",
+          "endDate": "2025-02-25",
+          "dose": "Elvanse, titracja do 60mg/d",
+          "attemptGroup": 0,
+          "notes": "Leczenie ADHD. Nie dotyczy MGH-ATRQ. Brak efektu. Odstawiony ok. 2025-02-25."
+        }
+      ],
+      "conclusion": "Na podstawie Kryteriów MGH-ATRQ Badania, zidentyfikowano 2 nieudane, adekwatne próby leczenia w obecnym epizodzie depresyjnym:\n- Próba 1: Duloksetyna w dawce 60mg/d przez około 13 tygodni (od 2022-12-29 do 2023-03-30).\n- Próba 2: Bupropion w dawce 300mg/d przez około 12.8 tygodni (od ok. 2024-09-03 do 2024-12-03).\nPacjent spełnia kryterium lekooporności TRD (co najmniej 2 niepowodzenia)."
+    },
+    "inclusionCriteria": [
+      {
+        "id": "IC1",
+        "name": "Zgoda na udział w badaniu (ICF)",
+        "status": "weryfikacja",
+        "details": "Świadoma zgoda zostanie uzyskana podczas wizyty przesiewowej.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "IC2",
+        "name": "Wiek ≥18 lat",
+        "status": "spełnione",
+        "details": "Pacjent ma 36 lat (urodzony ok. 1988 r., pierwsza wizyta w wieku 36 lat w 2022 r.), co spełnia kryterium wieku ≥18 lat.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "IC3",
+        "name": "Diagnoza dużej depresji",
+        "status": "weryfikacja",
+        "details": "Pacjent ma diagnozę F33.2 (Zaburzenie depresyjne nawracające, obecnie epizod depresji ciężkiej bez objawów psychotycznych) z dnia 04-03-2025. Potwierdzenie diagnozy wg DSM-5 za pomocą MINI 7.0.2 jest wymagane podczas wizyty przesiewowej.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "IC4",
+        "name": "Czas trwania pierwszego epizodu",
+        "status": "spełnione",
+        "details": "Pacjent ma diagnozę F33 (Zaburzenia depresyjne nawracające), więc obecny epizod nie jest pierwszym w życiu. Kryterium dotyczące czasu trwania pierwszego epizodu nie ma zastosowania.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "IC5",
+        "name": "Wynik MADRS ≥20",
+        "status": "weryfikacja",
+        "details": "Brak udokumentowanego wyniku MADRS. Ostatni wynik PHQ-9 to 19 (05-12-2022). Aktualny wynik MADRS jest niezbędny i zostanie oceniony podczas wizyty przesiewowej.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "IC6",
+        "name": "Lekooporność (TRD) wg MGH-ATRQ (specyficzne dla badania)",
+        "status": "spełnione",
+        "details": "Zidentyfikowano dwie adekwatne, nieudane próby leczenia w obecnym epizodzie depresyjnym, zgodnie ze specyficznymi dla badania kryteriami MGH-ATRQ:\n1. Duloksetyna: dawka 60mg/d (minimum wg protokołu: 60mg/d) stosowana przez około 13 tygodni (od 2022-12-29 do 2023-03-30; minimum wg protokołu: 8-10 tygodni). Próba zakończona niepowodzeniem (zwiększenie dawki z powodu braku poprawy).\n2. Bupropion: dawka 300mg/d (minimum wg protokołu: 300mg/d) stosowana przez około 12.8 tygodni (od ok. 2024-09-03 do 2024-12-03; minimum wg protokołu: 8-10 tygodni). Próba zakończona niepowodzeniem ('Brak poprawy').\nLiczba niepowodzeń (2) spełnia wymóg protokołu (co najmniej 2).",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "IC7",
+        "name": "Odstawienie leków",
+        "status": "weryfikacja",
+        "details": "Pacjent odstawił Elvanse ok. 25-02-2025. Duloksetyna i Bupropion zostały odstawione w grudniu 2024. Atomoksetyna prawdopodobnie odstawiona. Alprazolam (Xanax) przepisany 03-12-2024 na 30 dni; jeśli stosowany zgodnie z zaleceniami, okres wypłukiwania minął. Należy potwierdzić całkowite odstawienie wszystkich zabronionych leków i spełnienie okresów karencji (np. dla Alprazolamu, jeśli był stosowany doraźnie później) przed wizytą początkową.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "IC8",
+        "name": "Zdolność do udziału",
+        "status": "spełnione",
+        "details": "Na podstawie dokumentacji pacjent wydaje się zdolny do przestrzegania procedur badania i harmonogramu wizyt. Ostateczna ocena podczas wizyty przesiewowej.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      }
+    ],
+    "psychiatricExclusionCriteria": [
+      {
+        "id": "EC1",
+        "name": "Historia zaburzeń afektywnych dwubiegunowych",
+        "status": "spełnione",
+        "details": "Brak w dokumentacji historii ani objawów sugerujących zaburzenia afektywne dwubiegunowe. Diagnoza F33.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC2",
+        "name": "Zaburzenia psychotyczne",
+        "status": "spełnione",
+        "details": "W dokumentacji konsekwentnie odnotowywano 'bez objawów psychotycznych', 'nie wypowiada treści urojeniowych', 'neguje doznania omamowe'.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC3",
+        "name": "Zaburzenia osobowości",
+        "status": "spełnione",
+        "details": "W wywiadzie z 05-12-2022 wspomniano o 'osobowości unikającej'. Zaburzenie osobowości unikającej nie jest wymienione na liście wykluczających zaburzeń osobowości (paranoiczne, schizoidalne, schizotypowe, histrioniczne, narcystyczne).",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC4",
+        "name": "Zaburzenie osobowości typu borderline",
+        "status": "weryfikacja",
+        "details": "Brak w dokumentacji diagnozy zaburzenia osobowości borderline. Wymaga potwierdzenia za pomocą wywiadu lub modułu MINI plus na wizycie przesiewowej.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC5",
+        "name": "Aktywne zaburzenia współistniejące",
+        "status": "weryfikacja",
+        "details": "Brak w dokumentacji diagnozy aktywnego PTSD, OCD lub anoreksji. Wymaga potwierdzenia za pomocą wywiadu i MINI 7.0.2 na wizycie przesiewowej. Pacjent ma diagnozę F84 (ASD) i F90 (ADHD), które nie są wymienione jako wykluczające w tym punkcie.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC6",
+        "name": "Hospitalizacja psychiatryczna",
+        "status": "spełnione",
+        "details": "Brak informacji w dokumentacji o hospitalizacji psychiatrycznej w ciągu ostatnich 6 miesięcy przed potencjalnym screeningiem (zakładając screening w marcu 2025).",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC7",
+        "name": "Historia leczenia inwazyjnego",
+        "status": "niespełnione",
+        "details": "Pacjent otrzymał serię 12 wlewów ketaminy i.v. w okresie od grudnia 2022 do marca 2023 w ramach obecnego epizodu depresyjnego. Wlewy dożylne ketaminy, jako procedura wymagająca wkłucia dożylnego i podania leku tą drogą, mogą być uznane za inwazyjną metodę leczenia w kontekście tego kryterium, które wymienia ECT, DBS, VNS jako przykłady.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC8",
+        "name": "Historia leczenia nieinwazyjnego",
+        "status": "spełnione",
+        "details": "Pacjent stosował TMS 'ostatnio' przed wizytą 05-12-2022. Zakładając screening w marcu 2025, minęło znacznie więcej niż 6 miesięcy od zakończenia TMS.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC9",
+        "name": "Aktywna psychoterapia",
+        "status": "spełnione",
+        "details": "Na wizycie 05-12-2022 pacjent 'obecnie nie jest w terapii'. W trakcie leczenia ketaminą (do marca 2023) zalecano 'kontynuację sesji terapeutycznych'. Brak informacji o psychoterapii w późniejszym okresie. Zakłada się, że pacjent nie jest obecnie w aktywnej psychoterapii, która nie pozostałaby stabilna.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC10",
+        "name": "Uzależnienia",
+        "status": "spełnione",
+        "details": "Brak w dokumentacji diagnozy uzależnienia od alkoholu lub substancji psychoaktywnych w ciągu ostatnich 12 miesięcy. Wspomniano o ojcu uzależnionym od alkoholu i graniu na konsoli przez pacjenta jako formie radzenia sobie z problemami, ale nie ma formalnej diagnozy uzależnienia u pacjenta.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC11",
+        "name": "Ryzyko samobójcze",
+        "status": "spełnione",
+        "details": "W dokumentacji konsekwentnie odnotowywano 'bez myśli i tendencji samobójczych' lub 'przeczy myślom i tendencjom autoagresywnym'.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC12",
+        "name": "Depresja wtórna",
+        "status": "spełnione",
+        "details": "Diagnoza F33 wskazuje na pierwotne zaburzenie depresyjne.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC13",
+        "name": "Przeciwwskazania osobiste",
+        "status": "spełnione",
+        "details": "Na podstawie dostępnych informacji brak jest przesłanek wskazujących na okoliczności osobiste lub zachowanie uniemożliwiające bezpieczny udział. Ostateczna ocena na wizycie przesiewowej.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC14",
+        "name": "Historia rodzinna",
+        "status": "spełnione",
+        "details": "W wywiadzie rodzinnym odnotowano: matka 'leczy się na nerwice', ojciec 'uzależniony od alkoholu'. Brak informacji o występowaniu schizofrenii, zaburzenia schizoafektywnego lub ChAD I w rodzinie.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC15",
+        "name": "Ekspozycja na psychodeliki",
+        "status": "spełnione",
+        "details": "Brak w dokumentacji informacji o stosowaniu klasycznych psychodelików w ciągu ostatniego roku lub obecnego epizodu.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      }
+    ],
+    "medicalExclusionCriteria": [
+      {
+        "id": "GMEC1",
+        "name": "Ciąża lub karmienie",
+        "status": "spełnione",
+        "details": "Pacjent jest mężczyzną, kryterium nie dotyczy.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC2",
+        "name": "Antykoncepcja",
+        "status": "spełnione",
+        "details": "Pacjent jest mężczyzną. Kwestia antykoncepcji dotyczy kobiet zdolnych do zajścia w ciążę. Mężczyźni mogą być zobowiązani do stosowania antykoncepcji, jeśli protokół tak stanowi dla partnerki - to nie jest tu sprecyzowane jako kryterium dla mężczyzn.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC3",
+        "name": "Testy ciążowe",
+        "status": "spełnione",
+        "details": "Pacjent jest mężczyzną, kryterium nie dotyczy.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC4",
+        "name": "Dawstwo nasienia",
+        "status": "weryfikacja",
+        "details": "Należy zapytać pacjenta o plany dotyczące oddawania nasienia w ciągu 3 miesięcy po zakończeniu badania.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC5",
+        "name": "Choroby układu krążenia",
+        "status": "weryfikacja",
+        "details": "W przeszłości odnotowano podwyższone wartości ciśnienia tętniczego (do 147/92 mmHg dnia 20-08-2024 podczas stosowania Medikinetu CR). Wymagane aktualne badanie EKG (ocena QT) oraz monitorowanie ciśnienia tętniczego. Brak historii udaru, zawału, ale należy wykluczyć niekontrolowane nadciśnienie, tachykardię lub arytmię.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC6",
+        "name": "Cukrzyca",
+        "status": "spełnione",
+        "details": "Brak w dokumentacji informacji o cukrzycy. Zakłada się brak.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC7",
+        "name": "Choroby tarczycy",
+        "status": "weryfikacja",
+        "details": "Brak w dokumentacji informacji o chorobach tarczycy. Wymagane aktualne badania laboratoryjne (TSH, ft4).",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC8",
+        "name": "Padaczka",
+        "status": "spełnione",
+        "details": "Brak w dokumentacji informacji o zaburzeniach drgawkowych. Zakłada się brak.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC9",
+        "name": "Wyniki badań",
+        "status": "weryfikacja",
+        "details": "Wymagane aktualne badania laboratoryjne (morfologia, biochemia, próby wątrobowe, panel nerkowy itp.) w celu wykluczenia istotnych klinicznie nieprawidłowości.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC10",
+        "name": "Inne choroby",
+        "status": "spełnione",
+        "details": "Na wizycie 05-12-2022 odnotowano 'Somatyczne zdrowy, bez leków na stałe'. Poza podwyższonym BP w przeszłości, brak informacji o innych istotnych schorzeniach somatycznych. Diagnozy psychiatryczne (ASD, ADHD) są oceniane w ramach kryteriów psychiatrycznych.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC11",
+        "name": "Udział w innych badaniach",
+        "status": "spełnione",
+        "details": "Brak w dokumentacji informacji o aktualnym udziale w innym badaniu interwencyjnym. Zakłada się brak.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC12",
+        "name": "Nadwrażliwość",
+        "status": "weryfikacja",
+        "details": "Pacjent zgłaszał skutki uboczne po niektórych lekach (np. fluoksetyna, TLPD, pramipeksol, Elvanse). Nadwrażliwość na badany lek (psylocybinę) lub substancje pomocnicze jest nieznana i wymaga oceny.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      }
+    ],
+    "reportConclusion": {
+      "overallQualification": "Prawdopodobnie nie kwalifikuje się",
+      "mainIssues": [
+        "EC7: Stosowanie wlewów dożylnych ketaminy w obecnym epizodzie depresyjnym jest prawdopodobnym kryterium wykluczającym, jeśli ketamina i.v. jest interpretowana jako 'inwazyjna metoda leczenia' w kontekście tego protokołu."
+      ],
+      "criticalInfoNeeded": [
+        "Interpretacja przez sponsora/komisję bioetyczną, czy wlewy ketaminy i.v. są traktowane jako 'inwazyjna metoda leczenia' wykluczająca z badania (EC7).",
+        "Potwierdzenie diagnozy dużej depresji oraz wykluczenie zaburzenia osobowości borderline i innych aktywnych zaburzeń współistniejących za pomocą MINI 7.0.2 (IC3, EC4, EC5).",
+        "Aktualny wynik w skali MADRS (IC5).",
+        "Potwierdzenie odstawienia wszystkich zabronionych leków i spełnienia okresów karencji (IC7).",
+        "Informacja o planach dotyczących oddawania nasienia (GMEC4).",
+        "Aktualne badania medyczne: EKG, ciśnienie tętnicze, badania laboratoryjne (TSH, morfologia, biochemia itp.) (GMEC5, GMEC7, GMEC9).",
+        "Ocena ewentualnej nadwrażliwości na składniki badanego preparatu (GMEC12)."
+      ],
+      "estimatedProbability": 10
+    },
+    "analyzedAt": "2025-05-28T18:49:10.639Z",
+    "isMockData": false,
+    "modelUsed": "gemini",
+    "drugMappingInfo": {
+      "mappingsApplied": 23,
+      "mappings": [
+        {
+          "original": "Dulsevia",
+          "mapped": "Duloxetinum 30 mg",
+          "confidence": 0.95
+        },
+        {
+          "original": "pnie Podano",
+          "mapped": "Glucosum 50 g + Calcii chloridum dihydricum 0.3675 mg + Magnesii chloridum hexahydricum 0.2033 g + Natrii chloridum 11.279 g + Natrii lactas 15.69 g",
+          "confidence": 0.8
+        },
+        {
+          "original": "pnie podano",
+          "mapped": "Glucosum 50 g + Calcii chloridum dihydricum 0.3675 mg + Magnesii chloridum hexahydricum 0.2033 g + Natrii chloridum 11.279 g + Natrii lactas 15.69 g",
+          "confidence": 0.8
+        },
+        {
+          "original": "Podano ondansetron",
+          "mapped": "Ondansetroni hydrochloridum dihydricum 2.5 mg",
+          "confidence": 0.8
+        },
+        {
+          "original": "Podano\nondansetron",
+          "mapped": "Ondansetroni hydrochloridum dihydricum 2.5 mg",
+          "confidence": 0.8
+        },
+        {
+          "original": "Depratal",
+          "mapped": "Duloxetini hydrochloridum 68.72 mg",
+          "confidence": 0.95
+        },
+        {
+          "original": "Trazodone",
+          "mapped": "Trazodoni hydrochloridum 50 mg",
+          "confidence": 0.8
+        },
+        {
+          "original": "jak dotychczas\nOprymea",
+          "mapped": "Sulfogaiacolum 6 g",
+          "confidence": 0.8
+        },
+        {
+          "original": "pnie",
+          "mapped": "Glucosum 50 g + Calcii chloridum dihydricum 0.3675 mg + Magnesii chloridum hexahydricum 0.2033 g + Natrii chloridum 11.279 g + Natrii lactas 15.69 g",
+          "confidence": 0.8
+        },
+        {
+          "original": "dni do docelowej dawki",
+          "mapped": "Prednisolonum 2 mg/ml + Estradioli benzoas 0,05 mg/ml + Acidum salicylicum 4 mg/ml",
+          "confidence": 0.8
+        },
+        {
+          "original": "Concerta",
+          "mapped": "Methylphenidati hydrochloridum 18 mg",
+          "confidence": 0.95
+        },
+        {
+          "original": "Melatonina",
+          "mapped": "Melatoninum 5 mg",
+          "confidence": 0.8
+        },
+        {
+          "original": "Ketrel",
+          "mapped": "Quetiapini fumaras 25 mg",
+          "confidence": 0.95
+        },
+        {
+          "original": "Medikinet CR",
+          "mapped": "Methylphenidati hydrochloridum 5 mg",
+          "confidence": 0.8
+        },
+        {
+          "original": "Welbox",
+          "mapped": "Bupropioni hydrochloridum 150 mg",
+          "confidence": 0.95
+        },
+        {
+          "original": "Auroxetyn",
+          "mapped": "Atomoxetini hydrochloridum 10 mg",
+          "confidence": 0.95
+        },
+        {
+          "original": "welbox",
+          "mapped": "Bupropioni hydrochloridum 150 mg",
+          "confidence": 0.95
+        },
+        {
+          "original": "Brintellix",
+          "mapped": "Vortioxetini hydrobromidum 5 mg",
+          "confidence": 0.95
+        },
+        {
+          "original": "Pregabalin",
+          "mapped": "Pregabalinum 25 mg",
+          "confidence": 0.8
+        },
+        {
+          "original": "ondansetron",
+          "mapped": "Ondansetroni hydrochloridum dihydricum 2.5 mg",
+          "confidence": 0.8
+        },
+        {
+          "original": "Oprymea",
+          "mapped": "Pramipexolum 0.18 mg",
+          "confidence": 0.95
+        },
+        {
+          "original": "obecnie Welbox",
+          "mapped": "Bupropioni hydrochloridum 150 mg",
+          "confidence": 0.8
+        },
+        {
+          "original": "Trazodone Glenmark",
+          "mapped": "Capecitabinum 150 mg",
+          "confidence": 0.8
+        }
+      ],
+      "preprocessedAt": "2025-05-28T18:49:10.639Z"
+    }
+  },
+  "medicalHistory": "KARTA WIZYTY | Prywatna: dn. 05-12-2022, Warszawa\nOddział: Aleje Jerozolimskie\nCena: 300,00 zł\nPacjent: \nMszanka 36\n22-230 Wola Uhruska\n\nLekarz: Michał Hapon (3523297)\nWywiad\nPacjenta zgłasza się z powodu zaburzeń depresyjnych, twierdzi, że od nastoletnich lat zaczęły się jego problemy. Dużo lęku\ntowarzyszy tym objawom. Dodatkowo w trakcie terapii stwierdzono u niego osobowość unikającą. Próbował różnych terapii,\nostatnio nawet TMS, 30 zabiegów. Miał też EMDR. (minimalna poprawa). Miał liczne terapie, testował różne leki, najlepsza\npoprawna na sertralinie. Obecnie jest bez leków.\nStosował psychoterapię, zaczął w 26 roku życia: psychoanalityczna, potem CBT, potem chodził na grupową terapię na\nSobieskiego, chodził na warsztaty dla mężczyzn, psychologia procesu. Chodził też na DDA, w 2 miejsca, po rok, 2.\nDodatkowo praca z \"wewnętrznym dzieckiem\". Jeszcze inna terapie 1,5 roku. Obecnie nie jest w terapii.\nStosował: sertralinę 50 mg (próbował zwiększać, ale nie czuł różnicy, najdłużej brał 50), fluoksetynę (nic nie dało, skutki\nuboczne), pamięta, że brał też lek trójpiersieniowy, nie pamięta nazwy (dużo skutków ubocznych), welbox 150 (bez efektu),\nMozarin, Alventa (75 mg, potem 112,5 - bez poprawy, bez skutków ubocznych), Brintellix, Pregabalin ( 100 mg).\nWywiad rodzinny: mama leczy się na nerwice, tez przyjmowała setaloft, ojciec uzależniony od alkoholu.\nPochodzi ze wschodniej granicy Polski, twierdzi, że pochodzi z pełnej rodziny, \"ale takiej patolskiej\". Ojciec nadużywał\nalkoholu, znikał, robił awantury, ma starszego brata, i siostrę. Ojciec był \"złota rączką\", grał na instrumentach, budowlaniec,\nbył bardziej indywidualistą Mama zajmowała się domem, potem dorabiała w opiece . Obecnie są w separacji, w jednym\ndomu rozdzielonym. Do szkoły poszedł o czasie w wieku 7 lat, radził sobie z nauką, z rówieśnikami trochę gorzej. Z\ntechnikum ma jednego przyjaciela, ma jeszcze kontakt z drugim ale kontakt sporadyczny. W szkole średniej był w internacie,\nbyły tam problemy z ludźmi, był zamknięty w sobie. Zawsze się czuł poza tym kręgiem towarzyskim. Poszedł na politechnikę\nwarszawską, skończył informatykę. Pracuje od 5 roku w zawodzie.\nPóźno zaczął się spotykać z dziewczynami, związek w wieku 20 paru, najpierw 8 miesięcy, potem 4 lata. Mieszkali razem,\nplanowali razem przyszłość i rodzinę. Zaczął w tym celu budowę domu, ale związek się rozpadł, nie może się zamotywać do\ndokończenia. Drobne znajomości z innymi kobietami. Czuje, że jest w kontaktach perfekcjonista, boi się popełniać błędy\nrodziców w znajomościach.\nZainteresowania: granie na konsoli, wie, że to może być problem, ale potrafi się od tego powstrzymać, zagłusza tym swoje\nproblemy. Bywały okresy kiedy to też mu nie sprawiało przyjemności.\nLepsze kontakty z mamą, z ojcem bardzo sporadyczne kontakty (\"mam do niego zerowy szacunek\"). Z rodzeństwem całkiem\ndobre kontakty, dosyć rzadkie.\nCzuł często nieadekwatność w kontaktach z innymi, lęki społeczne, czuł smutek, przygnębienie. Konwersyjne objawy lęku:\nbóle brzucha, ścisk w żołądku, biegunki. Bywały okresy anhedonii, braku aktywności.\nMiewa problemy ze snem, kładzie się za późno, nie wysypia się.\nSomatyczne zdrowy, bez leków na stałe.\nPHQ 19 GAD 18\nWszechstornnie zorientowany, nastrój jednostajnie obnizony, napęd w granicach normy, afekt zgodny z nastrojem. Bez\nformalnych zaburzeń myślenia. Skargi na obniżenie nastroju, motywacji, nasilone objawy lękowe ograniczajace wiele\naktywności życiowych, o charakterze przewlekłym. Bez objawów psychotycznych, bez myśli i tendnecji samobójczych.\nWłączam duloksetynę.\nZakwalifikowany do ketaminy.\nRozpoznanie\n- F33 (*) - Zaburzenia depresyjne nawracające\nZalecenia\nDepratal: tabl. dojelitowe, 30 mg / 1 op. po 28 szt.\nDS: 2x1\nOdpłatność: 30%\nUsługi prywatne\n- Konsultacja psychiatryczna (pierwsza) 350 - 1 szt. - 300,00 zł\nWystawił(a):\nMichał Hapon (3523297)\nKeyClinic\nNowogrodzka 47a, 00-695 Warszawa\nNIP: 7011194833, REGON: 52806794600010, tel. 576250700\nNumer księgi rejestrowej: 000000274970\nKod res. cz. VIII/VII/V: / /02\nNr umowy z NFZ:\nStrona 1 z 1\nKARTA WIZYTY | Prywatna: dn. 16-12-2022, Warszawa\nOddział: Nowogrodzka\nCena: 4960,00 zł\nPacjent: \nMszanka 36\n22-230 Wola Uhruska\n\nLekarz: Magdalena Więdłocha (2967545)\nWywiad\nZ uwagi na niepowodzenie leczenia epizodu depresyjnego kilkoma lekami przeciwdepresyjnymi i stwierdzoną lekooporność,\npo wykluczeniu przeciwwskazań zakwalifikowano pacjenta do leczenia ketaminą iv. Pacjent zgłosił się na 1. zabieg.\nOmówiono możliwe korzyści i ryzyko związane ze stosowaniem ketaminy w leczeniu off-label. Pacjent wyraził pisemną zgodę\nna podjęcie leczenia. Stan somatyczny stabilny, bez obj.stenokardialnych, duszności, obniżenia tolerancji wysiłku. Waga:\n100kg Parametry życiowe przed zabiegiem: BP 126/81, HR 88/min, SpO2 98%. Pacjent spożywał ostatni posiłek 4h temu.\nPodano 45mg ketaminy w 100ml 0,9%NaCl w 50 min wlewie i.v. Podczas infuzji wystąpiły umiarkowanie nasilone objawy\ndysocjacji, bez innych działań niepożądanych. 60 min po zakończeniu wlewu pacjent w logicznym kontakcie, wszechstronnie\nzorientowany, wydolny krążeniowo i oddechowo, negował dolegliwości somatyczne. Parametry życiowe monitorowano i\nodnotowano w karcie przebiegu zabiegu. Po zabiegu pacjent pozostawał wszechstronnie zorientowany, w rzeczowym\nkontakcie, nieco obniżonym nastroju i napędzie, bez objawów wytwórczych, bez myśli i tendencji samobójczych.\nPoinformowano o zakazie prowadzenia pojazdów i obsługiwania maszyn oraz wykonywania innych potencjalnie\nniebezpiecznych czynności przez 48h od zabiegu. Przed opuszczeniem przez pacjenta ośrodka potwierdzono ustąpienie\nobjawów dysocjacyjnych, zaburzeń percepcji oraz sedacji; parametry życiowe w normie. Pacjent gotowy do opuszczenia\nośrodka. Do domu wraca komunikacją publiczną. Po zabiegu zaplanowana sesja terapii integracyjnej.\nZal. kontynuacja dotychczasowej farmakoterapii - Dulsevia 30mg 1-0-0\nRozpoznanie\n- F33.1 (*) - Zaburzenie depresyjne nawracające, obecnie epizod depresyjny umiarkowany\nUsługi prywatne\n- Leczenie ketaminą - 1 szt. - 4960,00 zł\nWystawił(a):\nMagdalena Więdłocha (2967545)\nKeyClinic\nNowogrodzka 47a, 00-695 Warszawa\nNIP: 7011194833, REGON: 52806794600010, tel. 576250700\nNumer księgi rejestrowej: 000000274970\nKod res. cz. VIII/VII/V: / /01\nNr umowy z NFZ:\nStrona 1 z 1\nKARTA WIZYTY | Prywatna: dn. 28-12-2022, Warszawa\nOddział: Nowogrodzka\nPacjent: \nMszanka 36\n22-230 Wola Uhruska\n\nLekarz: Magdalena Więdłocha (2967545)\nWywiad\nPacjent zgłosił się na 2. wlew ketaminy, wyraził zgodę na leczenie offlabel ketaminą. Poprzednie podanie leku tolerował\ndobrze, poza nieznacznie nasilonymi nudnościami przez od 2h, nie występowały obj.niepożądane. Stan somatyczny stabilny,\nbez obj.stenokardialnych, duszności, obniżenia tolerancji wysiłku. Waga: 96kg. Parametry życiowe przed zabiegiem: BP\n117/70, HR 75/min, SpO2 98%. Pacjent na czczo. Podano 55mg ketaminy w 100ml 0,9%NaCl w 40min wlewie i.v. Podczas\ninfuzji wystąpiły umiarkowanie nasilone objawy dysocjacji, bez innych działań niepożądanych. 60 min od rozpoczęcia wlewu\npacjent w logicznym kontakcie, wszechstronnie zorientowany, wydolny krążeniowo i oddechowo, negował dolegliwości\nsomatyczne. Parametry życiowe (BP, HR, SpO2, RR) monitorowano i odnotowano w karcie przebiegu zabiegu. Po zabiegu\npacjent pozostawał wszechstronnie zorientowany, w rzeczowym kontakcie, w obojętnym nastroju, nieco obniżonym\nnapędzie, bez objawów wytwórczych, bez myśli i tendencji samobójczych. Poinformowano o zakazie prowadzenia pojazdów i\nobsługiwania maszyn oraz wykonywania innych potencjalnie niebezpiecznych czynności przez 48h od zabiegu. Przed\nopuszczeniem przez pacjenta ośrodka potwierdzono ustąpienie objawów dysocjacyjnych, zaburzeń percepcji oraz sedacji;\nparametry życiowe w normie. Pacjent gotowy do opuszczenia ośrodka. Wraca do domu komunikacją publiczną. Zal.\nzwiększenie dawki Dulsevii z 30 do 60mg/d.\nRozpoznanie\n- F33.1 (*) - Zaburzenie depresyjne nawracające, obecnie epizod depresyjny umiarkowany\nZalecenia\nDepratal: tabl. dojelitowe, 60 mg / 1 op. po 28 szt.\nDS: 1-0-0 tabl.\nOdpłatność: 100%\nWystawił(a):\nMagdalena Więdłocha (2967545)\nKeyClinic\nNowogrodzka 47a, 00-695 Warszawa\nNIP: 7011194833, REGON: 52806794600010, tel. 576250700\nNumer księgi rejestrowej: 000000274970\nKod res. cz. VIII/VII/V: / /01\nNr umowy z NFZ:\nStrona 1 z 1\nKARTA WIZYTY | Prywatna: dn. 30-12-2022, Warszawa\nOddział: Nowogrodzka\nPacjent: \nMszanka 36\n22-230 Wola Uhruska\n\nLekarz: Magdalena Więdłocha (2967545)\nWywiad\nPacjent zgłosił się na 3. wlew ketaminy, wyraził zgodę na leczenie offlabel ketaminą. Po ostatnim wlewie - nudności\numiarkowanie nasilone, trwały kilka godzin. Pacjent zwiększył wczoraj dawkę duloksetyny do 60 mg. Relacjonuje niewielką\npoprawę nastroju, zmniejszenie niepokoju. Stan somatyczny stabilny, bez obj.stenokardialnych, duszności, obniżenia\ntolerancji wysiłku. Waga: 96kg. Parametry życiowe przed zabiegiem: BP 118/83, HR 82/min, SpO2 98%. Pacjent jadł ostatni\nposiłek 4 h temu. Przed wlewem ketaminy podano Dexaven 4mg/ 20ml 0,9%NaCl. Następnie Podano 70mg ketaminy w\n100ml 0,9%NaCl w 40min wlewie i.v. Podczas infuzji wystąpiły umiarkowanie nasilone objawy dysocjacji, bez innych działań\nniepożądanych. 60 min od rozpoczęcia wlewu pacjent w logicznym kontakcie, wszechstronnie zorientowany, wydolny\nkrążeniowo i oddechowo, negował dolegliwości somatyczne. Parametry życiowe (BP, HR, SpO2, RR) monitorowano i\nodnotowano w karcie przebiegu zabiegu. Po zabiegu pacjent pozostawał wszechstronnie zorientowany, w rzeczowym\nkontakcie, w obojętnym nastroju, nieco obniżonym napędzie, bez objawów wytwórczych, bez myśli i tendencji samobójczych.\nPoinformowano o zakazie prowadzenia pojazdów i obsługiwania maszyn oraz wykonywania innych potencjalnie\nniebezpiecznych czynności przez 48h od zabiegu. Przed opuszczeniem przez pacjenta ośrodka potwierdzono ustąpienie\nobjawów dysocjacyjnych, zaburzeń percepcji oraz sedacji; parametry życiowe w normie. Pacjent gotowy do opuszczenia\nośrodka. Wraca do domu komunikacją publiczną. Zal. Dulsevia 60mg 1-0-0, konstynuacja sesji terapeutycznych\nRozpoznanie\n- F33.1 (*) - Zaburzenie depresyjne nawracające, obecnie epizod depresyjny umiarkowany\nWystawił(a):\nMagdalena Więdłocha (2967545)\nKeyClinic\nNowogrodzka 47a, 00-695 Warszawa\nNIP: 7011194833, REGON: 52806794600010, tel. 576250700\nNumer księgi rejestrowej: 000000274970\nKod res. cz. VIII/VII/V: / /01\nNr umowy z NFZ:\nStrona 1 z 1\nKARTA WIZYTY | Prywatna: dn. 04-01-2023, Warszawa\nOddział: Nowogrodzka\nPacjent: \nMszanka 36\n22-230 Wola Uhruska\n\nLekarz: Magdalena Więdłocha (2967545)\nWywiad\nPacjent zgłosił się na 4. wlew ketaminy, wyraził zgodę na leczenie offlabel ketaminą. Relacjonuje niewielką poprawę\nnastroju, zmniejszenie niepokoju. Stan somatyczny stabilny, bez obj.stenokardialnych, duszności, obniżenia tolerancji\nwysiłku. Waga: 96kg. Parametry życiowe przed zabiegiem: BP 122/82, HR 78/min, SpO2 98%. Pacjent jadł ostatni posiłek 4 h\ntemu. Przed wlewem ketaminy podano Dexaven 4mg/ 20ml 0,9%NaCl. Następnie podano 80 mg ketaminy w 100ml\n0,9%NaCl w 40min wlewie i.v. Podczas infuzji wystąpiły umiarkowanie nasilone objawy dysocjacji, bez innych działań\nniepożądanych. 60 min od rozpoczęcia wlewu pacjent w logicznym kontakcie, wszechstronnie zorientowany, wydolny\nkrążeniowo i oddechowo, zgłaszał nudności o umiarkowanym nasileniu. Podano ondansetron 4mg/100ml 0,9% NaCl iv.\nParametry życiowe (BP, HR, SpO2, RR) monitorowano i odnotowano w karcie przebiegu zabiegu. Po zabiegu pacjent\npozostawał wszechstronnie zorientowany, w rzeczowym kontakcie, w obojętnym nastroju, nieco obniżonym napędzie, bez\nobjawów wytwórczych, bez myśli i tendencji samobójczych. Poinformowano o zakazie prowadzenia pojazdów i obsługiwania\nmaszyn oraz wykonywania innych potencjalnie niebezpiecznych czynności przez 48h od zabiegu. Przed opuszczeniem przez\npacjenta ośrodka potwierdzono ustąpienie objawów dysocjacyjnych, zaburzeń percepcji oraz sedacji; parametry życiowe w\nnormie. Pacjent gotowy do opuszczenia ośrodka. Wraca do domu komunikacją publiczną. Zal. Dulsevia 60mg 1-0-0,\nkontynuacja sesji terapeutycznych\nRozpoznanie\n- F33.1 (*) - Zaburzenie depresyjne nawracające, obecnie epizod depresyjny umiarkowany\nWystawił(a):\nMagdalena Więdłocha (2967545)\nKeyClinic\nNowogrodzka 47a, 00-695 Warszawa\nNIP: 7011194833, REGON: 52806794600010, tel. 576250700\nNumer księgi rejestrowej: 000000274970\nKod res. cz. VIII/VII/V: / /01\nNr umowy z NFZ:\nStrona 1 z 1\nKARTA WIZYTY | Prywatna: dn. 11-01-2023, Warszawa\nOddział: Nowogrodzka\nPacjent: \nMszanka 36\n22-230 Wola Uhruska\n\nLekarz: Magdalena Więdłocha (2967545)\nWywiad\nPacjent zgłosił się na 5. wlew ketaminy, wyraził zgodę na leczenie offlabel ketaminą. Relacjonuje niewielką poprawę\nnastroju, zmniejszenie niepokoju. Stan somatyczny stabilny, bez obj.stenokardialnych, duszności, obniżenia tolerancji\nwysiłku. Waga: 95kg. Parametry życiowe przed zabiegiem: BP 130/78, HR 77/min, SpO2 96%. Pacjent jadł ostatni posiłek 4 h\ntemu. Przed wlewem ketaminy podano Dexaven 4mg/ 20ml 0,9%NaCl z uwagi na występujące pozabiegu nudności.\nNastępnie podano 95 mg ketaminy w 100ml 0,9%NaCl w 40min wlewie i.v. Podczas infuzji wystąpiły umiarkowanie nasilone\nobjawy dysocjacji, bez innych działań niepożądanych. 60 min od rozpoczęcia wlewu pacjent w logicznym kontakcie,\nwszechstronnie zorientowany, wydolny krążeniowo i oddechowo, zgłaszał nudności o umiarkowanym nasileniu. Podano\nondansetron 4mg/100ml 0,9% NaCl iv. Parametry życiowe (BP, HR, SpO2, RR) monitorowano i odnotowano w karcie\nprzebiegu zabiegu. Po zabiegu pacjent pozostawał wszechstronnie zorientowany, w rzeczowym kontakcie, w obojętnym\nnastroju, nieco obniżonym napędzie, bez objawów wytwórczych, bez myśli i tendencji samobójczych. Poinformowano o\nzakazie prowadzenia pojazdów i obsługiwania maszyn oraz wykonywania innych potencjalnie niebezpiecznych czynności\nprzez 48h od zabiegu. Przed opuszczeniem przez pacjenta ośrodka potwierdzono ustąpienie objawów dysocjacyjnych,\nzaburzeń percepcji oraz sedacji; parametry życiowe w normie. Pacjent gotowy do opuszczenia ośrodka. Wraca do domu\nkomunikacją publiczną. Zal. Dulsevia 60mg 1-0-0, kontynuacja sesji terapeutycznych\nRozpoznanie\n- F33.1 (*) - Zaburzenie depresyjne nawracające, obecnie epizod depresyjny umiarkowany\nWystawił(a):\nMagdalena Więdłocha (2967545)\nKeyClinic\nNowogrodzka 47a, 00-695 Warszawa\nNIP: 7011194833, REGON: 52806794600010, tel. 576250700\nNumer księgi rejestrowej: 000000274970\nKod res. cz. VIII/VII/V: / /01\nNr umowy z NFZ:\nStrona 1 z 1\nKARTA WIZYTY | Prywatna: dn. 13-01-2023, Warszawa\nOddział: Nowogrodzka\nPacjent: \nMszanka 36\n22-230 Wola Uhruska\n\nLekarz: Michał Hapon (3523297)\nWywiad\nPacjent zgłasza poprawę stanu psychicznego, widzi u siebie większą stabilizację, mniej \"dołów\" od ostatnich 2 dni,\noptymistycznie nastawiony do kontynuacji terapii. Odnotował, że przy podejściu do zabiegu po zjedzeniu lekkostrawnego\nposiłku nie występują u niego mdłości.\nPacjent zgłosił się na 6. zabieg. Omówiono możliwe korzyści i ryzyko związane ze stosowaniem ketaminy w leczeniu off-label.\nPacjent wyraził pisemną zgodę na podjęcie leczenia. Stan somatyczny stabilny, bez obj.stenokardialnych, duszności,\nobniżenia tolerancji wysiłku. Waga: 96 kg Parametry życiowe przed zabiegiem: BP 123/77, HR 95/min, SpO2 96%. Pacjent\nspożywał ostatni posiłek 4h temu. Podano 105mg ketaminy w 100ml 0,9%NaCl w 40min wlewie i.v. Dodatkowo z uwagi na\nnudności po poprzednich zabiegach zastosowano Dexaven 4 mg w 20 ml 0,9% NaCl przed infuzją. Podczas infuzji wystąpiły\numiarkowanie nasilone objawy dysocjacji, bez innych działań niepożądanych. 60 min po zakończeniu wlewu pacjent w\nlogicznym kontakcie, wszechstronnie zorientowany, wydolny krążeniowo i oddechowo, negował dolegliwości somatyczne.\nParametry życiowe (BP, HR, SpO2, RR) monitorowano i odnotowano w karcie przebiegu zabiegu. Po zabiegu pacjent\npozostawał wszechstronnie zorientowany, w rzeczowym kontakcie, nieco obniżonym nastroju i napędzie, bez objawów\nwytwórczych, bez myśli i tendencji samobójczych. Poinformowano o zakazie prowadzenia pojazdów i obsługiwania maszyn\noraz wykonywania innych potencjalnie niebezpiecznych czynności przez 48h od zabiegu. Przed opuszczeniem przez pacjenta\nośrodka potwierdzono ustąpienie objawów dysocjacyjnych, zaburzeń percepcji oraz sedacji; parametry życiowe w normie.\nPacjent gotowy do opuszczenia ośrodka. Został odebrany przez bliską osobę.\nZal. kontynuacja dotychczasowej farmakoterapii - Dulsevia 60mg 1-0-0, kontynuacja sesji terapeutycznych.\nRozpoznanie\n- F33.1 (*) - Zaburzenie depresyjne nawracające, obecnie epizod depresyjny umiarkowany\nWystawił(a):\nMichał Hapon (3523297)\nKeyClinic\nNowogrodzka 47a, 00-695 Warszawa\nNIP: 7011194833, REGON: 52806794600010, tel. 576250700\nNumer księgi rejestrowej: 000000274970\nKod res. cz. VIII/VII/V: / /01\nNr umowy z NFZ:\nStrona 1 z 1\nKARTA WIZYTY | Prywatna: dn. 27-01-2023, Warszawa\nOddział: Nowogrodzka\nCena: 1000,00 zł\nPacjent: \nMszanka 36\n22-230 Wola Uhruska\n\nLekarz: Magdalena Więdłocha (2967545)\nWywiad\nUtrzymuje się poprawa stanu psychicznego, widzi u siebie większą stabilizację, optymistycznie nastawiony do kontynuacji\nterapii.\nPacjent zgłosił się na 7. zabieg. Omówiono możliwe korzyści i ryzyko związane ze stosowaniem ketaminy w leczeniu off-label.\nPacjent wyraził pisemną zgodę na podjęcie leczenia. Stan somatyczny stabilny, bez obj.stenokardialnych, duszności,\nobniżenia tolerancji wysiłku. Waga: 96 kg Parametry życiowe przed zabiegiem: BP 135/87, HR 87/min, SpO2 99%. Pacjent na\nczzczo. Podano 100mg ketaminy w 100ml 0,9%NaCl w 40min wlewie i.v. Dodatkowo z uwagi na nudności po poprzednich\nzabiegach zastosowano Dexaven 4 mg w 20 ml 0,9% NaCl przed infuzją. Podczas infuzji wystąpiły umiarkowanie nasilone\nobjawy dysocjacji, bez innych działań niepożądanych. 60 min po zakończeniu wlewu pacjent w logicznym kontakcie,\nwszechstronnie zorientowany, wydolny krążeniowo i oddechowo, negował dolegliwości somatyczne. Parametry życiowe (BP,\nHR, SpO2, RR) monitorowano i odnotowano w karcie przebiegu zabiegu. Po zabiegu pacjent pozostawał wszechstronnie\nzorientowany, w rzeczowym kontakcie, nieco obniżonym nastroju i napędzie, bez objawów wytwórczych, bez myśli i\ntendencji samobójczych. Poinformowano o zakazie prowadzenia pojazdów i obsługiwania maszyn oraz wykonywania innych\npotencjalnie niebezpiecznych czynności przez 48h od zabiegu. Przed opuszczeniem przez pacjenta ośrodka potwierdzono\nustąpienie objawów dysocjacyjnych, zaburzeń percepcji oraz sedacji; parametry życiowe w normie. Pacjent gotowy do\nopuszczenia ośrodka. Został odebrany przez bliską osobę.\nZal. kontynuacja dotychczasowej farmakoterapii - Dulsevia 60mg 1-0-0, kontynuacja sesji terapeutycznych.\nRozpoznanie\n- F33.1 (*) - Zaburzenie depresyjne nawracające, obecnie epizod depresyjny umiarkowany\nZalecenia\nDepratal: tabl. dojelitowe, 60 mg / 3 op. po 28 szt.\nDS: 1-0-0 tabl.\nOdpłatność: 100%\nUsługi prywatne\n- Leczenie ketaminą - 1 szt. - 1000,00 zł\nWystawił(a):\nMagdalena Więdłocha (2967545)\nKeyClinic\nNowogrodzka 47a, 00-695 Warszawa\nNIP: 7011194833, REGON: 52806794600010, tel. 576250700\nNumer księgi rejestrowej: 000000274970\nKod res. cz. VIII/VII/V: / /01\nNr umowy z NFZ:\nStrona 1 z 1\nKARTA WIZYTY | Prywatna: dn. 03-02-2023, Warszawa\nOddział: Nowogrodzka\nPacjent: \nMszanka 36\n22-230 Wola Uhruska\n\nLekarz: Michał Hapon (3523297)\nWywiad\nPacjent zgłasza poprawę stanu psychicznego, widzi u siebie większą stabilizację, mniej \"dołów\", ale najlepiej się czuje w\npierwsze 2 dni, potem się to troche obniża i stabilizuje, ale ten nastrój jest \"bazowo lepszy niż wcześniej\". Odnotował, że przy\npodejściu do zabiegu po zjedzeniu lekkostrawnego posiłku nie występują u niego mdłości. Pacjent zgłosił się na 8. zabieg.\nOmówiono możliwe korzyści i ryzyko związane ze stosowaniem ketaminy w leczeniu off-label. Pacjent wyraził pisemną zgodę\nna podjęcie leczenia. Stan somatyczny stabilny, bez obj.stenokardialnych, duszności, obniżenia tolerancji wysiłku. Waga: 96\nkg Parametry życiowe przed zabiegiem: BP 131/77, HR 95/min, SpO2 96%. Pacjent spożywał ostatni posiłek 4h temu. Podano\n105mg ketaminy w 100ml 0,9%NaCl w 40min wlewie i.v. Dodatkowo z uwagi na nudności po poprzednich zabiegach\nzastosowano Dexaven 4 mg w 20 ml 0,9% NaCl przed infuzją. Podczas infuzji wystąpiły umiarkowanie nasilone objawy\ndysocjacji, bez innych działań niepożądanych. 60 min po zakończeniu wlewu pacjent w logicznym kontakcie, wszechstronnie\nzorientowany, wydolny krążeniowo i oddechowo, negował dolegliwości somatyczne. Parametry życiowe (BP, HR, SpO2, RR)\nmonitorowano i odnotowano w karcie przebiegu zabiegu. Po zabiegu pacjent pozostawał wszechstronnie zorientowany, w\nrzeczowym kontakcie, nieco obniżonym nastroju i napędzie, bez objawów wytwórczych, bez myśli i tendencji samobójczych.\nPoinformowano o zakazie prowadzenia pojazdów i obsługiwania maszyn oraz wykonywania innych potencjalnie\nniebezpiecznych czynności przez 48h od zabiegu. Przed opuszczeniem przez pacjenta ośrodka potwierdzono ustąpienie\nobjawów dysocjacyjnych, zaburzeń percepcji oraz sedacji; parametry życiowe w normie. Pacjent gotowy do opuszczenia\nośrodka. Został odebrany przez bliską osobę. Zal. kontynuacja dotychczasowej farmakoterapii - Dulsevia 60mg 1-0-0,\nkontynuacja sesji terapeutycznych.\nRozpoznanie\n- F33.1 (*) - Zaburzenie depresyjne nawracające, obecnie epizod depresyjny umiarkowany\nWystawił(a):\nMichał Hapon (3523297)\nKeyClinic\nNowogrodzka 47a, 00-695 Warszawa\nNIP: 7011194833, REGON: 52806794600010, tel. 576250700\nNumer księgi rejestrowej: 000000274970\nKod res. cz. VIII/VII/V: / /01\nNr umowy z NFZ:\nStrona 1 z 1\nKARTA WIZYTY | Prywatna: dn. 10-02-2023, Warszawa\nOddział: Nowogrodzka\nCena: 2000,00 zł\nPacjent: \nMszanka 36\n22-230 Wola Uhruska\n\nLekarz: Magdalena Więdłocha (2967545)\nWywiad\nPacjent relacjonuje utrzymującą się poprawę stanu psychicznego, czuje się stabilniej, jest aktywniejszy, szczególna porpawa\nnastroju i aktywnosci utrzymuje się przez pierwsze 2 dni po wlewie, ale bazowy nastrój też jest lepszy. Pacjent pracuje nad\nzdrowszymi nawykami, codziennie rano spaceruje. Dzisiaj zgłosił się na 9. zabieg. Omówiono możliwe korzyści i ryzyko\nzwiązane ze stosowaniem ketaminy w leczeniu off-label. Pacjent wyraził pisemną zgodę na podjęcie leczenia. Stan\nsomatyczny stabilny, bez obj.stenokardialnych, duszności, obniżenia tolerancji wysiłku. Waga: 96 kg Parametry życiowe\nprzed zabiegiem: BP 120/80, HR 93/min, SpO2 99%. Pacjent spożywał ostatni posiłek 4h temu. Podano 110mg ketaminy w\n100ml 0,9%NaCl w 50min wlewie i.v. Dodatkowo z uwagi na nudności po poprzednich zabiegach zastosowano Dexaven 4 mg\nw 20 ml 0,9% NaCl przed infuzją. Podczas infuzji wystąpiły umiarkowanie nasilone objawy dysocjacji, bez innych działań\nniepożądanych. 60 min po zakończeniu wlewu pacjent w logicznym kontakcie, wszechstronnie zorientowany, wydolny\nkrążeniowo i oddechowo, negował dolegliwości somatyczne. Parametry życiowe (BP, HR, SpO2, RR) monitorowano i\nodnotowano w karcie przebiegu zabiegu. Po zabiegu pacjent pozostawał wszechstronnie zorientowany, w rzeczowym\nkontakcie, nieco obniżonym nastroju i napędzie, bez objawów wytwórczych, bez myśli i tendencji samobójczych.\nPoinformowano o zakazie prowadzenia pojazdów i obsługiwania maszyn oraz wykonywania innych potencjalnie\nniebezpiecznych czynności przez 48h od zabiegu. Przed opuszczeniem przez pacjenta ośrodka potwierdzono ustąpienie\nobjawów dysocjacyjnych, zaburzeń percepcji oraz sedacji; parametry życiowe w normie. Pacjent gotowy do opuszczenia\nośrodka. Został odebrany przez bliską osobę. Zal. kontynuacja dotychczasowej farmakoterapii - Depratal 60mg 1-0-0,\nkontynuacja sesji terapeutycznych.\nRozpoznanie\n- F33.1 (*) - Zaburzenie depresyjne nawracające, obecnie epizod depresyjny umiarkowany\nUsługi prywatne\n- Leczenie ketaminą - 2 szt. - 2000,00 zł\nWystawił(a):\nMagdalena Więdłocha (2967545)\nKeyClinic\nNowogrodzka 47a, 00-695 Warszawa\nNIP: 7011194833, REGON: 52806794600010, tel. 576250700\nNumer księgi rejestrowej: 000000274970\nKod res. cz. VIII/VII/V: / /01\nNr umowy z NFZ:\nStrona 1 z 1\nKARTA WIZYTY | Prywatna: dn. 17-02-2023, Warszawa\nOddział: Nowogrodzka\nCena: 1000,00 zł\nPacjent: \nMszanka 36\n22-230 Wola Uhruska\n\nLekarz: Magdalena Więdłocha (2967545)\nWywiad\nPacjent relacjonuje utrzymującą się poprawę stanu psychicznego, czuje się stabilniej, jest aktywniejszy, szczególna poprawa\nnastroju i aktywnosci utrzymuje się przez pierwsze 2 dni po wlewie, później odczuwalny spadek. Dzisiaj zgłosił się na 10.\nzabieg. Omówiono możliwe korzyści i ryzyko związane ze stosowaniem ketaminy w leczeniu off-label. Pacjent wyraził\npisemną zgodę na podjęcie leczenia. Stan somatyczny stabilny, bez obj.stenokardialnych, duszności, obniżenia tolerancji\nwysiłku. Waga: 96 kg Parametry życiowe przed zabiegiem: BP 130/88, HR 78/min, SpO2 97%. Pacjent spożywał ostatni\nposiłek 4h temu. Podano 105 mg ketaminy w 100ml 0,9%NaCl w 50min wlewie i.v. Dodatkowo z uwagi na nudności po\npoprzednich zabiegach zastosowano Dexaven 4 mg w 20 ml 0,9% NaCl przed infuzją. Podczas infuzji wystąpiły umiarkowanie\nnasilone objawy dysocjacji, bez innych działań niepożądanych. 60 min po zakończeniu wlewu pacjent w logicznym kontakcie,\nwszechstronnie zorientowany, wydolny krążeniowo i oddechowo, negował dolegliwości somatyczne. Parametry życiowe (BP,\nHR, SpO2, RR) monitorowano i odnotowano w karcie przebiegu zabiegu. Po zabiegu pacjent pozostawał wszechstronnie\nzorientowany, w rzeczowym kontakcie, nieco obniżonym nastroju i napędzie, bez objawów wytwórczych, bez myśli i\ntendencji samobójczych. Poinformowano o zakazie prowadzenia pojazdów i obsługiwania maszyn oraz wykonywania innych\npotencjalnie niebezpiecznych czynności przez 48h od zabiegu. Przed opuszczeniem przez pacjenta ośrodka potwierdzono\nustąpienie objawów dysocjacyjnych, zaburzeń percepcji oraz sedacji; parametry życiowe w normie. Pacjent gotowy do\nopuszczenia ośrodka. Został odebrany przez bliską osobę. Zal. kontynuacja dotychczasowej farmakoterapii - Depratal 60mg\n1-0-0, 30mg 1-0-0 (zwiększenie dawki) ,kontynuacja sesji terapeutycznych.\nRozpoznanie\n- F33.1 (*) - Zaburzenie depresyjne nawracające, obecnie epizod depresyjny umiarkowany\nZalecenia\nDepratal: tabl. dojelitowe, 30 mg / 2 op. po 28 szt.\nDS: 1-0-0\nOdpłatność: 100%\nUsługi prywatne\n- Leczenie ketaminą - 1 szt. - 1000,00 zł\nWystawił(a):\nMagdalena Więdłocha (2967545)\nKeyClinic\nNowogrodzka 47a, 00-695 Warszawa\nNIP: 7011194833, REGON: 52806794600010, tel. 576250700\nNumer księgi rejestrowej: 000000274970\nKod res. cz. VIII/VII/V: / /01\nNr umowy z NFZ:\nStrona 1 z 1\nKARTA WIZYTY | Prywatna: dn. 24-02-2023, Warszawa\nOddział: Nowogrodzka\nCena: 1000,00 zł\nPacjent: \nMszanka 36\n22-230 Wola Uhruska\n\nLekarz: Magdalena Więdłocha (2967545)\nWywiad\nPacjent czuje się gorzej w ostatnich dniach w zakresie nastroju i aktywności. Ma poczucie, że leczenie ketaminą nie dało\npełnej remisji objawów depresyjnych. Relacjonuje trudności z zasypianiem. Tydzień temu zgodnie z zaleceniami zwiększył\ndawkę duloksetyny do 90mg/d Dzisiaj zgłosił się na 11. zabieg. Omówiono możliwe korzyści i ryzyko związane ze\nstosowaniem ketaminy w leczeniu off-label. Pacjent wyraził pisemną zgodę na podjęcie leczenia. Stan somatyczny stabilny,\nbez obj.stenokardialnych, duszności, obniżenia tolerancji wysiłku. Waga: 96 kg Parametry życiowe przed zabiegiem: BP\n125/84, HR 87/min, SpO2 99%. Pacjent spożywał ostatni posiłek 4h temu. Podano 110 mg ketaminy w 100ml 0,9%NaCl w\n50min wlewie i.v. Dodatkowo z uwagi na nudności po poprzednich zabiegach zastosowano Dexaven 4 mg w 20 ml 0,9% NaCl\nprzed infuzją. Podczas infuzji wystąpiły umiarkowanie nasilone objawy dysocjacji, bez innych działań niepożądanych. 60 min\npo zakończeniu wlewu pacjent w logicznym kontakcie, wszechstronnie zorientowany, wydolny krążeniowo i oddechowo,\nnegował dolegliwości somatyczne. Parametry życiowe (BP, HR, SpO2, RR) monitorowano i odnotowano w karcie przebiegu\nzabiegu. Po zabiegu pacjent pozostawał wszechstronnie zorientowany, w rzeczowym kontakcie, nieco obniżonym nastroju i\nnapędzie, bez objawów wytwórczych, bez myśli i tendencji samobójczych. Poinformowano o zakazie prowadzenia pojazdów i\nobsługiwania maszyn oraz wykonywania innych potencjalnie niebezpiecznych czynności przez 48h od zabiegu. Przed\nopuszczeniem przez pacjenta ośrodka potwierdzono ustąpienie objawów dysocjacyjnych, zaburzeń percepcji oraz sedacji;\nparametry życiowe w normie. Pacjent gotowy do opuszczenia ośrodka. Został odebrany przez bliską osobę. Zal. kontynuacja\ndotychczasowej farmakoterapii - Depratal 60mg 1-0-0, 30mg 1-0-0, Trazodone 50mg 0-0-1/2 lub 1 tabl. ,kontynuacja sesji\nterapeutycznych.\nRozpoznanie\n- F33.1 (*) - Zaburzenie depresyjne nawracające, obecnie epizod depresyjny umiarkowany\nZalecenia\nTrazodone Neuraxpharm (Trazodone Glenmark): tabl., 50 mg / 1 op. po 30 szt.\nDS: 0-0-1 tabl.\nOdpłatność: 100%\nUsługi prywatne\n- Leczenie ketaminą - 1 szt. - 1000,00 zł\nWystawił(a):\nMagdalena Więdłocha (2967545)\nKeyClinic\nNowogrodzka 47a, 00-695 Warszawa\nNIP: 7011194833, REGON: 52806794600010, tel. 576250700\nNumer księgi rejestrowej: 000000274970\nKod res. cz. VIII/VII/V: / /01\nNr umowy z NFZ:\nStrona 1 z 1\nKARTA WIZYTY | Prywatna: dn. 03-03-2023, Warszawa\nOddział: Nowogrodzka\nCena: 1000,00 zł\nPacjent: \nMszanka 36\n22-230 Wola Uhruska\n\nLekarz: Magdalena Więdłocha (2967545)\nWywiad\nPacjent zgłosił się na 12. zabieg. Nastrój obnizony, trudności w zmotywowaniu się do podejmowania działań. Omówiono\nmożliwe korzyści i ryzyko związane ze stosowaniem ketaminy w leczeniu off-label. Pacjent wyraził pisemną zgodę na\nwykonanie zabiegu. Stan somatyczny stabilny, bez obj.stenokardialnych, duszności, obniżenia tolerancji wysiłku. Waga: 96\nkg Parametry życiowe przed zabiegiem: BP 120/80, HR 85/min, SpO2 98%. Pacjent spożywał ostatni posiłek 4h temu. Podano\n110 mg ketaminy w 100ml 0,9%NaCl w 50min wlewie i.v. Dodatkowo z uwagi na nudności po poprzednich zabiegach\nzastosowano Dexaven 4 mg w 20 ml 0,9% NaCl przed infuzją. Podczas infuzji wystąpiły umiarkowanie nasilone objawy\ndysocjacji, znaczne nasilenie niepokoju, pesymistycznych myśli. W związku z pogorszeniem samopcozucia wlew przerwano\npo podaniu ok. 70ml. 60 min po zakończeniu wlewu pacjent w logicznym kontakcie, wszechstronnie zorientowany, wydolny\nkrążeniowo i oddechowo, negował dolegliwości somatyczne. Parametry życiowe (BP, HR, SpO2, RR) monitorowano i\nodnotowano w karcie przebiegu zabiegu. Po zabiegu pacjent pozostawał wszechstronnie zorientowany, w rzeczowym\nkontakcie, nieco obniżonym nastroju i napędzie, bez objawów wytwórczych, bez myśli i tendencji samobójczych.\nPoinformowano o zakazie prowadzenia pojazdów i obsługiwania maszyn oraz wykonywania innych potencjalnie\nniebezpiecznych czynności przez 48h od zabiegu. Przed opuszczeniem przez pacjenta ośrodka potwierdzono ustąpienie\nobjawów dysocjacyjnych, zaburzeń percepcji oraz sedacji; parametry życiowe w normie. Pacjent gotowy do opuszczenia\nośrodka. Został odebrany przez bliską osobę. Zal. kontynuacja dotychczasowej farmakoterapii - Depratal 60mg 1-0-0, 30mg\n1-0-0, Trazodone 50mg 0-0-1/2 lub 1 tabl. ,kontynuacja sesji terapeutycznych.\nRozpoznanie\n- F33.1 (*) - Zaburzenie depresyjne nawracające, obecnie epizod depresyjny umiarkowany\nUsługi prywatne\n- Leczenie ketaminą - 1 szt. - 1000,00 zł\nWystawił(a):\nMagdalena Więdłocha (2967545)\nKeyClinic\nNowogrodzka 47a, 00-695 Warszawa\nNIP: 7011194833, REGON: 52806794600010, tel. 576250700\nNumer księgi rejestrowej: 000000274970\nKod res. cz. VIII/VII/V: / /01\nNr umowy z NFZ:\nStrona 1 z 1\nKARTA WIZYTY | Prywatna: dn. 31-03-2023, Warszawa\nOddział: Aleje Jerozolimskie\nPacjent: \nMszanka 36\n22-230 Wola Uhruska\n\nLekarz: Magdalena Więdłocha (2967545)\nWywiad\notrzymano wyniki badania farmakogenetycznego (raport w załączeniu).\nCYP2D^ - UM\nCYP3A4/5 - obniżona aktywność\nZalecono zwiększenie dawki duloksetyny z 90 do 120mg oraz zgłoszenie na konsultację za 4 tygodnie.\nRozpoznanie\n- F33.1 (*) - Zaburzenie depresyjne nawracające, obecnie epizod depresyjny umiarkowany\nZalecenia\nDepratal: tabl. dojelitowe, 60 mg / 2 op. po 56 szt.\nDS: 2-0-0 tabl.\nOdpłatność: 30%\nWystawił(a):\nMagdalena Więdłocha (2967545)\nKeyClinic\nNowogrodzka 47a, 00-695 Warszawa\nNIP: 7011194833, REGON: 52806794600010, tel. 576250700\nNumer księgi rejestrowej: 000000274970\nKod res. cz. VIII/VII/V: / /02\nNr umowy z NFZ:\nStrona 1 z 1\nKARTA WIZYTY | Prywatna: dn. 27-04-2023, Warszawa\nOddział: Aleje Jerozolimskie\nCena: 250,00 zł\nPacjent: \nMszanka 36\n22-230 Wola Uhruska\n\nLekarz: Magdalena Więdłocha (2967545)\nWywiad\nPacjent nie odczuwa poprawy pomimo zwiększenia dawki duloksetyny do 120mg (ok. 4 tyg. temu). Jak opisuje, odczuwa\nprzygnębienie, trudnosci w zmotywowaniu się do podejmowania działań, anhedonię, poczucie braku sensu życia.\naktualny stan psychiczny: orientacja wszechstronna, kontakt rzeczowy, nastrój obniżony, niepokój psychoruchowy. Pacjent\nnie wypowiada treści urojeniowych spontanicznie ani dopytywany, nie stwierdza się formalnych zaburzeń myślenia. Neguje\ndoznania omamowe, nie zdradza ich swoim zachowaniem. Przeczy myślom i tendencjom autoagresywnym.\nW związku z utrzymującymi się objawami depresyjnymi (obniżony nastrój, anhedonia, brak motywacji) pomimo stosowanej\nfarmakoterapii, zaproponowano pacjentowi wdrożenie pramipeksolu off-label. Poinformowano o możliwych korzyściach i\ndziałaniach niepożądanych. Pacjent wyraził zgodę na podjęcie leczenia.\nDepratal 120mg jak dotychczas\nOprymea 0,26mg 1 tabl. wieczorem przez 7 dni, następnie 0,52 mg 1 tabl. wieczorem przez 7 dni, następnie 1,05mg 1 tabl.\nwieczorem do kolejnej wizyty - za 4 tygodnie.\nRozpoznanie\n- F33.1 (*) - Zaburzenie depresyjne nawracające, obecnie epizod depresyjny umiarkowany\nZalecenia\nOprymea: tabl. o przedł. uwalnianiu, 0,26 mg+ 0,52 mg+ 1,05 mg / 1 op. po 7 szt. + 7 szt. + 7 szt.\nDS: 1-0-0 tabl.\nOdpłatność: 100%\nOprymea: tabl. o przedł. uwalnianiu, 1,05 mg / 1 op. po 30 szt.\nDS: 0-0-1 tabl.\nOdpłatność: 30%\nDepratal: tabl. dojelitowe, 60 mg / 2 op. po 56 szt.\nDS: 2-0-0 tabl.\nOdpłatność: 30%\nUsługi prywatne\n- Konsultacja psychiatryczna (kolejna) - 1 szt. - 250,00 zł\nWystawił(a):\nMagdalena Więdłocha (2967545)\nKeyClinic\nNowogrodzka 47a, 00-695 Warszawa\nNIP: 7011194833, REGON: 52806794600010, tel. 576250700\nNumer księgi rejestrowej: 000000274970\nKod res. cz. VIII/VII/V: / /02\nNr umowy z NFZ:\nStrona 1 z 1\nKARTA WIZYTY | Prywatna: dn. 19-06-2023, Warszawa\nOddział: Aleje Jerozolimskie\nPacjent: \nMszanka 36\n22-230 Wola Uhruska\n\nLekarz: Magdalena Więdłocha (2967545)\nWywiad\nMail od pacjenta:\n\"Biorę już trochę ten lek Oprymea w dawce 1,05mg, ale nie ma poprawy.\n1. Napisała Pani, że można zwiększać jego dawkę. Napisze Pani w jaki sposób, tj. o ile podbijać i w jakich odstępach czasu?\n2. Czy Depratal (dawka 120mg) brać nadal, czy jednak go odstawiać?\"\nOdpowiedź:\n\"jeśli dobrze toleruje Pan Oprymeę, ale nie ma poprawy, to możemy stopniowo zwiększać dawkę. Proponuję o 0,26 mg co 3\ndni do docelowej dawki 2,1mg wieczorem, czyli:\n- pierwsze 3 dni: 1,05+0,26 mg\n- kolejne 3 dni: 1,05+0,52 mg\n- kolejne 3 dni: 1,05+0,52+0,26mg\n- następnie: 2 tabl. 1,05 mg wieczorem\nPo osiągnieciu dawki 2,1 mg proszę poczekać 2-3 tygodnie, jeśli nie odczuje Pan poprawy, może Pan w taki sam sposób\nzwiększyć dawkę do 3 tabl. 1,05mg (3,15mg). Jeśli przy tej dawce po 2-3 tygodniach nadal nie będzie efektu, proszę dać\nznać.\nW przypadku Depratalu, myślę że możemy stopniowo schodzić z dawki, jeśli ostatnie zwiększenie nie przyniosło żadnego\nefektu. Proponuję stopniowo - o 15 mg (0,5 tabl. 30mg) co tydzień do dawki 60mg.\"\nRozpoznanie\n- F33.1 (*) - Zaburzenie depresyjne nawracające, obecnie epizod depresyjny umiarkowany\nZalecenia\nOprymea: tabl. o przedł. uwalnianiu, 0,26 mg+ 0,52 mg+ 1,05 mg / 2 op. po 7 szt. + 7 szt. + 7 szt.\nDS: 0-0-1 tabl.\nOdpłatność: 100%\nOprymea: tabl. o przedł. uwalnianiu, 2,1 mg / 2 op. po 30 szt.\nDS: 0-0-1 tabl.\nOdpłatność: 100%\nDepratal: tabl. dojelitowe, 30 mg / 2 op. po 28 szt.\nDS: 1-0-0 tabl.\nOdpłatność: 100%\nWystawił(a):\nMagdalena Więdłocha (2967545)\nKeyClinic\nNowogrodzka 47a, 00-695 Warszawa\nNIP: 7011194833, REGON: 52806794600010, tel. 576250700\nNumer księgi rejestrowej: 000000274970\nKod res. cz. VIII/VII/V: / /02\nNr umowy z NFZ:\nStrona 1 z 1\nKARTA WIZYTY | Prywatna: dn. 30-08-2023, Warszawa\nOddział: Aleje Jerozolimskie\nPacjent: \nMszanka 36\n22-230 Wola Uhruska\n\nLekarz: Magdalena Więdłocha (2967545)\nWywiad\npacjent zgłosił pisemną prośbę o kontynuację dotychczasowego leczenia, wystawiono rp.\nRozpoznanie\n- F33.1 (*) - Zaburzenie depresyjne nawracające, obecnie epizod depresyjny umiarkowany\nZalecenia\nOprymea: tabl. o przedł. uwalnianiu, 2,1 mg / 1 op. po 30 szt.\nDS: 0-0-1 tabl.\nOdpłatność: 100%\nOprymea: tabl. o przedł. uwalnianiu, 0,26 mg+ 0,52 mg+ 1,05 mg / 1 op. po 7 szt. + 7 szt. + 7 szt.\nDS: 0-0-1 tabl.\nOdpłatność: 100%\nWystawił(a):\nMagdalena Więdłocha (2967545)\nKeyClinic\nNowogrodzka 47a, 00-695 Warszawa\nNIP: 7011194833, REGON: 52806794600010, tel. 576250700\nNumer księgi rejestrowej: 000000274970\nKod res. cz. VIII/VII/V: / /02\nNr umowy z NFZ:\nStrona 1 z 1\nKARTA WIZYTY | Prywatna: dn. 19-09-2023, Warszawa\nOddział: Aleje Jerozolimskie\nCena: 250,00 zł\nPacjent: \nMszanka 36\n22-230 Wola Uhruska\n\nLekarz: Magdalena Więdłocha (2967545)\nWywiad\nW związku z brakiem efektu terapeutycznego pramipeksolu, zalecono stopniowe odstawianie, pacjent przyjmuje obecnie\n1,05 mg. Nie odczuwał przykrych objawów przy zmniejszaniu dawki. W trakcie przyjmowania zauważył nasilenie skłonności\ndo przejadania się (\"nie widział sensu, żeby sobie odmawiać\") i zarywania nocy (praca, gry, \"oglądanie głupot\"), pomimo że\nbył senny. Często w dzień chciało mu się spać, a wieczorem \"miał ochotę coś porobić\" i ciężko było mu się oderwać. Po\nzmniejszeniu dawki - poprawa.\nUtrzymuje się brak energii, anhedonia, brak motywacji do podejmowania działań, wycofanie społeczne. Pacjent pracuje, ma\nz tego satysfakcję, ale nie realizuje się zupełnie w innych obszarach życia, co przyczynia się do obniżonego nastroju,\npoczucia beznadziei i bezsilności.\naktualny stan psychiczny: orientacja wszechstronna, kontakt rzeczowy, nastrój obniżony, napęd w normie. Pacjent nie\nwypowiada treści urojeniowych spontanicznie ani dopytywany, nie stwierdza się formalnych zaburzeń myślenia. Neguje\ndoznania omamowe, nie zdradza ich swoim zachowaniem. Przeczy myślom i tendencjom autoagresywnym.\nW związku z utrzymującymi się objawami depresyjnymi (obniżony nastrój, anhedonia, brak motywacji) pomimo stosowanej\nfarmakoterapii, zaproponowano pacjentowi wdrożenie metylofenidatu off-label. Poinformowano o możliwych korzyściach i\ndziałaniach niepożądanych. Pacjent wyraził zgodę na podjęcie leczenia.\nZal.\nDepratal 60mg 1-0-0\nConcerta 18 mg 1-0-0, w razie nieodczuwania efektu po kilku dniach zwiększenie dawki do 2-0-0\nNiespożywanie alkoholu ani innych spa.\nKonsultacja kontrolna za 2 miesiące lub wcześniej w razie niepokojących objawów.\nZebrano szczegółowy wywiad, o którym mowa w par. 7 ust. 2a Rozporządzenia Ministra Zdrowia z dnia 11 września 2006 r.\nw sprawie środków odurzających, substancji psychotropowych, prekursorów kategorii 1 i preparatów zawierających te środki\nlub substancje (Dz. U. z 2021 r. poz. 166), że ilość i rodzaj produktów leczniczych przepisanych pacjentowi na receptach\nwystawionych i zrealizowanych nie jest wystarczająca dla prawidłowego prowadzenia farmakoterapii\nRozpoznanie\n- F33.1 (*) - Zaburzenie depresyjne nawracające, obecnie epizod depresyjny umiarkowany\nZalecenia\nConcerta®: tabl. o przedł. uwalnianiu, 18 mg / 2 op. po 30 szt.\nDS: 1-0-0 tabl.\nOdpłatność: 100%\nDepratal: tabl. dojelitowe, 60 mg / 1 op. po 56 szt.\nDS: 1-0-0 tabl.\nOdpłatność: 100%\nUsługi prywatne\n- Konsultacja psychiatryczna (kolejna) - 1 szt. - 250,00 zł\nWystawił(a):\nMagdalena Więdłocha (2967545)\nKeyClinic\nNowogrodzka 47a, 00-695 Warszawa\nNIP: 7011194833, REGON: 52806794600010, tel. 576250700\nNumer księgi rejestrowej: 000000274970\nKod res. cz. VIII/VII/V: / /02\nNr umowy z NFZ:\nStrona 1 z 1\nKARTA WIZYTY | Prywatna: dn. 24-10-2023, Warszawa\nOddział: Aleje Jerozolimskie\nPacjent: \nMszanka 36\n22-230 Wola Uhruska\n\nLekarz: Magdalena Więdłocha (2967545)\nWywiad\ninformacja od pacjenta: \"Pobrałem trochę ten lek Concerta 3x18mg i za jakieś 2 dni kończy mi się drugie (i ostatnie)\nopakowanie, które mam.\nMoże coś tam jest lepiej. Szczerze mówiąc, ciężko mi powiedzieć. Mam tak rozwalony cykl dobowy przez zarywanie nocek,\nże może i lek by działał lepiej, ale jakbym miał regularny sen.\nMoże spróbuję dzisiaj wrócić do brania 1/2 tabletki tego Trazodone, który mi kiedyś Pani przepisała (wcześniej próbowałem,\nmoże i lepiej się wysypiałem, ale czemuś przestałem go brać).\"\nZal.\nConcerta 36mg+18mg rano po posiłku\nTrazodone 50mg - 1/2 tabl ok. 22.00\nMelatonina 5mg 1 tabl. ok. 20.00\nostatnia wizyta < 3 mies. temu\nDokonano weryfikacji za pośrednictwem systemu, o której mowa w par. 7 ust. 2a Rozporządzenia Ministra Zdrowia z dnia 11\nwrześnia 2006 r. w sprawie środków odurzających, substancji psychotropowych, prekursorów kategorii 1 i preparatów\nzawierających te środki lub substancje (Dz. U. z 2021 r. poz. 166), że ilość i rodzaj produktów leczniczych przepisanych\npacjentowi na receptach wystawionych i zrealizowanych nie jest wystarczająca dla prawidłowego prowadzenia\nfarmakoterapii.\nRozpoznanie\n- F33.1 (*) - Zaburzenie depresyjne nawracające, obecnie epizod depresyjny umiarkowany\nZalecenia\nConcerta®: tabl. o przedł. uwalnianiu, 36 mg / 2 op. po 30 szt.\nDS: 1-0-0 tabl.\nOdpłatność: 100%\nConcerta®: tabl. o przedł. uwalnianiu, 18 mg / 2 op. po 30 szt.\nDS: 1-0-0 tabl.\nOdpłatność: 100%\nWystawił(a):\nMagdalena Więdłocha (2967545)\nKeyClinic\nNowogrodzka 47a, 00-695 Warszawa\nNIP: 7011194833, REGON: 52806794600010, tel. 576250700\nNumer księgi rejestrowej: 000000274970\nKod res. cz. VIII/VII/V: / /02\nNr umowy z NFZ:\nStrona 1 z 1\nKARTA WIZYTY | Prywatna: dn. 18-12-2023, Warszawa\nOddział: Aleje Jerozolimskie\nPacjent: \nMszanka 36\n22-230 Wola Uhruska\n\nLekarz: Magdalena Więdłocha (2967545)\nWywiad\nPacjent relacjonuje częściową poprawę w zakresie nastroju i motywacji do podejmowania działań po zwiększeniu dawki\nConcerty do 36mg+18mg. Neguje działania niepożądane\nZal. Concerta 36mg+18mg rano po posiłku Trazodone 50mg - 1/2 tabl ok. 22.00 Melatonina 5mg 1 tabl. ok. 20.00\nDokonano weryfikacji za pośrednictwem systemu, o której mowa w par. 7 ust. 2a Rozporządzenia Ministra Zdrowia z dnia 11\nwrześnia 2006 r. w sprawie środków odurzających, substancji psychotropowych, prekursorów kategorii 1 i preparatów\nzawierających te środki lub substancje (Dz. U. z 2021 r. poz. 166), że ilość i rodzaj produktów leczniczych przepisanych\npacjentowi na receptach wystawionych i zrealizowanych nie jest wystarczająca dla prawidłowego prowadzenia\nfarmakoterapii.\nRozpoznanie\n- F33.1 (*) - Zaburzenie depresyjne nawracające, obecnie epizod depresyjny umiarkowany\nZalecenia\nDepratal: tabl. dojelitowe, 60 mg / 2 op. po 28 szt.\nDS: 1-0-0 tabl.\nOdpłatność: 100%\nConcerta®: tabl. o przedł. uwalnianiu, 18 mg / 1 op. po 30 szt.\nDS: 1-0-0 tabl.\nOdpłatność: 100%\nConcerta®: tabl. o przedł. uwalnianiu, 36 mg / 1 op. po 30 szt.\nDS: 1-0-0 tabl.\nOdpłatność: 100%\nWystawił(a):\nMagdalena Więdłocha (2967545)\nKeyClinic\nNowogrodzka 47a, 00-695 Warszawa\nNIP: 7011194833, REGON: 52806794600010, tel. 576250700\nNumer księgi rejestrowej: 000000274970\nKod res. cz. VIII/VII/V: / /02\nNr umowy z NFZ:\nStrona 1 z 1\nKARTA WIZYTY | Prywatna: dn. 23-01-2024, Warszawa\nOddział: Aleje Jerozolimskie\nCena: 250,00 zł\nPacjent: \nMszanka 36\n22-230 Wola Uhruska\n\nLekarz: Magdalena Więdłocha (2967545)\nWywiad\nPacjent nie odczuwa wyraźnej poprawy przy stosowaniu Concerty 54 mg , nie miał też działań niepożądanych, \"jakby w\nogóle nie brał leku\". Opisuje rozregulowanie rytmu dobowego, ma problemy ze snem. Utrzymuje się brak energii, anhedonia,\nbrak motywacji do podejmowania działań, wycofanie społeczne.\nstan psychiczny: orientacja wszechstronna, kontakt rzeczowy, nastrój obniżony, napęd w normie. Pacjent nie wypowiada\ntreści urojeniowych spontanicznie ani dopytywany, nie stwierdza się formalnych zaburzeń myślenia. Neguje doznania\nomamowe, nie zdradza ich swoim zachowaniem. Przeczy myślom i tendencjom autoagresywnym.\nZal.\nDepratal 60mg 1-0-0\nKetrel 25mg - proszę zacząć od 0,5 tabl. ok. 21.00, zaleznie od efektu moze Pan zwiększyć dawkę do 1 lub 2 tabl.\nMelatonina 5mg - 1 tabl. ok. 21.00\nMedikinet CR - działa ok. 6-8h, proszę zacząć od 20 mg rano po sniadaniu i zaleznie od efektu może Pan zwiększać dawkę o\n10mg co 1-2 dni\nMedikinet - działa ok 2-4 h, moze być stosowany 2-3x dziennie (np. 3x 10mg)\nNieprzekraczanie maksymalnej dawki metylofenidatu 60mg.\nkons. kontrolna za 2 miesiące lub wczesniej w razie niepokojących objawów.\npomiar BP, HR 2xdz.\nRozpoznanie\n- F33.1 (*) - Zaburzenie depresyjne nawracające, obecnie epizod depresyjny umiarkowany\nZalecenia\nDepratal: tabl. dojelitowe, 60 mg / 3 op. po 28 szt.\nDS: 1-0-0 tabl.\nOdpłatność: 100%\nKetrel: tabl. powl., 25 mg / 3 op. po 1 poj. 30 szt.\nDS: 0-0-1 tabl.\nOdpłatność: 100%\nMedikinet® CR 10 mg: kaps. o zmod. uwalnianiu, twarde, 10 mg / 2 op. po 30 szt.\nDS: 2-0-0 tabl.\nOdpłatność: 100%\nMedikinet® CR 20 mg: kaps. o zmod. uwalnianiu, twarde, 20 mg / 2 op. po 30 szt.\nDS: 2-0-0\nOdpłatność: 100%\nMedikinet® 10 mg: tabl., 10 mg / 2 op. po 30 szt.\nDS: 0-2-0\nOdpłatność: 100%\nUsługi prywatne\n- Konsultacja psychiatryczna (kolejna) - 1 szt. - 250,00 zł\nWystawił(a):\nMagdalena Więdłocha (2967545)\nKeyClinic\nNowogrodzka 47a, 00-695 Warszawa\nNIP: 7011194833, REGON: 52806794600010, tel. 576250700\nNumer księgi rejestrowej: 000000274970\nKod res. cz. VIII/VII/V: / /02\nNr umowy z NFZ:\nStrona 1 z 1\nKARTA WIZYTY | Prywatna: dn. 14-03-2024, Warszawa\nOddział: Aleje Jerozolimskie\nPacjent: \nMszanka 36\n22-230 Wola Uhruska\n\nLekarz: Magdalena Więdłocha (2967545)\nWywiad\nPoprawa aktywności, motywacji, nastroju przy stosowaniu Medikinetu CR 40 mg.\nzal.\nMedikinet CR 20mg 2-0-0\nDokonano weryfikacji za pośrednictwem systemu, o której mowa w par. 7 ust. 2a Rozporządzenia Ministra Zdrowia z dnia 11\nwrześnia 2006 r. w sprawie środków odurzających, substancji psychotropowych, prekursorów kategorii 1 i preparatów\nzawierających te środki lub substancje (Dz. U. z 2021 r. poz. 166), że ilość i rodzaj produktów leczniczych przepisanych\npacjentowi na receptach wystawionych i zrealizowanych nie jest wystarczająca dla prawidłowego prowadzenia\nfarmakoterapii.\nRozpoznanie\n- F33.1 (*) - Zaburzenie depresyjne nawracające, obecnie epizod depresyjny umiarkowany\nZalecenia\nMedikinet® CR 20 mg: kaps. o zmod. uwalnianiu, twarde, 20 mg / 2 op. po 30 szt.\nDS: 2-0-0 tabl.\nOdpłatność: 100%\nWystawił(a):\nMagdalena Więdłocha (2967545)\nKeyClinic\nNowogrodzka 47a, 00-695 Warszawa\nNIP: 7011194833, REGON: 52806794600010, tel. 576250700\nNumer księgi rejestrowej: 000000274970\nKod res. cz. VIII/VII/V: / /02\nNr umowy z NFZ:\nStrona 1 z 1\nKARTA WIZYTY | Prywatna: dn. 14-05-2024, Warszawa\nOddział: Nowogrodzka\nPacjent: \nMszanka 36\n22-230 Wola Uhruska\n\nLekarz: Magdalena Więdłocha (2967545)\nWywiad\nPacjent zgłosił prośbę o kontynuację dotychczasowego leczenia. Konsultację ma zaplanowaną za miesiąc. Wystawiono rp.\nost. kons. < 3 mies. temu\nDokonano weryfikacji za pośrednictwem systemu, o której mowa w par. 7 ust. 2a Rozporządzenia Ministra Zdrowia z dnia 11\nwrześnia 2006 r. w sprawie środków odurzających, substancji psychotropowych, prekursorów kategorii 1 i preparatów\nzawierających te środki lub substancje (Dz. U. z 2021 r. poz. 166), że ilość i rodzaj produktów leczniczych przepisanych\npacjentowi na receptach wystawionych i zrealizowanych nie jest wystarczająca dla prawidłowego prowadzenia\nfarmakoterapii.\nRozpoznanie\n- F33.1 (*) - Zaburzenie depresyjne nawracające, obecnie epizod depresyjny umiarkowany\nZalecenia\nKod e-Recepty: 7649 – realizacja od teraz\nMedikinet® 10 mg: tabl., 10 mg / 2 op. po 30 szt.\nDS: 0-1-0 tabl.\nOdpłatność: 100%\nKod e-Recepty: 2235 – realizacja od teraz\nSymkinet MR: kaps. o zmodyf. uwalnianiu, twarde, 20 mg / 3 op. po 30 szt.\nDS: 2-0-0 tabl.\nOdpłatność: 100%\nWystawił(a):\nMagdalena Więdłocha (2967545)\nKeyClinic\nNowogrodzka 47a, 00-695 Warszawa\nNIP: 7011194833, REGON: 52806794600010, tel. 576250700\nNumer księgi rejestrowej: 000000274970\nKod res. cz. VIII/VII/V: / /01\nNr umowy z NFZ:\nStrona 1 z 1\nKARTA WIZYTY | Prywatna: dn. 21-05-2024, Warszawa\nOddział: Nowogrodzka\nPacjent: \nMszanka 36\n22-230 Wola Uhruska\n\nLekarz: Magdalena Więdłocha (2967545)\nWywiad\nPacjent zgłosił prośbę o kontynuację dotychczasowego leczenia. Konsultację ma zaplanowaną za miesiąc. Wystawiono rp.\nRozpoznanie\n- F33.1 (*) - Zaburzenie depresyjne nawracające, obecnie epizod depresyjny umiarkowany\nZalecenia\nKod e-Recepty: 1140 – realizacja od teraz\nDepratal: tabl. dojelitowe, 60 mg / 2 op. po 28 szt.\nDS: 1-0-0 tabl.\nOdpłatność: 100%\nWystawił(a):\nMagdalena Więdłocha (2967545)\nKeyClinic\nNowogrodzka 47a, 00-695 Warszawa\nNIP: 7011194833, REGON: 52806794600010, tel. 576250700\nNumer księgi rejestrowej: 000000274970\nKod res. cz. VIII/VII/V: / /01\nNr umowy z NFZ:\nStrona 1 z 1\nKARTA WIZYTY | Prywatna: dn. 18-06-2024, Warszawa\nOddział: Nowogrodzka\nCena: 300,00 zł\nPacjent: \nMszanka 36\n22-230 Wola Uhruska\n\nLekarz: Magdalena Więdłocha (2967545)\nWywiad\nPacjent podjął diagnostykę w kier ASD, jest przygnębiony diagnozą i \"nieuleczalnością\" tego stanu, od czasu rozpoczecia\nprocesu diagnostycznego. Córka brata pacjenta ma autyzm. Ostatnio pacjent był też na ślubie pacjenta, co było dla niego\ntrudnym doświadczeniem, bo pogłębiło poczucie, że wszyscy wokół układają sobie życie. Pacjent spotyka się czasem z\nkolegą i siostrzenicą i gra w planszówki/karty. Ostatnio odczuwa spadek energii, motywacji do podejmowania działań,\naktywności. Przyjmował ostatnio Medikinet , bo nie wykupił CR - wydaje się, że lepiej czuł się przy postaci CR.\nstan psychiczny: orientacja wszechstronna, kontakt rzeczowy, nastrój obniżony, napęd w normie, afekt dostosowany. Pacjent\nnie wypowiada treści urojeniowych, neguje doznania omamowe i nie zdradza ich swoim zachowaniem. Neguje myśli i\ntendencje samobójcze.\nZal.\nMedikinet CR 30mg 2-0-0\nDulsevia 60mg 1-0-0\nPomiar BP, HR 2x dziennie.\nPoinformowano o możliwych działaniach niepożądanych leczenia.\nNiespożywanie alkoholu ani innych spa\nKons. kontrolna za 2 miesiące lub wcześniej w razie niepokojących objawów.\nDokonano weryfikacji za pośrednictwem systemu, o której mowa w par. 7 ust. 2a Rozporządzenia Ministra Zdrowia z dnia 11\nwrześnia 2006 r. w sprawie środków odurzających, substancji psychotropowych, prekursorów kategorii 1 i preparatów\nzawierających te środki lub substancje (Dz. U. z 2021 r. poz. 166), że ilość i rodzaj produktów leczniczych przepisanych\npacjentowi na receptach wystawionych i zrealizowanych nie jest wystarczająca dla prawidłowego prowadzenia\nfarmakoterapii.\nRozpoznanie\n- F33.1 (*) - Zaburzenie depresyjne nawracające, obecnie epizod depresyjny umiarkowany\nZalecenia\nKod e-Recepty: 0262 – realizacja od teraz\nMedikinet® CR 30 mg: kaps. o zmod. uwalnianiu, twarde, 30 mg / 3 op. po 30 szt.\nDS: 2-0-0 tabl.\nOdpłatność: 100%\nKod e-Recepty: 1673 – realizacja od teraz\nDepratal: tabl. dojelitowe, 60 mg / 3 op. po 28 szt.\nDS: 1-0-0 tabl.\nOdpłatność: 100%\nKod e-Recepty: 9331 – realizacja od teraz\nMedikinet® CR 30 mg: kaps. o zmod. uwalnianiu, twarde, 30 mg / 3 op. po 30 szt.\nDS: 2-0-0 tabl.\nOdpłatność: 100%\nUsługi prywatne\n- Konsultacja psychiatryczna (kolejna) - 1 szt. - 300,00 zł\nWystawił(a):\nMagdalena Więdłocha (2967545)\nKeyClinic\nNowogrodzka 47a, 00-695 Warszawa\nNIP: 7011194833, REGON: 52806794600010, tel. 576250700\nNumer księgi rejestrowej: 000000274970\nKod res. cz. VIII/VII/V: / /01\nNr umowy z NFZ:\nStrona 1 z 1\nKARTA WIZYTY | Prywatna: dn. 20-08-2024, Warszawa\nOddział: Nowogrodzka\nCena: 300,00 zł\nPacjent: \nMszanka 36\n22-230 Wola Uhruska\n\nLekarz: Magdalena Więdłocha (2967545)\nWywiad\nPacjent relacjonuje znaczne pogorszenie stanu psychicznego, obniżenie nastroju, motywacji do podejmowania działań,\napatię, anhedonię. Zaniedbuje pracę. Nie odczuwa już korzystnych efektów Medikinetu CR (60mg/d). BP do 147/92.\nstan psychiczny: orientacja wszechstronna, kontakt rzeczowy, nastrój obniżony, napęd w normie, afekt słabo modulowany.\nPacjent nie wypowiada treści urojeniowych, neguje doznania omamowe i nie zdradza ich swoim zachowaniem. Neguje myśli i\ntendencje samobójcze.\nZal.\nDulsevia 60mg 1-0-0\nWelbox 150mg 1 tabl. rano, ew. po 2 tyg. zwiększenie dawki do 2 tabl.\nMedikinet CR - odstawienie\nzaplanowano dgn w kier. ADHD (mgr M.Trybuś)\nPoinformowano o możliwych działaniach niepożądanych leczenia.\nNiespożywanie alkoholu ani innych spa\nKons. kontrolna za 2 miesiące lub wcześniej w razie niepokojących objawów.\nRozpoznanie\n- F33.2 (*) - Zaburzenie depresyjne nawracające, obecnie epizod depresji ciężkiej bez objawów psychotycznych\nZalecenia\nKod e-Recepty: 6910 – realizacja od 20.08\nDepratal: tabl. dojelitowe, 60 mg / 2 op. po 28 szt.\nDS: co 1 dzień 1 szt. przez 56 dni\nOdpłatność: 30%\nWelbox: tabl. o zmodyf. uwalnianiu, 150 mg / 4 op. po 30 szt.\nDS: co 1 dzień 2 szt. przez 60 dni\nOdpłatność: 100%\nUsługi prywatne\n- Konsultacja psychiatryczna (kolejna) - 1 szt. - 300,00 zł\nWystawił(a):\nMagdalena Więdłocha (2967545)\nKeyClinic\nNowogrodzka 47a, 00-695 Warszawa\nNIP: 7011194833, REGON: 52806794600010, tel. 576250700\nNumer księgi rejestrowej: 000000274970\nKod res. cz. VIII/VII/V: / /01\nNr umowy z NFZ:\nStrona 1 z 1\nKARTA WIZYTY | Prywatna: dn. 15-11-2024, Warszawa\nOddział: Oddział domyślny\nPacjent: \nMszanka 36\n22-230 Wola Uhruska\n\nLekarz: Magdalena Więdłocha (2967545)\nWywiad\nPacjent zgłosił prośbę o receptę na Welbox w celu kontynuacji leczenia.\nWystawiono rp., zalecono kons. w najbliższych tygodniach.\nRozpoznanie\n- F33.2 (*) - Zaburzenie depresyjne nawracające, obecnie epizod depresji ciężkiej bez objawów psychotycznych\nZalecenia\nKod e-Recepty: 3941 – realizacja od 15.11\nWelbox: tabl. o zmodyf. uwalnianiu, 150 mg / 4 op. po 30 szt.\nDS: 2 szt. dziennie przez 60 dni\nOdpłatność: 100%\nWystawił(a):\nMagdalena Więdłocha (2967545)\nKeyClinic\nNowogrodzka 47a, 00-695 Warszawa\nNIP: 7011194833, REGON: 52806794600010, tel. 576250700\nNumer księgi rejestrowej: 000000274970\nKod res. cz. VIII/VII/V: / /\nNr umowy z NFZ:\nStrona 1 z 1\nKARTA WIZYTY | Prywatna: dn. 03-12-2024, Warszawa\nOddział: Nowogrodzka\nCena: 300,00 zł\nPacjent: \nMszanka 36\n22-230 Wola Uhruska\n\nLekarz: Magdalena Więdłocha (2967545)\nWywiad\nPacjent przyjmuje obecnie Welbox 300mg, Depratal 60mg. Brak poprawy po włączeniu Welboxu. Utrzymuje się obniżony\nnastrój, napęd, motywacja do podejmowania działań. Pacjent ukończył dgn w kier ADHD - potwierdzono rozpoznanie.\nstan psychiczny: orientacja wszechstronna, kontakt rzeczowy, nastrój i napęd obniżone, afekt dostosowany. Pacjent nie\nwypowiada treści urojeniowych, neguje doznania omamowe i nie zdradza ich swoim zachowaniem. Neguje myśli i tendencje\nsamobójcze.\nZal.\nWelbox - proszę odstawić, od kolejnego dnia:\nDepratal 30mg - 1,5 tabl. rano przez 3-4 dni, następnie 1 tabl. rano przez 3-4 dni, następnie 0,5 tabl. przez 3-4 dni, następnie\nproszę odstawić. Od kolejnego dnia proszę zacząć stosować:\nAuroxetyn 25mg - 1 tabl. rano przez tydzień, po kolejnym tygodniu może Pan zwiększyć do 2 tabl., a po kolejnych 1-2 tyg. do\n3 tabl.\nZłozono wniosek o import docelowy Elvanse.\nPoinformowano o możliwych działaniach niepożądanych leczenia. Niespożywanie alkoholu ani innych spa. Kons. kontrolna za\n2 miesiące lub wcześniej w razie niepokojących objawów.\nRozpoznanie\n- F33.2 (*) - Zaburzenie depresyjne nawracające, obecnie epizod depresji ciężkiej bez objawów psychotycznych\n- F84 - Całościowe zaburzenia rozwojowe\n- F90 - Zaburzenia hiperkinetyczne\nZalecenia\nKod e-Recepty: 9515 – realizacja od 03.12\nElvanse - import docelowy: kaps. twarde, 30 mg / 3 op. po 30 szt.\nDS: 1-0-0 szt.\nOdpłatność: 100%\nKod e-Recepty: 8161 – realizacja od 03.12\nElvanse - import docelowy: kaps. twarde, 30 mg / 3 op. po 30 szt.\nDS: 1-0-0 szt.\nOdpłatność: 100%\nKod e-Recepty: 4831 – realizacja od 03.12\nAuroxetyn : kaps. twarde, 25 mg / 3 op. po 28 szt.\nDS: 2-0-0 szt. do końca op.\nOdpłatność: 100%\nKod e-Recepty: 1479 – realizacja od 03.12\nXanax® - (IR): tabl., 0,25 mg / 1 op. po 30 szt.\nDS: 0-1-0 szt.\nOdpłatność: 100%\nUsługi prywatne\n- Konsultacja psychiatryczna (kolejna) - 1 szt. - 300,00 zł\nWystawił(a):\nMagdalena Więdłocha (2967545)\nKeyClinic\nNowogrodzka 47a, 00-695 Warszawa\nNIP: 7011194833, REGON: 52806794600010, tel. 576250700\nNumer księgi rejestrowej: 000000274970\nKod res. cz. VIII/VII/V: / /01\nNr umowy z NFZ:\nStrona 1 z 1\nKARTA WIZYTY | Prywatna: dn. 13-12-2024, Warszawa\nOddział: Oddział domyślny\nPacjent: \nMszanka 36\n22-230 Wola Uhruska\n\nLekarz: Magdalena Więdłocha (2967545)\nWywiad\nWniosek o import docelowy Elvanse został zaakceptowany przez konsultanta wojewódzkiego, natomiast odrzucony przez\nMin. Zdrowia, co zostało uzasadnione dostępnością leku w aptekach w Pl.\nWystawiono receptę na Elvanse.\nDokonano weryfikacji za pośrednictwem systemu, o której mowa w par. 7 ust. 2a Rozporządzenia Ministra Zdrowia z dnia 11\nwrześnia 2006 r. w sprawie środków odurzających, substancji psychotropowych, prekursorów kategorii 1 i preparatów\nzawierających te środki lub substancje (Dz. U. z 2021 r. poz. 166), że ilość i rodzaj produktów leczniczych przepisanych\npacjentowi na receptach wystawionych i zrealizowanych nie jest wystarczająca dla prawidłowego prowadzenia\nfarmakoterapii.\nRozpoznanie\n- F33.2 (*) - Zaburzenie depresyjne nawracające, obecnie epizod depresji ciężkiej bez objawów psychotycznych\n- F84 - Całościowe zaburzenia rozwojowe\n- F90 - Zaburzenia hiperkinetyczne\nZalecenia\nKod e-Recepty: 7198 – realizacja od 13.12\nElvanse: kaps. twarde, 30 mg / 2 op. po 30 szt.\nDS: 1-0-0 szt.\nOdpłatność: 100%\nWystawił(a):\nMagdalena Więdłocha (2967545)\nKeyClinic\nNowogrodzka 47a, 00-695 Warszawa\nNIP: 7011194833, REGON: 52806794600010, tel. 576250700\nNumer księgi rejestrowej: 000000274970\nKod res. cz. VIII/VII/V: / /\nNr umowy z NFZ:\nStrona 1 z 1\nKARTA WIZYTY | Prywatna: dn. 04-01-2025, Warszawa\nOddział: Oddział domyślny\nPacjent: \nMszanka 36\n22-230 Wola Uhruska\n\nLekarz: Magdalena Więdłocha (2967545)\nWywiad\npoprawa recepty na Elvanse.\nRozpoznanie\n- F33.2 (*) - Zaburzenie depresyjne nawracające, obecnie epizod depresji ciężkiej bez objawów psychotycznych\n- F90 - Zaburzenia hiperkinetyczne\n- F84 - Całościowe zaburzenia rozwojowe\nZalecenia\nKod e-Recepty: 4361 – realizacja od 04.01\nElvanse: kaps. twarde, 30 mg / 2 op. po 30 szt.\nDS: 1-0-0 szt.\nOdpłatność: 100%\nWystawił(a):\nMagdalena Więdłocha (2967545)\nKeyClinic\nNowogrodzka 47a, 00-695 Warszawa\nNIP: 7011194833, REGON: 52806794600010, tel. 576250700\nNumer księgi rejestrowej: 000000274970\nKod res. cz. VIII/VII/V: / /\nNr umowy z NFZ:\nStrona 1 z 1\nKARTA WIZYTY | Prywatna: dn. 06-01-2025, Warszawa\nOddział: Oddział domyślny\nPacjent: \nMszanka 36\n22-230 Wola Uhruska\n\nLekarz: Magdalena Więdłocha (2967545)\nWywiad\npoprawa recepty na Elvanse.\nRozpoznanie\n- F33.2 (*) - Zaburzenie depresyjne nawracające, obecnie epizod depresji ciężkiej bez objawów psychotycznych\n- F84 - Całościowe zaburzenia rozwojowe\n- F90 - Zaburzenia hiperkinetyczne\nZalecenia\nKod e-Recepty: 8545 – realizacja od 06.01\nElvanse: kaps. twarde, 30 mg / 2 op. po 30 szt.\nDS: 1x1 szt.\nOdpłatność: 100%\nWystawił(a):\nMagdalena Więdłocha (2967545)\nKeyClinic\nNowogrodzka 47a, 00-695 Warszawa\nNIP: 7011194833, REGON: 52806794600010, tel. 576250700\nNumer księgi rejestrowej: 000000274970\nKod res. cz. VIII/VII/V: / /\nNr umowy z NFZ:\nStrona 1 z 1\nKARTA WIZYTY | Prywatna: dn. 09-01-2025, Warszawa\nOddział: Nowogrodzka\nPacjent: \nMszanka 36\n22-230 Wola Uhruska\n\nLekarz: Magdalena Więdłocha (2967545)\nWywiad\nW związku z brakiem możliwości wystawienia Elvanse na Rpz w systemie MyDr, wystawiono receptę w systemie pacjent.gov\n(30mg, 2 op.)\nDokonano weryfikacji za pośrednictwem systemu, o której mowa w par. 7 ust. 2a Rozporządzenia Ministra Zdrowia z dnia 11\nwrześnia 2006 r. w sprawie środków odurzających, substancji psychotropowych, prekursorów kategorii 1 i preparatów\nzawierających te środki lub substancje (Dz. U. z 2021 r. poz. 166), że ilość i rodzaj produktów leczniczych przepisanych\npacjentowi na receptach wystawionych i zrealizowanych nie jest wystarczająca dla prawidłowego prowadzenia\nfarmakoterapii.\nRozpoznanie\n- F33.2 (*) - Zaburzenie depresyjne nawracające, obecnie epizod depresji ciężkiej bez objawów psychotycznych\n- F84 - Całościowe zaburzenia rozwojowe\n- F90 - Zaburzenia hiperkinetyczne\nWystawił(a):\nMagdalena Więdłocha (2967545)\nKeyClinic\nNowogrodzka 47a, 00-695 Warszawa\nNIP: 7011194833, REGON: 52806794600010, tel. 576250700\nNumer księgi rejestrowej: 000000274970\nKod res. cz. VIII/VII/V: / /01\nNr umowy z NFZ:\nStrona 1 z 1\nKARTA WIZYTY | Prywatna: dn. 04-03-2025, Warszawa\nOddział: Aleje Jerozolimskie\nCena: 300,00 zł\nPacjent: M.K.\nMszanka 36\n22-230 Wola Uhruska\n\nLekarz: Magdalena Więdłocha (2967545)\nWywiad\nPacjent nie odczuwał żadnego korzystnego efektu w zakresie poprawy koncentracji, motywacji po Elvanse (do 60mg/d), a\nnawet czuł się gorzej niż przed włączeniem leku, miał trudności z wykonywaniem obowiązków w pracy. Zalecono odstawienie\nElvanse i od ok. tygodnia pacjent nie stosuje leku. Relacjonuje utrzymujący się obniżony nastrój, napięcie, trudności z\npodejmowaniem aktywności, anhedonię - nic nie sprawia przyjemności, satysfakcji. Pacjent czuje się zmęczony,\nzrezygnowany, nie ma nadziei na poprawę.\nstan psychiczny: orientacja wszechstronna, kontakt rzeczowy, nastrój obniżony, napęd w normie, afekt dostosowany. Pacjent\nnie wypowiada treści urojeniowych, neguje doznania omamowe i nie zdradza ich swoim zachowaniem. Neguje myśli i\ntendencje samobójcze.\nZal.\nW związku z lekoopornością zab. depresyjnych skierowano pacjenta na kwalifikację do badania zastosowania psylocybiny w\nTRD.\nPoinformowano o możliwych działaniach niepożądanych leczenia.\nKons. w razie niezgłoszenia się na konsultację/ niezakwalifikowania się do powyższego badania.\nRozpoznanie\n- F33.2 (*) - Zaburzenie depresyjne nawracające, obecnie epizod depresji ciężkiej bez objawów psychotycznych\n- F84 - Całościowe zaburzenia rozwojowe\n- F90 - Zaburzenia hiperkinetyczne\nUsługi prywatne\n- Konsultacja psychiatryczna (kolejna) - 1 szt. - 300,00 zł\nWystawił(a):\nMagdalena Więdłocha (2967545)\nKeyClinic\nNowogrodzka 47a, 00-695 Warszawa\nNIP: 7011194833, REGON: 52806794600010, tel. 576250700\nNumer księgi rejestrowej: 000000274970\nKod res. cz. VIII/VII/V: / /02\nNr umowy z NFZ:\nStrona 1 z 1\n",
+  "studyProtocol": "{\n  \"inclusion\": [\n    {\n      \"id\": \"IC1\",\n      \"name\": \"Zgoda na udział w badaniu (ICF)\",\n      \"details\": \"Pacjent musi podpisać świadomą zgodę na udział w badaniu.\"\n    },\n    {\n      \"id\": \"IC2\",\n      \"name\": \"Wiek ≥18 lat\",\n      \"details\": \"Pacjent musi mieć ukończone 18 lat w momencie screeningu.\"\n    },\n    {\n      \"id\": \"IC3\",\n      \"name\": \"Diagnoza dużej depresji\",\n      \"details\": \"Duża depresja bez objawów psychotycznych (pojedynczy lub nawracający epizod wg DSM-5) potwierdzona przez MINI 7.0.2.\"\n    },\n    {\n      \"id\": \"IC4\",\n      \"name\": \"Czas trwania pierwszego epizodu\",\n      \"details\": \"Jeśli obecny epizod jest pierwszym w życiu, musi trwać ≥6 miesięcy i ≤2 lata w momencie screeningu.\"\n    },\n    {\n      \"id\": \"IC5\",\n      \"name\": \"Wynik MADRS ≥20\",\n      \"details\": \"Całkowity wynik w skali MADRS ≥20 podczas screeningu i wizyty początkowej.\"\n    },\n    {\n      \"id\": \"IC6\",\n      \"name\": \"Lekooporność (TRD) wg MGH-ATRQ (specyficzne dla badania)\",\n      \"details\": \"Niepowodzenie co najmniej dwóch (2) do czterech (4) różnych, adekwatnych prób leczenia przeciwdepresyjnego (monoterapia lub leczenie adjuwantowe) w obecnym epizodzie depresyjnym. Adekwatność próby leczenia oceniana jest wyłącznie na podstawie specyficznego dla tego badania formularza MGH-ATRQ (minimalna dawka i czas trwania). Dodatkowo, dla Polski, uwzględnia się Kwetiapinę 150mg jako leczenie adjuwantowe. Szczegóły poniżej.\",\n      \"mghAtrqPoland\": {\n        \"minTrialDurationWeeks\": \"co najmniej 8 lub 10 tygodni\",\n        \"medications\": [\n          {\n            \"drugName\": \"Doxepin\",\n            \"brandName\": \"Adapin\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Clomipramine\",\n            \"brandName\": \"Anafranil\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Amoxapine\",\n            \"brandName\": \"Asendin\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Amitriptyline\",\n            \"brandName\": \"Endep/Elavil\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Maprotiline\",\n            \"brandName\": \"Ludiomil\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Desipramine\",\n            \"brandName\": \"Norpramin\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Nortriptyline\",\n            \"brandName\": \"Pamelor\",\n            \"minDose\": \"75mg/d\"\n          },\n          {\n            \"drugName\": \"Doxepin \",\n            \"brandName\": \"Sinequan\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Trimipramine\",\n            \"brandName\": \"Surmontil\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Imipramine\",\n            \"brandName\": \"Tofranil\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Protriptyline\",\n            \"brandName\": \"Vivactil\",\n            \"minDose\": \"30mg/d\"\n          },\n          {\n            \"drugName\": \"Pipofezine\",\n            \"brandName\": \"Azafen\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Noxiptiline\",\n            \"brandName\": \"Agedal/Elronon\",\n            \"minDose\": \"100mg/d\"\n          },\n          {\n            \"drugName\": \"Isocarboxazid\",\n            \"brandName\": \"Marplan\",\n            \"minDose\": \"30mg/d\",\n            \"notes\": \"MAOI\"\n          },\n          {\n            \"drugName\": \"Phenelzine\",\n            \"brandName\": \"Nardil\",\n            \"minDose\": \"45mg/d\",\n            \"notes\": \"MAOI\"\n          },\n          {\n            \"drugName\": \"Tranylcypromine\",\n            \"brandName\": \"Parnate\",\n            \"minDose\": \"30mg/d\",\n            \"notes\": \"MAOI\"\n          },\n          {\n            \"drugName\": \"Selegiline patch\",\n            \"brandName\": \"Emsam\",\n            \"minDose\": \"6 mg/24 hrs\",\n            \"notes\": \"MAOI\"\n          },\n          {\n            \"drugName\": \"Moclobemide\",\n            \"brandName\": \"Aurorix\",\n            \"minDose\": \"300 mg/d\",\n            \"notes\": \"MAOI (RIMA)\"\n          },\n          {\n            \"drugName\": \"Pirlindole\",\n            \"brandName\": \"Pirazidol\",\n            \"minDose\": \"200 mg/d\",\n            \"notes\": \"MAOI (RIMA)\"\n          },\n          {\n            \"drugName\": \"Escitalopram\",\n            \"brandName\": \"Lexapro\",\n            \"minDose\": \"10mg/d\",\n            \"notes\": \"SSRI\"\n          },\n          {\n            \"drugName\": \"Fluvoxamine\",\n            \"brandName\": \"Luvox\",\n            \"minDose\": \"50mg/d\",\n            \"notes\": \"SSRI\"\n          },\n          {\n            \"drugName\": \"Paroxetine\",\n            \"brandName\": \"Paxil\",\n            \"minDose\": \"20/25mg/d\",\n            \"notes\": \"SSRI - dawka 20 LUB 25 mg/d\"\n          },\n          {\n            \"drugName\": \"Fluoxetine\",\n            \"brandName\": \"Prozac\",\n            \"minDose\": \"20mg/d\",\n            \"notes\": \"SSRI\"\n          },\n          {\n            \"drugName\": \"Sertraline\",\n            \"brandName\": \"Zoloft\",\n            \"minDose\": \"50mg/d\",\n            \"notes\": \"SSRI\"\n          },\n          {\n            \"drugName\": \"Citalopram\",\n            \"brandName\": \"Celexa\",\n            \"minDose\": \"20mg/d\",\n            \"notes\": \"SSRI\"\n          },\n          {\n            \"drugName\": \"Vilazodone\",\n            \"brandName\": \"Viibryd\",\n            \"minDose\": \"40mg/d\"\n          },\n          {\n            \"drugName\": \"Vortioxetine\",\n            \"brandName\": \"Brintellix\",\n            \"minDose\": \"10mg/d\"\n          },\n          {\n            \"drugName\": \"Venlafaxine\",\n            \"brandName\": \"Effexor\",\n            \"minDose\": \"150mg/d\",\n            \"notes\": \"SNRI\"\n          },\n          {\n            \"drugName\": \"Duloxetine\",\n            \"brandName\": \"Cymbalta\",\n            \"minDose\": \"60mg/d\",\n            \"notes\": \"SNRI\"\n          },\n          {\n            \"drugName\": \"Desvenlafaxine\",\n            \"brandName\": \"Pristiq\",\n            \"minDose\": \"50mg/d\",\n            \"notes\": \"SNRI\"\n          },\n          {\n            \"drugName\": \"Milnacipran\",\n            \"brandName\": \"Savella\",\n            \"minDose\": \"100mg/d\",\n            \"notes\": \"SNRI\"\n          },\n          {\n            \"drugName\": \"Levomilnacipran\",\n            \"brandName\": \"Fetzima\",\n            \"minDose\": \"40mg/d\",\n            \"notes\": \"SNRI\"\n          },\n          {\n            \"drugName\": \"Trazodone\",\n            \"brandName\": \"Desyrel\",\n            \"minDose\": \"300mg/d\"\n          },\n          {\n            \"drugName\": \"Nefazodone\",\n            \"brandName\": \"Serzone\",\n            \"minDose\": \"300mg/d\"\n          },\n          {\n            \"drugName\": \"Bupropion\",\n            \"brandName\": \"Wellbutrin\",\n            \"minDose\": \"300mg/d\"\n          },\n          {\n            \"drugName\": \"Mirtazapine\",\n            \"brandName\": \"Remeron\",\n            \"minDose\": \"15mg/d\"\n          },\n          {\n            \"drugName\": \"Agomelatine\",\n            \"brandName\": \"Valdoxan\",\n            \"minDose\": \"25mg/d\"\n          },\n          {\n            \"drugName\": \"Tianeptine\",\n            \"brandName\": \"Stablon\",\n            \"minDose\": \"37.5mg/d\"\n          },\n          {\n            \"drugName\": \"Reboxetine\",\n            \"brandName\": \"Edronax\",\n            \"minDose\": \"4 mg/d\"\n          },\n          {\n            \"drugName\": \"Mianserin\",\n            \"brandName\": \"Bolvidon/Depnon, Norval/Tolvon\",\n            \"minDose\": \"30 mg/d\"\n          },\n          {\n            \"drugName\": \"Opipramol\",\n            \"brandName\": \"Insidon\",\n            \"minDose\": \"150 mg/d\"\n          },\n          {\n            \"drugName\": \"Kwetiapina (jako leczenie adjuwantowe)\",\n            \"minDose\": \"150 mg/dzień\",\n            \"notes\": \"Specyficzne dla Polski, leczenie adjuwantowe przez co najmniej 8 lub 10 tygodni.\"\n          }\n        ],\n        \"generalNotes\": [\n          \"Powyższa lista leków i dawek opiera się wyłącznie na specyficznym formularzu MGH-ATRQ dostarczonym dla tego badania.\",\n          \"Za adekwatną próbę leczenia uznaje się stosowanie leku w określonej minimalnej dawce (lub wyższej) przez co najmniej 8 lub 10 tygodni.\",\n          \"Kwetiapina 150mg/dzień jest uznawana w Polsce jako adekwatne leczenie adjuwantowe trwające co najmniej 8 lub 10 tygodni.\",\n          \"Ocena powinna ściśle bazować na powyższych kryteriach. Należy zwrócić uwagę na instrukcję na formularzu MGH-ATRQ dotyczącą sprawdzania, czy lek był dodany w celu augmentacji/wzmocnienia efektu antydepresyjnego.\"\n        ]\n      }\n    },\n    {\n      \"id\": \"IC7\",\n      \"name\": \"Odstawienie leków\",\n      \"details\": \"Zgoda na odstawienie wszystkich zabronionych leków i potwierdzenie ich odstawienia przed wizytą początkową.\"\n    },\n    {\n      \"id\": \"IC8\",\n      \"name\": \"Zdolność do udziału\",\n      \"details\": \"Możliwość wykonania wszystkich procedur bez pomocy i zgoda na przestrzeganie harmonogramu wizyt.\"\n    }\n  ],\n  \"psychiatricExclusion\": [\n    {\n      \"id\": \"EC1\",\n      \"name\": \"Historia zaburzeń afektywnych dwubiegunowych\",\n      \"details\": \"Obecność lub historia zaburzeń afektywnych dwubiegunowych.\"\n    },\n    {\n      \"id\": \"EC2\",\n      \"name\": \"Zaburzenia psychotyczne\",\n      \"details\": \"Obecność lub historia schizofrenii, zaburzenia schizofreniformnego, schizoafektywnego lub innych zaburzeń psychotycznych.\"\n    },\n    {\n      \"id\": \"EC3\",\n      \"name\": \"Zaburzenia osobowości\",\n      \"details\": \"Zaburzenia osobowości: paranoiczne, schizoidalne, schizotypowe, histrioniczne, narcystyczne lub inne poważne współistniejące zaburzenia psychiatryczne.\"\n    },\n    {\n      \"id\": \"EC4\",\n      \"name\": \"Zaburzenie osobowości typu borderline\",\n      \"details\": \"Zaburzenie osobowości z pogranicza potwierdzone wywiadem lub modułem MINI plus.\"\n    },\n    {\n      \"id\": \"EC5\",\n      \"name\": \"Aktywne zaburzenia współistniejące\",\n      \"details\": \"Aktywne PTSD, OCD lub anoreksja potwierdzone wywiadem i MINI 7.0.2.\"\n    },\n    {\n      \"id\": \"EC6\",\n      \"name\": \"Hospitalizacja psychiatryczna\",\n      \"details\": \"Hospitalizacja psychiatryczna w ciągu 6 miesięcy przed screeningiem.\"\n    },\n    {\n      \"id\": \"EC7\",\n      \"name\": \"Historia leczenia inwazyjnego\",\n      \"details\": \"Stosowanie inwazyjnych metod leczenia (ECT, DBS, VNS) w obecnym epizodzie.\"\n    },\n    {\n      \"id\": \"EC8\",\n      \"name\": \"Historia leczenia nieinwazyjnego\",\n      \"details\": \"Stosowanie nieinwazyjnych metod leczenia (TMS) w ciągu 6 miesięcy przed screeningiem.\"\n    },\n    {\n      \"id\": \"EC9\",\n      \"name\": \"Aktywna psychoterapia\",\n      \"details\": \"Udział w programie psychoterapii, który nie pozostanie stabilny przez 9 tygodni.\"\n    },\n    {\n      \"id\": \"EC10\",\n      \"name\": \"Uzależnienia\",\n      \"details\": \"Uzależnienie od alkoholu lub substancji psychoaktywnych w ciągu 12 miesięcy przed screeningiem.\"\n    },\n    {\n      \"id\": \"EC11\",\n      \"name\": \"Ryzyko samobójcze\",\n      \"details\": \"Znaczące ryzyko samobójcze według określonych kryteriów.\"\n    },\n    {\n      \"id\": \"EC12\",\n      \"name\": \"Depresja wtórna\",\n      \"details\": \"Depresja wtórna do przyczyn medycznych lub polekowych.\"\n    },\n    {\n      \"id\": \"EC13\",\n      \"name\": \"Przeciwwskazania osobiste\",\n      \"details\": \"Okoliczności osobiste lub zachowanie uniemożliwiające bezpieczny udział.\"\n    },\n    {\n      \"id\": \"EC14\",\n      \"name\": \"Historia rodzinna\",\n      \"details\": \"Występowanie schizofrenii, zaburzenia schizoafektywnego lub ChAD I w rodzinie.\"\n    },\n    {\n      \"id\": \"EC15\",\n      \"name\": \"Ekspozycja na psychodeliki\",\n      \"details\": \"Stosowanie klasycznych psychodelików w ciągu ostatniego roku lub obecnego epizodu.\"\n    }\n  ],\n  \"medicalExclusion\": [\n    {\n      \"id\": \"GMEC1\",\n      \"name\": \"Ciąża lub karmienie\",\n      \"details\": \"Pacjentki w ciąży, karmiące lub planujące ciążę.\"\n    },\n    {\n      \"id\": \"GMEC2\",\n      \"name\": \"Antykoncepcja\",\n      \"details\": \"Brak zgody na stosowanie skutecznej antykoncepcji podczas badania.\"\n    },\n    {\n      \"id\": \"GMEC3\",\n      \"name\": \"Testy ciążowe\",\n      \"details\": \"Brak negatywnego wyniku testu ciążowego przed rozpoczęciem badania.\"\n    },\n    {\n      \"id\": \"GMEC4\",\n      \"name\": \"Dawstwo nasienia\",\n      \"details\": \"Planowane oddawanie nasienia w ciągu 3 miesięcy po zakończeniu badania.\"\n    },\n    {\n      \"id\": \"GMEC5\",\n      \"name\": \"Choroby układu krążenia\",\n      \"details\": \"Historia udaru, zawału, niekontrolowane nadciśnienie, tachykardia, wydłużony QT lub arytmia.\"\n    },\n    {\n      \"id\": \"GMEC6\",\n      \"name\": \"Cukrzyca\",\n      \"details\": \"Cukrzyca typu 1 lub niekontrolowana typu 2 (HbA1c >8%).\"\n    },\n    {\n      \"id\": \"GMEC7\",\n      \"name\": \"Choroby tarczycy\",\n      \"details\": \"Niestabilna choroba tarczycy lub nieprawidłowe wyniki badań.\"\n    },\n    {\n      \"id\": \"GMEC8\",\n      \"name\": \"Padaczka\",\n      \"details\": \"Występowanie zaburzeń drgawkowych.\"\n    },\n    {\n      \"id\": \"GMEC9\",\n      \"name\": \"Wyniki badań\",\n      \"details\": \"Istotne klinicznie nieprawidłowości w badaniach laboratoryjnych.\"\n    },\n    {\n      \"id\": \"GMEC10\",\n      \"name\": \"Inne choroby\",\n      \"details\": \"Inne istotne schorzenia mogące wpływać na interpretację wyników.\"\n    },\n    {\n      \"id\": \"GMEC11\",\n      \"name\": \"Udział w innych badaniach\",\n      \"details\": \"Aktualny udział w innym badaniu interwencyjnym.\"\n    },\n    {\n      \"id\": \"GMEC12\",\n      \"name\": \"Nadwrażliwość\",\n      \"details\": \"Nadwrażliwość na badany lek lub substancje pomocnicze.\"\n    }\n  ]\n}"
+}

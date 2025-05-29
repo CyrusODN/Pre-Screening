@@ -1,0 +1,20 @@
+{
+  "id": "analysis_mb8b1n1u_oix053evy",
+  "patientId": "Mszanka",
+  "analysisType": "single-agent",
+  "modelUsed": "gemini",
+  "createdAt": "2025-05-28T18:54:57.513Z",
+  "updatedAt": "2025-05-28T18:54:57.541Z",
+  "status": "completed",
+  "version": "1.0.0",
+  "tags": [
+    "Osobowość unikająca (diagnoza z wywiadu)",
+    "F84 - Całościowe zaburzenia rozwojowe (ASD)",
+    "F90 - Zaburzenia hiperkinetyczne (ADHD)",
+    "Objawy lękowe",
+    "Problemy ze snem",
+    "Podwyższone wartości ciśnienia tętniczego w przeszłości (do 147/92 mmHg)",
+    "single-agent"
+  ],
+  "notes": "Mariusz K. Klasyczny - 28.05.2025 20:54"
+}

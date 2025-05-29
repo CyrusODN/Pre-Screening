@@ -1,0 +1,182 @@
+## Remedius Pre-Screening System: Revolutionizing Clinical Trial Recruitment
+
+**Transforming Patient Identification with AI**
+
+---
+
+### The Challenge: A Bottleneck in Medical Advancement
+
+*   **Slow Recruitment:** Identifying eligible patients for clinical trials is a major bottleneck, often taking months and delaying critical research.
+*   **High Costs:** Manual screening is labor-intensive and expensive. Estimates suggest ~80% of trials fail to meet enrollment timelines, and ~50% of sites under-enroll. Each day a blockbuster drug is delayed can cost up to $8 million in lost revenue.
+*   **High Failure Rates:** A significant percentage of pre-screened patients are ultimately found ineligible, wasting resources and time.
+*   **Data Overload:** Researchers struggle to efficiently process complex patient data and numerous eligibility criteria.
+
+---
+
+### Our Solution: Remedius Pre-Screening System
+
+An AI-powered platform that intelligently analyzes patient medical data against complex clinical trial protocols.
+
+*   **Automated Analysis:** Leverages advanced AI (like Gemini 2.5 Pro & Claude 4 Opus) to rapidly process patient records.
+*   **Accurate Matching:** Precisely matches patients to inclusion/exclusion criteria, including nuanced conditions like TRD.
+*   **Dynamic Reporting:** Generates clear, actionable pre-screening reports, including confidence scores and identification of key issues.
+*   **Researcher Override:** Empowers investigators with manual override and commenting features, ensuring clinical expertise guides the final decision.
+
+**Remedius: Faster, Smarter, More Efficient Patient Recruitment.**
+
+---
+
+### Value Proposition: Accelerate Research, Reduce Costs
+
+*   **Drastically Reduce Screening Time:** Cut down patient identification timelines from weeks/months to days/hours.
+*   **Significantly Lower Recruitment Costs:** Automate manual tasks, freeing up valuable researcher and clinician time.
+*   **Improve Enrolment Quality:** Increase the percentage of eligible patients progressing to full screening.
+*   **Enhance Data-Driven Decisions:** Provide comprehensive insights into patient eligibility and potential red flags.
+*   **Streamline Workflow:** Integrate seamlessly into existing research processes with user-friendly reports.
+
+**Example:** If a CRO typically spends X hours per patient on manual pre-screening, Remedius can reduce this by an estimated 70-80%.
+
+---
+
+### How It Works: Intelligent Automation
+
+1.  **Data Input:** Securely ingests anonymized patient medical history and relevant documents.
+2.  **AI Analysis:** The system's core AI engine, utilizing models like Gemini 2.5 Pro, analyzes the data against the specific trial's inclusion/exclusion criteria.
+3.  **Criteria Matching:** Identifies matches, discrepancies, and areas needing further verification for each criterion.
+4.  **Report Generation:** Produces a comprehensive `PrintableReport` with:
+    *   Overall qualification assessment.
+    *   Estimated probability of qualification (AI initial & post-researcher review).
+    *   Breakdown of met/unmet criteria with status indicators and AI rationale.
+    *   Space for researcher comments and manual status overrides.
+    *   Summaries for TRD analysis, episode estimation, etc.
+5.  **Researcher Review:** Clinicians review the AI-generated report, apply their expertise, and make final pre-screening decisions.
+
+---
+
+### Market Opportunity: A Multi-Billion Dollar Imperative
+
+*   **Global Clinical Trials Market:** Valued at over USD 50 billion (2023) and projected to grow significantly.
+*   **Patient Recruitment Market:** A substantial segment, with a critical need for efficiency improvements. Costs associated with patient recruitment can be up to 30-40% of total trial budgets.
+*   **Unmet Need:** Existing solutions are often fragmented or lack the sophisticated AI-driven analysis Remedius offers.
+
+**The cost of *not* optimizing recruitment is far greater than the investment in an effective solution.**
+
+---
+
+### Target Audience: Empowering Key Stakeholders
+
+*   **Contract Research Organizations (CROs):** Enhance service offerings, improve efficiency, and deliver faster results to pharma clients.
+*   **Pharmaceutical & Biotech Companies:** Accelerate drug development timelines and reduce R&D costs for in-house trials.
+*   **Hospitals & Research Institutions:** Improve capacity for conducting clinical trials and attract more studies.
+*   **Principal Investigators & Research Coordinators:** Reduce administrative burden and focus on patient care and core research activities.
+
+---
+
+### Business Model & Pricing Strategy
+
+**Value-Based Pricing reflecting ROI:**
+The average revenue per patient successfully enrolled in a clinical trial can range significantly, from thousands to tens of thousands of dollars, depending on the trial phase and therapeutic area. Remedius directly impacts this by increasing the speed and success rate of enrollment.
+
+**Proposed Tiers (Illustrative - Requires Market Validation):**
+
+*   **Tier 1: Per-Screening Fee:**
+    *   Ideal for smaller institutions or infrequent users.
+    *   Example: €50 - €150 per comprehensive patient pre-screening report.
+    *   Justification: Significant time saving (e.g., 2-5 hours of expert time saved per patient).
+*   **Tier 2: Subscription Model (Volume-Based):**
+    *   For CROs and larger research centers with consistent needs.
+    *   Small: Up to 100 screenings/month - e.g., €2,000 - €4,000/month
+    *   Medium: Up to 500 screenings/month - e.g., €7,500 - €15,000/month
+    *   Large/Enterprise: Custom pricing for higher volumes, API access, and premium support.
+*   **Tier 3: Value-Sharing/Success-Based (Pilot Phase/Strategic Partnerships):**
+    *   A percentage fee based on successfully enrolled patients identified through Remedius.
+    *   Higher risk, higher reward; demonstrates confidence in the platform's efficacy.
+
+**Billing Conditions:**
+*   Monthly/Annual subscriptions for Tier 2.
+*   Pay-as-you-go for Tier 1.
+*   Clear Service Level Agreements (SLAs) for report generation time and support.
+
+**Cost Justification:**
+*   If Remedius helps enroll just one extra patient or accelerates a trial by a few weeks, the ROI can be manifold the cost of the service.
+*   Reduced administrative overhead, better resource allocation.
+
+---
+
+### Go-to-Market Strategy: Phased Global Expansion
+
+**Phase 1: Poland (Launch July 2025 - Q4 2026)**
+*   **Focus:** Establish a strong foothold, gather local case studies, refine product based on Polish market feedback.
+*   **Channels:**
+    *   Direct outreach to major hospitals, research institutions, and local CROs.
+    *   Partnerships with academic medical centers.
+    *   Presence at Polish clinical research conferences.
+    *   Pilot programs with key opinion leaders (KOLs).
+*   **Marketing:** Localized content, webinars, workshops demonstrating value.
+
+**Phase 2: Europe (Q1 2027 - Q4 2028)**
+*   **Focus:** Expand to key European markets (e.g., Germany, UK, France, Spain, Nordics).
+*   **Channels:**
+    *   Build on Polish success stories.
+    *   Establish regional sales teams/distributors.
+    *   Adapt to GDPR and country-specific healthcare data regulations.
+    *   Target larger European CROs and pharmaceutical companies.
+    *   Presence at major European clinical trial congresses (e.g., DIA Europe).
+*   **Marketing:** Multilingual marketing materials, thought leadership on AI in clinical trials.
+
+**Phase 3: USA (Q1 2029 Onwards)**
+*   **Focus:** Enter the largest and most complex market.
+*   **Channels:**
+    *   Significant investment in sales and marketing.
+    *   Address FDA regulations and HIPAA compliance rigorously.
+    *   Strategic partnerships with US-based CROs and health systems.
+    *   Direct sales to large pharmaceutical companies.
+    *   Showcase at prominent US conferences (e.g., SCOPE Summit, DIA US).
+*   **Marketing:** Strong emphasis on competitive differentiation and ROI for the US healthcare system.
+
+---
+
+### Our Team (Placeholder)
+
+*   **[Your Name/Founder Name] - Role:** Brief background and expertise.
+*   **[Key Team Member 2] - Role:** Brief background and expertise.
+*   **[Key Team Member 3] - Role:** Brief background and expertise.
+*   **Advisory Board (if any):** Mention key advisors.
+
+*(This section is for you to fill in with details about the core team and their relevant experience.)*
+
+---
+
+### Traction & Milestones (Example - Adapt as Needed)
+
+*   **[Date]:** MVP Development Completed (Remedius Pre-Screening System)
+*   **[Date]:** Successful internal pilot with X mock patient profiles.
+*   **[Date]:** First feedback from [Beta Tester/Institution Name].
+*   **Q2 2025:** Secure first Letter of Intent (LOI) from a Polish research institution.
+*   **July 2025:** Official Launch in Poland.
+*   **Q4 2025:** Achieve X paying customers / Y pre-screenings in Poland.
+*   **Q2 2026:** Publish first Polish case study demonstrating significant ROI.
+
+---
+
+### The Ask: Fueling Our Growth
+
+We are seeking **[Specify Seed Funding Amount, e.g., €500,000]** to:
+
+*   **Finalize Product Development:** Enhance features, scale infrastructure, ensure robust security and compliance.
+*   **Accelerate Go-to-Market in Poland:** Build out sales and marketing team, fund pilot programs.
+*   **Prepare for European Expansion:** Conduct market research, initiate regulatory groundwork for key EU markets.
+*   **Strengthen IP Protection:** Secure patents for core AI technology.
+
+**Join us in revolutionizing how life-saving treatments reach patients faster.**
+
+---
+
+### Contact Us
+
+**[Your Name/Company Name]**
+**[Your Email]**
+**[Your Phone Number (Optional)]**
+**[Your Website (if available)]**
+
+**Thank You!** 

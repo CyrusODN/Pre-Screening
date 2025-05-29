@@ -11,10 +11,11 @@ import type { PharmacotherapyItem, PatientData, SupportedAIModel } from '../type
 import { PREDEFINED_PROTOCOLS } from '../data/protocols';
 import drugMappingClient from './drugMappingClient';
 // UJEDNOLICENIE: Import z nowego MGH-ATRQ serwisu
-import { mghAtrqService, type MGHATRQAssessmentResult } from './mghAtrqService';
+import { enhancedMGHATRQService } from './enhancedMghAtrqService';
 import { analysisHistoryService } from './AnalysisHistoryService';
 // Import funkcji AI
 import { analyzePatientData as analyzePatientDataAI } from './ai';
+import type { EnhancedMGHATRQResult } from './enhancedMghAtrqService';
 
 // ============================================================================
 // CLINICAL RESEARCH TYPES & INTERFACES
@@ -146,7 +147,7 @@ export interface DataQualityAssessment {
 // ============================================================================
 
 // Advanced drug classification with AI-ready variables
-export const classifyDrugForClinicalResearch = (drugName: string, dose?: string, notes?: string): DrugClassificationResult => {
+export const classifyDrugForClinicalResearch = (drugName: string, dose?: string | null, notes?: string | null): DrugClassificationResult => {
   const name = drugName.toLowerCase().trim();
   const normalizedName = name.replace(/[^a-z]/g, '');
   
@@ -303,19 +304,45 @@ export const classifyDrugForClinicalResearch = (drugName: string, dose?: string,
 };
 
 // UJEDNOLICENIE: Delegacja do nowego serwisu MGH-ATRQ
-export const extractDoseFromString = mghAtrqService.extractDoseFromString;
+// USUNIĘTO: export const extractDoseFromString = mghAtrqService.extractDoseFromString;
 
 // Advanced MGH-ATRQ compliance analysis with AI variables
 // UJEDNOLICENIE: Delegacja do nowego ujednoliconego serwisu MGH-ATRQ
-export const analyzeMGHATRQCompliance = (
+export const analyzeMGHATRQCompliance = async (
   drugName: string, 
   dose: string, 
   duration: number, 
   notes?: string, 
   patientData?: PatientData
-): MGHATRQAssessmentResult => {
+): Promise<MGHATRQAssessmentResult> => {
   console.log(`🔄 [Clinical Analysis] Delegating MGH-ATRQ assessment to unified service`);
-  return mghAtrqService.assessMGHATRQCompliance(drugName, dose, duration, notes, patientData);
+  
+  // Przekonwertuj parametry na format oczekiwany przez Enhanced MGH-ATRQ service
+  const pharmacotherapyItem: PharmacotherapyItem = {
+    id: `temp-${Date.now()}`,
+    drugName,
+    dose,
+    startDate: null,
+    endDate: null,
+    notes: notes || undefined,
+    attemptGroup: 1,
+    shortName: drugName.substring(0, 3).toUpperCase()
+  };
+  
+  // NAPRAWIONO: Użyj Enhanced MGH-ATRQ service z AI-powered tłumaczeniem
+  const enhancedResult = await enhancedMGHATRQService.assessTRDWithPreprocessing(
+    [pharmacotherapyItem], 
+    null, // episodeStartDate
+    [] // preprocessing mappings - puste dla pojedynczej oceny
+  );
+  
+  // Konwertuj wynik Enhanced service na format oczekiwany przez legacy interface
+  return {
+    isCompliant: enhancedResult.isCompliant,
+    confidence: enhancedResult.confidence,
+    reasoning: enhancedResult.reasoning,
+    failureCount: enhancedResult.failureCount
+  };
 };
 
 // AI Variable: Analyze adverse events from clinical notes
@@ -552,18 +579,18 @@ export const analyzeTreatmentResponse = (notes: string, duration: number, attemp
 };
 
 // AI Variable: Comprehensive clinical analysis
-export const performClinicalAnalysis = (
+export const performClinicalAnalysis = async (
   episode: PharmacotherapyItem, 
   duration: number, 
   patientData?: PatientData
-): ClinicalAnalysisResult => {
+): Promise<ClinicalAnalysisResult> => {
   const drugName = episode.drugName || '';
   const dose = episode.dose || '';
   const notes = episode.notes || '';
   const attemptGroup = episode.attemptGroup || 0;
   
-  // Perform all analyses
-  const mghAtrqCompliance = analyzeMGHATRQCompliance(drugName, dose, duration, notes, patientData);
+  // Perform all analyses with async MGH-ATRQ
+  const mghAtrqCompliance = await analyzeMGHATRQCompliance(drugName, dose, duration, notes, patientData);
   const adverseEvents = analyzeAdverseEvents(notes, '', duration);
   const treatmentResponse = analyzeTreatmentResponse(notes, duration, attemptGroup);
   
@@ -628,70 +655,77 @@ const safeDate = (dateStr: string | null | undefined): Date | null => {
  * @param patientData - Complete patient data for context
  * @returns Enhanced pharmacotherapy data with clinical insights
  */
-export const enrichPharmacotherapyData = (
+export const enrichPharmacotherapyData = async (
   pharmacotherapy: PharmacotherapyItem[], 
   patientData: PatientData
-): ProcessedDrugEpisode[] => {
+): Promise<ProcessedDrugEpisode[]> => {
   console.log('🔬 Starting clinical analysis for', pharmacotherapy.length, 'episodes');
   
-  return pharmacotherapy
-    .map((drug, index) => {
-      const parsedStartDate = safeDate(drug.startDate);
-      const parsedEndDate = safeDate(drug.endDate);
-      
-      if (!parsedStartDate || !parsedEndDate) {
-        console.warn('⚠️ Invalid dates for episode:', drug.drugName);
-        return null;
-      }
-      
-      const duration = differenceInDays(parsedEndDate, parsedStartDate);
-      
-      // Perform comprehensive clinical analysis
-      const clinicalAnalysis = performClinicalAnalysis(drug, duration, patientData);
-      const drugClassification = classifyDrugForClinicalResearch(drug.drugName || '', drug.dose, drug.notes);
-      
-      // Create treatment context
-      const treatmentContext: TreatmentContext = {
-        episodeNumber: drug.attemptGroup || index + 1,
-        isFirstLine: (drug.attemptGroup || index + 1) === 1,
-        isMonotherapy: !drugClassification.isAugmentationAgent,
-        isAugmentation: drugClassification.isAugmentationAgent,
-        isCombination: false, // TODO: Detect from concurrent medications
-        previousFailures: Math.max(0, (drug.attemptGroup || index + 1) - 1),
-        washoutPeriod: 0, // TODO: Calculate from previous episode
-        reasonForStart: drug.notes?.includes('rozpoczęcie') ? 'nowy epizod' : 'zmiana leczenia',
-        reasonForStop: clinicalAnalysis.treatmentResponse.reasonForDiscontinuation
-      };
-      
-      // Assess data quality
-      const dataQuality: DataQualityAssessment = {
-        completeness: [drug.drugName, drug.dose, drug.startDate, drug.endDate].filter(Boolean).length / 4,
-        reliability: drug.notes ? 0.8 : 0.6,
-        missingFields: [
-          !drug.drugName && 'drugName',
-          !drug.dose && 'dose',
-          !drug.startDate && 'startDate',
-          !drug.endDate && 'endDate',
-          !drug.notes && 'notes'
-        ].filter(Boolean) as string[],
-        inconsistencies: [],
-        confidence: clinicalAnalysis.mghAtrqCompliance.confidence
-      };
-      
-      console.log(`✅ Analyzed ${drug.drugName}: ${drugClassification.primaryClass}, MGH-ATRQ: ${clinicalAnalysis.mghAtrqCompliance.isCompliant}`);
-      
-      return {
-        ...drug,
-        originalIndex: index,
-        parsedStartDate,
-        parsedEndDate,
-        clinicalAnalysis,
-        drugClassification,
-        treatmentContext,
-        dataQuality
-      } as ProcessedDrugEpisode;
-    })
-    .filter((drug): drug is ProcessedDrugEpisode => drug !== null);
+  const results: ProcessedDrugEpisode[] = [];
+  
+  for (let index = 0; index < pharmacotherapy.length; index++) {
+    const drug = pharmacotherapy[index];
+    const parsedStartDate = safeDate(drug.startDate);
+    const parsedEndDate = safeDate(drug.endDate);
+    
+    if (!parsedStartDate || !parsedEndDate) {
+      console.warn('⚠️ Invalid dates for episode:', drug.drugName);
+      continue;
+    }
+    
+    const duration = differenceInDays(parsedEndDate, parsedStartDate);
+    
+    // Perform comprehensive clinical analysis (now async)
+    const clinicalAnalysis = await performClinicalAnalysis(drug, duration, patientData);
+    const drugClassification = classifyDrugForClinicalResearch(
+      drug.drugName || '', 
+      drug.dose, 
+      drug.notes === null ? undefined : drug.notes // NAPRAWIONO: konwersja null → undefined
+    );
+    
+    // Create treatment context
+    const treatmentContext: TreatmentContext = {
+      episodeNumber: drug.attemptGroup || index + 1,
+      isFirstLine: (drug.attemptGroup || index + 1) === 1,
+      isMonotherapy: !drugClassification.isAugmentationAgent,
+      isAugmentation: drugClassification.isAugmentationAgent,
+      isCombination: false, // TODO: Detect from concurrent medications
+      previousFailures: Math.max(0, (drug.attemptGroup || index + 1) - 1),
+      washoutPeriod: 0, // TODO: Calculate from previous episode
+      reasonForStart: (drug.notes ?? '').includes('rozpoczęcie') ? 'nowy epizod' : 'zmiana leczenia', // NAPRAWIONO: nullish coalescing
+      reasonForStop: clinicalAnalysis.treatmentResponse.reasonForDiscontinuation
+    };
+    
+    // Assess data quality
+    const dataQuality: DataQualityAssessment = {
+      completeness: [drug.drugName, drug.dose, drug.startDate, drug.endDate].filter(Boolean).length / 4,
+      reliability: drug.notes ? 0.8 : 0.6,
+      missingFields: [
+        !drug.drugName && 'drugName',
+        !drug.dose && 'dose',
+        !drug.startDate && 'startDate',
+        !drug.endDate && 'endDate',
+        !drug.notes && 'notes'
+      ].filter(Boolean) as string[],
+      inconsistencies: [],
+      confidence: clinicalAnalysis.mghAtrqCompliance.confidence
+    };
+    
+    console.log(`✅ Analyzed ${drug.drugName}: ${drugClassification.primaryClass}, MGH-ATRQ: ${clinicalAnalysis.mghAtrqCompliance.isCompliant}`);
+    
+    results.push({
+      ...drug,
+      originalIndex: index,
+      parsedStartDate,
+      parsedEndDate,
+      clinicalAnalysis,
+      drugClassification,
+      treatmentContext,
+      dataQuality
+    } as ProcessedDrugEpisode);
+  }
+  
+  return results;
 };
 
 // ============================================================================
@@ -705,10 +739,9 @@ export const clinicalAnalysisService = {
   analyzeAdverseEvents,
   analyzeTreatmentResponse,
   performClinicalAnalysis,
-  extractDoseFromString,
   
   // UJEDNOLICENIE: Referencja do nowego serwisu MGH-ATRQ
-  mghAtrqService
+  enhancedMGHATRQService
 };
 
 export default clinicalAnalysisService;
@@ -864,4 +897,20 @@ export async function analyzePatientDataWithHistory(
 
     throw error;
   }
+}
+
+// Fallback interface for compatibility
+export interface MGHATRQAssessmentResult {
+  isCompliant: boolean;
+  confidence: number;
+  reasoning: string;
+  failureCount: number;
+  adequateTrials?: Array<{
+    id: string;
+    drugName: string;
+    dose: string;
+    duration: number;
+    adequate: boolean;
+    reasoning: string;
+  }>;
 } 

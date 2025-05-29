@@ -206,9 +206,21 @@ const CriteriaStatusPieChart: React.FC<{criteriaData: Array<Criterion & {type: s
 
   const statusCounts = criteriaData.reduce((acc, criterion) => {
     const effectiveStatus = getEffectiveStatus(criterion);
-    const statusLabel = effectiveStatus.includes('spełnione') || effectiveStatus.includes('OK') ? 'Pozytywne / OK' :
-      effectiveStatus.includes('niespełnione') || effectiveStatus.includes('wykluczenie') || effectiveStatus.includes('problem') ? 'Negatywne / Problem' :
-        'Do Weryfikacji';
+    
+    // Sprawdzamy czy status oznacza pozytywny wynik
+    const isPositive = effectiveStatus.includes('spełnione') || effectiveStatus.includes('OK');
+    
+    // Sprawdzamy czy status oznacza negatywny wynik/wykluczenie
+    const isNegative = effectiveStatus.includes('niespełnione') || 
+                      effectiveStatus.includes('wykluczenie') || 
+                      effectiveStatus.includes('problem') ||
+                      effectiveStatus === 'potencjalne wykluczenie' ||
+                      effectiveStatus === 'problem/weryfikacja';
+    
+    const statusLabel = isPositive ? 'Pozytywne / OK' :
+                       isNegative ? 'Negatywne / Problem' :
+                       'Do Weryfikacji';
+    
     acc[statusLabel] = (acc[statusLabel] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);

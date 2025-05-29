@@ -131,27 +131,30 @@ POPRAWNA ANALIZA:
 → **WNIOSEK: Epizod 1 (do sierpnia 2019), remisja (2019-2024), Epizod 2 (od maja 2024)**
 
 ODPOWIEDŹ MUSI BYĆ W FORMACIE JSON:
+
+**WAŻNE INSTRUKCJE FORMATOWANIA JSON:**
+1. **NIE UŻYWAJ** znaków przerwania linii (\n) wewnątrz stringów
+2. **NIE UŻYWAJ** znaków tabulacji (\t) w stringach  
+3. **UŻYWAJ** tylko standardowych znaków ASCII i polskich liter
+4. **OGRANICZ** długość każdego stringa do maksymalnie 200 znaków
+5. **UŻYJ** trzech kropek (...) jeśli tekst jest za długi
+6. **ESCAPE'UJ** cudzysłowy wewnątrz stringów za pomocą \"
+7. **KAŻDY STRING** musi kończyć się przed końcem linii JSON
+
 {
   "scenarios": [
     {
-      "id": number,
-      "description": "string - opis scenariusza z poprawną logiką psychiatryczną (zmiana leczenia = kontynuacja epizodu)",
-      "evidence": "string - dowody z analizą przyczyn zmian farmakoterapii",
-      "startDate": "YYYY-MM-DD - data rozpoczęcia epizodu (nie zmiany leku!)",
-      "endDate": "YYYY-MM-DD lub null - data remisji (nie zmiany leku!)",
-      "confidence": number // 0.0-1.0
+      "id": 1,
+      "description": "string - opis scenariusza (max 200 znaków)",
+      "evidence": "string - dowody wspierające (max 200 znaków)", 
+      "startDate": "YYYY-MM-DD lub null",
+      "endDate": "YYYY-MM-DD lub null",
+      "confidence": 0.0-1.0
     }
   ],
-  "mostLikelyScenario": number,
-  "conclusion": "string - podsumowanie z poprawną logiką: zmiana leczenia z powodu braku poprawy = kontynuacja epizodu",
-  "remissionPeriods": [
-    {
-      "startDate": "YYYY-MM-DD",
-      "endDate": "YYYY-MM-DD", 
-      "evidence": "string - dowody na rzeczywistą remisję (nie zmianę leku)",
-      "confidence": number
-    }
-  ]
+  "mostLikelyScenario": 1,
+  "overallConfidence": 0.0-1.0,
+  "clinicalReasoning": "string - uzasadnienie kliniczne (max 200 znaków)"
 }
 
 **UWAGI KOŃCOWE:**
@@ -240,28 +243,102 @@ Wykonaj szczegółową analizę epizodów depresyjnych według instrukcji system
   }
 
   public validate(result: EpisodeAnalysisResult): boolean {
-    return (
-      Array.isArray(result.scenarios) &&
-      result.scenarios.length > 0 &&
-      typeof result.mostLikelyScenario === 'number' &&
-      typeof result.conclusion === 'string' &&
-      result.scenarios.every(scenario => 
-        typeof scenario.id === 'number' &&
-        typeof scenario.description === 'string' &&
-        typeof scenario.evidence === 'string' &&
-        typeof scenario.confidence === 'number' &&
-        scenario.confidence >= 0 && scenario.confidence <= 1
-      ) &&
-      Array.isArray(result.remissionPeriods) &&
-      result.remissionPeriods.every(period => 
-        typeof period.startDate === 'string' || period.startDate === null &&
-        typeof period.endDate === 'string' || period.endDate === null &&
-        typeof period.evidence === 'string' &&
-        typeof period.confidence === 'number' &&
-        period.confidence >= 0 && period.confidence <= 1 &&
-        typeof period.notes === 'string'
-      )
-    );
+    console.log(`🔍 [${this.name}] Szczegółowa walidacja wyniku:`, result);
+    
+    // Sprawdź podstawową strukturę
+    if (!result || typeof result !== 'object') {
+      console.error(`❌ [${this.name}] Wynik nie jest obiektem:`, typeof result);
+      return false;
+    }
+    
+    // Sprawdź scenarios - musi być tablicą z przynajmniej jednym elementem
+    if (!Array.isArray(result.scenarios)) {
+      console.error(`❌ [${this.name}] scenarios nie jest tablicą:`, result.scenarios);
+      return false;
+    }
+    
+    if (result.scenarios.length === 0) {
+      console.error(`❌ [${this.name}] scenarios jest puste`);
+      return false;
+    }
+    
+    // Sprawdź mostLikelyScenario - musi być liczbą
+    if (typeof result.mostLikelyScenario !== 'number') {
+      console.error(`❌ [${this.name}] mostLikelyScenario nie jest liczbą:`, typeof result.mostLikelyScenario);
+      return false;
+    }
+    
+    // Sprawdź conclusion - musi być stringiem i nie pustym
+    if (typeof result.conclusion !== 'string' || result.conclusion.length === 0) {
+      console.error(`❌ [${this.name}] conclusion nie jest niepustym stringiem:`, typeof result.conclusion);
+      return false;
+    }
+    
+    // Sprawdź każdy scenariusz (prostsze sprawdzenie)
+    for (let i = 0; i < result.scenarios.length; i++) {
+      const scenario = result.scenarios[i];
+      
+      if (typeof scenario.id !== 'number') {
+        console.error(`❌ [${this.name}] scenarios[${i}].id nie jest liczbą:`, typeof scenario.id);
+        return false;
+      }
+      if (typeof scenario.description !== 'string' || scenario.description.length === 0) {
+        console.error(`❌ [${this.name}] scenarios[${i}].description problematyczne:`, typeof scenario.description);
+        return false;
+      }
+      if (typeof scenario.evidence !== 'string' || scenario.evidence.length === 0) {
+        console.error(`❌ [${this.name}] scenarios[${i}].evidence problematyczne:`, typeof scenario.evidence);
+        return false;
+      }
+      if (typeof scenario.confidence !== 'number' || scenario.confidence < 0 || scenario.confidence > 1) {
+        console.error(`❌ [${this.name}] scenarios[${i}].confidence nieprawidłowe:`, scenario.confidence);
+        return false;
+      }
+    }
+    
+    // Sprawdź remissionPeriods - musi być tablicą (może być pusta)
+    if (!Array.isArray(result.remissionPeriods)) {
+      console.error(`❌ [${this.name}] remissionPeriods nie jest tablicą:`, result.remissionPeriods);
+      return false;
+    }
+    
+    // Sprawdź każdy okres remisji (jeśli istnieją) - uproszczona logika
+    for (let i = 0; i < result.remissionPeriods.length; i++) {
+      const period = result.remissionPeriods[i];
+      
+      // Sprawdź startDate - może być string lub null
+      if (period.startDate !== null && typeof period.startDate !== 'string') {
+        console.error(`❌ [${this.name}] remissionPeriods[${i}].startDate nieprawidłowe:`, period.startDate);
+        return false;
+      }
+      
+      // Sprawdź endDate - może być string lub null
+      if (period.endDate !== null && typeof period.endDate !== 'string') {
+        console.error(`❌ [${this.name}] remissionPeriods[${i}].endDate nieprawidłowe:`, period.endDate);
+        return false;
+      }
+      
+      // Sprawdź evidence
+      if (typeof period.evidence !== 'string') {
+        console.error(`❌ [${this.name}] remissionPeriods[${i}].evidence nie jest stringiem:`, typeof period.evidence);
+        return false;
+      }
+      
+      // Sprawdź confidence
+      if (typeof period.confidence !== 'number' || period.confidence < 0 || period.confidence > 1) {
+        console.error(`❌ [${this.name}] remissionPeriods[${i}].confidence nieprawidłowe:`, period.confidence);
+        return false;
+      }
+      
+      // Napraw brakujące notes
+      if (!period.notes || typeof period.notes !== 'string') {
+        console.log(`⚠️ [${this.name}] remissionPeriods[${i}].notes brakuje, dodaję domyślne`);
+        period.notes = `Okres remisji: ${period.startDate || 'nieznana data początkowa'} - ${period.endDate || 'nieznana data końcowa'}`;
+      }
+    }
+    
+    console.log(`✅ [${this.name}] Walidacja zakończona pomyślnie`);
+    return true;
   }
 
   protected calculateConfidence(result: EpisodeAnalysisResult, context: SharedContext): number {

@@ -36,6 +36,8 @@ export class LocalAnalysisStorage {
       await fs.mkdir(this.dataPath, { recursive: true });
       
       console.log(`📁 [LocalStorage] Initialized directories: ${this.basePath}`);
+      console.log(`📁 [LocalStorage] Metadata path: ${path.resolve(this.metadataPath)}`);
+      console.log(`📁 [LocalStorage] Data path: ${path.resolve(this.dataPath)}`);
     } catch (error) {
       throw new StorageError(
         `Failed to create storage directories: ${error}`,
@@ -210,21 +212,34 @@ export class LocalAnalysisStorage {
 
   async getStats() {
     try {
+      console.log(`📊 [LocalStorage] Getting stats from: ${this.metadataPath}`);
       const metadataFiles = await fs.readdir(this.metadataPath);
+      console.log(`📊 [LocalStorage] Found ${metadataFiles.length} files:`, metadataFiles);
       const allMetadata = [];
 
       for (const file of metadataFiles) {
-        if (!file.endsWith('.json')) continue;
+        if (!file.endsWith('.json')) {
+          console.log(`📊 [LocalStorage] Skipping non-JSON file: ${file}`);
+          continue;
+        }
         
         try {
           const filePath = path.join(this.metadataPath, file);
+          console.log(`📊 [LocalStorage] Reading file: ${filePath}`);
           const content = await fs.readFile(filePath, 'utf-8');
           const metadata = JSON.parse(content);
+          console.log(`📊 [LocalStorage] Parsed metadata for ${file}:`, {
+            id: metadata.id,
+            type: metadata.analysisType,
+            model: metadata.modelUsed || metadata.aiModel
+          });
           allMetadata.push(metadata);
         } catch (error) {
-          console.warn(`⚠️ [LocalStorage] Failed to read metadata file: ${file}`);
+          console.warn(`⚠️ [LocalStorage] Failed to read metadata file: ${file}`, error.message);
         }
       }
+
+      console.log(`📊 [LocalStorage] Total metadata loaded: ${allMetadata.length}`);
 
       // Oblicz statystyki
       const byType = {};
@@ -241,7 +256,7 @@ export class LocalAnalysisStorage {
         byType[type] = (byType[type] || 0) + 1;
 
         // Według modelu
-        const model = metadata.aiModel || 'unknown';
+        const model = metadata.modelUsed || metadata.aiModel || 'unknown';
         byModel[model] = (byModel[model] || 0) + 1;
 
         // Według statusu

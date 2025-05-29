@@ -1,11 +1,12 @@
 // src/agents/coordination/MultiAgentCoordinator.ts
 
+import { preprocessMedicalHistoryForDrugMapping } from '../../services/ai';
 import type { 
   MultiAgentCoordinator, 
   SharedContext, 
   AgentResult
 } from '../../types/agents';
-import type { PatientData, SupportedAIModel } from '../../types/index';
+import type { PatientData, SupportedAIModel, Criterion } from '../../types/index';
 import drugMappingClient from '../../services/drugMappingClient';
 
 // Import wszystkich agentów
@@ -16,116 +17,12 @@ import { TRDAssessmentAgent } from '../core/TRDAssessmentAgent';
 import { CriteriaAssessmentAgent } from '../core/CriteriaAssessmentAgent';
 import { RiskAssessmentAgent } from '../core/RiskAssessmentAgent';
 
-/**
- * Preprocessuje historię medyczną, mapując nazwy handlowe leków na substancje czynne
- */
-async function preprocessMedicalHistoryForDrugMapping(medicalHistory: string): Promise<{
-  processedHistory: string;
-  drugMappings: Array<{original: string; mapped: string; confidence: number}>;
-}> {
-  console.log('🔍 [Multi-Agent] Preprocessing medical history for drug mapping...');
-  
-  const drugMappings: Array<{original: string; mapped: string; confidence: number}> = [];
-  let processedHistory = medicalHistory;
-  
-  // POPRAWIONE WZORCE - bardziej precyzyjne wykrywanie nazw leków
-  const drugPatterns = [
-    // Wzorce dla nazw leków z dawkami (najwyższy priorytet)
-    /\b([A-Z][a-z]{2,}(?:\s+[A-Z][a-z]+)*)\s+(?:\d+(?:[.,]\d+)?\s*(?:mg|mcg|g|ml|IU|j\.m\.))/gi,
-    
-    // Wzorce dla znanych nazw handlowych leków (lista sprawdzonych nazw)
-    /\b(Escitalopram|Elicea|Efevelon|Hydroxyzinum|Lamitrin|Pregabalin|Wellbutrin|Egzysta|Oreos|Lamotrix|Brintellix|Dulsevia|Neurovit|Welbox|Preato|Asertin|Dekristol|Mirtagen)\b/gi,
-    
-    // Wzorce dla nazw z typowymi końcówkami farmaceutycznymi (tylko jeśli mają sens)
-    /\b([A-Z][a-z]{3,}(?:ina|ine|ol|um|an|on|ex|al|yl|il|ium))\b(?=\s+(?:\d+|tabl|kaps|mg|ml|dawka|rano|wieczór|na noc))/gi,
-    
-    // Wzorce dla nazw po słowach kluczowych
-    /(?:lek|preparat|medication|drug|stosuje|przyjmuje|zażywa|podaje)[\s:]+([A-Z][a-z]{3,}(?:\s+[A-Z][a-z]+)*)/gi,
-    
-    // Wzorce dla nazw w nawiasach (tylko jeśli wyglądają jak leki)
-    /\(([A-Z][a-z]{3,}(?:\s+[A-Z][a-z]+)*)\)/gi
-  ];
-  
-  const potentialDrugs = new Set<string>();
-  
-  // Lista słów do wykluczenia (nie są lekami)
-  const excludeWords = new Set([
-    'Centrum', 'Szpital', 'Oddział', 'Gmina', 'Telefon', 'Stan', 'Hemoglobina', 
-    'Cholesterol', 'Kreatynina', 'Witamina', 'Marcina', 'Nadal', 'Roste',
-    'Zawiesina', 'Regon', 'Hormon', 'Kontrola', 'Skan', 'Mail', 'Dialog',
-    'Terapia', 'Centrum', 'Ograniczon', 'Orygina', 'Zmian', 'Wspomina',
-    'Spowodowan', 'Koleina', 'Ealan', 'Trijodotyronina', 'Tyreotropina',
-    'Creatinine', 'Evevelon', 'Dulsevic', 'Elsay', 'Ntrum', 'Orycina'
-  ]);
-  
-  // Wyciągnij potencjalne nazwy leków
-  drugPatterns.forEach(pattern => {
-    let match;
-    while ((match = pattern.exec(medicalHistory)) !== null) {
-      const drugName = match[1].trim();
-      
-      // Sprawdź czy to nie jest słowo do wykluczenia
-      if (drugName.length > 3 && 
-          !excludeWords.has(drugName) && 
-          !excludeWords.has(drugName.toLowerCase()) &&
-          // Sprawdź czy nie zawiera cyfr (prawdopodobnie nie jest lekiem)
-          !/\d/.test(drugName) &&
-          // Sprawdź czy nie jest zbyt długie (prawdopodobnie fragment tekstu)
-          drugName.length < 25 &&
-          // Sprawdź czy nie zawiera typowych słów niefarmaceutycznych
-          !/(?:pacjent|leczenie|terapia|badanie|wizyta|kontrola|szpital|oddział|centrum|telefon|mail|adres|ulica|miasto)/i.test(drugName)) {
-        potentialDrugs.add(drugName);
-      }
-    }
-  });
-  
-  console.log(`🔍 [Multi-Agent] Found ${potentialDrugs.size} potential drug names:`, Array.from(potentialDrugs));
-  
-  // Mapuj każdą potencjalną nazwę leku
-  for (const drugName of potentialDrugs) {
-    try {
-      const mappingResult = await drugMappingClient.mapDrugToStandard(drugName);
-      
-      if (mappingResult.found && mappingResult.confidence > 0.7) { // Zwiększony próg confidence
-        const standardName = mappingResult.standardName;
-        const activeSubstance = mappingResult.activeSubstance;
-        
-        // Użyj substancji czynnej jako głównej nazwy
-        const mappedName = activeSubstance || standardName;
-        
-        drugMappings.push({
-          original: drugName,
-          mapped: mappedName,
-          confidence: mappingResult.confidence
-        });
-        
-        // Zamień w tekście wszystkie wystąpienia nazwy handlowej na substancję czynną
-        const regex = new RegExp(`\\b${drugName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
-        processedHistory = processedHistory.replace(regex, `${mappedName} (${drugName})`);
-        
-        console.log(`✅ [Multi-Agent] Mapped: ${drugName} → ${mappedName} (confidence: ${Math.round(mappingResult.confidence * 100)}%)`);
-      } else {
-        console.log(`⚠️ [Multi-Agent] No mapping found for: ${drugName} (confidence: ${mappingResult.confidence})`);
-      }
-    } catch (error) {
-      console.error(`❌ [Multi-Agent] Error mapping drug ${drugName}:`, error);
-    }
-  }
-  
-  console.log(`✅ [Multi-Agent] Drug mapping completed. Mapped ${drugMappings.length} drugs.`);
-  
-  return {
-    processedHistory,
-    drugMappings
-  };
-}
-
 export class MultiAgentCoordinatorImpl implements MultiAgentCoordinator {
   private readonly agents: Map<string, any> = new Map();
   private readonly executionLog: string[] = [];
-  private readonly RATE_LIMIT_DELAY = 45000; // 45 sekund między agentami - zwiększone z powodu rate limiting Claude
-  private readonly CLAUDE_RATE_LIMIT_DELAY = 60000; // 60 sekund specjalnie dla Claude
-  private readonly MAX_RETRIES = 3;
+  private readonly RATE_LIMIT_DELAY = 5000; // ZMNIEJSZONE z 45s na 5s - obsłużone przez backend proxy
+  private readonly CLAUDE_RATE_LIMIT_DELAY = 10000; // ZMNIEJSZONE z 60s na 10s
+  private readonly MAX_RETRIES = 2; // ZMNIEJSZONE z 3 na 2
 
   constructor() {
     // Inicjalizacja wszystkich agentów
@@ -181,65 +78,55 @@ export class MultiAgentCoordinatorImpl implements MultiAgentCoordinator {
 
     const agentResults: Record<string, AgentResult> = {};
 
-    // FAZA 1: Analiza podstawowa - sekwencyjna dla zależności
+    // FAZA 1: Analiza podstawowa
     this.log('🚀 FAZA 1: Rozpoczynanie analizy podstawowej...');
     
-    // Krok 1a: Clinical Synthesis (brak zależności)
+    // Krok 1a: Clinical Synthesis (brak zależności) - PIERWSZY
     const clinicalResult = await this.executeAgent('clinical-synthesis', sharedContext);
     agentResults['clinical-synthesis'] = clinicalResult;
     sharedContext.clinicalSynthesis = clinicalResult;
     this.log('✅ Agent Syntezy Klinicznej zakończony pomyślnie');
 
-    // Krok 1b: Episode Analysis (zależy tylko od clinical-synthesis)
+    // Krok 1b: Episode Analysis (zależy tylko od clinical-synthesis) - DRUGI
+    this.log('🔄 Rozpoczynanie analizy epizodów...');
     const episodeResult = await this.executeAgent('episode-analysis', sharedContext);
     agentResults['episode-analysis'] = episodeResult;
     sharedContext.episodeAnalysis = episodeResult;
-    this.log('✅ Agent Analizy Epizodów zakończony pomyślnie');
+    this.log('✅ Agent Analizy Epizodów zakończony');
 
-    // Krok 1c: Pharmacotherapy Analysis (zależy od clinical-synthesis i episode-analysis)
+    // Krok 1c: Pharmacotherapy Analysis (zależy od clinical-synthesis + episode-analysis) - TRZECI
+    this.log('🔄 Rozpoczynanie analizy farmakoterapii...');
     const pharmacoResult = await this.executeAgent('pharmacotherapy-analysis', sharedContext);
     agentResults['pharmacotherapy-analysis'] = pharmacoResult;
     sharedContext.pharmacotherapyAnalysis = pharmacoResult;
-    this.log('✅ Agent Farmakoterapii zakończony pomyślnie');
+    this.log('✅ Agent Analizy Farmakoterapii zakończony');
 
-    // FAZA 2: Analiza TRD (zależy od fazy 1)
+    // FAZA 2: TRD Analysis (zależy od wszystkich poprzednich)
     this.log('🔬 FAZA 2: Rozpoczynanie analizy TRD...');
-    
     const trdResult = await this.executeAgent('trd-assessment', sharedContext);
     agentResults['trd-assessment'] = trdResult;
     sharedContext.trdAssessment = trdResult;
     this.log('✅ Agent TRD zakończony');
 
-    // FAZA 3: Ocena kryteriów (zależy od faz 1-2)
-    this.log('📋 FAZA 3: Rozpoczynanie oceny kryteriów...');
-    
+    // FAZA 3: Criteria Assessment (zależy od wszystkich poprzednich)
+    this.log('🔬 FAZA 3: Rozpoczynanie oceny kryteriów...');
     const criteriaResult = await this.executeAgent('criteria-assessment', sharedContext);
     agentResults['criteria-assessment'] = criteriaResult;
     sharedContext.inclusionCriteriaAssessment = criteriaResult;
     this.log('✅ Agent Oceny Kryteriów zakończony');
 
-    // FAZA 4: Ocena ryzyka (zależy od wszystkich poprzednich)
-    this.log('⚠️ FAZA 4: Rozpoczynanie oceny ryzyka...');
-    
+    // FAZA 4: Risk Assessment (zależy od wszystkich poprzednich + criteria)
+    this.log('🔬 FAZA 4: Rozpoczynanie oceny ryzyka...');
     const riskResult = await this.executeAgent('risk-assessment', sharedContext);
     agentResults['risk-assessment'] = riskResult;
     sharedContext.riskAssessment = riskResult;
     this.log('✅ Agent Oceny Ryzyka zakończony');
 
-    // FAZA 5: Synteza końcowa
-    this.log('🎯 FAZA 5: Synteza wyników...');
-    
+    // SYNTEZA FINALNA
+    this.log('🎯 Rozpoczynanie syntezy finalnej...');
     const finalResult = this.synthesizeFinalResult(agentResults, sharedContext);
-    
-    // Dodaj informacje o mapowaniu leków do wyniku końcowego
-    finalResult.drugMappingInfo = {
-      mappingsApplied: drugMappings.length,
-      mappings: drugMappings,
-      preprocessedAt: new Date().toISOString()
-    };
-    
-    this.log(`✅ Analiza wieloagentowa zakończona pomyślnie z ${drugMappings.length} mapowaniami leków`);
-    
+    this.log('✅ Analiza wieloagentowa zakończona pomyślnie');
+
     return {
       finalResult,
       agentResults,

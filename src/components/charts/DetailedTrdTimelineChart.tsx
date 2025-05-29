@@ -132,7 +132,7 @@ interface TimelineEvent {
   id: string;              
   drugName: string;
   shortName: string;
-  dose: string;            
+  dose: string | null;            
   startDate: Date;
   endDate: Date;
   duration: number;        
@@ -1001,23 +1001,36 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
   // OPTIMIZED DATA PROCESSING
   // ============================================================================
   
-  // Memoized drug groups processing with performance optimizations
-  const { drugGroups, allEvents, timeRange, drugClasses } = useMemo(() => {
-    const pharmacotherapy = patientData.trdAnalysis?.pharmacotherapy || [];
-    
-    // Early return for empty data
-    if (pharmacotherapy.length === 0) {
-      return { 
-        drugGroups: [], 
-        allEvents: [], 
-        timeRange: { start: new Date(), end: new Date() }, 
-        drugClasses: [] 
-      };
-    }
-    
-    // Process episodes with enhanced clinical analysis
-    const validEpisodes: ProcessedDrugEpisode[] = pharmacotherapy
-      .map((drug, index) => {
+  // Process data with async clinical analysis
+  const [processedData, setProcessedData] = useState<{
+    drugGroups: DrugGroup[];
+    allEvents: ProcessedDrugEpisode[];
+    timeRange: { start: Date; end: Date };
+    drugClasses: string[];
+  }>({
+    drugGroups: [],
+    allEvents: [],
+    timeRange: { start: new Date(), end: new Date() },
+    drugClasses: []
+  });
+
+  useEffect(() => {
+    const processData = async () => {
+      const pharmacotherapy = patientData.trdAnalysis?.pharmacotherapy || [];
+      
+      // Early return for empty data
+      if (pharmacotherapy.length === 0) {
+        setProcessedData({
+          drugGroups: [],
+          allEvents: [],
+          timeRange: { start: new Date(), end: new Date() },
+          drugClasses: []
+        });
+        return;
+      }
+      
+      // Process episodes with enhanced clinical analysis
+      const processEpisode = async (drug: any, index: number): Promise<ProcessedDrugEpisode | null> => {
         const parsedStartDate = safeDate(drug.startDate);
         const parsedEndDate = safeDate(drug.endDate);
         
@@ -1025,8 +1038,8 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
         
         const duration = differenceInDays(parsedEndDate, parsedStartDate);
         
-        // Perform comprehensive clinical analysis
-        const clinicalAnalysis = clinicalAnalysisService.performClinicalAnalysis(drug, duration, patientData);
+        // Perform comprehensive clinical analysis with await
+        const clinicalAnalysis = await clinicalAnalysisService.performClinicalAnalysis(drug, duration, patientData);
         const drugClassification = clinicalAnalysisService.classifyDrugForClinicalResearch(drug.drugName || '', drug.dose, drug.notes);
         
         // Create treatment context
@@ -1058,8 +1071,8 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
         };
         
         return {
-        ...drug,
-        originalIndex: index,
+          ...drug,
+          originalIndex: index,
           parsedStartDate,
           parsedEndDate,
           clinicalAnalysis,
@@ -1067,175 +1080,176 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
           treatmentContext,
           dataQuality
         } as ProcessedDrugEpisode;
-      })
-      .filter((drug): drug is ProcessedDrugEpisode => drug !== null);
+      };
+      
+      // Process all episodes in parallel
+      const validEpisodes = (await Promise.all(
+        pharmacotherapy.map((drug, index) => processEpisode(drug, index))
+      )).filter((drug): drug is ProcessedDrugEpisode => drug !== null);
 
-    // Group by drug name with enhanced clinical analysis
-    const groupedByDrug = new Map<string, ProcessedDrugEpisode[]>();
-    validEpisodes.forEach(episode => {
-      const drugName = (episode.drugName || 'Nieznany Lek').trim();
-      const existing = groupedByDrug.get(drugName);
-      if (existing) {
-        existing.push(episode);
-      } else {
-        groupedByDrug.set(drugName, [episode]);
-      }
-    });
-
-    // Create enhanced drug groups with clinical insights
-    const groups: DrugGroup[] = Array.from(groupedByDrug.entries()).map(([drugName, episodes]) => {
-      const firstEpisode = episodes[0];
-      const shortName = firstEpisode?.shortName || drugName.substring(0, 4).toUpperCase();
-      
-      // Aggregate clinical analysis across episodes
-      const drugClassification = firstEpisode.drugClassification;
-      const totalDuration = episodes.reduce((sum, ep) => sum + differenceInDays(ep.parsedEndDate, ep.parsedStartDate), 0);
-      const maxDose = episodes.reduce((max, ep) => ep.dose && ep.dose > max ? ep.dose : max, '');
-      
-      // Overall clinical analysis for the drug group
-      const overallMghCompliance = episodes.some(ep => ep.clinicalAnalysis.mghAtrqCompliance.isCompliant);
-      const hasAdverseEvents = episodes.some(ep => ep.clinicalAnalysis.adverseEvents.hasAdverseEvents);
-      const bestResponse = episodes.reduce((best, ep) => {
-        const score = ep.clinicalAnalysis.treatmentResponse.efficacyScore;
-        return score > best ? score : best;
-      }, 0);
-      
-      const overallAnalysis: ClinicalAnalysisResult = {
-        mghAtrqCompliance: {
-          isCompliant: overallMghCompliance,
-          confidence: Math.max(...episodes.map(ep => ep.clinicalAnalysis.mghAtrqCompliance.confidence)),
-          reasoning: `Analiza ${episodes.length} epizodów leczenia`,
-          minDoseReached: episodes.some(ep => ep.clinicalAnalysis.mghAtrqCompliance.minDoseReached),
-          minDurationReached: episodes.some(ep => ep.clinicalAnalysis.mghAtrqCompliance.minDurationReached),
-          adequateTrial: overallMghCompliance,
-          specificFindings: {
-            drugFound: episodes.some(ep => ep.clinicalAnalysis.mghAtrqCompliance.specificFindings.drugFound),
-            doseAdequate: episodes.some(ep => ep.clinicalAnalysis.mghAtrqCompliance.specificFindings.doseAdequate),
-            durationAdequate: episodes.some(ep => ep.clinicalAnalysis.mghAtrqCompliance.specificFindings.durationAdequate),
-            augmentationUsed: episodes.some(ep => ep.clinicalAnalysis.mghAtrqCompliance.specificFindings.augmentationUsed)
-          }
-        },
-        adverseEvents: {
-          hasAdverseEvents,
-          severity: hasAdverseEvents ? 'moderate' : 'unknown',
-          events: episodes.flatMap(ep => ep.clinicalAnalysis.adverseEvents.events),
-          impactOnTreatment: hasAdverseEvents ? 'dose_reduction' : 'none',
-          confidence: 0.8
-        },
-        treatmentResponse: {
-          responseType: bestResponse > 7 ? 'full_response' : bestResponse > 4 ? 'partial_response' : 'no_response',
-          timeToResponse: Math.min(...episodes.map(ep => ep.clinicalAnalysis.treatmentResponse.timeToResponse)),
-          sustainedResponse: episodes.some(ep => ep.clinicalAnalysis.treatmentResponse.sustainedResponse),
-          reasonForDiscontinuation: episodes[episodes.length - 1]?.clinicalAnalysis.treatmentResponse.reasonForDiscontinuation || '',
-          efficacyScore: bestResponse,
-          confidence: 0.8
-        },
-        protocolEligibility: {
-          eligibleForCOMP006: overallMghCompliance,
-          inclusionCriteriaMet: overallMghCompliance ? ['IC6'] : [],
-          exclusionCriteriaViolated: [],
-          riskFactors: hasAdverseEvents ? ['adverse_events_history'] : [],
-          recommendations: []
-        },
-        drugInteractions: {
-          hasInteractions: false,
-          interactions: [],
-          clinicalRelevance: 'low'
-        },
-        clinicalSignificance: {
-          overallSignificance: hasAdverseEvents ? 'high' : overallMghCompliance ? 'moderate' : 'low',
-          factors: [],
-          recommendations: [],
-          flagsForReview: []
+      // Group by drug name with enhanced clinical analysis
+      const groupedByDrug = new Map<string, ProcessedDrugEpisode[]>();
+      validEpisodes.forEach(episode => {
+        const drugName = (episode.drugName || 'Nieznany Lek').trim();
+        const existing = groupedByDrug.get(drugName);
+        if (existing) {
+          existing.push(episode);
+        } else {
+          groupedByDrug.set(drugName, [episode]);
         }
-      };
-      
-      // Protocol relevance analysis
-      const protocolRelevance: ProtocolRelevanceAnalysis = {
-        isRelevantForCOMP006: drugClassification.isProtocolRelevant,
-        contributesToTRDDiagnosis: drugClassification.isAntidepressant && overallMghCompliance,
-        meetsAdequacyCriteria: overallMghCompliance,
-        hasExclusionaryFindings: false,
-        clinicalNotes: [`${episodes.length} epizodów`, `Łączny czas: ${totalDuration} dni`],
-        protocolScore: calculateProtocolScore(drugClassification, overallMghCompliance, episodes.length, totalDuration),
-        eligibilityConfidence: calculateEligibilityConfidence(drugClassification, overallMghCompliance, episodes)
-      };
-      
-      // Calculate efficacy trend (legacy compatibility)
-      const efficacyTrend = episodes.length > 1 ? 
-        (episodes[episodes.length - 1].clinicalAnalysis.treatmentResponse.efficacyScore > 
-         episodes[0].clinicalAnalysis.treatmentResponse.efficacyScore ? 'improving' : 'declining') : 'unknown';
-      
-      // Treatment pattern analysis
-      const treatmentPattern = analyzeTreatmentPattern(episodes);
-      
-      // Predictive analytics
-      const predictiveAnalytics = generatePredictiveAnalytics(episodes, patientData);
-      
-      return {
-        drugName,
-        shortName,
-        episodes: episodes.sort((a, b) => a.parsedStartDate.getTime() - b.parsedStartDate.getTime()),
-        isExpanded: expandedDrugs.has(drugName),
-        isVisible: !hiddenDrugs.has(drugName),
-        color: getDrugColor(drugName, drugClassification.primaryClass),
+      });
+
+      // Create enhanced drug groups with clinical insights
+      const groups: DrugGroup[] = Array.from(groupedByDrug.entries()).map(([drugName, episodes]) => {
+        const firstEpisode = episodes[0];
+        const shortName = firstEpisode?.shortName || drugName.substring(0, 4).toUpperCase();
         
-        // Enhanced clinical data
-        drugClassification,
-        overallAnalysis,
-        protocolRelevance,
-        treatmentPattern,
-        predictiveAnalytics,
+        // Aggregate clinical analysis across episodes
+        const drugClassification = firstEpisode.drugClassification;
+        const totalDuration = episodes.reduce((sum, ep) => sum + differenceInDays(ep.parsedEndDate, ep.parsedStartDate), 0);
+        const maxDose = episodes.reduce((max, ep) => ep.dose && ep.dose > max ? ep.dose : max, '');
         
-        // Legacy fields (maintained for compatibility)
-        drugClass: drugClassification.primaryClass,
-        totalDuration,
-        maxDose,
-        efficacyTrend,
-        mghAtrqCompliant: overallMghCompliance
-      };
-    });
+        // Overall clinical analysis for the drug group
+        const overallMghCompliance = episodes.some(ep => ep.clinicalAnalysis.mghAtrqCompliance.isCompliant);
+        const hasAdverseEvents = episodes.some(ep => ep.clinicalAnalysis.adverseEvents.hasAdverseEvents);
+        const bestResponse = episodes.reduce((best, ep) => {
+          const score = ep.clinicalAnalysis.treatmentResponse.efficacyScore;
+          return score > best ? score : best;
+        }, 0);
+        
+        const overallAnalysis: ClinicalAnalysisResult = {
+          mghAtrqCompliance: {
+            isCompliant: overallMghCompliance,
+            confidence: Math.max(...episodes.map(ep => ep.clinicalAnalysis.mghAtrqCompliance.confidence)),
+            reasoning: `Analiza ${episodes.length} epizodów leczenia`,
+            failureCount: Math.max(...episodes.map(ep => ep.clinicalAnalysis.mghAtrqCompliance.failureCount || 0))
+          },
+          adverseEvents: {
+            hasAdverseEvents,
+            severity: hasAdverseEvents ? 'moderate' : 'unknown',
+            events: episodes.flatMap(ep => ep.clinicalAnalysis.adverseEvents.events),
+            impactOnTreatment: hasAdverseEvents ? 'dose_reduction' : 'none',
+            confidence: 0.8
+          },
+          treatmentResponse: {
+            responseType: bestResponse > 7 ? 'full_response' : bestResponse > 4 ? 'partial_response' : 'no_response',
+            timeToResponse: Math.min(...episodes.map(ep => ep.clinicalAnalysis.treatmentResponse.timeToResponse)),
+            sustainedResponse: episodes.some(ep => ep.clinicalAnalysis.treatmentResponse.sustainedResponse),
+            reasonForDiscontinuation: episodes[episodes.length - 1]?.clinicalAnalysis.treatmentResponse.reasonForDiscontinuation || '',
+            efficacyScore: bestResponse,
+            confidence: 0.8
+          },
+          protocolEligibility: {
+            eligibleForCOMP006: overallMghCompliance,
+            inclusionCriteriaMet: overallMghCompliance ? ['IC6'] : [],
+            exclusionCriteriaViolated: [],
+            riskFactors: hasAdverseEvents ? ['adverse_events_history'] : [],
+            recommendations: []
+          },
+          drugInteractions: {
+            hasInteractions: false,
+            interactions: [],
+            clinicalRelevance: 'low'
+          },
+          clinicalSignificance: {
+            overallSignificance: hasAdverseEvents ? 'high' : overallMghCompliance ? 'moderate' : 'low',
+            factors: [],
+            recommendations: [],
+            flagsForReview: []
+          }
+        };
+        
+        // Protocol relevance analysis
+        const protocolRelevance: ProtocolRelevanceAnalysis = {
+          isRelevantForCOMP006: drugClassification.isProtocolRelevant,
+          contributesToTRDDiagnosis: drugClassification.isAntidepressant && overallMghCompliance,
+          meetsAdequacyCriteria: overallMghCompliance,
+          hasExclusionaryFindings: false,
+          clinicalNotes: [`${episodes.length} epizodów`, `Łączny czas: ${totalDuration} dni`],
+          protocolScore: calculateProtocolScore(drugClassification, overallMghCompliance, episodes.length, totalDuration),
+          eligibilityConfidence: calculateEligibilityConfidence(drugClassification, overallMghCompliance, episodes)
+        };
+        
+        // Calculate efficacy trend (legacy compatibility)
+        const efficacyTrend = episodes.length > 1 ? 
+          (episodes[episodes.length - 1].clinicalAnalysis.treatmentResponse.efficacyScore > 
+           episodes[0].clinicalAnalysis.treatmentResponse.efficacyScore ? 'improving' : 'declining') : 'unknown';
+        
+        // Treatment pattern analysis
+        const treatmentPattern = analyzeTreatmentPattern(episodes);
+        
+        // Predictive analytics
+        const predictiveAnalytics = generatePredictiveAnalytics(episodes, patientData);
+        
+        return {
+          drugName,
+          shortName,
+          episodes: episodes.sort((a, b) => a.parsedStartDate.getTime() - b.parsedStartDate.getTime()),
+          isExpanded: expandedDrugs.has(drugName),
+          isVisible: !hiddenDrugs.has(drugName),
+          color: getDrugColor(drugName, drugClassification.primaryClass),
+          
+          // Enhanced clinical data
+          drugClassification,
+          overallAnalysis,
+          protocolRelevance,
+          treatmentPattern,
+          predictiveAnalytics,
+          
+          // Legacy fields (maintained for compatibility)
+          drugClass: drugClassification.primaryClass,
+          totalDuration,
+          maxDose,
+          efficacyTrend,
+          mghAtrqCompliant: overallMghCompliance
+        };
+      });
 
-    // Optimized sorting with clinical relevance priority
-    groups.sort((a, b) => {
-      // Prioritize protocol-relevant drugs
-      if (a.protocolRelevance.isRelevantForCOMP006 !== b.protocolRelevance.isRelevantForCOMP006) {
-        return a.protocolRelevance.isRelevantForCOMP006 ? -1 : 1;
-      }
+      // Optimized sorting with clinical relevance priority
+      groups.sort((a, b) => {
+        // Prioritize protocol-relevant drugs
+        if (a.protocolRelevance.isRelevantForCOMP006 !== b.protocolRelevance.isRelevantForCOMP006) {
+          return a.protocolRelevance.isRelevantForCOMP006 ? -1 : 1;
+        }
+        
+        // Then by drug class importance
+        const classOrder = ['SSRI', 'SNRI', 'TCA', 'Atypical', 'MAOI', 'Antipsychotic', 'Mood Stabilizer', 'Anxiolytic', 'Hypnotic', 'Other', 'Unknown'];
+        const aClassIndex = classOrder.indexOf(a.drugClass);
+        const bClassIndex = classOrder.indexOf(b.drugClass);
+        
+        if (aClassIndex !== bClassIndex) return aClassIndex - bClassIndex;
+        if (a.totalDuration !== b.totalDuration) return b.totalDuration - a.totalDuration;
+        
+        const aFirst = Math.min(...a.episodes.map(e => e.parsedStartDate.getTime()));
+        const bFirst = Math.min(...b.episodes.map(e => e.parsedStartDate.getTime()));
+        return aFirst - bFirst;
+      });
+
+      // Optimized time range calculation
+      const allDates = validEpisodes.flatMap(e => [e.parsedStartDate, e.parsedEndDate]);
+      const minDate = new Date(Math.min(...allDates.map(d => d.getTime())));
+      const maxDate = new Date(Math.max(...allDates.map(d => d.getTime())));
       
-      // Then by drug class importance
-      const classOrder = ['SSRI', 'SNRI', 'TCA', 'Atypical', 'MAOI', 'Antipsychotic', 'Mood Stabilizer', 'Anxiolytic', 'Hypnotic', 'Other', 'Unknown'];
-      const aClassIndex = classOrder.indexOf(a.drugClass);
-      const bClassIndex = classOrder.indexOf(b.drugClass);
+      const totalDays = differenceInDays(maxDate, minDate);
+      const paddingDays = Math.max(30, Math.floor(totalDays * 0.1));
       
-      if (aClassIndex !== bClassIndex) return aClassIndex - bClassIndex;
-      if (a.totalDuration !== b.totalDuration) return b.totalDuration - a.totalDuration;
-      
-      const aFirst = Math.min(...a.episodes.map(e => e.parsedStartDate.getTime()));
-      const bFirst = Math.min(...b.episodes.map(e => e.parsedStartDate.getTime()));
-      return aFirst - bFirst;
-    });
+      const paddedStart = addDays(startOfDay(minDate), -paddingDays);
+      const paddedEnd = addDays(endOfDay(maxDate), paddingDays);
 
-    // Optimized time range calculation
-    const allDates = validEpisodes.flatMap(e => [e.parsedStartDate, e.parsedEndDate]);
-    const minDate = new Date(Math.min(...allDates.map(d => d.getTime())));
-    const maxDate = new Date(Math.max(...allDates.map(d => d.getTime())));
-    
-    const totalDays = differenceInDays(maxDate, minDate);
-    const paddingDays = Math.max(30, Math.floor(totalDays * 0.1));
-    
-    const paddedStart = addDays(startOfDay(minDate), -paddingDays);
-    const paddedEnd = addDays(endOfDay(maxDate), paddingDays);
+      const uniqueClasses = [...new Set(groups.map(g => g.drugClass))];
 
-    const uniqueClasses = [...new Set(groups.map(g => g.drugClass))];
-
-    return {
-      drugGroups: groups,
-      allEvents: validEpisodes,
-      timeRange: { start: paddedStart, end: paddedEnd },
-      drugClasses: uniqueClasses
+      setProcessedData({
+        drugGroups: groups,
+        allEvents: validEpisodes,
+        timeRange: { start: paddedStart, end: paddedEnd },
+        drugClasses: uniqueClasses
+      });
     };
+
+    processData();
   }, [patientData, expandedDrugs, hiddenDrugs]);
+
+  const { drugGroups, allEvents, timeRange, drugClasses } = processedData;
 
   // ============================================================================
   // OPTIMIZED FILTERING AND CALCULATIONS
@@ -2016,7 +2030,7 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div className="bg-slate-50 rounded-lg p-3">
                 <div className="text-sm text-slate-600 mb-1">Dawka</div>
-                <div className="font-semibold text-slate-800">{selectedEvent.dose}</div>
+                <div className="font-semibold text-slate-800">{selectedEvent.dose || 'dawka nieznana'}</div>
               </div>
               <div className="bg-slate-50 rounded-lg p-3">
                 <div className="text-sm text-slate-600 mb-1">Czas trwania</div>
@@ -2270,7 +2284,7 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
         >
           <div className="space-y-1">
             <div className="font-semibold">{hoveredEvent.drugName}</div>
-            <div>Dawka: {hoveredEvent.dose}</div>
+            <div>Dawka: {hoveredEvent.dose || 'nieznana'}</div>
             <div>Czas trwania: {hoveredEvent.duration} dni</div>
             {showAdvancedMetrics && (
               <>

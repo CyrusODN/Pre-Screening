@@ -4,7 +4,7 @@ import type {
   SharedContext, 
   TRDAssessmentResult 
 } from '../../types/agents';
-import { mghAtrqService } from '../../services/mghAtrqService';
+import { enhancedMGHATRQService } from '../../services/enhancedMghAtrqService';
 
 export class TRDAssessmentAgent extends AbstractBaseAgent<TRDAssessmentResult> {
   constructor() {
@@ -105,21 +105,31 @@ Pacjent spełnia kryterium IC6, jeśli doświadczył niepowodzenia co najmniej D
 - Uwzględnij generalNotes w "Kryteriach MGH-ATRQ Badania" dla dodatkowych wskazówek
 
 ODPOWIEDŹ MUSI BYĆ W FORMACIE JSON:
+
+**WAŻNE INSTRUKCJE FORMATOWANIA JSON:**
+1. **NIE UŻYWAJ** znaków przerwania linii (\n) wewnątrz stringów
+2. **NIE UŻYWAJ** znaków tabulacji (\t) w stringach  
+3. **UŻYWAJ** tylko standardowych znaków ASCII i polskich liter
+4. **OGRANICZ** długość każdego stringa do maksymalnie 180 znaków
+5. **UŻYJ** trzech kropek (...) jeśli tekst jest za długi
+6. **ESCAPE'UJ** cudzysłowy wewnątrz stringów za pomocą \"
+7. **KAŻDY STRING** musi kończyć się przed końcem linii JSON
+
 {
   "episodeStartDate": "YYYY-MM-DD lub null",
   "adequateTrials": [
     {
-      "id": "string",
-      "drugName": "string",
-      "dose": "string",
-      "duration": number,
-      "adequate": boolean,
-      "reasoning": "string - szczegółowe uzasadnienie wg MGH-ATRQ"
+      "id": "string - ID próby (max 20 znaków)",
+      "drugName": "string - nazwa leku (max 50 znaków)",
+      "dose": "string - dawka (max 30 znaków)",
+      "duration": 0,
+      "adequate": true,
+      "reasoning": "string - uzasadnienie (max 180 znaków)"
     }
   ],
-  "trdStatus": "confirmed" | "not_confirmed" | "insufficient_data",
-  "failureCount": number,
-  "conclusion": "string - szczegółowy wniosek z listą punktowaną niepowodzeń: \\n- Próba 1: opis\\n- Próba 2: opis"
+  "trdStatus": "confirmed",
+  "failureCount": 0,
+  "conclusion": "string - wniosek (max 200 znaków)"
 }`,
       dependencies: ['clinical-synthesis', 'episode-analysis', 'pharmacotherapy-analysis']
     };
@@ -128,6 +138,9 @@ ODPOWIEDŹ MUSI BYĆ W FORMACIE JSON:
   }
 
   protected async executeLogic(context: SharedContext): Promise<TRDAssessmentResult> {
+    // Zapisz kontekst dla dostępu w metodach pomocniczych
+    this.currentContext = context;
+    
     const clinicalData = context.clinicalSynthesis?.data;
     const episodeData = context.episodeAnalysis?.data;
     const pharmacoData = context.pharmacotherapyAnalysis?.data;
@@ -150,6 +163,16 @@ Wykonaj szczegółową ocenę TRD według instrukcji systemowych, uwzględniają
     console.log('📋 Previous Agent Results length:', context.previousAgentResults?.length || 0);
     console.log('📋 Study Protocol length:', context.studyProtocol?.length || 0);
     
+    // Loguj mapowania preprocessing
+    if (context.drugMappingInfo?.mappings) {
+      console.log('🔍 [TRD Agent] Drug mappings available in context:', context.drugMappingInfo.mappings.length);
+      context.drugMappingInfo.mappings.forEach(mapping => {
+        console.log(`  - ${mapping.original} → ${mapping.mapped} (confidence: ${Math.round(mapping.confidence * 100)}%)`);
+      });
+    } else {
+      console.log('⚠️ [TRD Agent] No drug mappings found in context.drugMappingInfo');
+    }
+    
     // Loguj fragment previousAgentResults, żeby zobaczyć mapowania
     if (context.previousAgentResults) {
       const mappingSection = context.previousAgentResults.match(/Mapowania leków:[\s\S]*?(?=\n\n|\n[A-Z]|$)/);
@@ -164,7 +187,7 @@ Wykonaj szczegółową ocenę TRD według instrukcji systemowych, uwzględniają
     const aiResult = this.parseJSONResponse<TRDAssessmentResult>(response);
     
     // UJEDNOLICENIE: Weryfikacja wyników AI za pomocą ujednoliconego serwisu
-    const verifiedResult = this.verifyWithUnifiedService(aiResult, pharmacoData?.timeline || []);
+    const verifiedResult = await this.verifyWithUnifiedService(aiResult, pharmacoData?.timeline || [], context);
     
     return verifiedResult;
   }
@@ -172,20 +195,26 @@ Wykonaj szczegółową ocenę TRD według instrukcji systemowych, uwzględniają
   /**
    * Weryfikuje wyniki AI za pomocą ujednoliconego serwisu MGH-ATRQ
    */
-  private verifyWithUnifiedService(
+  private async verifyWithUnifiedService(
     aiResult: TRDAssessmentResult, 
-    pharmacotherapy: any[]
-  ): TRDAssessmentResult {
+    pharmacotherapy: any[],
+    context: SharedContext
+  ): Promise<TRDAssessmentResult> {
     console.log(`🔄 [TRD Agent] Verifying AI results with unified MGH-ATRQ service`);
     
     try {
-      // Użyj ujednoliconego serwisu do weryfikacji
-      const serviceResult = mghAtrqService.assessTRDCompliance(
+      // KROK 1: Wyodrębnij mapowania preprocessing z kontekstu
+      const preprocessingMappings = this.extractPreprocessingMappings(context);
+      console.log(`📋 [TRD Agent] Extracted ${preprocessingMappings.length} preprocessing mappings`);
+      
+      // KROK 2: Użyj Enhanced MGH-ATRQ service z AI-powered tłumaczeniem
+      const serviceResult = await enhancedMGHATRQService.assessTRDWithPreprocessing(
         pharmacotherapy,
-        aiResult.episodeStartDate
+        aiResult.episodeStartDate,
+        preprocessingMappings
       );
       
-      // Porównaj wyniki
+      // KROK 3: Porównaj wyniki
       const aiFailureCount = aiResult.failureCount;
       const serviceFailureCount = serviceResult.failureCount || 0;
       
@@ -200,7 +229,14 @@ Wykonaj szczegółową ocenę TRD według instrukcji systemowych, uwzględniają
           failureCount: serviceFailureCount,
           trdStatus: serviceResult.isCompliant ? 'confirmed' : 'not_confirmed',
           conclusion: serviceResult.reasoning,
-          adequateTrials: serviceResult.adequateTrials || aiResult.adequateTrials
+          adequateTrials: serviceResult.adequateTrials?.map(trial => ({
+            id: trial.id,
+            drugName: trial.originalDrugName,
+            dose: trial.dose,
+            duration: trial.duration,
+            adequate: trial.adequate,
+            reasoning: trial.reasoning
+          })) || aiResult.adequateTrials
         };
       }
       
@@ -208,7 +244,14 @@ Wykonaj szczegółową ocenę TRD według instrukcji systemowych, uwzględniają
       return {
         ...aiResult,
         failureCount: serviceFailureCount, // Użyj dokładniejszej liczby z serwisu
-        adequateTrials: serviceResult.adequateTrials || aiResult.adequateTrials
+        adequateTrials: serviceResult.adequateTrials?.map(trial => ({
+          id: trial.id,
+          drugName: trial.originalDrugName,
+          dose: trial.dose,
+          duration: trial.duration,
+          adequate: trial.adequate,
+          reasoning: trial.reasoning
+        })) || aiResult.adequateTrials
       };
       
     } catch (error) {
@@ -217,6 +260,67 @@ Wykonaj szczegółową ocenę TRD według instrukcji systemowych, uwzględniają
       return aiResult;
     }
   }
+
+  /**
+   * Wyodrębnia mapowania preprocessing z kontekstu SharedContext
+   */
+  private extractPreprocessingMappings(context: SharedContext): Array<{ originalName: string; standardName: string; activeSubstance: string }> {
+    // Sprawdź czy są mapowania w drugMappingInfo (główna ścieżka w MultiAgentCoordinator)
+    if (context?.drugMappingInfo?.mappings) {
+      console.log(`🔍 [TRD Agent] Found preprocessing mappings in context.drugMappingInfo`);
+      return context.drugMappingInfo.mappings.map((mapping: any) => ({
+        originalName: mapping.original || '',
+        standardName: mapping.mapped || '',
+        activeSubstance: mapping.mapped || ''
+      }));
+    }
+    
+    // Jeśli nie ma bezpośredniego dostępu, spróbuj wyodrębnić z previousAgentResults
+    if (context?.previousAgentResults) {
+      const mappings = this.parsePreprocessingFromText(context.previousAgentResults);
+      if (mappings.length > 0) {
+        console.log(`🔍 [TRD Agent] Extracted ${mappings.length} mappings from previousAgentResults text`);
+        return mappings;
+      }
+    }
+    
+    console.log(`⚠️ [TRD Agent] No preprocessing mappings found in context`);
+    return [];
+  }
+  
+  /**
+   * Parsuje mapowania preprocessing z tekstu previousAgentResults
+   */
+  private parsePreprocessingFromText(text: string): Array<{ originalName: string; standardName: string; activeSubstance: string }> {
+    const mappings: Array<{ originalName: string; standardName: string; activeSubstance: string }> = [];
+    
+    // Szukaj sekcji mapowań leków
+    const mappingSection = text.match(/Mapowania leków:[\s\S]*?(?=\n\n|\n[A-Z]|$)/);
+    if (!mappingSection) return [];
+    
+    // Parsuj linie mapowań typu "- welbox → Bupropioni hydrochloridum 150 mg (confidence: 98%)"
+    const mappingLines = mappingSection[0].match(/- .+ → .+ \(confidence: \d+%\)/g);
+    if (!mappingLines) return [];
+    
+    for (const line of mappingLines) {
+      const match = line.match(/- (.+) → (.+) \(confidence: \d+%\)/);
+      if (match) {
+        const originalName = match[1].trim();
+        const standardName = match[2].trim();
+        
+        mappings.push({
+          originalName,
+          standardName,
+          activeSubstance: standardName
+        });
+      }
+    }
+    
+    return mappings;
+  }
+  
+  // Dodaj właściwość do przechowywania kontekstu
+  private currentContext?: SharedContext;
 
   protected getErrorFallback(): TRDAssessmentResult {
     return {
@@ -308,4 +412,4 @@ Wykonaj szczegółową ocenę TRD według instrukcji systemowych, uwzględniają
     
     return warnings;
   }
-} 
+}

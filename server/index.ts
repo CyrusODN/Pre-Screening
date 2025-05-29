@@ -185,7 +185,7 @@ app.post('/api/drug-mapping/search', async (req, res) => {
     }
 
     // Dynamiczny import serwisu
-    const { default: drugMappingService } = await import('../src/services/drugMappingService.js');
+    const { default: drugMappingService } = await import('../src/services/drugMappingService.ts');
     const result = await drugMappingService.mapDrugToStandard(drugName);
     
     console.log(`✅ [Backend] Drug mapping completed for: ${drugName}, found: ${result.found}`);
@@ -212,7 +212,7 @@ app.post('/api/drug-mapping/detailed-search', async (req, res) => {
     }
 
     // Dynamiczny import serwisu
-    const { default: drugMappingService } = await import('../src/services/drugMappingService.js');
+    const { default: drugMappingService } = await import('../src/services/drugMappingService.ts');
     const result = await drugMappingService.searchDrugs(searchTerm);
     
     console.log(`✅ [Backend] Detailed search completed for: ${searchTerm}, matches: ${result.exactMatches.length + result.partialMatches.length + result.substanceMatches.length}`);
@@ -233,7 +233,7 @@ app.get('/api/drug-mapping/stats', async (req, res) => {
     console.log('📊 [Backend] Drug database stats request');
     
     // Dynamiczny import serwisu
-    const { default: drugMappingService } = await import('../src/services/drugMappingService.js');
+    const { default: drugMappingService } = await import('../src/services/drugMappingService.ts');
     const stats = await drugMappingService.getDatabaseStats();
     
     console.log(`✅ [Backend] Stats retrieved: ${stats.totalDrugs} drugs, ${stats.uniqueSubstances} substances`);
@@ -254,7 +254,7 @@ app.get('/api/drug-mapping/antidepressants', async (req, res) => {
     console.log('💊 [Backend] Antidepressants request');
     
     // Dynamiczny import serwisu
-    const { default: drugMappingService } = await import('../src/services/drugMappingService.js');
+    const { default: drugMappingService } = await import('../src/services/drugMappingService.ts');
     const antidepressants = await drugMappingService.getAntidepressants();
     
     console.log(`✅ [Backend] Found ${antidepressants.length} antidepressants`);
@@ -264,6 +264,27 @@ app.get('/api/drug-mapping/antidepressants', async (req, res) => {
     console.error('💥 [Backend] Antidepressants error:', error);
     res.status(500).json({ 
       error: 'Failed to get antidepressants', 
+      details: error.message 
+    });
+  }
+});
+
+// Endpoint do pobierania WSZYSTKICH leków z polskiego rejestru
+app.get('/api/drug-mapping/all', async (req, res) => {
+  try {
+    console.log('💊 [Backend] All drugs request');
+    
+    // Dynamiczny import serwisu - używaj .js extension jak inne endpointy
+    const { default: drugMappingService } = await import('../src/services/drugMappingService.ts');
+    const allDrugs = await drugMappingService.getAllDrugs();
+    
+    console.log(`✅ [Backend] Found ${allDrugs.length} drugs from Polish national registry`);
+    res.json(allDrugs);
+    
+  } catch (error) {
+    console.error('💥 [Backend] All drugs error:', error);
+    res.status(500).json({ 
+      error: 'Failed to get all drugs', 
       details: error.message 
     });
   }
@@ -281,7 +302,7 @@ app.post('/api/drug-mapping/is-antidepressant', async (req, res) => {
     }
 
     // Dynamiczny import serwisu
-    const { default: drugMappingService } = await import('../src/services/drugMappingService.js');
+    const { default: drugMappingService } = await import('../src/services/drugMappingService.ts');
     const isAntidepressant = await drugMappingService.isAntidepressant(drugName);
     
     console.log(`✅ [Backend] Antidepressant check completed for: ${drugName}, result: ${isAntidepressant}`);
@@ -314,7 +335,7 @@ app.post('/api/analysis/save', async (req, res) => {
     // Dynamiczny import LocalAnalysisStorage
     const { LocalAnalysisStorage } = await import('./storage/LocalAnalysisStorage.js');
     const storage = new LocalAnalysisStorage({
-      basePath: '../History',
+      basePath: './History',
       compression: false,
       maxFileSize: 10 * 1024 * 1024 // 10MB
     });
@@ -342,7 +363,7 @@ app.get('/api/analysis/load/:id', async (req, res) => {
     // Dynamiczny import LocalAnalysisStorage
     const { LocalAnalysisStorage } = await import('./storage/LocalAnalysisStorage.js');
     const storage = new LocalAnalysisStorage({
-      basePath: '../History',
+      basePath: './History',
       compression: false
     });
     
@@ -372,7 +393,7 @@ app.get('/api/analysis/list', async (req, res) => {
     // Dynamiczny import LocalAnalysisStorage
     const { LocalAnalysisStorage } = await import('./storage/LocalAnalysisStorage.js');
     const storage = new LocalAnalysisStorage({
-      basePath: '../History',
+      basePath: './History',
       compression: false
     });
     
@@ -406,7 +427,7 @@ app.delete('/api/analysis/delete/:id', async (req, res) => {
     // Dynamiczny import LocalAnalysisStorage
     const { LocalAnalysisStorage } = await import('./storage/LocalAnalysisStorage.js');
     const storage = new LocalAnalysisStorage({
-      basePath: '../History',
+      basePath: './History',
       compression: false
     });
     
@@ -436,7 +457,7 @@ app.get('/api/analysis/stats', async (req, res) => {
     // Dynamiczny import LocalAnalysisStorage
     const { LocalAnalysisStorage } = await import('./storage/LocalAnalysisStorage.js');
     const storage = new LocalAnalysisStorage({
-      basePath: '../History',
+      basePath: './History',
       compression: false
     });
     

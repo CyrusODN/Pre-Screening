@@ -86,49 +86,56 @@ Prawdopodobieństwo zależy od szczegółów:
 - Ocena kryteriów (spełnienie wymogów protokołu)
 
 **FORMAT ODPOWIEDZI:**
-Zwróć JSON z następującą strukturą:
-\`\`\`json
+
+**WAŻNE INSTRUKCJE FORMATOWANIA JSON:**
+1. **NIE UŻYWAJ** znaków przerwania linii (\n) wewnątrz stringów
+2. **NIE UŻYWAJ** znaków tabulacji (\t) w stringach  
+3. **UŻYWAJ** tylko standardowych znaków ASCII i polskich liter
+4. **OGRANICZ** długość każdego stringa do maksymalnie 120 znaków
+5. **UŻYJ** trzech kropek (...) jeśli tekst jest za długi
+6. **ESCAPE'UJ** cudzysłowy wewnątrz stringów za pomocą \"
+7. **KAŻDY STRING** musi kończyć się przed końcem linii JSON
+
 {
   "patientRiskProfile": {
     "suicidalRisk": {
-      "level": "low|medium|high|critical",
-      "indicators": ["Wskaźnik 1", "Wskaźnik 2"],
-      "mitigationStrategies": ["Strategia 1", "Strategia 2"]
+      "level": "low",
+      "indicators": ["string - wskaźnik (max 80 znaków)"],
+      "mitigationStrategies": ["string - strategia (max 100 znaków)"]
     },
     "adherenceRisk": {
-      "level": "low|medium|high",
-      "factors": ["Czynnik 1", "Czynnik 2"],
-      "recommendations": ["Rekomendacja 1", "Rekomendacja 2"]
+      "level": "medium",
+      "factors": ["string - czynnik (max 80 znaków)"],
+      "recommendations": ["string - rekomendacja (max 100 znaków)"]
     },
     "adverseEventRisk": {
-      "level": "low|medium|high",
-      "potentialEvents": ["Zdarzenie 1", "Zdarzenie 2"],
-      "monitoringNeeds": ["Monitoring 1", "Monitoring 2"]
+      "level": "medium",
+      "potentialEvents": ["string - zdarzenie (max 80 znaków)"],
+      "monitoringNeeds": ["string - monitoring (max 100 znaków)"]
     },
     "dropoutRisk": {
-      "level": "low|medium|high",
-      "factors": ["Czynnik 1", "Czynnik 2"],
-      "retentionStrategies": ["Strategia 1", "Strategia 2"]
+      "level": "medium",
+      "factors": ["string - czynnik (max 80 znaków)"],
+      "retentionStrategies": ["string - strategia (max 100 znaków)"]
     }
   },
   "studySpecificRisks": {
     "protocolCompliance": 85,
     "dataQuality": 90,
-    "ethicalConcerns": ["Kwestia 1", "Kwestia 2"]
+    "ethicalConcerns": ["string - kwestia etyczna (max 100 znaków)"]
   },
   "inclusionProbability": {
     "score": 75,
     "confidence": 85,
     "keyFactors": {
-      "positive": ["Pozytywny 1", "Pozytywny 2"],
-      "negative": ["Negatywny 1", "Negatywny 2"],
-      "neutral": ["Neutralny 1", "Neutralny 2"]
+      "positive": ["string - pozytywny czynnik (max 80 znaków)"],
+      "negative": ["string - negatywny czynnik (max 80 znaków)"],
+      "neutral": ["string - neutralny czynnik (max 80 znaków)"]
     },
-    "recommendation": "include|exclude|further_evaluation",
-    "reasoning": "Szczegółowe uzasadnienie rekomendacji z wyjaśnieniem logiki bezwzględnych wykluczeń"
+    "recommendation": "include",
+    "reasoning": "string - uzasadnienie (max 120 znaków)"
   }
 }
-\`\`\`
 
 **ZASADY OCENY RYZYKA:**
 1. **Ryzyko samobójcze** - priorytet bezpieczeństwa, historia prób, ideacje

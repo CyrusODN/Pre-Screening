@@ -293,7 +293,7 @@ export const PrintableReport: React.FC<PrintableReportProps> = ({
               <div className="space-y-1">
                 {patientProfile.trdAnalysis.pharmacotherapy.map((item, idx) => (
                   <div key={idx} className="border-l-4 border-blue-200 pl-3 py-1">
-                    <p className="font-medium">{item.drugName} ({item.dose})</p>
+                    <p className="font-medium">{item.drugName} ({item.dose || 'dawka nieznana'})</p>
                     <p className="text-sm text-gray-600">
                       {item.startDate} - {item.endDate || 'trwa'} | 
                       Grupa próby: {item.attemptGroup}

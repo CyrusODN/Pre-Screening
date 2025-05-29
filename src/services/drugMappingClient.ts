@@ -95,6 +95,25 @@ class DrugMappingClient {
   }
 
   /**
+   * Pobiera WSZYSTKIE leki z polskiego rejestru (nie tylko przeciwdepresyjne)
+   * NOWA METODA: Skalowalne rozwiązanie dla mapowania wszystkich leków
+   */
+  public async getAllDrugs(): Promise<DrugRecord[]> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/all`);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error getting all drugs:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Sprawdza czy lek jest przeciwdepresyjny
    */
   public async isAntidepressant(drugName: string): Promise<{drugName: string; isAntidepressant: boolean}> {

@@ -74,7 +74,7 @@ export interface PharmacotherapyItem {
   shortName: string;
   startDate: string | null;
   endDate: string | null;
-  dose: string;
+  dose: string | null;
   attemptGroup: number;
   notes?: string;
   isAugmentation?: boolean;

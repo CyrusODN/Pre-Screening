@@ -121,18 +121,22 @@ if (import.meta.env.DEV) {
     // Dodaj funkcję testową do globalnego obiektu window dla łatwego dostępu z konsoli
     (window as any).testStorage = testBrowserStorage;
     
+    // WYŁĄCZONY automatyczny test - można uruchomić ręcznie przez testStorage()
+    console.log('🧪 [Test] Automatic storage test is DISABLED');
+    console.log('🧪 [Test] You can run storage test manually by calling: testStorage()');
+    
     // Opcjonalnie uruchom test automatycznie po załadowaniu
-    window.addEventListener('load', () => {
-      console.log('🧪 [Test] Page loaded. You can run storage test by calling: testStorage()');
-      console.log('🧪 [Test] Or wait for automatic test in 3 seconds...');
-      
-      setTimeout(() => {
-        console.log('🧪 [Test] Starting automatic storage test...');
-        testBrowserStorage().catch(error => {
-          console.error('🧪 [Test] Automatic storage test failed:', error);
-        });
-      }, 3000); // Opóźnienie 3s, aby aplikacja się w pełni załadowała
-    });
+    // window.addEventListener('load', () => {
+    //   console.log('🧪 [Test] Page loaded. You can run storage test by calling: testStorage()');
+    //   console.log('🧪 [Test] Or wait for automatic test in 3 seconds...');
+    //   
+    //   setTimeout(() => {
+    //     console.log('🧪 [Test] Starting automatic storage test...');
+    //     testBrowserStorage().catch(error => {
+    //       console.error('🧪 [Test] Automatic storage test failed:', error);
+    //     });
+    //   }, 3000); // Opóźnienie 3s, aby aplikacja się w pełni załadowała
+    // });
   }
 }
 

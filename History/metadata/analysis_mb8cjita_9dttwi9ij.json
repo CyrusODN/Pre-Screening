@@ -1,0 +1,20 @@
+{
+  "id": "analysis_mb8cjita_9dttwi9ij",
+  "patientId": "PAT/202505/276",
+  "analysisType": "multi-agent",
+  "modelUsed": "gemini",
+  "createdAt": "2025-05-28T19:36:51.438Z",
+  "updatedAt": "2025-05-28T19:36:51.498Z",
+  "status": "completed",
+  "version": "0.1.0",
+  "tags": [
+    "lekami przeciwdepresyjnymi",
+    "rozregulowany rytm dobowy",
+    "P2",
+    "D6",
+    "P3",
+    "A4",
+    "multi-agent"
+  ],
+  "notes": "MK PAT/202505/276 - Wieloagentowa - 28.05.2025 21:36"
+}

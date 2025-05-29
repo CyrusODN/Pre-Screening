@@ -1,0 +1,16 @@
+{
+  "id": "analysis_mb83a6ih_iahumr021",
+  "patientId": "Krzysztof Gos",
+  "analysisType": "single-agent",
+  "modelUsed": "gemini",
+  "createdAt": "2025-05-28T15:17:39.056Z",
+  "updatedAt": "2025-05-28T15:17:39.082Z",
+  "status": "completed",
+  "version": "1.0.0",
+  "tags": [
+    "Łagodne zaburzenia poznawcze",
+    "Prawdopodobna łagodna hiperplazja prostaty (przyjmuje Tamsulosin)",
+    "single-agent"
+  ],
+  "notes": "Krzysztof G. - Klasyczna - 28.05.2025 17:17"
+}

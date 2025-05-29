@@ -1,0 +1,16 @@
+{
+  "id": "analysis_mb836h95_yl2rjvgd8",
+  "patientId": "Patient001",
+  "analysisType": "single-agent",
+  "modelUsed": "gemini",
+  "createdAt": "2025-05-28T15:14:46.346Z",
+  "updatedAt": "2025-05-28T15:14:46.386Z",
+  "status": "completed",
+  "version": "1.0.0",
+  "tags": [
+    "F42 Zaburzenia obsesyjno-kompulsyjne",
+    "Astma oskrzelowa",
+    "single-agent"
+  ],
+  "notes": "Adrian H. - Klasyczna - 28.05.2025 17:14"
+}

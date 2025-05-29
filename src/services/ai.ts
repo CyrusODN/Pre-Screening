@@ -6,6 +6,76 @@ import { initialPatientData } from '../data/mockData';
 // Usunięto nieużywany import 'differenceInDays'
 import { addDays, formatISO, isValid, parseISO } from 'date-fns'; 
 import drugMappingClient from './drugMappingClient';
+import type { DrugRecord } from './drugMappingService';
+import PrescriptionParser from '../utils/prescriptionParser';
+
+// PERFORMANCE: Cache dla preprocessingu leków
+let drugNamesCache: Map<string, {standardName: string, activeSubstance: string, confidence: number}> | null = null;
+let cacheTimestamp: number = 0;
+const CACHE_DURATION = 30 * 60 * 1000; // 30 minut cache
+
+async function getDrugNamesMap(): Promise<Map<string, {standardName: string, activeSubstance: string, confidence: number}>> {
+  const now = Date.now();
+  
+  // Sprawdź czy cache jest aktualny
+  if (drugNamesCache && (now - cacheTimestamp) < CACHE_DURATION) {
+    console.log(`📋 [AI Service] Using cached drug names map (${drugNamesCache.size} entries)`);
+    return drugNamesCache;
+  }
+  
+  console.log('📊 [AI Service] Building drug names cache - this may take a moment...');
+  const startTime = Date.now();
+  
+  // Pobierz WSZYSTKIE leki (nie tylko przeciwdepresyjne)
+  const allDrugs = await drugMappingClient.getAllDrugs();
+  console.log(`📋 [AI Service] Loaded ${allDrugs.length} drugs from national registry`);
+  
+  // Stwórz mapę ALL POSSIBLE NAME VARIANTS → standardName + activeSubstance
+  const drugNameMap = new Map<string, {standardName: string, activeSubstance: string, confidence: number}>();
+  
+  allDrugs.forEach((drug: DrugRecord) => {
+    // 1. Dodaj nazwę produktu (handlową)
+    if (drug.productName) {
+      const cleanName = drug.productName.replace(/\s+\d+.*$/, '').trim(); // Usuń dawki
+      drugNameMap.set(cleanName.toLowerCase(), {
+        standardName: drug.commonName || drug.productName,
+        activeSubstance: drug.activeSubstance || drug.commonName || drug.productName,
+        confidence: 0.98 // Wysoka pewność - bezpośrednio z bazy
+      });
+    }
+    
+    // 2. Dodaj nazwę powszechną (łacińską)
+    if (drug.commonName) {
+      const baseName = drug.commonName.toLowerCase();
+      drugNameMap.set(baseName, {
+        standardName: drug.commonName,
+        activeSubstance: drug.activeSubstance || drug.commonName,
+        confidence: 0.99 // Najwyższa pewność - oficjalna nazwa
+      });
+      
+      // 3. INTELIGENTNE GENEROWANIE WARIANTÓW NAZW (Latin → English → Polish)
+      const nameVariants = generateIntelligentDrugNameVariants(drug.commonName);
+      nameVariants.forEach(variant => {
+        if (!drugNameMap.has(variant.name.toLowerCase())) {
+          drugNameMap.set(variant.name.toLowerCase(), {
+            standardName: drug.commonName,
+            activeSubstance: drug.activeSubstance || drug.commonName,
+            confidence: variant.confidence
+          });
+        }
+      });
+    }
+  });
+  
+  // Zapisz w cache
+  drugNamesCache = drugNameMap;
+  cacheTimestamp = now;
+  
+  const buildTime = Date.now() - startTime;
+  console.log(`🧠 [AI Service] Built drug names cache: ${drugNameMap.size} variants in ${buildTime}ms`);
+  
+  return drugNameMap;
+}
 
 export async function analyzePatientData(
   medicalHistory: string,
@@ -289,12 +359,62 @@ function processAIResponse(jsonString: string, modelUsed: SupportedAIModel): Pat
 
     // Dodano typy dla parametrów p (pharmacotherapy item from AI) i index
     const mapPharmacotherapy = (p: any, index: number): PharmacotherapyItem => {
-      let startDateStr = toNullIfEmpty(p.startDate);
-      let endDateStr = toNullIfEmpty(p.endDate);
+      let parsedStartDate = null;
+      let parsedEndDate = null;
+      let startDateStr = null;
+      let endDateStr = null;
       let notes = p.notes || '';
 
-      let parsedStartDate = startDateStr ? parseISO(startDateStr) : null;
-      let parsedEndDate = endDateStr ? parseISO(endDateStr) : null;
+      // ENHANCED: Parse prescription to separate dose from clinical instructions
+      let finalDose = p.dose;
+      if (p.dose && typeof p.dose === 'string' && p.dose.length > 10) {
+        // If dose field contains long text, likely it's prescription text
+        const prescriptionResult = PrescriptionParser.parsePrescription(p.dose);
+        
+        if (prescriptionResult.dose !== 'N/A') {
+          finalDose = prescriptionResult.dose;
+          
+          // Add clinical instructions to notes if they exist
+          if (prescriptionResult.clinicalNotes && prescriptionResult.clinicalNotes.trim()) {
+            notes = notes 
+              ? `${notes}; ${prescriptionResult.clinicalNotes}` 
+              : prescriptionResult.clinicalNotes;
+          }
+          
+          console.log(`💊 [Prescription Parser] "${p.dose}" → Dose: "${finalDose}", Notes: "${prescriptionResult.clinicalNotes}"`);
+        }
+      }
+
+      // Try to parse dates safely
+      if (p.startDate) {
+        if (typeof p.startDate === 'string') {
+          if (p.startDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            parsedStartDate = parseISO(p.startDate);
+          } else {
+            const attemptedDate = parseISO(p.startDate);
+            if (isValid(attemptedDate)) {
+              parsedStartDate = attemptedDate;
+            }
+          }
+        } else if (p.startDate instanceof Date) {
+          parsedStartDate = p.startDate;
+        }
+      }
+
+      if (p.endDate) {
+        if (typeof p.endDate === 'string') {
+          if (p.endDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            parsedEndDate = parseISO(p.endDate);
+          } else {
+            const attemptedDate = parseISO(p.endDate);
+            if (isValid(attemptedDate)) {
+              parsedEndDate = attemptedDate;
+            }
+          }
+        } else if (p.endDate instanceof Date) {
+          parsedEndDate = p.endDate;
+        }
+      }
 
       if (!parsedStartDate || !isValid(parsedStartDate)) {
         console.warn(`Drug "${p.drugName || 'Nieznany'}" (ID: ${p.id || index}): Invalid or missing startDate: "${p.startDate}". Cannot process this item for chart.`);
@@ -321,7 +441,7 @@ function processAIResponse(jsonString: string, modelUsed: SupportedAIModel): Pat
         shortName: p.shortName ?? (p.drugName ? p.drugName.substring(0,3).toUpperCase() : 'N/A'),
         startDate: startDateStr, 
         endDate: endDateStr,   
-        dose: p.dose ?? 'N/A',
+        dose: finalDose ?? 'N/A', // Use the parsed dose instead of raw prescription text
         attemptGroup: typeof p.attemptGroup === 'number' ? p.attemptGroup : 0,
         notes: notes,
         isAugmentation: typeof p.isAugmentation === 'boolean' ? p.isAugmentation : undefined,
@@ -378,8 +498,10 @@ function processAIResponse(jsonString: string, modelUsed: SupportedAIModel): Pat
 
 /**
  * Preprocessuje historię medyczną, mapując nazwy handlowe leków na substancje czynne
+ * WYEKSPORTOWANA FUNKCJA - używana również w MultiAgentCoordinator
+ * NOWA WERSJA: Skalowalne rozwiązanie hybrydowe - WSZYSTKIE leki + inteligentne tłumaczenie nazw
  */
-async function preprocessMedicalHistoryForDrugMapping(medicalHistory: string): Promise<{
+export async function preprocessMedicalHistoryForDrugMapping(medicalHistory: string): Promise<{
   processedHistory: string;
   drugMappings: Array<{original: string; mapped: string; confidence: number}>;
 }> {
@@ -388,94 +510,375 @@ async function preprocessMedicalHistoryForDrugMapping(medicalHistory: string): P
   const drugMappings: Array<{original: string; mapped: string; confidence: number}> = [];
   let processedHistory = medicalHistory;
   
-  // POPRAWIONE WZORCE - bardziej precyzyjne wykrywanie nazw leków
-  const drugPatterns = [
-    // Wzorce dla nazw leków z dawkami (najwyższy priorytet)
-    /\b([A-Z][a-z]{2,}(?:\s+[A-Z][a-z]+)*)\s+(?:\d+(?:[.,]\d+)?\s*(?:mg|mcg|g|ml|IU|j\.m\.))/gi,
+  // NOWE PODEJŚCIE: Użyj WSZYSTKICH leków z bazy + inteligentne tłumaczenie nazw
+  try {
+    console.log('📊 [AI Service] Loading ALL drugs from Polish national registry...');
     
-    // Wzorce dla znanych nazw handlowych leków (lista sprawdzonych nazw)
-    /\b(Escitalopram|Elicea|Efevelon|Hydroxyzinum|Lamitrin|Pregabalin|Wellbutrin|Egzysta|Oreos|Lamotrix|Brintellix|Dulsevia|Neurovit|Welbox|Preato|Asertin|Dekristol|Mirtagen)\b/gi,
+    // Pobierz WSZYSTKIE leki (nie tylko przeciwdepresyjne)
+    const allDrugs = await drugMappingClient.getAllDrugs();
     
-    // Wzorce dla nazw z typowymi końcówkami farmaceutycznymi (tylko jeśli mają sens)
-    /\b([A-Z][a-z]{3,}(?:ina|ine|ol|um|an|on|ex|al|yl|il|ium))\b(?=\s+(?:\d+|tabl|kaps|mg|ml|dawka|rano|wieczór|na noc))/gi,
+    console.log(`📋 [AI Service] Loaded ${allDrugs.length} drugs from national registry`);
     
-    // Wzorce dla nazw po słowach kluczowych
-    /(?:lek|preparat|medication|drug|stosuje|przyjmuje|zażywa|podaje)[\s:]+([A-Z][a-z]{3,}(?:\s+[A-Z][a-z]+)*)/gi,
+    // Stwórz mapę ALL POSSIBLE NAME VARIANTS → standardName + activeSubstance
+    const drugNameMap = new Map<string, {standardName: string, activeSubstance: string, confidence: number}>();
     
-    // Wzorce dla nazw w nawiasach (tylko jeśli wyglądają jak leki)
-    /\(([A-Z][a-z]{3,}(?:\s+[A-Z][a-z]+)*)\)/gi
-  ];
-  
-  const potentialDrugs = new Set<string>();
-  
-  // Lista słów do wykluczenia (nie są lekami)
-  const excludeWords = new Set([
-    'Centrum', 'Szpital', 'Oddział', 'Gmina', 'Telefon', 'Stan', 'Hemoglobina', 
-    'Cholesterol', 'Kreatynina', 'Witamina', 'Marcina', 'Nadal', 'Roste',
-    'Zawiesina', 'Regon', 'Hormon', 'Kontrola', 'Skan', 'Mail', 'Dialog',
-    'Terapia', 'Centrum', 'Ograniczon', 'Orygina', 'Zmian', 'Wspomina',
-    'Spowodowan', 'Koleina', 'Ealan', 'Trijodotyronina', 'Tyreotropina',
-    'Creatinine', 'Evevelon', 'Dulsevic', 'Elsay', 'Ntrum', 'Orycina'
-  ]);
-  
-  // Wyciągnij potencjalne nazwy leków
-  drugPatterns.forEach(pattern => {
-    let match;
-    while ((match = pattern.exec(medicalHistory)) !== null) {
-      const drugName = match[1].trim();
-      
-      // Sprawdź czy to nie jest słowo do wykluczenia
-      if (drugName.length > 3 && 
-          !excludeWords.has(drugName) && 
-          !excludeWords.has(drugName.toLowerCase()) &&
-          // Sprawdź czy nie zawiera cyfr (prawdopodobnie nie jest lekiem)
-          !/\d/.test(drugName) &&
-          // Sprawdź czy nie jest zbyt długie (prawdopodobnie fragment tekstu)
-          drugName.length < 25 &&
-          // Sprawdź czy nie zawiera typowych słów niefarmaceutycznych
-          !/(?:pacjent|leczenie|terapia|badanie|wizyta|kontrola|szpital|oddział|centrum|telefon|mail|adres|ulica|miasto)/i.test(drugName)) {
-        potentialDrugs.add(drugName);
+    allDrugs.forEach((drug: DrugRecord) => {
+      // 1. Dodaj nazwę produktu (handlową)
+      if (drug.productName) {
+        const cleanName = drug.productName.replace(/\s+\d+.*$/, '').trim(); // Usuń dawki
+        drugNameMap.set(cleanName.toLowerCase(), {
+          standardName: drug.commonName || drug.productName,
+          activeSubstance: drug.activeSubstance || drug.commonName || drug.productName,
+          confidence: 0.98 // Wysoka pewność - bezpośrednio z bazy
+        });
       }
-    }
-  });
-  
-  console.log(`🔍 [AI Service] Found ${potentialDrugs.size} potential drug names:`, Array.from(potentialDrugs));
-  
-  // Mapuj każdą potencjalną nazwę leku
-  for (const drugName of potentialDrugs) {
-    try {
-      const mappingResult = await drugMappingClient.mapDrugToStandard(drugName);
       
-      if (mappingResult.found && mappingResult.confidence > 0.7) { // Zwiększony próg confidence
-        const standardName = mappingResult.standardName;
-        const activeSubstance = mappingResult.activeSubstance;
-        
-        // Użyj substancji czynnej jako głównej nazwy
-        const mappedName = activeSubstance || standardName;
-        
-        drugMappings.push({
-          original: drugName,
-          mapped: mappedName,
-          confidence: mappingResult.confidence
+      // 2. Dodaj nazwę powszechną (łacińską)
+      if (drug.commonName) {
+        const baseName = drug.commonName.toLowerCase();
+        drugNameMap.set(baseName, {
+          standardName: drug.commonName,
+          activeSubstance: drug.activeSubstance || drug.commonName,
+          confidence: 0.99 // Najwyższa pewność - oficjalna nazwa
         });
         
-        // Zamień w tekście wszystkie wystąpienia nazwy handlowej na substancję czynną
-        const regex = new RegExp(`\\b${drugName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
-        processedHistory = processedHistory.replace(regex, `${mappedName} (${drugName})`);
-        
-        console.log(`✅ [AI Service] Mapped: ${drugName} → ${mappedName} (confidence: ${Math.round(mappingResult.confidence * 100)}%)`);
-      } else {
-        console.log(`⚠️ [AI Service] No mapping found for: ${drugName} (confidence: ${mappingResult.confidence})`);
+        // 3. INTELIGENTNE GENEROWANIE WARIANTÓW NAZW (Latin → English → Polish)
+        const nameVariants = generateIntelligentDrugNameVariants(drug.commonName);
+        nameVariants.forEach(variant => {
+          if (!drugNameMap.has(variant.name.toLowerCase())) {
+            drugNameMap.set(variant.name.toLowerCase(), {
+              standardName: drug.commonName,
+              activeSubstance: drug.activeSubstance || drug.commonName,
+              confidence: variant.confidence
+            });
+          }
+        });
       }
-    } catch (error) {
-      console.error(`❌ [AI Service] Error mapping drug ${drugName}:`, error);
+    });
+    
+    console.log(`🧠 [AI Service] Generated ${drugNameMap.size} total name variants (Latin/English/Polish)`);
+    
+    // BARDZO PRECYZYJNE WYSZUKIWANIE - używaj wszystkich wariantów nazw
+    const allVerifiedNames = Array.from(drugNameMap.keys()).filter(name => 
+      name.length >= 4 && // Minimalna długość nazwy
+      !isObviousTextFragment(name) // Odfiltruj oczywiste fragmenty tekstu
+    );
+    
+    const drugPattern = new RegExp(`\\b(${allVerifiedNames.map(name => escapeRegex(name)).join('|')})\\b`, 'gi');
+    
+    console.log(`🔍 [AI Service] Created search pattern for ${allVerifiedNames.length} verified drug name variants`);
+    
+    // Znajdź wszystkie dopasowania w tekście
+    const foundDrugs = new Set<string>();
+    let match;
+    while ((match = drugPattern.exec(medicalHistory)) !== null) {
+      const drugName = match[1].trim();
+      foundDrugs.add(drugName);
+    }
+    
+    console.log(`🔍 [AI Service] Found ${foundDrugs.size} verified drug names in text:`, Array.from(foundDrugs));
+    
+    // Mapuj każdą znalezioną nazwę leku
+    for (const drugName of foundDrugs) {
+      try {
+        // Sprawdź w lokalnej mapie (z inteligentnie wygenerowanymi wariantami)
+        const localMapping = drugNameMap.get(drugName.toLowerCase());
+        if (localMapping) {
+          drugMappings.push({
+            original: drugName,
+            mapped: localMapping.activeSubstance,
+            confidence: localMapping.confidence
+          });
+          
+          // Zamień w tekście: [nazwa handlowa] → [substancja czynna (nazwa handlowa)]
+          const regex = new RegExp(`\\b${escapeRegex(drugName)}\\b`, 'gi');
+          processedHistory = processedHistory.replace(regex, `${localMapping.activeSubstance} (${drugName})`);
+          
+          console.log(`✅ [AI Service] Local mapping: ${drugName} → ${localMapping.activeSubstance} (confidence: ${Math.round(localMapping.confidence * 100)}%)`);
+        } else {
+          // FALLBACK: Inteligentne tłumaczenie przez AI (tylko dla wysokiej pewności)
+          if (drugName.length >= 5 && isLikelyPharmaceuticalName(drugName)) {
+            const mappingResult = await drugMappingClient.mapDrugToStandard(drugName);
+            
+            if (mappingResult.found && mappingResult.confidence > 0.90) { // Wyższy próg dla fallback
+              const activeSubstance = mappingResult.activeSubstance || mappingResult.standardName;
+              
+              drugMappings.push({
+                original: drugName,
+                mapped: activeSubstance,
+                confidence: mappingResult.confidence
+              });
+              
+              const regex = new RegExp(`\\b${escapeRegex(drugName)}\\b`, 'gi');
+              processedHistory = processedHistory.replace(regex, `${activeSubstance} (${drugName})`);
+              
+              console.log(`✅ [AI Service] AI fallback mapping: ${drugName} → ${activeSubstance} (confidence: ${Math.round(mappingResult.confidence * 100)}%)`);
+            } else {
+              console.log(`⚠️ [AI Service] Low confidence AI mapping rejected: ${drugName} (confidence: ${mappingResult.confidence})`);
+            }
+          } else {
+            console.log(`⚠️ [AI Service] Skipped unlikely drug name: ${drugName}`);
+          }
+        }
+      } catch (error) {
+        console.error(`❌ [AI Service] Error mapping drug ${drugName}:`, error);
+      }
+    }
+    
+  } catch (error) {
+    console.error('❌ [AI Service] Error accessing Polish drug registry:', error);
+    console.log('⚠️ [AI Service] Fallback to conservative mapping...');
+    
+    // EMERGENCY FALLBACK: Tylko najbardziej pewne farmaceutyczne wzorce
+    const conservativePharmaceuticalPattern = new RegExp(
+      `\\b(${KNOWN_PHARMACEUTICAL_BRANDS.map(name => escapeRegex(name)).join('|')})\\b`, 
+      'gi'
+    );
+    
+    const foundDrugs = new Set<string>();
+    let match;
+    while ((match = conservativePharmaceuticalPattern.exec(medicalHistory)) !== null) {
+      foundDrugs.add(match[1].trim());
+    }
+    
+    for (const drugName of foundDrugs) {
+      try {
+        if (drugName.length >= 5 && isLikelyPharmaceuticalName(drugName)) {
+          const mappingResult = await drugMappingClient.mapDrugToStandard(drugName);
+          
+          if (mappingResult.found && mappingResult.confidence > 0.95) { // Bardzo wysoki próg dla emergency
+            const activeSubstance = mappingResult.activeSubstance || mappingResult.standardName;
+            
+            drugMappings.push({
+              original: drugName,
+              mapped: activeSubstance,
+              confidence: mappingResult.confidence
+            });
+            
+            const regex = new RegExp(`\\b${escapeRegex(drugName)}\\b`, 'gi');
+            processedHistory = processedHistory.replace(regex, `${activeSubstance} (${drugName})`);
+            
+            console.log(`✅ [AI Service] Emergency mapping: ${drugName} → ${activeSubstance} (confidence: ${Math.round(mappingResult.confidence * 100)}%)`);
+          }
+        }
+      } catch (error) {
+        console.error(`❌ [AI Service] Error in emergency mapping for ${drugName}:`, error);
+      }
     }
   }
   
-  console.log(`✅ [AI Service] Drug mapping completed. Mapped ${drugMappings.length} drugs.`);
+  console.log(`✅ [AI Service] Drug mapping completed. Mapped ${drugMappings.length} drugs with high confidence.`);
   
   return {
     processedHistory,
     drugMappings
   };
+}
+
+/**
+ * Inteligentnie generuje warianty nazw leków: Latin ↔ English ↔ Polish
+ * Wykorzystuje farmaceutyczne wzorce językowe i nomenklaturę międzynarodową
+ */
+function generateIntelligentDrugNameVariants(latinName: string): Array<{name: string, confidence: number}> {
+  const variants: Array<{name: string, confidence: number}> = [];
+  const lower = latinName.toLowerCase();
+  
+  // FARMACEUTYCZNE TRANSFORMACJE JĘZYKOWE
+  const linguisticTransformations = [
+    // Łacińskie końcówki → Angielskie INN (International Nonproprietary Names)
+    { from: /um$/, to: 'e', confidence: 0.95 },           // Sertralinum → Sertraline
+    { from: /inum$/, to: 'ine', confidence: 0.94 },       // Fluoxetinum → Fluoxetine
+    { from: /olum$/, to: 'ol', confidence: 0.93 },        // Atenololum → Atenolol
+    { from: /anum$/, to: 'ane', confidence: 0.92 },       // 
+    
+    // Angielskie INN → Polskie końcówki
+    { from: /ine$/, to: 'ina', confidence: 0.90 },        // Sertraline → Sertralina
+    { from: /ol$/, to: 'olol', confidence: 0.89 },        // Atenolol → Atenolol (bez zmiany ale dodaje wariant)
+    { from: /ane$/, to: 'an', confidence: 0.88 },         //
+    
+    // Specjalne przypadki farmaceutyczne
+    { from: /prazol$/, to: 'prazole', confidence: 0.95 }, // Omeprazol → Omeprazole
+    { from: /statin$/, to: 'statinum', confidence: 0.94 },// Simvastatin → Simvastatinum
+  ];
+  
+  // Stosuj transformacje językowe
+  for (const transform of linguisticTransformations) {
+    if (transform.from.test(lower)) {
+      const stem = lower.replace(transform.from, '');
+      const transformedName = stem + transform.to;
+      const capitalizedName = transformedName.charAt(0).toUpperCase() + transformedName.slice(1);
+      
+      variants.push({
+        name: capitalizedName,
+        confidence: transform.confidence
+      });
+    }
+  }
+  
+  // RĘCZNE MAPOWANIA dla najważniejszych leków psychiatrycznych
+  const psychiatricDrugMappings: Record<string, Array<{name: string, confidence: number}>> = {
+    // Antydepresanty SSRI
+    'sertralinum': [
+      { name: 'Sertraline', confidence: 0.98 },
+      { name: 'Sertralina', confidence: 0.97 }
+    ],
+    'escitalopram': [
+      { name: 'Escitalopramum', confidence: 0.98 }
+    ],
+    'fluoxetinum': [
+      { name: 'Fluoxetine', confidence: 0.98 },
+      { name: 'Fluoksetyna', confidence: 0.96 }
+    ],
+    'paroxetinum': [
+      { name: 'Paroxetine', confidence: 0.98 },
+      { name: 'Paroksetyna', confidence: 0.96 }
+    ],
+    'citalopram': [
+      { name: 'Citalopramum', confidence: 0.98 }
+    ],
+    
+    // Antydepresanty SNRI
+    'venlafaxinum': [
+      { name: 'Venlafaxine', confidence: 0.98 },
+      { name: 'Wenlafaksyna', confidence: 0.96 }
+    ],
+    'duloxetinum': [
+      { name: 'Duloxetine', confidence: 0.98 },
+      { name: 'Duloksetyna', confidence: 0.96 }
+    ],
+    
+    // Antydepresanty atypowe
+    'mirtazapinum': [
+      { name: 'Mirtazapine', confidence: 0.98 },
+      { name: 'Mirtazapina', confidence: 0.96 }
+    ],
+    'trazodone': [
+      { name: 'Trazodon', confidence: 0.97 },
+      { name: 'Trazodoni', confidence: 0.95 }
+    ],
+    
+    // Benzodiazepiny
+    'alprazolam': [
+      { name: 'Alprazolamum', confidence: 0.98 }
+    ],
+    'lorazepam': [
+      { name: 'Lorazepamum', confidence: 0.98 }
+    ],
+    
+    // Neuroleptyki
+    'quetiapinum': [
+      { name: 'Quetiapine', confidence: 0.98 },
+      { name: 'Kwetiapina', confidence: 0.96 }
+    ],
+    'olanzapinum': [
+      { name: 'Olanzapine', confidence: 0.98 },
+      { name: 'Olanzapina', confidence: 0.96 }
+    ],
+    'risperidonum': [
+      { name: 'Risperidone', confidence: 0.98 },
+      { name: 'Risperidon', confidence: 0.96 }
+    ],
+    
+    // ADHD
+    'atomoxetinum': [
+      { name: 'Atomoxetine', confidence: 0.98 },
+      { name: 'Atomoksetyna', confidence: 0.96 }
+    ],
+    'methylphenidate': [
+      { name: 'Methylphenidatum', confidence: 0.98 }
+    ]
+  };
+  
+  const baseNameLower = lower.trim();
+  if (psychiatricDrugMappings[baseNameLower]) {
+    variants.push(...psychiatricDrugMappings[baseNameLower]);
+  }
+  
+  // Usuń duplikaty i zwróć
+  const uniqueVariants = variants.filter((variant, index, self) => 
+    index === self.findIndex(v => v.name.toLowerCase() === variant.name.toLowerCase())
+  );
+  
+  return uniqueVariants;
+}
+
+/**
+ * Lista znaných marek farmaceutycznych (emergency fallback)
+ */
+const KNOWN_PHARMACEUTICAL_BRANDS = [
+  // Antydepresanty - nazwy handlowe
+  'Brintellix', 'Dulsevia', 'Welbox', 'Auroxetyn', 'Depratal', 'Elicea', 'Efevelon',
+  'Cipralex', 'Lexapro', 'Prozac', 'Paxil', 'Zoloft', 'Cymbalta', 'Effexor',
+  
+  // Benzodiazepiny
+  'Xanax', 'Ativan', 'Valium', 'Klonopin', 'Rivotril',
+  
+  // Neuroleptyki
+  'Abilify', 'Risperdal', 'Zyprexa', 'Seroquel', 'Geodon',
+  
+  // ADHD
+  'Concerta', 'Ritalin', 'Medikinet', 'Strattera',
+  
+  // Inne psychiatryczne
+  'Lamictal', 'Depakine', 'Lithium', 'Pregabalin', 'Lyrica'
+];
+
+/**
+ * Sprawdza czy string wygląda na nazwę farmaceutyczną (nie fragment tekstu)
+ */
+function isLikelyPharmaceuticalName(name: string): boolean {
+  // Odrzuć oczywiste fragmenty tekstu polskiego
+  const textFragmentBlacklist = [
+    'obecnie', 'leku', 'dawki', 'dawka', 'dawce', 'podano', 'otrzymał', 
+    'przyjmuje', 'stosuje', 'minimalna', 'pierwsza', 'kolejna', 'dotychczas',
+    'docelowej', 'gnieciu', 'dni do', 'poprawa', 'leczenie', 'terapia',
+    'pacjent', 'choroba', 'objawy', 'diagnoza', 'historia'
+  ];
+  
+  const lowerName = name.toLowerCase();
+  if (textFragmentBlacklist.some(word => lowerName.includes(word))) {
+    return false;
+  }
+  
+  // Pozytywne wskaźniki nazwy farmaceutycznej
+  const pharmaceuticalIndicators = [
+    /.*ine$/i,    // końcówki farmaceutyczne
+    /.*inum$/i,
+    /.*ina$/i,
+    /.*yna$/i,
+    /.*pram$/i,
+    /.*olol$/i,
+    /.*pine$/i,
+    /.*zole$/i,
+    /.*statin$/i,
+    /.*prazol$/i,
+    /.*mab$/i,    // monoklonalne przeciwciała
+    /.*vir$/i,    // antywirusowe
+    /.*mycin$/i   // antybiotyki
+  ];
+  
+  return pharmaceuticalIndicators.some(pattern => pattern.test(name)) || 
+         name.length >= 6; // Długie nazwy prawdopodobnie to leki
+}
+
+/**
+ * Sprawdza czy to oczywisty fragment tekstu (nie nazwa leku)
+ */
+function isObviousTextFragment(name: string): boolean {
+  const obviousFragments = [
+    'obecnie', 'leku', 'dawki', 'dawka', 'dawce', 'podano', 'otrzymał', 
+    'przyjmuje', 'stosuje', 'minimalna', 'pierwsza', 'kolejna', 'dotychczas',
+    'docelowej', 'gnieciu', 'dni do', 'poprawa', 'leczenie', 'terapia',
+    'pacjent', 'choroba', 'objawy', 'diagnoza', 'historia', 'raport',
+    'badanie', 'wynik', 'ocena', 'analiza', 'wniosek'
+  ];
+  
+  return obviousFragments.includes(name.toLowerCase());
+}
+
+/**
+ * Escapuje specjalne znaki regex
+ */
+function escapeRegex(string: string): string {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
