@@ -21,13 +21,13 @@ export const SavedAnalysesManager: React.FC<SavedAnalysesManagerProps> = ({
   onClose
 }) => {
   const [analyses, setAnalyses] = useState<AnalysisMetadata[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState<boolean>(true);
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [filterType, setFilterType] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'date' | 'name' | 'type'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editingName, setEditingName] = useState('');
+  const [editingName, setEditingName] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [statistics, setStatistics] = useState<any>(null);
 

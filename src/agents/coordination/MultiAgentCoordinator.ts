@@ -140,7 +140,8 @@ export class MultiAgentCoordinatorImpl implements MultiAgentCoordinator {
   public async executeAgentPipeline(
     medicalHistory: string,
     studyProtocol: string,
-    selectedModel: SupportedAIModel
+    selectedModel: SupportedAIModel,
+    enableSpecialistAnalysis: boolean = false
   ): Promise<{
     finalResult: PatientData;
     agentResults: Record<string, AgentResult>;
@@ -230,6 +231,10 @@ export class MultiAgentCoordinatorImpl implements MultiAgentCoordinator {
     this.log('🎯 FAZA 5: Synteza wyników...');
     
     const finalResult = await this.synthesizeFinalResult(agentResults, sharedContext);
+    
+    // ======================================
+    // ANALYSIS COMPLETE
+    // ======================================
     
     // Dodaj informacje o mapowaniu leków do wyniku końcowego
     finalResult.drugMappingInfo = {

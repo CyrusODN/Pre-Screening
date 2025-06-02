@@ -1,6 +1,6 @@
 // ============================================================================
 // DETAILED TRD TIMELINE CHART - World-Class Clinical Research Component
-// Enhanced with Advanced Analytics and AI-Powered Insights
+// Enhanced with Infinity Zoom and Advanced Analytics
 // ============================================================================
 
 import React, { 
@@ -23,7 +23,10 @@ import {
   addHours,
   isWithinInterval,
   differenceInWeeks,
-  differenceInMonths
+  differenceInMonths,
+  addYears,
+  addMonths,
+  addWeeks
 } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import { 
@@ -75,6 +78,155 @@ import {
   type TreatmentContext,
   type DataQualityAssessment
 } from '../../services/clinicalAnalysisService';
+
+// ============================================================================
+// INFINITY ZOOM CONFIGURATION
+// ============================================================================
+
+// Infinity zoom configuration
+const ZOOM_CONFIG = {
+  // Base zoom factor (1.0 = normal view)
+  baseZoomFactor: 1.0,
+  
+  // Zoom limits
+  minZoomFactor: 0.1,    // 10x zoomed out
+  maxZoomFactor: 50.0,   // 50x zoomed in
+  
+  // Base pixels per day at zoom factor 1.0
+  basePixelsPerDay: 4,
+  
+  // Zoom step for buttons
+  zoomStep: 1.2,
+  
+  // Wheel zoom sensitivity
+  wheelSensitivity: 0.1,
+  
+  // Smooth zoom transition duration (ms)
+  transitionDuration: 150,
+  
+  // Minimum timeline width
+  minTimelineWidth: 1000,
+  
+  // Time marker configuration (improved spacing)
+  timeMarkers: {
+    // Minimum distance between major markers (pixels) - increased for readability
+    minMajorSpacing: 150,
+    // Minimum distance between minor markers (pixels) - increased for readability  
+    minMinorSpacing: 60,
+    // Maximum number of markers to render (performance)
+    maxMarkers: 100,
+    // Minimum marker height for visibility
+    majorMarkerHeight: '100%',
+    minorMarkerHeight: '60%'
+  }
+} as const;
+
+// Adaptive time intervals based on zoom level - improved with years and better spacing
+const getAdaptiveTimeInterval = (pixelsPerDay: number): {
+  majorInterval: 'year' | 'quarter' | 'month' | 'week' | 'day' | 'hour';
+  majorFormat: string;
+  majorStep: number;
+  minorInterval?: 'year' | 'quarter' | 'month' | 'week' | 'day' | 'hour';
+  minorFormat?: string;
+  minorStep?: number;
+  showYear?: boolean;
+} => {
+  // Calculate days per major tick based on improved spacing
+  const daysPerMajorTick = ZOOM_CONFIG.timeMarkers.minMajorSpacing / pixelsPerDay;
+  
+  if (daysPerMajorTick > 1095) { // > 3 years - show multi-year intervals
+    return {
+      majorInterval: 'year',
+      majorFormat: 'yyyy',
+      majorStep: Math.max(1, Math.ceil(daysPerMajorTick / 365)),
+      minorInterval: 'year',
+      minorFormat: 'yyyy',
+      minorStep: 1,
+      showYear: true
+    };
+  } else if (daysPerMajorTick > 365) { // > 1 year - show yearly intervals
+    return {
+      majorInterval: 'year',
+      majorFormat: 'yyyy',
+      majorStep: 1,
+      minorInterval: 'quarter',
+      minorFormat: 'QQQ yyyy',
+      minorStep: 1,
+      showYear: true
+    };
+  } else if (daysPerMajorTick > 180) { // > 6 months - show quarterly with year
+    return {
+      majorInterval: 'quarter',
+      majorFormat: 'QQQ yyyy',
+      majorStep: 1,
+      minorInterval: 'month',
+      minorFormat: 'MMM yyyy',
+      minorStep: 1,
+      showYear: true
+    };
+  } else if (daysPerMajorTick > 90) { // > 3 months - show monthly with year
+    return {
+      majorInterval: 'month',
+      majorFormat: 'MMM yyyy',
+      majorStep: 1,
+      minorInterval: 'month',
+      minorFormat: 'MMM',
+      minorStep: 1,
+      showYear: true
+    };
+  } else if (daysPerMajorTick > 45) { // > 6 weeks - show monthly
+    return {
+      majorInterval: 'month',
+      majorFormat: 'MMM yyyy',
+      majorStep: 1,
+      minorInterval: 'week',
+      minorFormat: 'dd MMM',
+      minorStep: 1,
+      showYear: false
+    };
+  } else if (daysPerMajorTick > 14) { // > 2 weeks - show weekly with context
+    return {
+      majorInterval: 'week',
+      majorFormat: 'dd MMM yyyy',
+      majorStep: Math.max(1, Math.ceil(daysPerMajorTick / 7)),
+      minorInterval: 'day',
+      minorFormat: 'dd',
+      minorStep: Math.max(1, Math.ceil(daysPerMajorTick / 7)),
+      showYear: false
+    };
+  } else if (daysPerMajorTick > 3) { // > 3 days - show daily
+    return {
+      majorInterval: 'day',
+      majorFormat: 'dd MMM yyyy',
+      majorStep: Math.max(1, Math.ceil(daysPerMajorTick)),
+      minorInterval: 'day',
+      minorFormat: 'dd',
+      minorStep: 1,
+      showYear: false
+    };
+  } else if (daysPerMajorTick > 1) { // > 1 day - show daily with hours
+    return {
+      majorInterval: 'day',
+      majorFormat: 'dd MMM yyyy',
+      majorStep: 1,
+      minorInterval: 'hour',
+      minorFormat: 'HH:mm',
+      minorStep: Math.max(1, Math.ceil(daysPerMajorTick * 24 / 4)), // Every 6 hours max
+      showYear: false
+    };
+  } else { // < 1 day - show hourly
+    const hoursPerTick = Math.max(1, Math.ceil(daysPerMajorTick * 24));
+    return {
+      majorInterval: 'hour',
+      majorFormat: 'dd MMM HH:mm',
+      majorStep: hoursPerTick,
+      minorInterval: 'hour',
+      minorFormat: 'HH:mm',
+      minorStep: Math.max(1, Math.ceil(hoursPerTick / 4)),
+      showYear: false
+    };
+  }
+};
 
 // ============================================================================
 // ENHANCED CLINICAL RESEARCH INTERFACES
@@ -176,7 +328,7 @@ interface DetailedTrdTimelineChartProps {
   patientData: PatientData;
   className?: string;
   onEventSelect?: (event: TimelineEvent | null) => void;
-  initialZoomLevel?: number;
+  initialZoomFactor?: number;
   enableVirtualization?: boolean;
   protocolId?: string; // Default to COMP006
   showClinicalInsights?: boolean;
@@ -184,6 +336,204 @@ interface DetailedTrdTimelineChartProps {
   enablePredictiveAnalytics?: boolean;
   showAdvancedMetrics?: boolean;
 }
+
+// ============================================================================
+// INFINITY ZOOM UTILITY FUNCTIONS
+// ============================================================================
+
+/**
+ * Calculate pixels per day based on zoom factor
+ */
+const calculatePixelsPerDay = (zoomFactor: number): number => {
+  return ZOOM_CONFIG.basePixelsPerDay * zoomFactor;
+};
+
+/**
+ * Calculate the total timeline width in pixels based on date range and zoom factor
+ */
+const calculateTimelineWidth = (startDate: Date, endDate: Date, zoomFactor: number): number => {
+  const totalDays = differenceInDays(endDate, startDate);
+  const pixelsPerDay = calculatePixelsPerDay(zoomFactor);
+  const calculatedWidth = totalDays * pixelsPerDay;
+  
+  return Math.max(calculatedWidth, ZOOM_CONFIG.minTimelineWidth);
+};
+
+/**
+ * Convert a date to pixel position on the timeline
+ */
+const dateToPixels = (date: Date, startDate: Date, endDate: Date, timelineWidth: number): number => {
+  const totalDays = differenceInDays(endDate, startDate);
+  const daysSinceStart = differenceInDays(date, startDate);
+  return (daysSinceStart / totalDays) * timelineWidth;
+};
+
+/**
+ * Convert a duration in days to pixels on the timeline
+ */
+const daysToPixels = (days: number, startDate: Date, endDate: Date, timelineWidth: number): number => {
+  const totalDays = differenceInDays(endDate, startDate);
+  return (days / totalDays) * timelineWidth;
+};
+
+/**
+ * Convert pixel position to date
+ */
+const pixelsToDate = (pixels: number, startDate: Date, endDate: Date, timelineWidth: number): Date => {
+  const totalDays = differenceInDays(endDate, startDate);
+  const daysSinceStart = (pixels / timelineWidth) * totalDays;
+  return addDays(startDate, Math.round(daysSinceStart));
+};
+
+/**
+ * Generate adaptive time markers based on zoom level - enhanced with intelligent filtering
+ */
+const generateAdaptiveTimeMarkers = (
+  startDate: Date, 
+  endDate: Date, 
+  timelineWidth: number, 
+  zoomFactor: number
+): Array<{ date: Date; label: string; x: number; type: 'major' | 'minor'; priority: number }> => {
+  const markers: Array<{ date: Date; label: string; x: number; type: 'major' | 'minor'; priority: number }> = [];
+  const pixelsPerDay = calculatePixelsPerDay(zoomFactor);
+  const intervalConfig = getAdaptiveTimeInterval(pixelsPerDay);
+  
+  // Helper function to add a marker with priority
+  const addMarker = (date: Date, type: 'major' | 'minor', formatStr: string, priority: number = 0) => {
+    const x = dateToPixels(date, startDate, endDate, timelineWidth);
+    if (x >= -100 && x <= timelineWidth + 100 && markers.length < ZOOM_CONFIG.timeMarkers.maxMarkers) {
+      markers.push({
+        date,
+        label: format(date, formatStr, { locale: pl }),
+        x,
+        type,
+        priority
+      });
+    }
+  };
+  
+  // Generate major markers with improved alignment
+  let current = new Date(startDate);
+  
+  // Enhanced alignment to appropriate boundary
+  const alignToInterval = (date: Date, interval: string): Date => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const day = date.getDate();
+    
+    switch (interval) {
+      case 'year': {
+        return new Date(year, 0, 1);
+      }
+      case 'quarter': {
+        const quarter = Math.floor(month / 3);
+        return new Date(year, quarter * 3, 1);
+      }
+      case 'month': 
+        return new Date(year, month, 1);
+      case 'week': {
+        const startOfWeek = new Date(date);
+        const dayOfWeek = startOfWeek.getDay();
+        const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Make Monday first day
+        startOfWeek.setDate(day + mondayOffset);
+        return startOfWeek;
+      }
+      case 'day':
+        return new Date(year, month, day);
+      case 'hour':
+        return new Date(year, month, day, date.getHours());
+      default:
+        return date;
+    }
+  };
+  
+  current = alignToInterval(current, intervalConfig.majorInterval);
+  
+  // Enhanced step function
+  const stepFunction = (date: Date, interval: string, step: number): Date => {
+    switch (interval) {
+      case 'year': return addYears(date, step);
+      case 'quarter': return addMonths(date, step * 3);
+      case 'month': return addMonths(date, step);
+      case 'week': return addWeeks(date, step);
+      case 'day': return addDays(date, step);
+      case 'hour': return addHours(date, step);
+      default: return addDays(date, step);
+    }
+  };
+  
+  // Add major markers with priority system
+  const extendedEndDate = addDays(endDate, 60); // Increased padding for better coverage
+  let majorCount = 0;
+  while (current <= extendedEndDate && majorCount < ZOOM_CONFIG.timeMarkers.maxMarkers / 2) {
+    if (current >= addDays(startDate, -30)) { // Start a bit before for context
+      // Higher priority for year boundaries and important dates
+      let priority = 1;
+      if (intervalConfig.majorInterval === 'year' || current.getMonth() === 0) priority = 3;
+      else if (intervalConfig.majorInterval === 'quarter' || current.getMonth() % 3 === 0) priority = 2;
+      
+      addMarker(current, 'major', intervalConfig.majorFormat, priority);
+      majorCount++;
+    }
+    current = stepFunction(current, intervalConfig.majorInterval, intervalConfig.majorStep);
+  }
+  
+  // Add minor markers with intelligent spacing
+  if (intervalConfig.minorInterval && intervalConfig.minorFormat && 
+      markers.length < ZOOM_CONFIG.timeMarkers.maxMarkers * 0.7) { // Leave room for minor markers
+    
+    current = alignToInterval(startDate, intervalConfig.minorInterval);
+    let minorCount = 0;
+    
+    while (current <= extendedEndDate && 
+           minorCount < ZOOM_CONFIG.timeMarkers.maxMarkers / 3 && 
+           markers.length < ZOOM_CONFIG.timeMarkers.maxMarkers) {
+      
+      const x = dateToPixels(current, startDate, endDate, timelineWidth);
+      
+      // Enhanced overlap detection with improved spacing
+      const hasOverlapWithMajor = markers.some(m => 
+        m.type === 'major' && Math.abs(m.x - x) < ZOOM_CONFIG.timeMarkers.minMinorSpacing
+      );
+      
+      const hasOverlapWithMinor = markers.some(m => 
+        m.type === 'minor' && Math.abs(m.x - x) < (ZOOM_CONFIG.timeMarkers.minMinorSpacing * 0.7)
+      );
+      
+      if (!hasOverlapWithMajor && !hasOverlapWithMinor && current >= addDays(startDate, -30)) {
+        addMarker(current, 'minor', intervalConfig.minorFormat, 0);
+        minorCount++;
+      }
+      
+      current = stepFunction(current, intervalConfig.minorInterval, intervalConfig.minorStep || 1);
+    }
+  }
+  
+  // Intelligent marker filtering - remove overlapping low-priority markers
+  const filteredMarkers: Array<{ date: Date; label: string; x: number; type: 'major' | 'minor'; priority: number }> = [];
+  const sortedMarkers = markers.sort((a, b) => {
+    // First sort by priority (high to low), then by type (major first), then by position
+    if (a.priority !== b.priority) return b.priority - a.priority;
+    if (a.type !== b.type) return a.type === 'major' ? -1 : 1;
+    return a.x - b.x;
+  });
+  
+  for (const marker of sortedMarkers) {
+    // Check if this marker would overlap with any already accepted marker
+    const wouldOverlap = filteredMarkers.some(accepted => {
+      const minSpacing = marker.type === 'major' || accepted.type === 'major' 
+        ? ZOOM_CONFIG.timeMarkers.minMajorSpacing 
+        : ZOOM_CONFIG.timeMarkers.minMinorSpacing;
+      return Math.abs(accepted.x - marker.x) < minSpacing;
+    });
+    
+    if (!wouldOverlap) {
+      filteredMarkers.push(marker);
+    }
+  }
+  
+  return filteredMarkers.sort((a, b) => a.x - b.x);
+};
 
 // ============================================================================
 // ADVANCED CLINICAL ANALYTICS FUNCTIONS
@@ -384,157 +734,8 @@ const generatePredictiveAnalytics = (
 };
 
 // ============================================================================
-// OPTIMIZED UTILITY FUNCTIONS
+// RESTORED MISSING DEFINITIONS
 // ============================================================================
-
-// Enhanced zoom levels with infinite scroll support
-const ZOOM_LEVELS = [
-  { 
-    name: '5 lat', 
-    pixelsPerDay: 0.5,
-    tickInterval: 'year' as const,
-    format: 'yyyy', 
-    unit: 'year' as const,
-    density: 'very-low' as const,
-    minorTickInterval: 'quarter' as const,
-    minorFormat: 'QQQ',
-    clinicalContext: 'lifetime_overview',
-    aiContext: 'long_term_patterns'
-  },
-  { 
-    name: '2 lata', 
-    pixelsPerDay: 1,
-    tickInterval: 'quarter' as const,
-    format: 'QQQ yyyy', 
-    unit: 'quarter' as const,
-    density: 'low' as const,
-    minorTickInterval: 'month' as const,
-    minorFormat: 'MMM',
-    clinicalContext: 'long_term_patterns',
-    aiContext: 'treatment_resistance_analysis'
-  },
-  { 
-    name: 'Rok', 
-    pixelsPerDay: 2,
-    tickInterval: 'month' as const,
-    format: 'MMM yyyy', 
-    unit: 'month' as const,
-    density: 'medium' as const,
-    minorTickInterval: 'week' as const,
-    minorFormat: 'dd',
-    clinicalContext: 'annual_review',
-    aiContext: 'efficacy_trend_analysis'
-  },
-  { 
-    name: '6 miesięcy', 
-    pixelsPerDay: 4,
-    tickInterval: 'month' as const,
-    format: 'MMM yyyy', 
-    unit: 'month' as const,
-    density: 'medium' as const,
-    minorTickInterval: 'week' as const,
-    minorFormat: 'dd MMM',
-    clinicalContext: 'episode_analysis',
-    aiContext: 'response_prediction'
-  },
-  { 
-    name: '3 miesiące', 
-    pixelsPerDay: 8,
-    tickInterval: 'week' as const,
-    format: 'dd MMM', 
-    unit: 'week' as const,
-    density: 'high' as const,
-    minorTickInterval: 'day' as const,
-    minorFormat: 'dd',
-    clinicalContext: 'treatment_response',
-    aiContext: 'early_response_detection'
-  },
-  { 
-    name: 'Miesiąc', 
-    pixelsPerDay: 16,
-    tickInterval: 'week' as const,
-    format: 'dd MMM', 
-    unit: 'week' as const,
-    density: 'high' as const,
-    minorTickInterval: 'day' as const,
-    minorFormat: 'dd',
-    clinicalContext: 'acute_monitoring',
-    aiContext: 'side_effect_monitoring'
-  },
-  { 
-    name: '2 tygodnie', 
-    pixelsPerDay: 32,
-    tickInterval: 'day' as const,
-    format: 'dd.MM', 
-    unit: 'day' as const,
-    density: 'very-high' as const,
-    minorTickInterval: 'hour' as const,
-    minorFormat: 'HH:mm',
-    clinicalContext: 'titration_period',
-    aiContext: 'dose_optimization'
-  },
-  { 
-    name: 'Tydzień', 
-    pixelsPerDay: 64,
-    tickInterval: 'day' as const,
-    format: 'dd.MM', 
-    unit: 'day' as const,
-    density: 'very-high' as const,
-    minorTickInterval: 'hour' as const,
-    minorFormat: 'HH:mm',
-    clinicalContext: 'daily_monitoring',
-    aiContext: 'acute_response_tracking'
-  },
-  { 
-    name: '3 dni', 
-    pixelsPerDay: 128,
-    tickInterval: 'hour' as const,
-    format: 'dd.MM HH:mm', 
-    unit: 'hour' as const,
-    density: 'ultra' as const,
-    minorTickInterval: 'hour' as const,
-    minorFormat: 'HH:mm',
-    clinicalContext: 'crisis_intervention',
-    aiContext: 'emergency_monitoring'
-  },
-  { 
-    name: 'Dzień', 
-    pixelsPerDay: 256,
-    tickInterval: 'hour' as const,
-    format: 'HH:mm', 
-    unit: 'hour' as const,
-    density: 'ultra' as const,
-    minorTickInterval: 'hour' as const,
-    minorFormat: 'HH:mm',
-    clinicalContext: 'hourly_monitoring',
-    aiContext: 'real_time_analysis'
-  },
-] as const;
-
-// Enhanced drug classification with AI-powered insights
-const DRUG_CLASS_COLORS = {
-  // Primary antidepressants (protocol relevant) - Enhanced with gradients
-  'SSRI': '#3B82F6',           // Blue - First line
-  'SNRI': '#10B981',           // Green - First line
-  'TCA': '#F59E0B',            // Amber - Second line
-  'MAOI': '#EF4444',           // Red - Third line
-  'Atypical': '#8B5CF6',       // Purple - Variable line
-  
-  // Augmentation agents - Enhanced visibility
-  'Mood Stabilizer': '#EC4899', // Pink - Augmentation
-  'Antipsychotic': '#64748B',   // Gray - Augmentation
-  'Anxiolytic': '#F97316',      // Orange - Adjunctive
-  'Hypnotic': '#22D3EE',        // Cyan - Adjunctive
-  
-  // AI-enhanced classifications
-  'Novel': '#A855F7',           // Purple - Novel mechanisms
-  'Experimental': '#F43F5E',    // Rose - Experimental
-  'Combination': '#06B6D4',     // Cyan - Combination therapy
-  
-  // Other/Unknown
-  'Other': '#A3E635',           // Lime - Unclassified
-  'Unknown': '#6B7280'          // Gray - Unknown
-} as const;
 
 // Responsive layout constants
 const LAYOUT = {
@@ -560,55 +761,9 @@ const BASE_COLORS = [
   '#6366F1', '#D946EF', '#06B6D4', '#A1A1AA', '#F43F5E', '#84CC16',
 ] as const;
 
-// ============================================================================
-// LEGACY COMPATIBILITY FUNCTIONS
-// ============================================================================
-
-// Legacy compatibility functions (updated to use new clinical analysis)
-// const calculateEfficacyTrend = (episodes: ProcessedDrugEpisode[]): 'improving' | 'stable' | 'declining' | 'unknown' => {
-//   if (episodes.length < 2) return 'unknown';
-//   const scores = episodes.map(e => e.clinicalAnalysis.treatmentResponse.efficacyScore).filter(s => s > 0);
-//   if (scores.length < 2) return 'unknown';
-//   
-//   const trend = scores[scores.length - 1] - scores[0];
-//   if (trend > 1) return 'improving';
-//   if (trend < -1) return 'declining';
-//   return 'stable';
-// };
-
-// Legacy MGH ATRQ compliance check (updated to use new analysis)
-// const checkMghAtrqCompliance = (drugName: string, dose: string, duration: number, notes?: string, patientData?: PatientData): boolean => {
-//   const analysis = clinicalAnalysisService.analyzeMGHATRQCompliance(drugName, dose, duration, notes, patientData);
-//   return analysis.isCompliant;
-// };
-
-// Legacy efficacy analysis (updated to use new analysis)
-// const analyzeEfficacyFromRealData = (notes: string, attemptGroup: number, drugName: string): number => {
-//   const response = clinicalAnalysisService.analyzeTreatmentResponse(notes, 84, attemptGroup);
-//   return response.efficacyScore;
-// };
-
-// Legacy adherence analysis (updated to use new analysis)
-// const analyzeAdherenceFromRealData = (notes: string, duration: number, attemptGroup: number): number => {
-//   const response = clinicalAnalysisService.analyzeTreatmentResponse(notes, duration, attemptGroup);
-//   return response.sustainedResponse ? 0.9 : 0.6;
-// };
-
-// Legacy side effects analysis (updated to use new analysis)
-// const analyzeSideEffectsFromRealData = (notes: string, drugClass: string): string[] => {
-//   const adverse = clinicalAnalysisService.analyzeAdverseEvents(notes, drugClass, 84);
-//   return adverse.events.map(e => e.type);
-// };
-
-// Legacy drug classification (updated to use new analysis)
-// const classifyDrugClass = (drugName: string): string => {
-//   const classification = clinicalAnalysisService.classifyDrugForClinicalResearch(drugName);
-//   return classification.primaryClass;
-// };
-
-// ============================================================================
-// OPTIMIZED UTILITY FUNCTIONS (Updated)
-// ============================================================================
+// Enhanced drug color cache with collision detection
+const drugColorCache = new Map<string, string>();
+const usedColors = new Set<string>();
 
 // Memoized hash function - improved for better distribution
 const hashCode = (str: string): number => {
@@ -631,10 +786,6 @@ const hashCode = (str: string): number => {
   
   return Math.abs(hash);
 };
-
-// Enhanced drug color cache with collision detection
-const drugColorCache = new Map<string, string>();
-const usedColors = new Set<string>();
 
 const getDrugColor = (drugName: string, drugClass?: string): string => {
   const cacheKey = `${drugName}-${drugClass || ''}`;
@@ -738,49 +889,6 @@ const debounce = <T extends (...args: any[]) => any>(
 };
 
 // ============================================================================
-// UTILITY FUNCTIONS FOR DATA ANALYSIS - UPDATED TO USE SERVICE
-// ============================================================================
-
-// All analysis functions now use the clinical analysis service
-// This ensures consistency and prevents code duplication
-
-// Efficacy trend calculation using clinical analysis
-// const calculateEfficacyTrend = (episodes: ProcessedDrugEpisode[]): 'improving' | 'stable' | 'declining' | 'unknown' => {
-//   if (episodes.length < 2) return 'unknown';
-//   const scores = episodes.map(e => e.clinicalAnalysis.treatmentResponse.efficacyScore).filter(s => s > 0);
-//   if (scores.length < 2) return 'unknown';
-//   
-//   const trend = scores[scores.length - 1] - scores[0];
-//   if (trend > 1) return 'improving';
-//   if (trend < -1) return 'declining';
-//   return 'stable';
-// };
-
-// MGH ATRQ compliance check using clinical analysis
-// const checkMghAtrqCompliance = (drugName: string, dose: string, duration: number, notes?: string, patientData?: PatientData): boolean => {
-//   const analysis = clinicalAnalysisService.analyzeMGHATRQCompliance(drugName, dose, duration, notes, patientData);
-//   return analysis.isCompliant;
-// };
-
-// Efficacy analysis using clinical analysis
-// const analyzeEfficacyFromRealData = (notes: string, attemptGroup: number, drugName: string): number => {
-//   const response = clinicalAnalysisService.analyzeTreatmentResponse(notes, 84, attemptGroup);
-//   return response.efficacyScore;
-// };
-
-// Adherence analysis using clinical analysis
-// const analyzeAdherenceFromRealData = (notes: string, duration: number, attemptGroup: number): number => {
-//   const response = clinicalAnalysisService.analyzeTreatmentResponse(notes, duration, attemptGroup);
-//   return response.sustainedResponse ? 0.9 : 0.6;
-// };
-
-// Side effects analysis using clinical analysis
-// const analyzeSideEffectsFromRealData = (notes: string, drugClass: string): string[] => {
-//   const adverse = clinicalAnalysisService.analyzeAdverseEvents(notes, drugClass, 84);
-//   return adverse.events.map(e => e.type);
-// };
-
-// ============================================================================
 // PERFORMANCE OPTIMIZED COMPONENTS
 // ============================================================================
 
@@ -859,9 +967,9 @@ const TimelineEventBar = memo<{
           : 'hover:shadow-2xl hover:z-20 hover:scale-102'
       }`}
       style={{
-        left: `${event.x}%`,
+        left: `${event.x}px`,
         top: event.y,
-        width: `${event.width}%`,
+        width: `${event.width}px`,
         height: event.height,
         background: `linear-gradient(135deg, ${event.color} 0%, ${event.color}CC 100%)`,
         border: getEventBorderStyle(),
@@ -917,7 +1025,7 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
   patientData, 
   className = '',
   onEventSelect,
-  initialZoomLevel = 4,
+  initialZoomFactor = 1.0,
   enableVirtualization = true,
   protocolId = 'COMP006',
   showClinicalInsights = true,
@@ -937,7 +1045,7 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
   const SIDEBAR_WIDTH = LAYOUT.SIDEBAR_WIDTH[screenSize];
   
   // Core state
-  const [zoomLevel, setZoomLevel] = useState(initialZoomLevel);
+  const [zoomFactor, setZoomFactor] = useState(initialZoomFactor);
   const [selectedEvent, setSelectedEvent] = useState<TimelineEvent | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [highlightedDrug, setHighlightedDrug] = useState<string | null>(null);
@@ -1228,13 +1336,14 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
       return aFirst - bFirst;
     });
 
-    // Optimized time range calculation
+    // Optimized time range calculation with better 2025 coverage
     const allDates = validEpisodes.flatMap(e => [e.parsedStartDate, e.parsedEndDate]);
     const minDate = new Date(Math.min(...allDates.map(d => d.getTime())));
     const maxDate = new Date(Math.max(...allDates.map(d => d.getTime())));
     
     const totalDays = differenceInDays(maxDate, minDate);
-    const paddingDays = Math.max(30, Math.floor(totalDays * 0.1));
+    // Increased padding to ensure all data including 2025 is visible
+    const paddingDays = Math.max(90, Math.floor(totalDays * 0.2)); // Increased from 30 and 0.1
     
     const paddedStart = addDays(startOfDay(minDate), -paddingDays);
     const paddedEnd = addDays(endOfDay(maxDate), paddingDays);
@@ -1274,97 +1383,15 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
     return { start: timeRange.start, end: timeRange.end };
   }, [timeRange]);
 
-  // Calculate timeline width based on zoom level
+  // Calculate timeline width based on zoom factor - FIXED with new function
   const timelineWidth = useMemo(() => {
-    const zoomConfig = ZOOM_LEVELS[zoomLevel];
-    const totalDays = differenceInDays(timeRange.end, timeRange.start);
-    return Math.max(totalDays * zoomConfig.pixelsPerDay, 1000); // Minimum 1000px width
-  }, [timeRange, zoomLevel]);
+    return calculateTimelineWidth(timeRange.start, timeRange.end, zoomFactor);
+  }, [timeRange, zoomFactor]);
 
-  // Dynamic time markers generation with infinite scroll support
+  // Dynamic time markers generation with consistent pixel positioning - FIXED
   const timeMarkers = useMemo(() => {
-    const markers: { date: Date; label: string; x: number; type: 'major' | 'minor' }[] = [];
-    const { start, end } = currentViewRange;
-    const zoomConfig = ZOOM_LEVELS[zoomLevel];
-    const totalDays = differenceInDays(end, start);
-    
-    // Generate major markers
-    let current = start;
-    const getMajorStep = () => {
-      const interval = zoomConfig.tickInterval;
-      if (interval === 'year') return { years: 1 };
-      if (interval === 'quarter') return { months: 3 };
-      if (interval === 'month') return { months: 1 };
-      if (interval === 'week') return { weeks: 1 };
-      if (interval === 'day') return { days: 1 };
-      if (interval === 'hour') return { hours: zoomConfig.density === 'ultra' ? 6 : 12 };
-      return { days: 1 };
-    };
-    
-    const majorStep = getMajorStep();
-    
-    while (current <= end) {
-      const daysSinceStart = differenceInDays(current, start);
-      const x = (daysSinceStart / totalDays) * 100;
-      
-      markers.push({
-        date: current,
-        label: format(current, zoomConfig.format),
-        x,
-        type: 'major'
-      });
-      
-      // Add next major marker
-      if (majorStep.years) current = addDays(current, 365 * majorStep.years);
-      else if (majorStep.months) current = addDays(current, 30 * majorStep.months);
-      else if (majorStep.weeks) current = addDays(current, 7 * majorStep.weeks);
-      else if (majorStep.days) current = addDays(current, majorStep.days);
-      else if (majorStep.hours) current = addHours(current, majorStep.hours);
-    }
-    
-    // Generate minor markers for higher zoom levels
-    if (zoomConfig.density === 'high' || zoomConfig.density === 'very-high' || zoomConfig.density === 'ultra') {
-      current = start;
-      const getMinorStep = () => {
-        const interval = zoomConfig.minorTickInterval as 'quarter' | 'month' | 'week' | 'day' | 'hour';
-        if (interval === 'quarter') return { months: 3 };
-        if (interval === 'month') return { months: 1 };
-        if (interval === 'week') return { weeks: 1 };
-        if (interval === 'day') return { days: 1 };
-        if (interval === 'hour') return { hours: zoomConfig.density === 'ultra' ? 1 : 6 };
-        return { days: 1 };
-      };
-      
-      const minorStep = getMinorStep();
-      
-      while (current <= end) {
-        const daysSinceStart = differenceInDays(current, start);
-        const x = (daysSinceStart / totalDays) * 100;
-        
-        // Only add minor markers that don't overlap with major ones
-        const isOverlappingMajor = markers.some(m => 
-          m.type === 'major' && Math.abs(m.x - x) < 0.5
-        );
-        
-        if (!isOverlappingMajor) {
-          markers.push({
-            date: current,
-            label: format(current, zoomConfig.minorFormat),
-            x,
-            type: 'minor'
-          });
-        }
-        
-        // Add next minor marker
-        if (minorStep.months) current = addDays(current, 30 * minorStep.months);
-        else if (minorStep.weeks) current = addDays(current, 7 * minorStep.weeks);
-        else if (minorStep.days) current = addDays(current, minorStep.days);
-        else if (minorStep.hours) current = addHours(current, minorStep.hours);
-      }
-    }
-    
-    return markers.sort((a, b) => a.x - b.x);
-  }, [currentViewRange, zoomLevel]);
+    return generateAdaptiveTimeMarkers(currentViewRange.start, currentViewRange.end, timelineWidth, zoomFactor);
+  }, [currentViewRange, timelineWidth, zoomFactor]);
 
   // Container height calculation
   const [windowHeight, setWindowHeight] = useState(window.innerHeight);
@@ -1479,12 +1506,10 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
     return positionMap;
   }, [filteredDrugGroups]);
 
-  // Generate visible events with optimized calculations and enhanced clinical data
+  // Generate visible events with consistent pixel positioning and enhanced clinical data
   const visibleEvents = useMemo(() => {
     const events: TimelineEvent[] = [];
     const { start, end } = currentViewRange;
-    const zoomConfig = ZOOM_LEVELS[zoomLevel];
-    const totalDays = differenceInDays(end, start);
     
     filteredDrugGroups.forEach(group => {
       if (!group.isVisible) return;
@@ -1507,15 +1532,13 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
           if (!dosePositionInfo) return;
           
           episodes.forEach(episode => {
-            // Always show all episodes in infinite scroll mode
             const eventStart = episode.parsedStartDate;
             const eventEnd = episode.parsedEndDate;
             
-            const startDays = differenceInDays(eventStart, start);
+            // FIXED: Use new positioning functions for consistent pixel-based positioning
+            const x = dateToPixels(eventStart, start, end, timelineWidth);
             const durationDays = differenceInDays(eventEnd, eventStart) + 1;
-            
-            const x = (startDays / totalDays) * 100;
-            const width = Math.max((durationDays / totalDays) * 100, 0.1);
+            const width = Math.max(daysToPixels(durationDays, start, end, timelineWidth), 2);
             
             // Analyze overlaps with enhanced detection
             const overlaps = [...new Set(allEvents
@@ -1562,7 +1585,7 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
               color: group.color,
               x,
               width,
-              y: dosePositionInfo.calculatedBarY, // Use the new calculated Y
+              y: dosePositionInfo.calculatedBarY,
               height: LAYOUT.EPISODE_HEIGHT,
               
               // Enhanced clinical data
@@ -1589,7 +1612,7 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
         });
       } else {
         // Collapsed view - show summary
-        const allEpisodes = group.episodes; // Show all episodes in infinite scroll mode
+        const allEpisodes = group.episodes;
         
         if (allEpisodes.length > 0) {
           const firstStart = Math.min(...allEpisodes.map(e => e.parsedStartDate.getTime()));
@@ -1598,14 +1621,13 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
           const eventStart = new Date(firstStart);
           const eventEnd = new Date(lastEnd);
           
-          const startDays = differenceInDays(eventStart, start);
+          // FIXED: Use new positioning functions for consistent pixel-based positioning
+          const x = dateToPixels(eventStart, start, end, timelineWidth);
           const durationDays = differenceInDays(eventEnd, eventStart) + 1;
-          
-          const x = (startDays / totalDays) * 100;
-          const width = Math.max((durationDays / totalDays) * 100, 0.1);
+          const width = Math.max(daysToPixels(durationDays, start, end, timelineWidth), 2);
           
           const collapsedPositionInfo = groupCalculatedPositions.dosePositions.get('collapsed');
-          if (!collapsedPositionInfo) return; // Should have a value from map generation
+          if (!collapsedPositionInfo) return;
           
           const summaryAnalysis: ClinicalAnalysisResult = group.overallAnalysis;
           const summaryPredictiveAnalytics = generatePredictiveAnalytics(allEpisodes, patientData);
@@ -1623,7 +1645,7 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
             color: group.color,
             x,
             width,
-            y: collapsedPositionInfo.calculatedBarY, // Use the new calculated Y for collapsed
+            y: collapsedPositionInfo.calculatedBarY,
             height: LAYOUT.EPISODE_HEIGHT,
             
             clinicalAnalysis: summaryAnalysis,
@@ -1654,12 +1676,170 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
     });
     
     return events;
-  }, [filteredDrugGroups, currentViewRange, zoomLevel, allEvents, patientData, drugPositionMap]);
+  }, [filteredDrugGroups, currentViewRange, allEvents, patientData, drugPositionMap, timelineWidth]);
 
   // ============================================================================
-  // EVENT HANDLERS - Enhanced with clinical insights
+  // EVENT HANDLERS - Enhanced with infinity zoom
   // ============================================================================
   
+  // Smooth zoom transition state
+  const [isZooming, setIsZooming] = useState(false);
+  const zoomTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Zoom center point for wheel zoom
+  const [zoomCenterX, setZoomCenterX] = useState<number | null>(null);
+  
+  // Smooth zoom function with center point
+  const smoothZoom = useCallback((
+    newZoomFactor: number, 
+    centerX?: number, 
+    duration: number = ZOOM_CONFIG.transitionDuration
+  ) => {
+    const clampedZoom = Math.max(ZOOM_CONFIG.minZoomFactor, Math.min(ZOOM_CONFIG.maxZoomFactor, newZoomFactor));
+    
+    if (clampedZoom === zoomFactor) return;
+    
+    setIsZooming(true);
+    setZoomFactor(clampedZoom);
+    
+    // Handle zoom center point
+    if (centerX !== undefined && containerRef.current) {
+      const container = containerRef.current;
+      const oldScrollLeft = container.scrollLeft;
+      const containerWidth = container.clientWidth;
+      
+      // Calculate the date at the center point
+      const oldTimelineWidth = calculateTimelineWidth(timeRange.start, timeRange.end, zoomFactor);
+      const newTimelineWidth = calculateTimelineWidth(timeRange.start, timeRange.end, clampedZoom);
+      
+      // Calculate new scroll position to maintain center point
+      const relativeCenterX = (oldScrollLeft + centerX) / oldTimelineWidth;
+      const newCenterX = relativeCenterX * newTimelineWidth;
+      const newScrollLeft = newCenterX - centerX;
+      
+      // Apply scroll position after a frame to ensure timeline has updated
+      requestAnimationFrame(() => {
+        if (container) {
+          container.scrollLeft = Math.max(0, newScrollLeft);
+        }
+      });
+    }
+    
+    // Clear previous timeout
+    if (zoomTimeoutRef.current) {
+      clearTimeout(zoomTimeoutRef.current);
+    }
+    
+    // Set zoom end timeout
+    zoomTimeoutRef.current = setTimeout(() => {
+      setIsZooming(false);
+      setZoomCenterX(null);
+    }, duration);
+  }, [zoomFactor, timeRange]);
+
+  // Wheel zoom handler for React onWheel prop
+  const handleWheel = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
+    // Only handle wheel events with Ctrl key (standard zoom behavior)
+    if (!e.ctrlKey && !e.metaKey) return;
+    
+    e.preventDefault();
+    
+    const container = containerRef.current;
+    if (!container) return;
+    
+    // Calculate zoom center point relative to container
+    const rect = container.getBoundingClientRect();
+    const centerX = e.clientX - rect.left;
+    
+    // Calculate zoom delta
+    const delta = -e.deltaY * ZOOM_CONFIG.wheelSensitivity;
+    const zoomMultiplier = Math.pow(ZOOM_CONFIG.zoomStep, delta);
+    const newZoomFactor = zoomFactor * zoomMultiplier;
+    
+    smoothZoom(newZoomFactor, centerX);
+  }, [zoomFactor, smoothZoom]);
+
+  // Keyboard shortcuts
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.target !== document.body && !(e.target as HTMLElement)?.closest('.timeline-container')) return;
+    
+    switch (e.key) {
+      case '+':
+      case '=':
+        if (e.ctrlKey || e.metaKey) {
+          e.preventDefault();
+          smoothZoom(zoomFactor * ZOOM_CONFIG.zoomStep);
+        }
+        break;
+      case '-':
+        if (e.ctrlKey || e.metaKey) {
+          e.preventDefault();
+          smoothZoom(zoomFactor / ZOOM_CONFIG.zoomStep);
+        }
+        break;
+      case '0':
+        if (e.ctrlKey || e.metaKey) {
+          e.preventDefault();
+          fitToContent();
+        }
+        break;
+      case 'r':
+        if (e.ctrlKey || e.metaKey) {
+          e.preventDefault();
+          resetZoom();
+        }
+        break;
+    }
+  }, [zoomFactor, smoothZoom]);
+
+  // Fit to content function
+  const fitToContent = useCallback(() => {
+    if (drugGroups.length === 0) return;
+    
+    const container = containerRef.current;
+    if (!container) return;
+    
+    const containerWidth = container.clientWidth;
+    const totalDays = differenceInDays(timeRange.end, timeRange.start);
+    const optimalPixelsPerDay = (containerWidth * 0.9) / totalDays; // 90% of container width
+    const optimalZoomFactor = optimalPixelsPerDay / ZOOM_CONFIG.basePixelsPerDay;
+    
+    smoothZoom(optimalZoomFactor);
+  }, [drugGroups, timeRange, smoothZoom]);
+
+  // Reset zoom function
+  const resetZoom = useCallback(() => {
+    smoothZoom(ZOOM_CONFIG.baseZoomFactor);
+  }, [smoothZoom]);
+
+  // Zoom to date range function
+  const zoomToDateRange = useCallback((startDate: Date, endDate: Date) => {
+    const container = containerRef.current;
+    if (!container) return;
+    
+    const containerWidth = container.clientWidth;
+    const rangeDays = differenceInDays(endDate, startDate);
+    const optimalPixelsPerDay = (containerWidth * 0.8) / rangeDays;
+    const optimalZoomFactor = optimalPixelsPerDay / ZOOM_CONFIG.basePixelsPerDay;
+    
+    smoothZoom(optimalZoomFactor);
+    
+    // Scroll to show the date range
+    requestAnimationFrame(() => {
+      const newTimelineWidth = calculateTimelineWidth(timeRange.start, timeRange.end, optimalZoomFactor);
+      const startX = dateToPixels(startDate, timeRange.start, timeRange.end, newTimelineWidth);
+      const endX = dateToPixels(endDate, timeRange.start, timeRange.end, newTimelineWidth);
+      const rangeWidth = endX - startX;
+      const centerX = startX + rangeWidth / 2;
+      const scrollLeft = centerX - containerWidth / 2;
+      
+      if (container) {
+        container.scrollLeft = Math.max(0, scrollLeft);
+      }
+    });
+  }, [timeRange, smoothZoom]);
+
+  // Event handlers for existing functionality
   const handleEventClick = useCallback((event: TimelineEvent) => {
     setSelectedEvent(event);
     onEventSelect?.(event);
@@ -1693,6 +1873,63 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
       return newSet;
     });
   }, []);
+
+  // Enhanced zoom indicator text with temporal context
+  const zoomIndicatorText = useMemo(() => {
+    const pixelsPerDay = calculatePixelsPerDay(zoomFactor);
+    const daysPerMajorTick = ZOOM_CONFIG.timeMarkers.minMajorSpacing / pixelsPerDay;
+    const intervalConfig = getAdaptiveTimeInterval(pixelsPerDay);
+    
+    // Create contextual description
+    let context = '';
+    if (daysPerMajorTick > 1095) context = 'Przegląd wieloletni';
+    else if (daysPerMajorTick > 365) context = 'Przegląd roczny';
+    else if (daysPerMajorTick > 90) context = 'Przegląd kwartalny';
+    else if (daysPerMajorTick > 30) context = 'Przegląd miesięczny';
+    else if (daysPerMajorTick > 7) context = 'Przegląd tygodniowy';
+    else if (daysPerMajorTick > 1) context = 'Przegląd dzienny';
+    else context = 'Przegląd godzinowy';
+    
+    // Create interval description
+    let intervalDesc = '';
+    if (daysPerMajorTick > 730) intervalDesc = `${Math.round(daysPerMajorTick / 365)} lat/znacznik`;
+    else if (daysPerMajorTick > 60) intervalDesc = `${Math.round(daysPerMajorTick / 30)} mies/znacznik`;
+    else if (daysPerMajorTick > 7) intervalDesc = `${Math.round(daysPerMajorTick)} dni/znacznik`;
+    else if (daysPerMajorTick > 1) intervalDesc = `${Math.round(daysPerMajorTick)} dni/znacznik`;
+    else intervalDesc = `${Math.round(daysPerMajorTick * 24)}h/znacznik`;
+    
+    return { context, intervalDesc, majorInterval: intervalConfig.majorInterval };
+  }, [zoomFactor]);
+
+  // ============================================================================
+  // EFFECT HOOKS - Enhanced with infinity zoom
+  // ============================================================================
+
+  // Keyboard event listener
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyDown]);
+
+  // Cleanup zoom timeout
+  useEffect(() => {
+    return () => {
+      if (zoomTimeoutRef.current) {
+        clearTimeout(zoomTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Auto-fit on initial load
+  useEffect(() => {
+    if (drugGroups.length > 0 && zoomFactor === ZOOM_CONFIG.baseZoomFactor) {
+      // Small delay to ensure container is rendered
+      const timer = setTimeout(() => {
+        fitToContent();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [drugGroups.length, fitToContent]);
 
   // ============================================================================
   // CLEANUP EFFECTS (This was for the old scrollTimeoutRef, can be removed)
@@ -1746,25 +1983,127 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
           </div>
           
           <div className="flex items-center gap-2">
-            <span className="text-sm text-slate-600 bg-remedy-light px-3 py-1 rounded-full">
-              Zoom: {ZOOM_LEVELS[zoomLevel].name}
-            </span>
+            <div className="flex items-center gap-2 text-xs text-slate-500 bg-white px-3 py-2 rounded-lg border border-remedy-border shadow-sm">
+              <div className="flex items-center gap-1">
+                <span className="text-slate-600 font-medium">{zoomIndicatorText.context}</span>
+                <span className="text-slate-400">•</span>
+                <span className="text-slate-500">{zoomIndicatorText.intervalDesc}</span>
+              </div>
+              <span className="text-slate-400">|</span>
+              <span className="font-semibold text-remedy-primary">{(zoomFactor * 100).toFixed(0)}%</span>
+            </div>
+            
+            {/* ATRQ Filter Toggle */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowMghCompliantOnly(!showMghCompliantOnly)}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg shadow-md transition-all duration-200 border text-xs font-medium ${
+                  showMghCompliantOnly
+                    ? 'bg-gradient-to-r from-remedy-primary to-remedy-accent text-white border-remedy-primary shadow-lg'
+                    : 'bg-white text-slate-600 border-remedy-border hover:bg-remedy-light hover:border-remedy-primary/50'
+                }`}
+                aria-label={showMghCompliantOnly ? "Pokaż wszystkie leki" : "Pokaż tylko leki zgodne z MGH-ATRQ"}
+                title={showMghCompliantOnly ? "Pokaż wszystkie leki" : "Pokaż tylko leki zgodne z MGH-ATRQ"}
+              >
+                <ShieldCheckIcon className={`w-4 h-4 ${showMghCompliantOnly ? 'text-white' : 'text-remedy-primary'}`} />
+                <span className="hidden sm:inline">MGH-ATRQ</span>
+                {showMghCompliantOnly && (
+                  <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                )}
+              </button>
+              
+              {/* Show compliance count */}
+              <div className="text-xs text-slate-500">
+                {showMghCompliantOnly 
+                  ? `${filteredDrugGroups.filter(g => g.mghAtrqCompliant).length} zgodnych`
+                  : `${drugGroups.filter(g => g.mghAtrqCompliant).length}/${drugGroups.length} zgodnych`
+                }
+              </div>
+            </div>
+            
+            {/* Info button with hover tooltip */}
+            <div className="relative group">
+              <button
+                className="p-2 rounded-lg bg-white shadow-md hover:bg-remedy-light hover:shadow-lg transition-all duration-200 border border-remedy-border hover:border-remedy-primary/50 group-hover:scale-105"
+                aria-label="Pomoc - Instrukcje zoom"
+              >
+                <InformationCircleIcon className="w-4 h-4 text-remedy-primary group-hover:text-remedy-accent transition-colors duration-200" />
+              </button>
+              
+              {/* Enhanced hover tooltip with better positioning */}
+              <div className="absolute top-full right-0 mt-3 w-96 bg-slate-900 text-white text-xs px-5 py-4 rounded-xl shadow-2xl border border-slate-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transform translate-y-2 group-hover:translate-y-0 transition-all duration-300 ease-out z-50 pointer-events-none">
+                <div className="space-y-3">
+                  <div className="text-white font-bold border-b border-slate-600 pb-2 text-sm">
+                    🔍 Infinity Zoom Timeline
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <div className="text-slate-300 font-semibold text-xs">⌨️ Sterowanie:</div>
+                      <div className="space-y-0.5 text-slate-200">
+                        <div>• <kbd className="bg-slate-700 px-1 rounded text-xs">Ctrl + Scroll</kbd> = Zoom w pozycji kursora</div>
+                        <div>• <kbd className="bg-slate-700 px-1 rounded text-xs">Ctrl + +/-</kbd> = Zoom in/out</div>
+                        <div>• <kbd className="bg-slate-700 px-1 rounded text-xs">Ctrl + 0</kbd> = Dopasuj do zawartości</div>
+                        <div>• <kbd className="bg-slate-700 px-1 rounded text-xs">Ctrl + R</kbd> = Reset zoom</div>
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="text-slate-300 font-semibold text-xs">📊 Znaczniki:</div>
+                      <div className="space-y-0.5 text-slate-200">
+                        <div>• <span className="bg-remedy-primary/80 px-1.5 py-0.5 rounded text-xs">Grube linie</span> = główne daty</div>
+                        <div>• <span className="bg-slate-600 px-1.5 py-0.5 rounded text-xs">Cienkie linie</span> = pomocnicze</div>
+                        <div>• Rok zawsze widoczny w kontekście</div>
+                        <div>• Automatyczne dostosowanie gęstości</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-slate-400 text-xs italic border-t border-slate-700 pt-2">
+                    💡 Hover nad tym przyciskiem aby zobaczyć instrukcje
+                  </div>
+                </div>
+                
+                {/* Enhanced arrow pointer */}
+                <div className="absolute -top-2 right-6 w-4 h-4 bg-slate-900 border-l border-t border-slate-700 transform rotate-45"></div>
+              </div>
+            </div>
+            
             <button
-              onClick={() => setZoomLevel(Math.max(0, zoomLevel - 1))}
-              disabled={zoomLevel === 0}
+              onClick={() => smoothZoom(zoomFactor / ZOOM_CONFIG.zoomStep)}
+              disabled={zoomFactor <= ZOOM_CONFIG.minZoomFactor}
               className="p-2 rounded-lg bg-white shadow-md hover:bg-remedy-light hover:shadow-lg disabled:opacity-50 transition-all duration-200 border border-remedy-border"
-              aria-label="Oddal"
+              aria-label="Oddal (Ctrl + -)"
+              title="Oddal (Ctrl + -)"
             >
               <MagnifyingGlassMinusIcon className="w-4 h-4 text-remedy-primary" />
             </button>
+            
             <button
-              onClick={() => setZoomLevel(Math.min(ZOOM_LEVELS.length - 1, zoomLevel + 1))}
-              disabled={zoomLevel === ZOOM_LEVELS.length - 1}
+              onClick={() => smoothZoom(zoomFactor * ZOOM_CONFIG.zoomStep)}
+              disabled={zoomFactor >= ZOOM_CONFIG.maxZoomFactor}
               className="p-2 rounded-lg bg-white shadow-md hover:bg-remedy-light hover:shadow-lg disabled:opacity-50 transition-all duration-200 border border-remedy-border"
-              aria-label="Przybliż"
+              aria-label="Przybliż (Ctrl + +)"
+              title="Przybliż (Ctrl + +)"
             >
               <MagnifyingGlassPlusIcon className="w-4 h-4 text-remedy-primary" />
             </button>
+            
+            <button
+              onClick={fitToContent}
+              className="px-3 py-2 rounded-lg bg-white shadow-md hover:bg-remedy-light hover:shadow-lg transition-all duration-200 border border-remedy-border text-xs font-medium text-remedy-primary"
+              aria-label="Dopasuj do zawartości (Ctrl + 0)"
+              title="Dopasuj do zawartości (Ctrl + 0)"
+            >
+              Dopasuj
+            </button>
+            
+            <button
+              onClick={resetZoom}
+              className="px-3 py-2 rounded-lg bg-white shadow-md hover:bg-remedy-light hover:shadow-lg transition-all duration-200 border border-remedy-border text-xs font-medium text-slate-600"
+              aria-label="Reset zoom (Ctrl + R)"
+              title="Reset zoom (Ctrl + R)"
+            >
+              Reset
+            </button>
+            
             <button
               onClick={() => setIsFullscreen(!isFullscreen)}
               className="p-2 rounded-lg bg-gradient-to-r from-remedy-primary to-remedy-accent text-white shadow-md hover:shadow-lg transition-all duration-200"
@@ -1805,14 +2144,38 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
             >
               {timeMarkers.map((marker, index) => (
                 <div
-                  key={index}
-                  className="absolute top-0 h-full flex items-center"
-                  style={{ left: `${marker.x}%` }}
+                  key={`${marker.type}-${index}-${marker.date.getTime()}`}
+                  className="absolute top-0 h-full flex items-start"
+                  style={{ left: `${marker.x}px` }}
                 >
-                  <div className="w-px h-full bg-remedy-primary/40"></div>
-                  <span className="absolute top-1 left-1 whitespace-nowrap text-xs font-medium text-slate-700 bg-white/80 backdrop-blur-sm px-1 rounded">
-                    {marker.label}
-                  </span>
+                  {/* Enhanced marker line with different heights */}
+                  <div 
+                    className={`w-px ${
+                      marker.type === 'major' 
+                        ? 'bg-remedy-primary/80 h-full' 
+                        : 'bg-remedy-primary/40 h-3/5 mt-2'
+                    }`}
+                  ></div>
+                  
+                  {/* Enhanced label with better typography and positioning */}
+                  <div className={`absolute left-2 flex flex-col ${
+                    marker.type === 'major' ? 'top-1' : 'top-3'
+                  }`}>
+                    <span className={`whitespace-nowrap ${
+                      marker.type === 'major' 
+                        ? 'text-sm font-bold text-slate-900 bg-white/95 px-2 py-1 rounded-md shadow-sm border border-remedy-border' 
+                        : 'text-xs font-medium text-slate-600 bg-white/85 px-1.5 py-0.5 rounded shadow-sm'
+                    } backdrop-blur-sm`}>
+                      {marker.label}
+                    </span>
+                    
+                    {/* Add year context for major markers if not already included */}
+                    {marker.type === 'major' && !marker.label.includes('2024') && !marker.label.includes('2025') && (
+                      <span className="text-xs text-slate-500 bg-white/80 px-1 rounded mt-0.5 self-start">
+                        {format(marker.date, 'yyyy')}
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -1820,7 +2183,7 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
         </div>
 
         {/* Main content area */}
-        <div className="flex relative" style={{ 
+        <div className="flex relative timeline-container" style={{ 
           height: containerHeight, // Viewport height for scrolling
           overflowY: 'auto',      // Enable vertical scroll here
           overflowX: 'visible'    // Allow horizontal overflow for tooltips
@@ -1943,6 +2306,7 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
             style={{ 
               height: totalContentHeight, // FIXED: Same height as sidebar
             }}
+            onWheel={handleWheel}
           >
             <div
               ref={timelineRef}
@@ -1952,13 +2316,17 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
                 width: timelineWidth // Use calculated timeline width based on zoom
               }}
             >
-              {/* Grid lines */}
+              {/* Enhanced Grid lines with visual hierarchy */}
               {timeMarkers.map((marker, index) => (
                 <div
-                  key={`grid-${index}`}
-                  className="absolute top-0 w-px bg-slate-300 opacity-60"
+                  key={`grid-${marker.type}-${index}-${marker.date.getTime()}`}
+                  className={`absolute top-0 ${
+                    marker.type === 'major' 
+                      ? 'w-px bg-remedy-primary/20 opacity-80' 
+                      : 'w-px bg-slate-300/40 opacity-60'
+                  }`}
                   style={{ 
-                    left: `${marker.x}%`, 
+                    left: `${marker.x}px`, 
                     height: '100%'
                   }}
                 />
@@ -1967,8 +2335,9 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
               {/* Timeline events */}
               {visibleEvents
                 .filter(event => {
-                  const isInViewportY = event.y + event.height >= 0 && event.y <= totalContentHeight; // FIXED: Use totalContentHeight instead of containerHeight
-                  const hasXIntersection = event.x < 100 && (event.x + event.width) > 0;
+                  const isInViewportY = event.y + event.height >= 0 && event.y <= totalContentHeight;
+                  // FIXED: Check if event is within timeline width (pixels)
+                  const hasXIntersection = event.x < timelineWidth && (event.x + event.width) > 0;
                   return isInViewportY && hasXIntersection;
                 })
                 .map(event => (
@@ -2270,7 +2639,7 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
         </div>
       )}
 
-      {/* Global Tooltip - Rendered at top level to appear above everything */}
+      {/* Global Tooltip - Enhanced with infinity zoom info */}
       {hoveredEvent && tooltipPosition && (
         <div 
           className="fixed px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-xl pointer-events-none z-[9999] min-w-max max-w-xs"
@@ -2281,16 +2650,23 @@ export const DetailedTrdTimelineChart: React.FC<DetailedTrdTimelineChartProps> =
           }}
         >
           <div className="space-y-1">
-            <div className="font-semibold">{hoveredEvent.drugName}</div>
+            <div className="font-semibold border-b border-gray-700 pb-1">{hoveredEvent.drugName}</div>
             <div>Dawka: {hoveredEvent.dose}</div>
             <div>Czas trwania: {hoveredEvent.duration} dni</div>
+            <div>Okres: {format(hoveredEvent.startDate, 'dd.MM.yyyy')} - {format(hoveredEvent.endDate, 'dd.MM.yyyy')}</div>
             {showAdvancedMetrics && (
               <>
-                <div>Skuteczność: {(hoveredEvent.predictiveAnalytics.treatmentSuccessProbability * 100).toFixed(0)}%</div>
-                <div>Pewność AI: {(hoveredEvent.aiConfidence * 100).toFixed(0)}%</div>
+                <div className="border-t border-gray-700 pt-1">
+                  <div>Skuteczność: {(hoveredEvent.predictiveAnalytics.treatmentSuccessProbability * 100).toFixed(0)}%</div>
+                  <div>Pewność AI: {(hoveredEvent.aiConfidence * 100).toFixed(0)}%</div>
+                  <div>Jakość danych: <span className="capitalize">{hoveredEvent.dataQuality}</span></div>
+                </div>
               </>
             )}
-            {hoveredEvent.mghAtrqCompliant && <div className="text-green-300">✓ Zgodne z MGH ATRQ</div>}
+            {hoveredEvent.mghAtrqCompliant && <div className="text-green-300 border-t border-gray-700 pt-1">✓ Zgodne z MGH ATRQ</div>}
+            <div className="text-gray-400 text-xs border-t border-gray-700 pt-1">
+              Ctrl+Scroll = Zoom, Ctrl+0 = Fit
+            </div>
           </div>
           <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
         </div>

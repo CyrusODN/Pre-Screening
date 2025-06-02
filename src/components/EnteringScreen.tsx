@@ -18,6 +18,9 @@ interface EnteringScreenProps {
   onAIModelChange: (model: SupportedAIModel) => void;
   isMultiAgentMode: boolean;
   onMultiAgentModeChange: (enabled: boolean) => void;
+  // NEW: Specialist analysis props
+  enableSpecialistAnalysis: boolean;
+  onSpecialistAnalysisChange: (enabled: boolean) => void;
   onLoadSavedAnalysis?: (analysis: StoredAnalysis) => void; // Nowa prop dla ładowania zapisanych analiz
 }
 
@@ -29,15 +32,17 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
     onAIModelChange,
     isMultiAgentMode,
     onMultiAgentModeChange,
+    enableSpecialistAnalysis,
+    onSpecialistAnalysisChange,
     onLoadSavedAnalysis
 }) => {
-  const [protocol, setProtocol] = useState('');
+  const [protocol, setProtocol] = useState<string>('');
   const [selectedProtocol, setSelectedProtocol] = useState<Protocol | null>(null);
-  const [medicalHistory, setMedicalHistory] = useState('');
+  const [medicalHistory, setMedicalHistory] = useState<string>('');
   const [protocolFile, setProtocolFile] = useState<File | null>(null);
   const [medicalHistoryFile, setMedicalHistoryFile] = useState<File | null>(null);
-  const [error, setError] = useState('');
-  const [showSavedAnalyses, setShowSavedAnalyses] = useState(false); // Zmieniono z showHistory
+  const [error, setError] = useState<string>('');
+  const [showSavedAnalyses, setShowSavedAnalyses] = useState<boolean>(false);
 
   const handleFileUpload = async (file: File, type: 'protocol' | 'medicalHistory') => {
     try {
@@ -156,6 +161,32 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
                 )}
               </div>
             </div>
+
+            {/* NEW: Specialist Analysis Toggle */}
+            <div className="flex items-center gap-2 card-remedy py-2 px-3">
+              <div className="icon-circle">
+                <Zap className="w-4 h-4" />
+              </div>
+              <label htmlFor="specialist-analysis-toggle" className="text-sm font-medium text-gray-900">
+                Analiza specjalistyczna:
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  id="specialist-analysis-toggle"
+                  type="checkbox"
+                  checked={enableSpecialistAnalysis}
+                  onChange={(e) => onSpecialistAnalysisChange(e.target.checked)}
+                  disabled={isMultiAgentMode} // Disabled in multi-agent mode as it might have its own analysis
+                  className="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 focus:ring-2 disabled:opacity-50"
+                />
+                <span className={`text-sm ${enableSpecialistAnalysis ? 'text-purple-600 font-medium' : 'text-gray-500'}`}>
+                  {enableSpecialistAnalysis ? 'Włączona' : 'Wyłączona'}
+                </span>
+                {isMultiAgentMode && (
+                  <span className="text-xs text-amber-600 ml-2">(Automatyczna w trybie wieloagentowym)</span>
+                )}
+              </div>
+            </div>
           </div>
 
           <div className="flex gap-2">
@@ -180,6 +211,22 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
           </div>
         </div>
 
+        {/* NEW: Info about specialist analysis */}
+        {enableSpecialistAnalysis && !isMultiAgentMode && (
+          <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 p-4 rounded-lg mb-4">
+            <div className="flex items-start space-x-3">
+              <Zap className="w-5 h-5 text-purple-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <h3 className="text-sm font-semibold text-purple-900 mb-1">Analiza Specjalistyczna Włączona</h3>
+                <p className="text-xs text-purple-700 leading-relaxed">
+                  System przeprowadzi wieloetapową analizę obejmującą: detekcję wszystkich form leczenia (w tym ketaminy), 
+                  profil gotowości psychodelicznej, połączenia kontekstowe oraz szczegółowy raport narracyjny. 
+                  Analiza może potrwać dłużej, ale zapewni bardziej kompletne wyniki.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {showSavedAnalyses ? (
           <div className="card-remedy mb-6">

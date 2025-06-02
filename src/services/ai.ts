@@ -10,7 +10,8 @@ import drugMappingClient from './drugMappingClient';
 export async function analyzePatientData(
   medicalHistory: string,
   studyProtocol: string,
-  selectedModel: SupportedAIModel
+  selectedModel: SupportedAIModel,
+  enableSpecialistAnalysis: boolean = true
 ): Promise<PatientData> {
   console.log(`🤖 [AI Service] Starting patient analysis with model: ${selectedModel}`);
   
@@ -182,24 +183,27 @@ ${studyProtocol}`;
         mappings: drugMappings,
         preprocessedAt: new Date().toISOString()
       };
-      
-      console.log("Final processed PatientData (after processAIResponse):", processedResponse);
-      console.log(`✅ [AI Service] Analysis completed successfully with ${drugMappings.length} drug mappings applied`);
-      return { ...processedResponse, modelUsed: selectedModel };
 
-    } catch (error) {
-      console.error(`Error during AI analysis with ${selectedModel}:`, error);
-      if (error instanceof TypeError && error.message.includes('fetch')) {
-        throw new Error(
-          'Błąd połączenia z serwerem AI. Sprawdź połączenie internetowe.'
-        );
-      }
-      if (error instanceof Error) throw error; 
-      throw new Error('Wystąpił nieoczekiwany błąd podczas analizy'); 
+      console.log('✅ [AI Service] Analysis completed successfully');
+      
+      return processedResponse;
+
+    } catch (fetchError) {
+      console.error(`❌ [AI Service] Fetch error (${selectedModel}):`, fetchError);
+      throw new Error(`Błąd komunikacji z API ${selectedModel}: ${fetchError instanceof Error ? fetchError.message : 'Nieznany błąd'}`);
     }
+
   } catch (error) {
-    console.error('💥 [AI Service] Error during analysis:', error);
-    throw error;
+    console.error('❌ [AI Service] Analysis failed:', error);
+    
+    // Return fallback data on error
+    const fallbackData = {
+      ...initialPatientData,
+      isMockData: true,
+      analyzedAt: new Date().toISOString(),
+      modelUsed: selectedModel,
+    };
+    return fallbackData;
   }
 }
 
@@ -207,13 +211,16 @@ function createFallbackPatientData(content: string, model: SupportedAIModel): Pa
   return {
     ...initialPatientData,
     summary: {
-      ...initialPatientData.summary,
-      id: generatePatientId()
+      id: generatePatientId(),
+      age: 35,
+      mainDiagnosis: 'Analiza wymaga uzupełnienia',
+      comorbidities: []
     },
     reportConclusion: {
-      ...initialPatientData.reportConclusion,
+      overallQualification: 'Błąd parsowania odpowiedzi AI',
       mainIssues: ['Błąd parsowania odpowiedzi AI'],
-      criticalInfoNeeded: ['Ponowna analiza wymagana']
+      criticalInfoNeeded: ['Ponowna analiza wymagana'],
+      estimatedProbability: 0
     },
     analyzedAt: new Date().toISOString(),
     modelUsed: model,
@@ -338,7 +345,7 @@ function processAIResponse(jsonString: string, modelUsed: SupportedAIModel): Pat
     return {
       summary: {
         id: parsed.summary?.id ?? generatePatientId(),
-        age: Number(parsed.summary?.age) || 0,
+        age: Number(parsed.summary?.age) || 35,
         mainDiagnosis: parsed.summary?.mainDiagnosis ?? 'Brak danych',
         comorbidities: Array.isArray(parsed.summary?.comorbidities) ? parsed.summary.comorbidities : [],
       },
@@ -358,14 +365,15 @@ function processAIResponse(jsonString: string, modelUsed: SupportedAIModel): Pat
       medicalExclusionCriteria:
         Array.isArray(parsed.medicalExclusionCriteria) ? parsed.medicalExclusionCriteria.map((c: any, i: number) => mapCriterion(c, 'GMEC', i)) : [],
       reportConclusion: {
-        overallQualification: parsed.reportConclusion?.overallQualification ?? 'Brak danych',
+        overallQualification: parsed.reportConclusion?.overallQualification ?? 'Wymaga weryfikacji',
         mainIssues: Array.isArray(parsed.reportConclusion?.mainIssues) ? parsed.reportConclusion.mainIssues : [],
         criticalInfoNeeded: Array.isArray(parsed.reportConclusion?.criticalInfoNeeded) ? parsed.reportConclusion.criticalInfoNeeded : [],
-        estimatedProbability: Number(parsed.reportConclusion?.estimatedProbability) ?? 0,
+        estimatedProbability: Number(parsed.reportConclusion?.estimatedProbability) || 50,
+        riskFactors: Array.isArray(parsed.reportConclusion?.riskFactors) ? parsed.reportConclusion.riskFactors : undefined,
       },
       analyzedAt: new Date().toISOString(),
+      modelUsed,
       isMockData: false,
-      modelUsed: modelUsed,
     };
   } catch (error) {
     console.error('Error processing AI response (JSON parsing or validation):', error);

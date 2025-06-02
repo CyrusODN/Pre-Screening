@@ -78,6 +78,7 @@ export const initialPatientData: PatientData = {
     ],
     estimatedProbability: 70
   },
+  analyzedAt: "2025-01-15T10:30:00Z",
   isMockData: true
 };
 
@@ -388,5 +389,6 @@ export const demoPatientData: PatientData = {
     ],
     estimatedProbability: 75
   },
+  analyzedAt: "2025-01-15T12:45:00Z",
   isMockData: true
 };

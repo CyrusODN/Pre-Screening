@@ -1,6 +1,6 @@
 import { MedicalChatbotAgent } from '../agents/core/MedicalChatbotAgent';
 import type { SharedContext, ChatbotResult } from '../types/agents';
-import type { PatientData, SupportedAIModel } from '../types/index';
+import type { PatientData } from '../types/index';
 
 export interface ChatMessage {
   id: string;
@@ -136,31 +136,43 @@ Jak mogę ci pomóc?`,
   }
 
   /**
-   * Konwertuje wyniki analizy monoagentowej do formatu wieloagentowego dla chatbota
+   * Konwertuje dane z analizy monoagentowej do formatu multi-agentowego
+   * aby zapewnić kompatybilność z chatbotem
    */
   private convertSingleAgentToMultiAgentFormat(patientData: PatientData): any {
+    // Safe access helpers
+    const summary = patientData.summary || { id: 'unknown', age: 0, mainDiagnosis: 'Nieznane', comorbidities: [] };
+    const trdAnalysis = patientData.trdAnalysis || { episodeStartDate: null, pharmacotherapy: [], conclusion: 'Brak danych' };
+    const reportConclusion = patientData.reportConclusion || { 
+      overallQualification: 'Nieznane', 
+      mainIssues: [], 
+      criticalInfoNeeded: [], 
+      estimatedProbability: 0 
+    };
+    const episodeEstimation = patientData.episodeEstimation || { scenarios: [], conclusion: 'Brak danych' };
+
     return {
       clinicalSynthesis: {
         success: true,
         data: {
-          patientOverview: `Pacjent ${patientData.summary.age} lat z głównym rozpoznaniem: ${patientData.summary.mainDiagnosis}. ${patientData.summary.comorbidities.length > 0 ? 'Choroby towarzyszące: ' + patientData.summary.comorbidities.join(', ') + '.' : ''}`,
-          mainDiagnosis: patientData.summary.mainDiagnosis,
-          comorbidities: patientData.summary.comorbidities,
+          patientOverview: `Pacjent ${summary.age} lat z głównym rozpoznaniem: ${summary.mainDiagnosis}. ${summary.comorbidities.length > 0 ? 'Choroby towarzyszące: ' + summary.comorbidities.join(', ') + '.' : ''}`,
+          mainDiagnosis: summary.mainDiagnosis,
+          comorbidities: summary.comorbidities,
           clinicalTimeline: [
             `Analiza przeprowadzona: ${patientData.analyzedAt ? new Date(patientData.analyzedAt).toLocaleDateString('pl-PL') : 'Nieznana data'}`,
-            `Model użyty: ${patientData.modelUsed}`,
-            ...(patientData.trdAnalysis.pharmacotherapy.map(p => 
+            `Model użyty: ${patientData.modelUsed || 'Nieznany'}`,
+            ...(trdAnalysis.pharmacotherapy.map(p => 
               `${p.drugName} (${p.dose}): ${p.startDate} - ${p.endDate}`
             ))
           ],
           keyObservations: [
-            `Główne rozpoznanie: ${patientData.summary.mainDiagnosis}`,
-            `Wiek pacjenta: ${patientData.summary.age} lat`,
-            `Liczba leków w historii: ${patientData.trdAnalysis.pharmacotherapy.length}`,
-            `Data rozpoczęcia epizodu: ${patientData.trdAnalysis.episodeStartDate || 'Nie określona'}`
+            `Główne rozpoznanie: ${summary.mainDiagnosis}`,
+            `Wiek pacjenta: ${summary.age} lat`,
+            `Liczba leków w historii: ${trdAnalysis.pharmacotherapy.length}`,
+            `Data rozpoczęcia epizodu: ${trdAnalysis.episodeStartDate || 'Nie określona'}`
           ],
-          treatmentHistory: patientData.trdAnalysis.conclusion,
-          riskFactors: patientData.reportConclusion.mainIssues || []
+          treatmentHistory: trdAnalysis.conclusion,
+          riskFactors: reportConclusion.mainIssues || []
         },
         confidence: 0.8,
         warnings: ['Dane pochodzą z analizy monoagentowej - mogą być mniej szczegółowe']
@@ -168,18 +180,18 @@ Jak mogę ci pomóc?`,
       episodeAnalysis: {
         success: true,
         data: {
-          scenarios: patientData.episodeEstimation.scenarios || [
+          scenarios: episodeEstimation.scenarios || [
             {
               id: 1,
-              description: patientData.episodeEstimation.conclusion,
+              description: episodeEstimation.conclusion,
               evidence: 'Analiza oparta na danych z analizy klasycznej',
-              startDate: patientData.trdAnalysis.episodeStartDate,
+              startDate: trdAnalysis.episodeStartDate,
               endDate: null,
               confidence: 0.7
             }
           ],
           mostLikelyScenario: 1,
-          conclusion: patientData.episodeEstimation.conclusion,
+          conclusion: episodeEstimation.conclusion,
           remissionPeriods: []
         },
         confidence: 0.7,
@@ -188,15 +200,15 @@ Jak mogę ci pomóc?`,
       pharmacotherapyAnalysis: {
         success: true,
         data: {
-          timeline: patientData.trdAnalysis.pharmacotherapy,
-          drugMappings: patientData.trdAnalysis.pharmacotherapy.map(p => ({
+          timeline: trdAnalysis.pharmacotherapy,
+          drugMappings: trdAnalysis.pharmacotherapy.map(p => ({
             originalName: p.drugName,
             standardName: p.drugName,
             confidence: 0.8
           })),
           prohibitedDrugs: [],
           gaps: [],
-          summary: `Zidentyfikowano ${patientData.trdAnalysis.pharmacotherapy.length} leków w historii farmakoterapii.`
+          summary: `Zidentyfikowano ${trdAnalysis.pharmacotherapy.length} leków w historii farmakoterapii.`
         },
         confidence: 0.8,
         warnings: ['Analiza farmakoterapii z systemu monoagentowego']
@@ -204,17 +216,17 @@ Jak mogę ci pomóc?`,
       trdAssessment: {
         success: true,
         data: {
-          trdStatus: patientData.trdAnalysis.conclusion.toLowerCase().includes('trd') || 
-                   patientData.trdAnalysis.conclusion.toLowerCase().includes('lekoopora') ? 'confirmed' : 'not_confirmed',
-          failureCount: patientData.trdAnalysis.pharmacotherapy.filter(p => p.attemptGroup > 0).length,
-          episodeStartDate: patientData.trdAnalysis.episodeStartDate,
-          adequateTrials: patientData.trdAnalysis.pharmacotherapy.map(p => ({
+          trdStatus: trdAnalysis.conclusion.toLowerCase().includes('trd') || 
+                   trdAnalysis.conclusion.toLowerCase().includes('lekoopora') ? 'confirmed' : 'not_confirmed',
+          failureCount: trdAnalysis.pharmacotherapy.filter(p => p.attemptGroup > 0).length,
+          episodeStartDate: trdAnalysis.episodeStartDate,
+          adequateTrials: trdAnalysis.pharmacotherapy.map(p => ({
             drugName: p.drugName,
             dose: p.dose,
             duration: 8, // Domyślnie 8 tygodni
             adequate: p.attemptGroup > 0
           })),
-          conclusion: patientData.trdAnalysis.conclusion
+          conclusion: trdAnalysis.conclusion
         },
         confidence: 0.7,
         warnings: ['Ocena TRD z analizy monoagentowej - może wymagać weryfikacji']
@@ -249,8 +261,8 @@ Jak mogę ci pomóc?`,
             riskLevel: c.status === 'spełnione' ? 'high' : 'low'
           })),
           overallAssessment: {
-            eligibilityScore: patientData.reportConclusion.estimatedProbability,
-            majorConcerns: patientData.reportConclusion.mainIssues,
+            eligibilityScore: reportConclusion.estimatedProbability,
+            majorConcerns: reportConclusion.mainIssues,
             minorConcerns: [],
             strengthsForInclusion: []
           }
@@ -284,21 +296,21 @@ Jak mogę ci pomóc?`,
             }
           },
           studySpecificRisks: {
-            protocolCompliance: patientData.reportConclusion.estimatedProbability,
+            protocolCompliance: reportConclusion.estimatedProbability,
             dataQuality: 70,
-            ethicalConcerns: patientData.reportConclusion.mainIssues
+            ethicalConcerns: reportConclusion.mainIssues
           },
           inclusionProbability: {
-            score: patientData.reportConclusion.estimatedProbability,
+            score: reportConclusion.estimatedProbability,
             confidence: 70,
             keyFactors: {
               positive: [],
-              negative: patientData.reportConclusion.mainIssues,
-              neutral: patientData.reportConclusion.criticalInfoNeeded || []
+              negative: reportConclusion.mainIssues,
+              neutral: reportConclusion.criticalInfoNeeded || []
             },
-            recommendation: patientData.reportConclusion.estimatedProbability > 70 ? 'include' : 
-                           patientData.reportConclusion.estimatedProbability > 40 ? 'further_evaluation' : 'exclude',
-            reasoning: patientData.reportConclusion.overallQualification
+            recommendation: reportConclusion.estimatedProbability > 70 ? 'include' : 
+                           reportConclusion.estimatedProbability > 40 ? 'further_evaluation' : 'exclude',
+            reasoning: reportConclusion.overallQualification
           }
         },
         confidence: 0.7,

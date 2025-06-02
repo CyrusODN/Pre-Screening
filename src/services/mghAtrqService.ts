@@ -101,40 +101,83 @@ export const getMGHATRQMedications = () => {
 
 /**
  * Find matching medication in MGH-ATRQ protocol
+ * UJEDNOLICENIE: Updated to use same mapping logic as clinicalAnalysisService
  */
 export const findMatchingMedication = (drugName: string) => {
   const mghAtrqMedications = getMGHATRQMedications();
   const normalizedDrugName = drugName.toLowerCase().replace(/[^a-z]/g, '');
   
+  // UJEDNOLICENIE: Enhanced variations with pharmaceutical/Latin names
+  const drugVariations = [
+    normalizedDrugName,
+    drugName.toLowerCase().replace(/[^a-z]/g, ''),
+    // Common Polish-English variations (same as clinicalAnalysisService)
+    normalizedDrugName.replace('wenlafaksyna', 'venlafaxine'),
+    normalizedDrugName.replace('venlafaxine', 'wenlafaksyna'),
+    normalizedDrugName.replace('kwetiapina', 'quetiapine'),
+    normalizedDrugName.replace('quetiapine', 'kwetiapina'),
+    normalizedDrugName.replace('escitalopram', 'escitalopram'), // same in both
+    normalizedDrugName.replace('mirtazapina', 'mirtazapine'),
+    normalizedDrugName.replace('mirtazapine', 'mirtazapina'),
+    normalizedDrugName.replace('duloksetyna', 'duloxetine'),
+    normalizedDrugName.replace('duloxetine', 'duloksetyna'),
+    normalizedDrugName.replace('sertralina', 'sertraline'),
+    normalizedDrugName.replace('sertraline', 'sertralina'),
+    normalizedDrugName.replace('fluoksetyna', 'fluoxetine'),
+    normalizedDrugName.replace('fluoxetine', 'fluoksetyna'),
+    normalizedDrugName.replace('paroksetyna', 'paroxetine'),
+    normalizedDrugName.replace('paroxetine', 'paroksetyna'),
+    normalizedDrugName.replace('citalopram', 'citalopram'), // same in both
+    normalizedDrugName.replace('bupropion', 'bupropion'), // same in both
+    normalizedDrugName.replace('trazodon', 'trazodone'),
+    normalizedDrugName.replace('trazodone', 'trazodon'),
+    
+    // NAPRAWA: Pharmaceutical/Latin names with "hydrochloridum" and other salts
+    normalizedDrugName.replace('sertralinihydrochloridum', 'sertralina'),
+    normalizedDrugName.replace('sertralinihydrochloridum', 'sertraline'),
+    normalizedDrugName.replace('sertralinehydrochloride', 'sertralina'),
+    normalizedDrugName.replace('sertralinehydrochloride', 'sertraline'),
+    normalizedDrugName.replace('escitalopramiumoxalas', 'escitalopram'),
+    normalizedDrugName.replace('escitalopramoxalate', 'escitalopram'),
+    normalizedDrugName.replace('fluoxetinihydrochloridum', 'fluoksetyna'),
+    normalizedDrugName.replace('fluoxetinihydrochloridum', 'fluoxetine'),
+    normalizedDrugName.replace('paroxetinihydrochloridum', 'paroksetyna'),
+    normalizedDrugName.replace('paroxetinihydrochloridum', 'paroxetine'),
+    normalizedDrugName.replace('citalopramihydrobromidum', 'citalopram'),
+    normalizedDrugName.replace('citaloprambromide', 'citalopram'),
+    normalizedDrugName.replace('venlafaxinihydrochloridum', 'wenlafaksyna'),
+    normalizedDrugName.replace('venlafaxinihydrochloridum', 'venlafaxine'),
+    normalizedDrugName.replace('duloxetinihydrochloridum', 'duloksetyna'),
+    normalizedDrugName.replace('duloxetinihydrochloridum', 'duloxetine'),
+    normalizedDrugName.replace('mirtazapinum', 'mirtazapina'),
+    normalizedDrugName.replace('mirtazapinum', 'mirtazapine'),
+    normalizedDrugName.replace('bupropionihydrochloridum', 'bupropion'),
+    normalizedDrugName.replace('bupropionhydrochloride', 'bupropion'),
+    normalizedDrugName.replace('trazodonihydrochloridum', 'trazodon'),
+    normalizedDrugName.replace('trazodonihydrochloridum', 'trazodone'),
+    normalizedDrugName.replace('quetiapinifumaras', 'kwetiapina'),
+    normalizedDrugName.replace('quetiapinifumaras', 'quetiapine'),
+    
+    // Common salt variants
+    normalizedDrugName.replace('hydrochloridum', ''),
+    normalizedDrugName.replace('hydrochloride', ''),
+    normalizedDrugName.replace('fumaras', ''),
+    normalizedDrugName.replace('fumarate', ''),
+    normalizedDrugName.replace('oxalas', ''),
+    normalizedDrugName.replace('oxalate', ''),
+    normalizedDrugName.replace('hydrobromidum', ''),
+    normalizedDrugName.replace('bromide', ''),
+    normalizedDrugName.replace('besylas', ''),
+    normalizedDrugName.replace('besylate', ''),
+    normalizedDrugName.replace('maleas', ''),
+    normalizedDrugName.replace('maleate', ''),
+    normalizedDrugName.replace('succinas', ''),
+    normalizedDrugName.replace('succinate', '')
+  ];
+  
   return mghAtrqMedications.find((med: any) => {
     const medName = med.drugName.toLowerCase().replace(/[^a-z]/g, '');
     const brandName = med.brandName?.toLowerCase().replace(/[^a-z]/g, '') || '';
-    
-    // Create variations for better matching (Polish/English names)
-    const drugVariations = [
-      normalizedDrugName,
-      drugName.toLowerCase().replace(/[^a-z]/g, ''),
-      // Common Polish-English variations
-      normalizedDrugName.replace('wenlafaksyna', 'venlafaxine'),
-      normalizedDrugName.replace('venlafaxine', 'wenlafaksyna'),
-      normalizedDrugName.replace('kwetiapina', 'quetiapine'),
-      normalizedDrugName.replace('quetiapine', 'kwetiapina'),
-      normalizedDrugName.replace('escitalopram', 'escitalopram'), // same in both
-      normalizedDrugName.replace('mirtazapina', 'mirtazapine'),
-      normalizedDrugName.replace('mirtazapine', 'mirtazapina'),
-      normalizedDrugName.replace('duloksetyna', 'duloxetine'),
-      normalizedDrugName.replace('duloxetine', 'duloksetyna'),
-      normalizedDrugName.replace('sertralina', 'sertraline'),
-      normalizedDrugName.replace('sertraline', 'sertralina'),
-      normalizedDrugName.replace('fluoksetyna', 'fluoxetine'),
-      normalizedDrugName.replace('fluoxetine', 'fluoksetyna'),
-      normalizedDrugName.replace('paroksetyna', 'paroxetine'),
-      normalizedDrugName.replace('paroxetine', 'paroksetyna'),
-      normalizedDrugName.replace('citalopram', 'citalopram'), // same in both
-      normalizedDrugName.replace('bupropion', 'bupropion'), // same in both
-      normalizedDrugName.replace('trazodon', 'trazodone'),
-      normalizedDrugName.replace('trazodone', 'trazodon')
-    ];
     
     return drugVariations.some(variation => 
       medName.includes(variation) || 
@@ -176,22 +219,58 @@ export const assessSingleTrial = (
     
     adequate = doseAdequate && durationAdequate;
     
-    reasoning = `Lek ${drugName} znajduje się w protokole MGH-ATRQ COMP006. `;
-    reasoning += `Znaleziono jako: ${matchingMedication.drugName} (${matchingMedication.brandName || 'undefined'}). `;
+    // NAPRAWA: Improved reasoning that aligns with the final decision
+    reasoning = `Próba leczenia lekiem ${drugName}`;
     
+    // Add drug recognition info
+    if (matchingMedication.drugName !== drugName) {
+      reasoning += ` (rozpoznany jako ${matchingMedication.drugName})`;
+    }
+    
+    reasoning += ` jest uwzględniona w protokole MGH-ATRQ COMP006. `;
+    
+    // Dose assessment
     if (doseAdequate) {
-      reasoning += `Dawka ${dose} jest adekwatna (min. ${minRequiredDose}mg). `;
+      reasoning += `Dawka ${dose} spełnia minimalne wymagania protokołu (≥${minRequiredDose}mg). `;
     } else {
-      reasoning += `Dawka ${dose} jest nieadekwatna (min. ${minRequiredDose}mg). `;
+      reasoning += `Dawka ${dose} jest poniżej minimalnego progu protokołu (wymagane ≥${minRequiredDose}mg). `;
     }
     
+    // Duration assessment
     if (durationAdequate) {
-      reasoning += `Czas trwania ${duration} dni jest adekwatny (min. 56 dni).`;
+      reasoning += `Czas trwania ${duration} dni spełnia minimalne wymagania (≥8 tygodni).`;
     } else {
-      reasoning += `Czas trwania ${duration} dni jest nieadekwatny (min. 56 dni).`;
+      reasoning += `Czas trwania ${duration} dni jest niewystarczający (wymagane ≥8 tygodni).`;
     }
+    
+    // Final assessment
+    if (adequate) {
+      reasoning += ` Próba uznana za adekwatną zgodnie z kryteriami MGH-ATRQ.`;
+    } else {
+      reasoning += ` Próba nie spełnia kryteriów adekwatności MGH-ATRQ.`;
+    }
+    
   } else {
-    reasoning = `Lek ${drugName} nie został znaleziony w protokole MGH-ATRQ COMP006. Nie można ocenić adekwatności.`;
+    // NAPRAWA: More informative message for unrecognized drugs
+    reasoning = `Lek ${drugName} nie jest uwzględniony w standardowym protokole MGH-ATRQ COMP006. `;
+    reasoning += `Ocena adekwatności będzie oparta na dostępnych danych klinicznych i kontekście terapeutycznym. `;
+    
+    // For unrecognized drugs, we can't assess adequacy by protocol standards
+    adequate = false;
+    
+    // But add clinical context if available
+    if (notes) {
+      const notesLower = notes.toLowerCase();
+      if (notesLower.includes('adekwatna') || notesLower.includes('adequate')) {
+        reasoning += `Uwagi kliniczne wskazują na adekwatność terapii.`;
+      } else if (notesLower.includes('nieadekwatna') || notesLower.includes('inadequate')) {
+        reasoning += `Uwagi kliniczne wskazują na nieadekwatność terapii.`;
+      } else {
+        reasoning += `Brak jednoznacznych wskazań dotyczących adekwatności w uwagach klinicznych.`;
+      }
+    } else {
+      reasoning += `Brak dodatkowych informacji klinicznych do oceny.`;
+    }
   }
   
   return {

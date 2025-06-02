@@ -1,113 +1,73 @@
 // src/App.tsx
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
-  AlertTriangle, 
-  CheckCircle, 
-  XCircle, 
-  ListChecks, 
-  Stethoscope, 
-  Target, 
-  BarChart3, 
-  FileText, 
-  TrendingUp,
-  CalendarDays,
-  Clock,
-  Brain,
-  FolderOpen,
-  Pill,
-  TestTube,
-  ChevronDown, 
-  ChevronUp, 
-  CheckCircle2, 
-  HelpCircle, 
-  User, 
-  Info, 
-  Filter, 
-  ArrowDownUp, 
-  Edit3, 
-  Save, 
-  RotateCcw, 
-  Printer, 
-  X, 
-  Zap
+  ChevronDown, ChevronUp, AlertTriangle, CheckCircle2, XCircle, HelpCircle, 
+  User, CalendarDays, Stethoscope, Pill, ListChecks, Target, BarChart3, 
+  Info, Filter, ArrowDownUp, Edit3, Save, RotateCcw, Printer, X, Zap, FolderOpen, Brain
+  // Usunięto nieużywane importy: MessageSquare, BrainCircuit
 } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { DetailedTrdTimelineChart } from './components/charts/DetailedTrdTimelineChart';
 import { EnteringScreen } from './components/EnteringScreen';
 import { PrintableReport } from './components/PrintableReport';
-import { Logo } from './components/Logo';
 import { ChatButton } from './components/ChatButton';
 import { ChatWindow } from './components/ChatWindow';
-import { StorageTestButton } from './components/StorageTestButton';
+import { Logo } from './components/Logo';
 import { SaveAnalysisButton } from './components/SaveAnalysisButton';
 import { SavedAnalysesManager } from './components/SavedAnalysesManager';
+import { HybridParsingDemo } from './components/HybridParsingDemo';
+import { PsychedelicAnalysisView } from './components/SpecialistAnalysisView';
 import { PsychotherapeuticAnalysisView } from './components/PsychotherapeuticAnalysisView';
 import { MultiAgentCoordinatorImpl } from './agents/coordination/MultiAgentCoordinator';
+// import { StorageTestButton } from './components/StorageTestButton';
 import { initialPatientData, demoPatientData } from './data/mockData';
 import { analyzePatientData } from './services/ai';
-import { DrugMappingDemo } from './components/DrugMappingDemo';
 import { analyzePatientDataMultiAgent, isMultiAgentAvailable } from './services/multiAgentService';
 import { chatbotService } from './services/chatbotService';
 import { saveToHistory } from './services/patientHistory';
-import { AnalysisHistoryService } from './services/AnalysisHistoryService';
-import { generateRealPsychotherapeuticAnalysis } from './services/psychotherapeuticAnalysisService';
+// Usunięto nieużywany import typu PharmacotherapyItem z tego pliku,
+// ponieważ jest on potrzebny tylko w DetailedTrdTimelineChart.tsx
 import type { PatientData, SupportedAIModel, Criterion } from './types'; 
 import { getAIConfig } from './config/aiConfig'; 
 import './styles/print.css';
-
-const getEffectiveStatus = (criterion: Criterion) => criterion.userStatus || criterion.status;
-
-const getStatusColor = (status: string | null | undefined) => {
-  switch (status) {
-    case 'spełnia':
-    case 'spełnione': 
-    case 'prawdopodobnie spełnione':
-    case 'prawdopodobnie OK':
-      return 'text-green-600 bg-green-50 border-green-200';
-    case 'nie spełnia':
-    case 'niespełnione':
-    case 'potencjalne wykluczenie':
-    case 'problem/weryfikacja':
-      return 'text-red-600 bg-red-50 border-red-200';
-    case 'częściowo spełnia':
-    case 'weryfikacja':
-    case 'potencjalnie niespełnione/weryfikacja':
-      return 'text-yellow-600 bg-yellow-50 border-yellow-200';
-    case 'nie dotyczy': 
-      return 'text-gray-500 bg-gray-50 border-gray-200';
-    default: 
-      return 'text-gray-400 bg-gray-50 border-gray-200';
-  }
-};
-
-const getStatusIcon = (status: string | null | undefined) => {
-  switch (status) {
-    case 'spełnia':
-    case 'spełnione':
-    case 'prawdopodobnie spełnione':
-    case 'prawdopodobnie OK':
-      return <CheckCircle2 size={14} />;
-    case 'nie spełnia':
-    case 'niespełnione':
-    case 'potencjalne wykluczenie':
-    case 'problem/weryfikacja':
-      return <XCircle size={14} />;
-    case 'częściowo spełnia':
-    case 'weryfikacja':
-    case 'potencjalnie niespełnione/weryfikacja':
-      return <AlertTriangle size={14} />;
-    case 'nie dotyczy': 
-      return <HelpCircle size={14} />;
-    default: 
-      return <HelpCircle size={14} />;
-  }
-};
+import { DrugMappingDemo } from './components/DrugMappingDemo';
+import { TRDTimelineChart } from './components/charts/TRDTimelineChart';
+import { generateMockPsychotherapeuticAnalysis } from './utils/mockPsychotherapeuticData';
+import { AccordionProvider, useAccordion } from './components/Accordion';
+// NEW: Import specialist analysis view
 
 const USER_STATUS_OPTIONS = [
   { value: 'spełnione_manual', label: 'Spełnione (ocena badacza)' },
   { value: 'niespełnione_manual', label: 'Niespełnione (ocena badacza)' },
   { value: 'weryfikacja_manual', label: 'Wymaga weryfikacji (ocena badacza)' },
 ];
+
+const getEffectiveStatus = (criterion: Criterion) => criterion.userStatus || criterion.status;
+
+const getStatusColor = (status: string | null | undefined) => {
+  if (status?.endsWith('_manual')) return 'text-blue-600';
+  switch (status) {
+    case 'spełnione': case 'prawdopodobnie OK': return 'text-green-600';
+    case 'niespełnione': case 'potencjalne wykluczenie': case 'problem/weryfikacja': return 'text-red-600';
+    case 'weryfikacja': case 'prawdopodobnie spełnione': case 'potencjalnie niespełnione/weryfikacja': return 'text-yellow-500';
+    default: return 'text-slate-500';
+  }
+};
+
+const getStatusIcon = (status: string | null | undefined) => {
+  const className = "inline-block mr-2 h-5 w-5";
+  if (status?.endsWith('_manual')) {
+    if (status.startsWith('spełnione')) return <CheckCircle2 className={className} />;
+    if (status.startsWith('niespełnione')) return <XCircle className={className} />;
+    return <HelpCircle className={className} />;
+  }
+  switch (status) {
+    case 'spełnione': case 'prawdopodobnie OK': return <CheckCircle2 className={className} />;
+    case 'niespełnione': case 'potencjalne wykluczenie': case 'problem/weryfikacja': return <XCircle className={className} />;
+    case 'weryfikacja': case 'prawdopodobnie spełnione': case 'potencjalnie niespełnione/weryfikacja': return <HelpCircle className={className} />;
+    default: return <Info className={className} />;
+  }
+};
 
 const AccordionItem: React.FC<{title: string, icon: React.ReactNode, children: React.ReactNode, defaultOpen?: boolean}> = ({ title, icon, children, defaultOpen = false }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
@@ -158,12 +118,11 @@ const EditCriterionModal: React.FC<{criterion: Criterion, onClose: () => void, o
               <label className="block text-sm font-medium text-gray-900 mb-2">Status:</label>
               <select value={newStatus} onChange={(e) => setNewStatus(e.target.value)}
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-remedy-accent focus:border-remedy-accent transition-all">
-                <option value="spełnia">Spełnia</option>
-                <option value="nie spełnia">Nie spełnia</option>
-                <option value="częściowo spełnia">Częściowo spełnia</option>
-                <option value="nie dotyczy">Nie dotyczy</option>
-                <option value="spełnia_manual">Spełnia (zmienione przez badacza)</option>
-                <option value="niespełnia_manual">Niespełnia (zmienione przez badacza)</option>
+                <option value="spełnione">Spełnione</option>
+                <option value="niespełnione">Niespełnione</option>
+                <option value="weryfikacja">Wymaga weryfikacji</option>
+                <option value="spełnione_manual">Spełnione (zmienione przez badacza)</option>
+                <option value="niespełnione_manual">Niespełnione (zmienione przez badacza)</option>
                 <option value="weryfikacja_manual">Wymaga weryfikacji (zmienione przez badacza)</option>
           </select>
         </div>
@@ -191,23 +150,7 @@ const CriteriaList: React.FC<{criteria: Criterion[], title: string, onUpdateCrit
   const [filter, setFilter] = useState<string>('all');
   const [sortOrder, setSortOrder] = useState<string>('id');
   const [editingCriterion, setEditingCriterion] = useState<Criterion | null>(null);
-  const statusOrder: Record<string, number> = { 
-    'problem/weryfikacja': 1, 
-    'potencjalne wykluczenie': 1, 
-    'niespełnione_manual': 1,
-    'niespełnione': 1,
-    'nie spełnia': 1,
-    'potencjalnie niespełnione/weryfikacja': 2, 
-    'weryfikacja': 2, 
-    'weryfikacja_manual': 2,
-    'częściowo spełnia': 2,
-    'prawdopodobnie spełnione': 3, 
-    'prawdopodobnie OK': 3, 
-    'spełnione': 4, 
-    'spełnione_manual': 4,
-    'spełnia': 4,
-    'nie dotyczy': 5
-  };
+  const statusOrder: Record<string, number> = { 'problem/weryfikacja': 1, 'potencjalne wykluczenie': 1, 'niespełnione_manual': 1, 'potencjalnie niespełnione/weryfikacja': 2, 'weryfikacja': 2, 'weryfikacja_manual': 2, 'prawdopodobnie spełnione': 3, 'prawdopodobnie OK': 3, 'spełnione': 4, 'spełnione_manual': 4, };
   const uniqueStatuses = useMemo(() => { const statuses = (criteria || []).map(c => getEffectiveStatus(c)); const userStatuses = USER_STATUS_OPTIONS.map(opt => opt.value); return ['all', ...new Set([...statuses, ...userStatuses])]; }, [criteria]);
   const filteredAndSortedCriteria = useMemo(() => {
     let result = [...(criteria || [])];
@@ -271,17 +214,9 @@ const CriteriaStatusPieChart: React.FC<{criteriaData: Array<Criterion & {type: s
 
   const statusCounts = criteriaData.reduce((acc, criterion) => {
     const effectiveStatus = getEffectiveStatus(criterion);
-    let statusLabel: string;
-    
-    if (effectiveStatus.includes('spełnia') || effectiveStatus.includes('spełnione') || effectiveStatus.includes('OK')) {
-      statusLabel = 'Pozytywne / OK';
-    } else if (effectiveStatus.includes('nie spełnia') || effectiveStatus.includes('niespełnione') || 
-               effectiveStatus.includes('wykluczenie') || effectiveStatus.includes('problem')) {
-      statusLabel = 'Negatywne / Problem';
-    } else {
-      statusLabel = 'Do Weryfikacji';
-    }
-    
+    const statusLabel = effectiveStatus.includes('spełnione') || effectiveStatus.includes('OK') ? 'Pozytywne / OK' :
+      effectiveStatus.includes('niespełnione') || effectiveStatus.includes('wykluczenie') || effectiveStatus.includes('problem') ? 'Negatywne / Problem' :
+        'Do Weryfikacji';
     acc[statusLabel] = (acc[statusLabel] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
@@ -501,10 +436,14 @@ const App = () => {
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [isPrintMode, setIsPrintMode] = useState(false);
   const [isMultiAgentMode, setIsMultiAgentMode] = useState(false);
+  // NEW: Specialist analysis toggle
   const [enableSpecialistAnalysis, setEnableSpecialistAnalysis] = useState(true);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [hasChatSession, setHasChatSession] = useState(false);
   const [showDrugDemo, setShowDrugDemo] = useState(false);
+  const [showHybridDemo, setShowHybridDemo] = useState(false);
+  const [showPsychedelicDemo, setShowPsychedelicDemo] = useState(false);
+  const [showPsychedelicPanelInline, setShowPsychedelicPanelInline] = useState(false);
   const [showSavedAnalyses, setShowSavedAnalyses] = useState(false);
   const [originalAnalysisData, setOriginalAnalysisData] = useState<{
     medicalHistory: string;
@@ -752,11 +691,11 @@ const App = () => {
         const effectiveStatus = getEffectiveStatus(criterion);
         if (criterion.userStatus) { 
           if ((initialStatus.includes('problem') || initialStatus.includes('wykluczenie') || initialStatus.includes('niespełnione')) &&
-            (effectiveStatus.includes('spełnia'))) {
+            (effectiveStatus.includes('spełnione_manual'))) {
             baseProbability = Math.min(100, baseProbability + 5); 
           }
-          else if ((initialStatus.includes('spełnia') || initialStatus.includes('OK')) &&
-            (effectiveStatus.includes('nie spełnia'))) {
+          else if ((initialStatus.includes('spełnione') || initialStatus.includes('OK')) &&
+            (effectiveStatus.includes('niespełnione_manual'))) {
             baseProbability = Math.max(0, baseProbability - 10);
           }
         }
@@ -937,6 +876,44 @@ const App = () => {
     );
   }
 
+  // Jeśli pokazujemy demo hybrydowego parsowania
+  if (showHybridDemo) {
+    return (
+      <div className="min-h-screen bg-gradient-theme-light py-8">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="mb-6">
+            <button
+              onClick={() => setShowHybridDemo(false)}
+              className="btn-secondary"
+            >
+              ← Powrót do aplikacji
+            </button>
+          </div>
+          <HybridParsingDemo />
+        </div>
+      </div>
+    );
+  }
+
+  // Jeśli pokazujemy demo analizy prepsychodelicznej
+  if (showPsychedelicDemo) {
+    return demoPatientData.specialistAnalysis ? (
+      <PsychedelicAnalysisView 
+        analysisResult={demoPatientData.specialistAnalysis}
+        onClose={() => setShowPsychedelicDemo(false)}
+      />
+    ) : (
+      <div className="min-h-screen bg-gradient-theme-light py-8 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Demo niedostępne</h2>
+          <button onClick={() => setShowPsychedelicDemo(false)} className="btn-secondary">
+            ← Powrót
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-theme-light py-8 px-3 sm:px-4 lg:px-6 font-sans">
       <style>{`
@@ -1002,6 +979,16 @@ const App = () => {
                 <div className="w-2 h-2 bg-remedy-accent rounded-full"></div>
                 <span>Tryb: <span className="font-medium text-slate-800">{isMultiAgentMode ? 'Wieloagentowy' : 'Klasyczny'}</span></span>
               </div>
+              {/* NEW: Show specialist analysis status */}
+              {patientProfile.specialistAnalysis && (
+                <>
+                  <div className="w-1 h-4 bg-slate-300 rounded-full"></div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                    <span>Analiza: <span className="font-medium text-purple-700">Specjalistyczna</span></span>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -1152,32 +1139,34 @@ const App = () => {
         </div>
       </section>
 
-      {/* NEW: Psychotherapeutic Analysis Button */}
-      <section className="card-remedy bg-gradient-to-r from-purple-50 to-indigo-50 border-purple-200">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <div className="icon-circle mr-3 bg-gradient-to-r from-purple-600 to-indigo-600">
-              <Brain size={16} />
+      {/* NEW: Inline Psychedelic Analysis Button when real data available */}
+      {patientProfile.specialistAnalysis && (
+        <section className="card-remedy bg-gradient-to-r from-purple-50 to-indigo-50 border-purple-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="icon-circle mr-3 bg-gradient-to-r from-purple-600 to-indigo-600">
+                <Brain size={16} />
+              </div>
+              <div>
+                <span className="text-xl font-bold text-gray-900">Analiza Pre-Screeningu Psychedelicznego</span>
+                <p className="text-sm text-gray-600 mt-1">Dostępna szczegółowa analiza gotowości do terapii psychedelicznej</p>
+              </div>
             </div>
-            <div>
-              <span className="text-xl font-bold text-gray-900">Pre-Screeningowa Analiza Psychoterapeutyczna</span>
-              <p className="text-sm text-gray-600 mt-1">Szczegółowa ocena gotowości do terapii psychodelicznej z perspektywy psychoterapeutycznej</p>
-            </div>
+            <button
+              onClick={() => setShowPsychedelicPanelInline(true)}
+              className="btn-primary bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+            >
+              🧠 Pokaż Analizę
+            </button>
           </div>
-          <button
-            onClick={() => setShowPsychotherapeuticAnalysis(true)}
-            className="btn-primary bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
-          >
-            🧠 Przeprowadź Analizę
-          </button>
-        </div>
-      </section>
+        </section>
+      )}
 
-      {/* Psychotherapeutic Analysis Modal */}
-      {showPsychotherapeuticAnalysis && (
-        <PsychotherapeuticAnalysisView 
-          analysisResult={generateRealPsychotherapeuticAnalysis(patientProfile)}
-          onClose={() => setShowPsychotherapeuticAnalysis(false)}
+      {/* Inline Psychedelic Analysis Panel */}
+      {showPsychedelicPanelInline && patientProfile.specialistAnalysis && (
+        <PsychedelicAnalysisView 
+          analysisResult={patientProfile.specialistAnalysis}
+          onClose={() => setShowPsychedelicPanelInline(false)}
         />
       )}
     </main>
@@ -1204,6 +1193,12 @@ const App = () => {
           className="no-print btn-primary"
         >
           🧪 Demo Mapowania Leków
+        </button>
+        <button
+          onClick={() => setShowHybridDemo(true)}
+          className="no-print btn-primary"
+        >
+          🔬 Demo Hybrydowego Parsowania
         </button>
       </div>
       

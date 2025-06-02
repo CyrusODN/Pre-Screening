@@ -187,7 +187,49 @@ export const classifyDrugForClinicalResearch = (drugName: string, dose?: string,
     normalizedName.replace('citalopram', 'citalopram'), // same in both
     normalizedName.replace('bupropion', 'bupropion'), // same in both
     normalizedName.replace('trazodon', 'trazodone'),
-    normalizedName.replace('trazodone', 'trazodon')
+    normalizedName.replace('trazodone', 'trazodon'),
+    
+    // UJEDNOLICENIE: Pharmaceutical/Latin names with "hydrochloridum" and other salts
+    normalizedName.replace('sertralinihydrochloridum', 'sertralina'),
+    normalizedName.replace('sertralinihydrochloridum', 'sertraline'),
+    normalizedName.replace('sertralinehydrochloride', 'sertralina'),
+    normalizedName.replace('sertralinehydrochloride', 'sertraline'),
+    normalizedName.replace('escitalopramiumoxalas', 'escitalopram'),
+    normalizedName.replace('escitalopramoxalate', 'escitalopram'),
+    normalizedName.replace('fluoxetinihydrochloridum', 'fluoksetyna'),
+    normalizedName.replace('fluoxetinihydrochloridum', 'fluoxetine'),
+    normalizedName.replace('paroxetinihydrochloridum', 'paroksetyna'),
+    normalizedName.replace('paroxetinihydrochloridum', 'paroxetine'),
+    normalizedName.replace('citalopramihydrobromidum', 'citalopram'),
+    normalizedName.replace('citaloprambromide', 'citalopram'),
+    normalizedName.replace('venlafaxinihydrochloridum', 'wenlafaksyna'),
+    normalizedName.replace('venlafaxinihydrochloridum', 'venlafaxine'),
+    normalizedName.replace('duloxetinihydrochloridum', 'duloksetyna'),
+    normalizedName.replace('duloxetinihydrochloridum', 'duloxetine'),
+    normalizedName.replace('mirtazapinum', 'mirtazapina'),
+    normalizedName.replace('mirtazapinum', 'mirtazapine'),
+    normalizedName.replace('bupropionihydrochloridum', 'bupropion'),
+    normalizedName.replace('bupropionhydrochloride', 'bupropion'),
+    normalizedName.replace('trazodonihydrochloridum', 'trazodon'),
+    normalizedName.replace('trazodonihydrochloridum', 'trazodone'),
+    normalizedName.replace('quetiapinifumaras', 'kwetiapina'),
+    normalizedName.replace('quetiapinifumaras', 'quetiapine'),
+    
+    // Common salt variants
+    normalizedName.replace('hydrochloridum', ''),
+    normalizedName.replace('hydrochloride', ''),
+    normalizedName.replace('fumaras', ''),
+    normalizedName.replace('fumarate', ''),
+    normalizedName.replace('oxalas', ''),
+    normalizedName.replace('oxalate', ''),
+    normalizedName.replace('hydrobromidum', ''),
+    normalizedName.replace('bromide', ''),
+    normalizedName.replace('besylas', ''),
+    normalizedName.replace('besylate', ''),
+    normalizedName.replace('maleas', ''),
+    normalizedName.replace('maleate', ''),
+    normalizedName.replace('succinas', ''),
+    normalizedName.replace('succinate', '')
   ];
   
   // Find matching medication in protocol
