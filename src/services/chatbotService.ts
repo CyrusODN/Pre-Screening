@@ -241,7 +241,7 @@ ${patientData.medicalExclusionCriteria?.map(c => `- ${c.id}: ${c.name} - ${c.sta
       context += `\n\nOBSZAR FOKUS: ${focusArea}`;
     }
 
-    context += `\n\nODPOWIEDZ w sposób profesjonalny, konkretny i pomocny. Odwołuj się do konkretnych danych z analizy. Jeśli nie masz wystarczających informacji, powiedz o tym wprost.`;
+    context += `\n\nODPOWIEDZ w sposób profesjonalny, konkretny i pomocny. Odwołuj się do konkretnych danych z analizy. Jeśli nie masz wystarczających informacji, powiedz o tym wprost. NIE zaczynaj od powitań - przejdź od razu do analizy medycznej.`;
 
     return context;
   }
@@ -259,11 +259,14 @@ ${patientData.medicalExclusionCriteria?.map(c => `- ${c.id}: ${c.name} - ${c.sta
     const systemPrompt = `Jesteś doświadczonym lekarzem psychiatrą i specjalistą badań klinicznych. Odpowiadasz na pytania dotyczące analizy pre-screeningowej pacjentów w sposób profesjonalny, konkretny i pomocny.
 
 ZASADY:
+- NIE zaczynaj odpowiedzi od powitań typu "Dzień dobry", "Witam" itp.
+- Przejdź od razu do meritum odpowiedzi
 - Odwołuj się do konkretnych danych z analizy
 - Bądź precyzyjny w ocenach medycznych
 - Wskazuj na potrzebę weryfikacji przez lekarza
 - Używaj polskiej terminologii medycznej
-- Jeśli nie masz wystarczających danych, powiedz o tym wprost`;
+- Jeśli nie masz wystarczających danych, powiedz o tym wprost
+- Odpowiadaj bezpośrednio na zadane pytanie bez zbędnych wstępów`;
 
     if (model === 'claude-opus') {
       const response = await fetch('https://api.anthropic.com/v1/messages', {
