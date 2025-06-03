@@ -423,7 +423,20 @@ async function preprocessMedicalHistoryForDrugMapping(medicalHistory: string): P
     'Zawiesina', 'Regon', 'Hormon', 'Kontrola', 'Skan', 'Mail', 'Dialog',
     'Terapia', 'Centrum', 'Ograniczon', 'Orygina', 'Zmian', 'Wspomina',
     'Spowodowan', 'Koleina', 'Ealan', 'Trijodotyronina', 'Tyreotropina',
-    'Creatinine', 'Evevelon', 'Dulsevic', 'Elsay', 'Ntrum', 'Orycina'
+    'Creatinine', 'Evevelon', 'Dulsevic', 'Elsay', 'Ntrum', 'Orycina',
+    // Nazwy miesięcy - polskie i angielskie
+    'stycznia', 'lutego', 'marca', 'kwietnia', 'maja', 'czerwca', 
+    'lipca', 'sierpnia', 'września', 'października', 'listopada', 'grudnia',
+    'styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
+    'lipiec', 'sierpień', 'wrzesień', 'październik', 'listopad', 'grudzień',
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December',
+    // Inne często występujące słowa
+    'Ubezpieczony', 'Pacjent', 'Diagnoza', 'Leczenie', 'Wizyta', 'Hospitalizacja',
+    'Konsultacja', 'Poradnia', 'Ambulatorium', 'Klinika', 'Ośrodek', 'Zakład',
+    'Instytut', 'Uniwersytet', 'Akademia', 'Medycyna', 'Zdrowie', 'Choroba',
+    'Zespół', 'Syndrom', 'Objawy', 'Wywiad', 'Badanie', 'Wynik', 'Ocena',
+    'Czas', 'Data', 'Godzina', 'Doba', 'Tydzień', 'Miesiąc', 'Rok'
   ]);
   
   // Wyciągnij potencjalne nazwy leków

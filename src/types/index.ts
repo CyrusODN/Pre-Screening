@@ -158,6 +158,9 @@ export interface PatientData {
   // NEW: Psychotherapeutic analysis (supplementary to clinical analysis)
   psychotherapeuticAnalysis?: PsychotherapeuticAnalysis;
   
+  // LEGACY: Specialist analysis alias (for backward compatibility with App.tsx)
+  specialistAnalysis?: PsychotherapeuticAnalysis;
+  
   // OLD: Narrative-based psychedelic analysis (keep for backward compatibility)
   analizaGotowosciPsychodelicznej?: AnalizaGotowosciPsychodelicznej;
 }

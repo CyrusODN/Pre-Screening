@@ -271,12 +271,23 @@ const CriteriaStatusPieChart: React.FC<{criteriaData: Array<Criterion & {type: s
     const effectiveStatus = getEffectiveStatus(criterion);
     let statusLabel: string;
     
-    if (effectiveStatus.includes('spełnia') || effectiveStatus.includes('spełnione') || effectiveStatus.includes('OK')) {
-      statusLabel = 'Pozytywne / OK';
-    } else if (effectiveStatus.includes('nie spełnia') || effectiveStatus.includes('niespełnione') || 
-               effectiveStatus.includes('wykluczenie') || effectiveStatus.includes('problem')) {
+    // POPRAWKA: Najpierw sprawdź statusy negatywne/problematyczne (żeby "niespełnione" nie było mylone z "spełnione")
+    if (effectiveStatus?.includes('nie spełnia') || 
+        effectiveStatus?.includes('niespełnione') || 
+        effectiveStatus?.includes('wykluczenie') || 
+        effectiveStatus?.includes('problem') ||
+        effectiveStatus === 'potencjalne wykluczenie' || 
+        effectiveStatus === 'problem/weryfikacja' ||
+        effectiveStatus === 'niespełnione_manual' ||
+        effectiveStatus === 'nie spełnia') {
       statusLabel = 'Negatywne / Problem';
-    } else {
+    } 
+    // Pozytywne statusy - sprawdź po negatywnych
+    else if (effectiveStatus?.includes('spełnia') || effectiveStatus?.includes('spełnione') || effectiveStatus?.includes('OK')) {
+      statusLabel = 'Pozytywne / OK';
+    } 
+    // Wszystko inne do weryfikacji
+    else {
       statusLabel = 'Do Weryfikacji';
     }
     
@@ -617,6 +628,20 @@ const App = () => {
     setPatientProfile(demoDataWithoutSpecialistAnalysis);
     setAnalysisError(null);
     
+    // Inicjalizuj sesję chatbota dla danych demo
+    try {
+      chatbotService.initializeSessionFromSingleAgent(
+        demoDataWithoutSpecialistAnalysis,
+        'Demo: Historia choroby pacjenta z danymi demonstracyjnymi',
+        'Demo: Protokół badania klinicznego'
+      );
+      setHasChatSession(true);
+      console.log('✅ Sesja chatbota została zainicjalizowana dla danych demo');
+    } catch (error) {
+      console.error('❌ Błąd podczas inicjalizacji chatbota dla demo:', error);
+      setHasChatSession(false);
+    }
+    
     if (demoPatientData.reportConclusion) {
       setDynamicConclusion({
         overallQualification: demoPatientData.reportConclusion.overallQualification || '',
@@ -643,6 +668,29 @@ const App = () => {
       medicalHistory: savedAnalysis.medicalHistory || '',
       studyProtocol: savedAnalysis.studyProtocol || '',
     });
+    
+    // Inicjalizuj sesję chatbota dla zapisanej analizy
+    try {
+      const analysisType = savedAnalysis.analysisType || 'single-agent';
+      if (analysisType === 'multi-agent') {
+        chatbotService.initializeSessionFromMultiAgent(
+          savedAnalysis.patientData,
+          savedAnalysis.medicalHistory || 'Brak danych historii choroby',
+          savedAnalysis.studyProtocol || 'Brak danych protokołu'
+        );
+      } else {
+        chatbotService.initializeSessionFromSingleAgent(
+          savedAnalysis.patientData,
+          savedAnalysis.medicalHistory || 'Brak danych historii choroby',
+          savedAnalysis.studyProtocol || 'Brak danych protokołu'
+        );
+      }
+      setHasChatSession(true);
+      console.log(`✅ Sesja chatbota została zainicjalizowana dla zapisanej analizy (${analysisType})`);
+    } catch (error) {
+      console.error('❌ Błąd podczas inicjalizacji chatbota dla zapisanej analizy:', error);
+      setHasChatSession(false);
+    }
     
     if (savedAnalysis.patientData.reportConclusion) {
       setDynamicConclusion({
