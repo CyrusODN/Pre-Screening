@@ -42,11 +42,9 @@ import { StorageTestButton } from './components/StorageTestButton';
 import { SaveAnalysisButton } from './components/SaveAnalysisButton';
 import { SavedAnalysesManager } from './components/SavedAnalysesManager';
 import { PsychotherapeuticAnalysisView } from './components/PsychotherapeuticAnalysisView';
-import { MultiAgentCoordinatorImpl } from './agents/coordination/MultiAgentCoordinator';
 import { initialPatientData, demoPatientData } from './data/mockData';
 import { analyzePatientData } from './services/ai';
 import { DrugMappingDemo } from './components/DrugMappingDemo';
-import { analyzePatientDataMultiAgent, isMultiAgentAvailable } from './services/multiAgentService';
 import { chatbotService } from './services/chatbotService';
 import { saveToHistory } from './services/patientHistory';
 import { AnalysisHistoryService } from './services/AnalysisHistoryService';
@@ -500,7 +498,6 @@ const App = () => {
   const [selectedAIModel, setSelectedAIModel] = useState<SupportedAIModel>('claude-opus'); 
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [isPrintMode, setIsPrintMode] = useState(false);
-  const [isMultiAgentMode, setIsMultiAgentMode] = useState(false);
   const [enableSpecialistAnalysis, setEnableSpecialistAnalysis] = useState(true);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [hasChatSession, setHasChatSession] = useState(false);
@@ -509,7 +506,6 @@ const App = () => {
   const [originalAnalysisData, setOriginalAnalysisData] = useState<{
     medicalHistory: string;
     studyProtocol: string;
-    agentResults?: Record<string, any>;
   } | null>(null);
 
   const [dynamicConclusion, setDynamicConclusion] = useState({
@@ -525,7 +521,6 @@ const App = () => {
       historyLength: data.medicalHistory?.length || 0,
       protocolLength: data.protocol?.length || 0,
       model: data.selectedAIModel,
-      isMultiAgentMode,
       enableSpecialistAnalysis,
       hasTrainingData: data.medicalHistory?.includes('KARTA WIZYTY') || false
     });
@@ -537,66 +532,31 @@ const App = () => {
     // Store original data for saving
     setOriginalAnalysisData({
       medicalHistory: data.medicalHistory,
-      studyProtocol: data.protocol,
-      agentResults: {}
+      studyProtocol: data.protocol
     });
     
     try {
-      let analysisResult: PatientData;
-      let agentResults: Record<string, any> = {};
+      console.log('🔧 Rozpoczynanie analizy monoagentowej...');
       
-      if (isMultiAgentMode && isMultiAgentAvailable()) {
-        console.log('🤖 Rozpoczynanie analizy wieloagentowej...');
-        
-        // Importuj coordinator bezpośrednio
-        const coordinator = new MultiAgentCoordinatorImpl();
-        
-        const coordinatorResult = await coordinator.executeAgentPipeline(
-          data.medicalHistory, 
-          data.protocol, 
-          data.selectedAIModel,
-          enableSpecialistAnalysis
+      // Używaj tylko systemu monoagentowego
+      const analysisResult = await analyzePatientData(
+        data.medicalHistory, 
+        data.protocol, 
+        data.selectedAIModel, 
+        enableSpecialistAnalysis
+      );
+      
+      // Inicjalizuj sesję chatbota
+      try {
+        chatbotService.initializeSessionFromSingleAgent(
+          analysisResult,
+          data.medicalHistory,
+          data.protocol
         );
-        
-        analysisResult = coordinatorResult.finalResult;
-        agentResults = coordinatorResult.agentResults;
-        
-        // Update stored data with agent results
-        setOriginalAnalysisData(prev => prev ? {
-          ...prev,
-          agentResults
-        } : null);
-        
-        // Inicjalizuj sesję chatbota dla analizy wieloagentowej
-        try {
-          chatbotService.initializeSession(
-            analysisResult,
-            agentResults,
-            data.medicalHistory,
-            data.protocol
-          );
-          setHasChatSession(true);
-          console.log('✅ Sesja chatbota została zainicjalizowana dla analizy wieloagentowej');
-        } catch (error) {
-          console.error('❌ Błąd podczas inicjalizacji chatbota dla analizy wieloagentowej:', error);
-        }
-      } else {
-        console.log('🔧 Rozpoczynanie analizy klasycznej...');
-        // NEW: Pass specialist analysis flag
-        analysisResult = await analyzePatientData(data.medicalHistory, data.protocol, data.selectedAIModel, enableSpecialistAnalysis);
-        
-        // Inicjalizuj sesję chatbota dla analizy monoagentowej
-        try {
-          chatbotService.initializeSessionFromSingleAgent(
-            analysisResult,
-            data.medicalHistory,
-            data.protocol
-          );
-          setHasChatSession(true);
-          console.log('✅ Sesja chatbota została zainicjalizowana dla analizy klasycznej');
-        } catch (error) {
-          console.error('❌ Błąd podczas inicjalizacji chatbota dla analizy klasycznej:', error);
-        }
+        setHasChatSession(true);
+        console.log('✅ Sesja chatbota została zainicjalizowana');
+      } catch (error) {
+        console.error('❌ Błąd podczas inicjalizacji chatbota:', error);
       }
       
       setPatientProfile(analysisResult);
@@ -614,8 +574,7 @@ const App = () => {
     } catch (error) {
       console.error('Error analyzing data in App.tsx:', error);
       const errorMessage = error instanceof Error ? error.message : 'Wystąpił nieznany błąd.';
-      const analysisType = isMultiAgentMode ? 'wieloagentowej' : 'klasycznej';
-      setAnalysisError(`Błąd podczas analizy ${analysisType} (${data.selectedAIModel}): ${errorMessage}. Używam danych testowych.`);
+      setAnalysisError(`Błąd podczas analizy (${data.selectedAIModel}): ${errorMessage}. Używam danych testowych.`);
       
       const mockDataWithModel: PatientData = {
         ...initialPatientData, 
@@ -683,7 +642,6 @@ const App = () => {
     setOriginalAnalysisData({
       medicalHistory: savedAnalysis.medicalHistory || '',
       studyProtocol: savedAnalysis.studyProtocol || '',
-      agentResults: savedAnalysis.agentResults || {}
     });
     
     if (savedAnalysis.patientData.reportConclusion) {
@@ -799,8 +757,6 @@ const App = () => {
       onLoadDemo={loadDemoData}
       selectedAIModel={selectedAIModel}
       onAIModelChange={setSelectedAIModel}
-      isMultiAgentMode={isMultiAgentMode}
-      onMultiAgentModeChange={setIsMultiAgentMode}
       enableSpecialistAnalysis={enableSpecialistAnalysis}
       onSpecialistAnalysisChange={setEnableSpecialistAnalysis}
       onLoadSavedAnalysis={handleLoadSavedAnalysis}
@@ -841,20 +797,9 @@ const App = () => {
                   selectedAIModel.toUpperCase()
                 }</span></span>
               </div>
-              <div className="flex items-center justify-center gap-2 text-sm">
-                <div className="w-2 h-2 bg-remedy-accent rounded-full"></div>
-                <span className="text-gray-600">Tryb: <span className="font-medium text-gray-800">{isMultiAgentMode ? '🤖 Wieloagentowy' : '🔧 Klasyczny'}</span></span>
-              </div>
-              {/* NEW: Show if specialist analysis is enabled */}
-              {enableSpecialistAnalysis && !isMultiAgentMode && (
-                <div className="flex items-center justify-center gap-2 text-sm">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                  <span className="text-gray-600">Analiza: <span className="font-medium text-purple-700">🔬 Specjalistyczna</span></span>
-                </div>
-              )}
             </div>
             
-            <p className="text-sm text-gray-500">{enableSpecialistAnalysis && !isMultiAgentMode ? 'Przeprowadzam wieloetapową analizę specjalistyczną...' : 'To może potrwać chwilę...'}</p>
+            <p className="text-sm text-gray-500">Przeprowadzam analizę...</p>
             
             {/* Progress Animation */}
             <div className="mt-4 w-full bg-gray-200 rounded-full h-2">
@@ -961,8 +906,6 @@ const App = () => {
                 patientData={patientProfile}
                 medicalHistory={originalAnalysisData.medicalHistory}
                 studyProtocol={originalAnalysisData.studyProtocol}
-                isMultiAgentMode={isMultiAgentMode}
-                agentResults={originalAnalysisData.agentResults}
                 className="text-sm"
               />
             )}
@@ -997,34 +940,10 @@ const App = () => {
                 <div className="w-2 h-2 bg-remedy-primary rounded-full"></div>
                 <span>Model: <span className="font-medium text-slate-800">{modelDisplayName}</span></span>
               </div>
-              <div className="w-1 h-4 bg-slate-300 rounded-full"></div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-remedy-accent rounded-full"></div>
-                <span>Tryb: <span className="font-medium text-slate-800">{isMultiAgentMode ? 'Wieloagentowy' : 'Klasyczny'}</span></span>
-              </div>
             </div>
           </div>
         </div>
       </header>
-
-      {/* Error Messages */}
-      {analysisError && !patientProfile.isMockData && (
-        <div className="mb-6 flex justify-center">
-          <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl inline-block text-sm max-w-4xl">
-            <AlertTriangle size={16} className="inline-block mr-2" />
-            {analysisError}
-          </div>
-        </div>
-      )}
-      {patientProfile.isMockData && (
-        <div className="mb-6 flex justify-center">
-          <div className="p-4 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-xl inline-block max-w-4xl">
-            <AlertTriangle size={16} className="inline-block mr-2" />
-            Używane są dane testowe - połączenie z AI ({modelDisplayName}) jest niedostępne lub wystąpił błąd.
-            {!isCurrentModelConfigured && ` Sprawdź konfigurację (klucz API, model) dla ${modelDisplayName} w pliku .env.`}
-          </div>
-        </div>
-      )}
 
       <main className="space-y-6">
         <section className="card-remedy">
@@ -1147,7 +1066,6 @@ const App = () => {
                 </div>
                 {dynamicConclusion.estimatedProbability <= 10 && <span className="text-gray-900 font-bold text-sm ml-2">{dynamicConclusion.estimatedProbability}%</span>}
               </div>
-              <p className="text-xs text-gray-500 mt-2">Prawdopodobieństwo uwzględnia modyfikacje badacza. Ocena początkowa AI ({modelDisplayName}): {patientProfile.reportConclusion?.estimatedProbability || 0}%.</p>
           </div>
         </div>
       </section>

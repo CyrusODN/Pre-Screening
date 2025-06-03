@@ -1,27 +1,21 @@
 // src/components/EnteringScreen.tsx
 import React, { useState } from 'react';
-import { Upload, FileText, AlertCircle, History, BrainCircuit, PlayCircle, Network, Zap, FolderOpen } from 'lucide-react'; // Added FolderOpen
+import { Upload, FileText, AlertCircle, History, BrainCircuit, PlayCircle, Zap, FolderOpen } from 'lucide-react';
 import { ProtocolSelector } from './ProtocolSelector';
 import { Logo } from './Logo';
-import { SavedAnalysesManager } from './SavedAnalysesManager'; // Nowy import
-// import { StorageTestButton } from './StorageTestButton';
-// Usunięto import starego systemu historii
-import { isMultiAgentAvailable } from '../services/multiAgentService';
+import { SavedAnalysesManager } from './SavedAnalysesManager';
 import type { Protocol, SupportedAIModel } from '../types';
-import type { StoredAnalysis } from '../types/storage'; // Poprawny import
+import type { StoredAnalysis } from '../types/storage';
 
 interface EnteringScreenProps {
   onDataSubmit: (data: { protocol: string; medicalHistory: string; selectedAIModel: SupportedAIModel }) => void;
   onSelectHistoricalPatient: (patientId: string) => void;
-  onLoadDemo?: () => void; // Nowa prop dla trybu demo
+  onLoadDemo?: () => void;
   selectedAIModel: SupportedAIModel;
   onAIModelChange: (model: SupportedAIModel) => void;
-  isMultiAgentMode: boolean;
-  onMultiAgentModeChange: (enabled: boolean) => void;
-  // NEW: Specialist analysis props
   enableSpecialistAnalysis: boolean;
   onSpecialistAnalysisChange: (enabled: boolean) => void;
-  onLoadSavedAnalysis?: (analysis: StoredAnalysis) => void; // Nowa prop dla ładowania zapisanych analiz
+  onLoadSavedAnalysis?: (analysis: StoredAnalysis) => void;
 }
 
 export const EnteringScreen: React.FC<EnteringScreenProps> = ({ 
@@ -30,8 +24,6 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
     onLoadDemo,
     selectedAIModel,
     onAIModelChange,
-    isMultiAgentMode,
-    onMultiAgentModeChange,
     enableSpecialistAnalysis,
     onSpecialistAnalysisChange,
     onLoadSavedAnalysis
@@ -80,7 +72,6 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
     setProtocolFile(null); 
   };
   
-  // Nowa funkcja do obsługi ładowania zapisanej analizy
   const handleLoadSavedAnalysis = (analysis: StoredAnalysis) => {
     if (onLoadSavedAnalysis) {
       onLoadSavedAnalysis(analysis);
@@ -122,47 +113,21 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
                 <BrainCircuit className="w-4 h-4" />
               </div>
               <label htmlFor="ai-model-select" className="text-sm font-medium text-gray-900">
-              Model AI:
-            </label>
-            <select
-              id="ai-model-select"
-              value={selectedAIModel}
-              onChange={(e) => onAIModelChange(e.target.value as SupportedAIModel)}
-                className="p-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-remedy-accent focus:border-remedy-accent transition-all"
-            >
-              <option value="o3">o3 (OpenAI-like)</option>
-              <option value="gemini">Gemini 2.5 Pro Preview 05-06</option>
-                <option value="claude-opus">Claude 4 Opus</option>
-            </select>
-            </div>
-
-            {/* Multi-Agent Mode Toggle */}
-            <div className="flex items-center gap-2 card-remedy py-2 px-3">
-              <div className="icon-circle">
-                <Network className="w-4 h-4" />
-              </div>
-              <label htmlFor="multi-agent-toggle" className="text-sm font-medium text-gray-900">
-                Tryb wieloagentowy:
+                Model AI:
               </label>
-              <div className="flex items-center gap-2">
-                <input
-                  id="multi-agent-toggle"
-                  type="checkbox"
-                  checked={isMultiAgentMode}
-                  onChange={(e) => onMultiAgentModeChange(e.target.checked)}
-                  disabled={!isMultiAgentAvailable()}
-                  className="w-4 h-4 text-remedy-accent bg-gray-100 border-gray-300 rounded focus:ring-remedy-accent focus:ring-2 disabled:opacity-50"
-                />
-                <span className={`text-sm ${isMultiAgentMode ? 'text-remedy-accent font-medium' : 'text-gray-500'}`}>
-                  {isMultiAgentMode ? 'Włączony' : 'Wyłączony'}
-                </span>
-                {!isMultiAgentAvailable() && (
-                  <span className="text-xs text-red-500 ml-2">(Niedostępny)</span>
-                )}
-              </div>
+              <select
+                id="ai-model-select"
+                value={selectedAIModel}
+                onChange={(e) => onAIModelChange(e.target.value as SupportedAIModel)}
+                className="p-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-remedy-accent focus:border-remedy-accent transition-all"
+              >
+                <option value="o3">o3 (OpenAI-like)</option>
+                <option value="gemini">Gemini 2.5 Pro Preview 05-06</option>
+                <option value="claude-opus">Claude 4 Opus</option>
+              </select>
             </div>
 
-            {/* NEW: Specialist Analysis Toggle */}
+            {/* Specialist Analysis Toggle */}
             <div className="flex items-center gap-2 card-remedy py-2 px-3">
               <div className="icon-circle">
                 <Zap className="w-4 h-4" />
@@ -176,15 +141,11 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
                   type="checkbox"
                   checked={enableSpecialistAnalysis}
                   onChange={(e) => onSpecialistAnalysisChange(e.target.checked)}
-                  disabled={isMultiAgentMode} // Disabled in multi-agent mode as it might have its own analysis
-                  className="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 focus:ring-2 disabled:opacity-50"
+                  className="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 focus:ring-2"
                 />
                 <span className={`text-sm ${enableSpecialistAnalysis ? 'text-purple-600 font-medium' : 'text-gray-500'}`}>
                   {enableSpecialistAnalysis ? 'Włączona' : 'Wyłączona'}
                 </span>
-                {isMultiAgentMode && (
-                  <span className="text-xs text-amber-600 ml-2">(Automatyczna w trybie wieloagentowym)</span>
-                )}
               </div>
             </div>
           </div>
@@ -210,23 +171,6 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
             )}
           </div>
         </div>
-
-        {/* NEW: Info about specialist analysis */}
-        {enableSpecialistAnalysis && !isMultiAgentMode && (
-          <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 p-4 rounded-lg mb-4">
-            <div className="flex items-start space-x-3">
-              <Zap className="w-5 h-5 text-purple-600 mt-0.5 flex-shrink-0" />
-              <div>
-                <h3 className="text-sm font-semibold text-purple-900 mb-1">Analiza Specjalistyczna Włączona</h3>
-                <p className="text-xs text-purple-700 leading-relaxed">
-                  System przeprowadzi wieloetapową analizę obejmującą: detekcję wszystkich form leczenia (w tym ketaminy), 
-                  profil gotowości psychodelicznej, połączenia kontekstowe oraz szczegółowy raport narracyjny. 
-                  Analiza może potrwać dłużej, ale zapewni bardziej kompletne wyniki.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
 
         {showSavedAnalyses ? (
           <div className="card-remedy mb-6">
@@ -293,13 +237,6 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
             </div>
           </form>
         )}
-        
-        {/* Storage Test Button - tylko w trybie deweloperskim */}
-        {/* {import.meta.env.DEV && (
-          <div className="mt-6">
-            <StorageTestButton />
-          </div>
-        )} */}
       </div>
     </div>
   );

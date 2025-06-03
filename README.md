@@ -1,158 +1,213 @@
-# Pre-Screening
+# 🧠 Remedius Pre-Screening System
 
-Aplikacja do analizy pre-screeningowej pacjentów w badaniach klinicznych.
+**Zaawansowany system AI do analizy kwalifikacji pacjentów w badaniach klinicznych z terapią psychodeliczną**
 
-## Wymagania
+## 📋 Opis Projektu
 
-- Node.js (wersja 18 lub nowsza)
-- npm (dołączony do Node.js)
+Remedius Pre-Screening to nowoczesna aplikacja webowa wykorzystująca sztuczną inteligencję do automatycznej analizy dokumentacji medycznej pacjentów pod kątem kwalifikacji do badań klinicznych. System specjalizuje się w ocenie pacjentów z depresją lekooporną (TRD) dla terapii psychodelicznych.
 
-## Instalacja i uruchomienie
+## ✨ Główne Funkcjonalności
 
-1. Sklonuj repozytorium:
+### 🔍 **Analiza Pre-Screeningowa**
+- **Automatyczna ocena kryteriów włączenia/wyłączenia** zgodnie z protokołem badania
+- **Analiza farmakoterapii i TRD** według kryteriów MGH-ATRQ
+- **Szacowanie początku epizodu depresyjnego** z wieloma scenariuszami
+- **Ocena prawdopodobieństwa kwalifikacji** z szczegółowym uzasadnieniem
+
+### 📊 **Wizualizacje i Raporty**
+- **Interaktywna oś czasu farmakoterapii** z analizą TRD
+- **Wykresy kołowe statusu kryteriów** z podziałem na kategorie
+- **Szczegółowe raporty PDF** gotowe do druku
+- **Dashboard z kluczowymi metrykami** pacjenta
+
+### 🤖 **Inteligentny Chatbot Medyczny**
+- **Kontekstowe odpowiedzi** na pytania o analizę
+- **Wyjaśnienia decyzji AI** w języku medycznym
+- **Sugerowane pytania następne** dla głębszej analizy
+- **Profesjonalne wsparcie kliniczne** 24/7
+
+### 💾 **Zarządzanie Danymi**
+- **Zapisywanie analiz** w lokalnej bazie danych
+- **Historia pacjentów** z możliwością porównania
+- **Export/Import danych** w formatach JSON/CSV
+- **Backup i przywracanie** analiz
+
+## 🚀 Technologie
+
+### Frontend
+- **React 18** z TypeScript
+- **Tailwind CSS** dla stylizacji
+- **Recharts** do wizualizacji danych
+- **Lucide React** dla ikon
+
+### Backend & AI
+- **Claude 4 Opus** (Anthropic) - główny model AI
+- **Gemini 2.5 Pro** (Google) - alternatywny model
+- **OpenAI o3** - wsparcie dla modeli OpenAI
+- **Node.js** backend dla mapowania leków
+
+### Narzędzia
+- **Vite** - bundler i dev server
+- **ESLint** - linting kodu
+- **TypeScript** - typowanie statyczne
+
+## 📦 Instalacja
+
+### Wymagania
+- Node.js 18+
+- npm lub yarn
+- Klucze API dla modeli AI
+
+### Kroki instalacji
+
+1. **Klonowanie repozytorium**
 ```bash
-git clone [url-repozytorium]
+git clone [repository-url]
+cd Pre-Screening
 ```
 
-2. Przejdź do katalogu projektu:
-```bash
-cd [nazwa-katalogu]
-```
-
-3. Zainstaluj zależności:
+2. **Instalacja zależności**
 ```bash
 npm install
 ```
 
-4. Skonfiguruj zmienne środowiskowe:
-   - Skopiuj plik `.env.example` do `.env`
-   - Uzupełnij wartości w pliku `.env`:
-     - `VITE_AI_API_KEY`: Twój klucz API
-     - `VITE_AI_ENDPOINT`: URL endpointu API (domyślnie dla OpenAI)
-     - `VITE_AI_MODEL`: Nazwa modelu (np. gpt-4)
+3. **Konfiguracja zmiennych środowiskowych**
+```bash
+cp .env.example .env
+```
 
-5. Uruchom aplikację w trybie deweloperskim:
+Wypełnij plik `.env` swoimi kluczami API:
+```env
+# Claude API (Anthropic)
+VITE_CLAUDE_API_KEY=your_claude_api_key
+
+# Gemini API (Google)
+VITE_GEMINI_API_KEY=your_gemini_api_key
+
+# OpenAI API
+VITE_OPENAI_API_KEY=your_openai_api_key
+```
+
+4. **Uruchomienie aplikacji**
 ```bash
 npm run dev
 ```
 
-Aplikacja będzie dostępna pod adresem: `http://localhost:5173`
+Aplikacja będzie dostępna pod adresem `http://localhost:5173`
 
-## Tryb testowy
+## 🎯 Użycie
 
-Jeśli zmienne środowiskowe nie są skonfigurowane, aplikacja automatycznie przełączy się w tryb testowy, używając przykładowych danych. Zobaczysz wtedy odpowiedni komunikat w interfejsie.
+### 1. **Wprowadzenie Danych**
+- Wybierz protokół badania lub wprowadź własny
+- Wklej historię choroby pacjenta
+- Wybierz model AI (Claude, Gemini, lub o3)
+- Włącz analizę specjalistyczną dla bardziej szczegółowych wyników
 
-## Funkcje
+### 2. **Analiza Automatyczna**
+System przeprowadzi kompleksową analizę obejmującą:
+- Ocenę wszystkich kryteriów włączenia i wyłączenia
+- Analizę farmakoterapii z mapowaniem nazw leków
+- Określenie statusu TRD według MGH-ATRQ
+- Szacowanie prawdopodobieństwa kwalifikacji
 
-- Analiza historii medycznej pacjenta
-- Ocena kryteriów włączenia i wyłączenia
-- Interaktywna edycja statusów kryteriów
-- Wizualizacja danych na wykresach
-- Historia poprzednich analiz
+### 3. **Przegląd Wyników**
+- Sprawdź wizualizacje na osi czasu
+- Przeanalizuj wykresy statusu kryteriów
+- Przeczytaj szczegółowe uzasadnienia AI
+- Skorzystaj z chatbota do zadawania pytań
 
-## Dostosowanie promptu AI
+### 4. **Edycja i Zapisywanie**
+- Edytuj statusy kryteriów jako badacz
+- Dodaj komentarze i uzasadnienia
+- Zapisz analizę do historii
+- Wydrukuj raport PDF
 
-Prompt AI znajduje się w pliku `src/services/ai.ts`. Możesz go dostosować do swoich potrzeb, modyfikując zmienną `AI_PROMPT`.
+## 🔧 Konfiguracja
 
-## Rozwiązywanie problemów
+### Modele AI
+System obsługuje trzy główne modele AI:
 
-1. Jeśli widzisz komunikat o danych testowych:
-   - Sprawdź, czy plik `.env` istnieje
-   - Upewnij się, że wszystkie zmienne środowiskowe są poprawnie ustawione
-   - Sprawdź, czy masz aktywny klucz API
+1. **Claude 4 Opus** (Rekomendowany)
+   - Najwyższa jakość analizy medycznej
+   - Doskonałe rozumienie kontekstu klinicznego
+   - Precyzyjne mapowanie leków
 
-2. Jeśli analiza nie działa:
-   - Sprawdź konsolę przeglądarki pod kątem błędów
-   - Upewnij się, że endpoint API jest dostępny
-   - Sprawdź, czy model AI jest poprawnie skonfigurowany
+2. **Gemini 2.5 Pro**
+   - Szybka analiza
+   - Dobra jakość za rozsądną cenę
+   - Stabilne API
 
-## Uruchomienie Systemu
+3. **OpenAI o3**
+   - Kompatybilność z ekosystemem OpenAI
+   - Dobra jakość ogólna
 
-### Wymagane Klucze API
-Upewnij się, że masz skonfigurowane klucze API w pliku `.env`:
+### Analiza Specjalistyczna
+Włączenie analizy specjalistycznej zapewnia:
+- Głębszą analizę farmakoterapii
+- Szczegółowe mapowanie nazw leków
+- Rozszerzone scenariusze epizodów
+- Dodatkowe weryfikacje kliniczne
+
+## 📁 Struktura Projektu
+
 ```
-OPENAI_API_KEY=your_openai_api_key
-ANTHROPIC_API_KEY=your_anthropic_api_key  
-GOOGLE_API_KEY=your_google_api_key
+src/
+├── components/          # Komponenty React
+│   ├── charts/         # Komponenty wykresów
+│   ├── EnteringScreen.tsx
+│   ├── PrintableReport.tsx
+│   └── ...
+├── services/           # Logika biznesowa
+│   ├── ai.ts          # Główny serwis AI
+│   ├── chatbotService.ts
+│   └── ...
+├── types/             # Definicje TypeScript
+├── data/              # Dane statyczne i protokoły
+├── config/            # Konfiguracja AI i aplikacji
+└── styles/            # Style CSS
 ```
 
-### Uruchomienie Pełnego Systemu
+## 🧪 Testowanie
+
+### Uruchomienie testów
 ```bash
-# Instalacja zależności
-npm install
-
-# Uruchomienie backend + frontend (zalecane)
-npm start
-
-# Alternatywnie - używając skryptu startowego
-./start.sh
-
-# Alternatywnie - uruchomienie osobno:
-# Backend (port 3001)
-npm run server
-
-# Frontend (port 5178)
-npm run dev
+npm test
 ```
 
-### Szybki Start
+### Testowanie API
 ```bash
-# Najprostszy sposób - uruchom wszystko naraz
-./start.sh
+node test-backend-api.js
 ```
 
-Skrypt automatycznie:
-- Sprawdzi czy masz klucze API w `.env`
-- Zainstaluje zależności jeśli potrzeba
-- Uruchomi backend i frontend
-- Pokaże status i adresy URL
+### Demo z przykładowymi danymi
+Aplikacja zawiera wbudowane dane demonstracyjne do testowania funkcjonalności.
 
-### Architektura
+## 📈 Rozwój
 
-System składa się z:
-1. **Backend Proxy Server** (port 3001) - obsługuje wywołania API AI
-2. **Frontend React App** (port 5178) - interfejs użytkownika
-3. **Multi-Agent System** - 6 wyspecjalizowanych agentów AI
+### Planowane funkcjonalności
+- [ ] Integracja z systemami szpitalnymi (HL7 FHIR)
+- [ ] Zaawansowana analityka i raporty
+- [ ] Wsparcie dla większej liczby protokołów badań
+- [ ] API dla integracji zewnętrznych
+- [ ] Mobilna aplikacja towarzysząca
 
-### Rozwiązanie Problemów CORS
+### Wkład w rozwój
+1. Fork repozytorium
+2. Stwórz branch dla nowej funkcjonalności
+3. Wprowadź zmiany z testami
+4. Wyślij Pull Request
 
-System używa backend proxy server'a do obsługi wywołań API AI, co rozwiązuje problemy CORS występujące przy bezpośrednich wywołaniach z przeglądarki.
+## 📄 Licencja
 
-## 🔬 Ocena TRD (Treatment-Resistant Depression)
+Ten projekt jest własnością Remedius i jest chroniony prawami autorskimi. Wszelkie prawa zastrzeżone.
 
-System oferuje dwa tryby oceny TRD:
+## 🆘 Wsparcie
 
-### 🤖 **System Wieloagentowy** (Rekomendowany)
-- **TRDAssessmentAgent**: Specjalistyczny agent do oceny lekooporności
-- **Weryfikacja**: Automatyczna weryfikacja wyników AI z ujednoliconym serwisem
-- **Protokół**: Ścisłe przestrzeganie kryteriów MGH-ATRQ z protokołu COMP006
+W przypadku problemów lub pytań:
+- Sprawdź dokumentację w folderze `/docs`
+- Przejrzyj istniejące Issues
+- Skontaktuj się z zespołem deweloperskim
 
-### 🧠 **System Monoagentowy** (Legacy)
-- **Pojedynczy prompt**: Kompleksowa analiza w jednym zapytaniu AI
-- **Mniej precyzyjny**: Brak specjalizacji w ocenie TRD
+---
 
-### 🔧 **Ujednolicony Serwis MGH-ATRQ**
-
-**Problem rozwiązany**: Wcześniej AI Insights i system AI używały różnych logik oceny MGH-ATRQ, co prowadziło do niespójnych wyników.
-
-**Rozwiązanie**: Nowy `mghAtrqService.ts` zapewnia:
-- ✅ **Jedną wspólną logikę** dla obu systemów
-- ✅ **Spójne wyniki** między AI Insights a analizą TRD
-- ✅ **Automatyczną weryfikację** wyników AI
-- ✅ **Lepsze parsowanie dawek** (np. "50mg (2x25mg)")
-- ✅ **Dokładne mapowanie leków** polsko-angielskie
-
-**Użycie**:
-```typescript
-import { mghAtrqService } from './services/mghAtrqService';
-
-// Ocena pojedynczej próby
-const singleTrial = mghAtrqService.assessSingleTrial(
-  'Quetiapine', '50mg (2x25mg)', 59, 'augmentacja'
-);
-
-// Kompleksowa ocena TRD
-const trdAssessment = mghAtrqService.assessTRDCompliance(
-  pharmacotherapyData, '2024-06-01'
-);
-```
+**Remedius Pre-Screening System** - Przyszłość analizy kwalifikacji pacjentów w badaniach klinicznych.

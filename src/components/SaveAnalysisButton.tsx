@@ -11,8 +11,6 @@ interface SaveAnalysisButtonProps {
   patientData: PatientData;
   medicalHistory?: string;
   studyProtocol?: string;
-  isMultiAgentMode?: boolean;
-  agentResults?: Record<string, any>;
   className?: string;
 }
 
@@ -20,8 +18,6 @@ export const SaveAnalysisButton: React.FC<SaveAnalysisButtonProps> = ({
   patientData,
   medicalHistory = '',
   studyProtocol = '',
-  isMultiAgentMode = false,
-  agentResults = {},
   className = ''
 }) => {
   const [isSaving, setIsSaving] = useState(false);
@@ -34,8 +30,7 @@ export const SaveAnalysisButton: React.FC<SaveAnalysisButtonProps> = ({
     const patientId = patientData.summary?.id || 'BrakID';
     const date = new Date().toLocaleDateString('pl-PL');
     const time = new Date().toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
-    const mode = isMultiAgentMode ? 'Wieloagentowa' : 'Klasyczna';
-    return `${patientId} - ${mode} - ${date} ${time}`;
+    return `${patientId} - Analiza - ${date} ${time}`;
   };
 
   const handleSaveClick = () => {
@@ -56,27 +51,16 @@ export const SaveAnalysisButton: React.FC<SaveAnalysisButtonProps> = ({
     setErrorMessage('');
 
     try {
-      let analysisId: string;
-
-      if (isMultiAgentMode) {
-        analysisId = await analysisHistoryService.saveMultiAgentAnalysis(
-          patientData,
-          agentResults,
-          medicalHistory,
-          studyProtocol
-        );
-      } else {
-        analysisId = await analysisHistoryService.saveSingleAgentAnalysis(
-          patientData,
-          medicalHistory,
-          studyProtocol
-        );
-      }
+      const analysisId = await analysisHistoryService.saveSingleAgentAnalysis(
+        patientData,
+        medicalHistory,
+        studyProtocol
+      );
 
       // Aktualizuj metadane z niestandardową nazwą
       await analysisHistoryService.updateAnalysisMetadata(analysisId, {
         notes: analysisName,
-        tags: [...(patientData.summary?.comorbidities || []), isMultiAgentMode ? 'multi-agent' : 'single-agent']
+        tags: [...(patientData.summary?.comorbidities || []), 'single-agent']
       });
 
       setSaveStatus('success');
@@ -168,7 +152,6 @@ export const SaveAnalysisButton: React.FC<SaveAnalysisButtonProps> = ({
 
                 <div className="text-xs text-gray-500">
                   <p><strong>Pacjent:</strong> {patientData.summary?.id || 'Brak ID'}</p>
-                  <p><strong>Tryb:</strong> {isMultiAgentMode ? 'Wieloagentowy' : 'Klasyczny'}</p>
                   <p><strong>Model:</strong> {patientData.modelUsed || 'Nieznany'}</p>
                 </div>
               </div>

@@ -1,6 +1,5 @@
-import { MedicalChatbotAgent } from '../agents/core/MedicalChatbotAgent';
-import type { SharedContext, ChatbotResult } from '../types/agents';
-import type { PatientData } from '../types/index';
+import type { PatientData, SupportedAIModel } from '../types/index';
+import { getAIConfig } from '../config/aiConfig';
 
 export interface ChatMessage {
   id: string;
@@ -14,53 +13,42 @@ export interface ChatMessage {
 
 export interface ChatSession {
   messages: ChatMessage[];
-  context: SharedContext | null;
+  patientData: PatientData | null;
+  medicalHistory: string;
+  studyProtocol: string;
   isActive: boolean;
-  analysisType: 'multi-agent' | 'single-agent';
 }
 
 class ChatbotService {
-  private chatbotAgent: MedicalChatbotAgent;
   private session: ChatSession;
 
   constructor() {
-    this.chatbotAgent = new MedicalChatbotAgent();
     this.session = {
       messages: [],
-      context: null,
-      isActive: false,
-      analysisType: 'multi-agent'
+      patientData: null,
+      medicalHistory: '',
+      studyProtocol: '',
+      isActive: false
     };
   }
 
   /**
-   * Inicjalizuje sesję chatbota z wynikami analizy wieloagentowej
+   * Inicjalizuje sesję chatbota z wynikami analizy monoagentowej
    */
-  public initializeSession(
+  public initializeSessionFromSingleAgent(
     patientData: PatientData,
-    agentResults: Record<string, any>,
     medicalHistory: string,
     studyProtocol: string
   ): void {
-    this.session.context = {
-      medicalHistory,
-      studyProtocol,
-      modelUsed: patientData.modelUsed || 'o3',
-      clinicalSynthesis: agentResults['clinical-synthesis'],
-      episodeAnalysis: agentResults['episode-analysis'],
-      pharmacotherapyAnalysis: agentResults['pharmacotherapy-analysis'],
-      trdAssessment: agentResults['trd-assessment'],
-      inclusionCriteriaAssessment: agentResults['criteria-assessment'],
-      riskAssessment: agentResults['risk-assessment']
-    };
-
+    this.session.patientData = patientData;
+    this.session.medicalHistory = medicalHistory;
+    this.session.studyProtocol = studyProtocol;
     this.session.isActive = true;
-    this.session.analysisType = 'multi-agent';
     this.session.messages = [
       {
         id: 'welcome',
         type: 'bot',
-        content: `Witam! Jestem asystentem medycznym AI specjalizującym się w analizie pre-screeningowej. Właśnie zakończyłem **analizę wieloagentową** pacjenta ${patientData.summary?.id || 'N/A'}. 
+        content: `Witam! Jestem asystentem medycznym AI specjalizującym się w analizie pre-screeningowej. Właśnie zakończyłem analizę pacjenta ${patientData.summary?.id || 'N/A'}. 
 
 Mogę odpowiedzieć na pytania dotyczące:
 • Kryteriów włączenia i wyłączenia
@@ -72,59 +60,7 @@ Mogę odpowiedzieć na pytania dotyczące:
 
 Jak mogę ci pomóc?`,
         timestamp: new Date(),
-        confidence: 1.0,
-        suggestedFollowUp: [
-          'Dlaczego ten pacjent może nie spełniać kryteriów?',
-          'Jakie są główne ryzyka dla tego pacjenta?',
-          'Czy możesz wyjaśnić ocenę TRD?',
-          'Jakie dodatkowe badania są potrzebne?'
-        ]
-      }
-    ];
-  }
-
-  /**
-   * Inicjalizuje sesję chatbota z wynikami analizy monoagentowej (klasycznej)
-   */
-  public initializeSessionFromSingleAgent(
-    patientData: PatientData,
-    medicalHistory: string,
-    studyProtocol: string
-  ): void {
-    // Konwertuj wyniki analizy monoagentowej do formatu kompatybilnego z chatbotem
-    const mockAgentResults = this.convertSingleAgentToMultiAgentFormat(patientData);
-
-    this.session.context = {
-      medicalHistory,
-      studyProtocol,
-      modelUsed: patientData.modelUsed || 'o3',
-      clinicalSynthesis: mockAgentResults.clinicalSynthesis,
-      episodeAnalysis: mockAgentResults.episodeAnalysis,
-      pharmacotherapyAnalysis: mockAgentResults.pharmacotherapyAnalysis,
-      trdAssessment: mockAgentResults.trdAssessment,
-      inclusionCriteriaAssessment: mockAgentResults.criteriaAssessment,
-      riskAssessment: mockAgentResults.riskAssessment
-    };
-
-    this.session.isActive = true;
-    this.session.analysisType = 'single-agent';
-    this.session.messages = [
-      {
-        id: 'welcome',
-        type: 'bot',
-        content: `Witam! Jestem asystentem medycznym AI specjalizującym się w analizie pre-screeningowej. Właśnie zakończyłem **analizę klasyczną** pacjenta ${patientData.summary?.id || 'N/A'}. 
-
-Mogę odpowiedzieć na pytania dotyczące:
-• Kryteriów włączenia i wyłączenia
-• Analizy farmakoterapii i TRD
-• Oceny ryzyka pacjenta
-• Rekomendacji dalszych kroków
-
-**Uwaga:** To analiza klasyczna (monoagentowa). Wszystkie decyzje medyczne wymagają weryfikacji przez lekarza prowadzącego.
-
-Jak mogę ci pomóc?`,
-        timestamp: new Date(),
-        confidence: 0.8, // Nieco niższa pewność dla analizy monoagentowej
+        confidence: 0.8,
         suggestedFollowUp: [
           'Dlaczego ten pacjent może nie spełniać kryteriów?',
           'Jakie są główne problemy w analizie?',
@@ -136,201 +72,17 @@ Jak mogę ci pomóc?`,
   }
 
   /**
-   * Konwertuje dane z analizy monoagentowej do formatu multi-agentowego
-   * aby zapewnić kompatybilność z chatbotem
-   */
-  private convertSingleAgentToMultiAgentFormat(patientData: PatientData): any {
-    // Safe access helpers
-    const summary = patientData.summary || { id: 'unknown', age: 0, mainDiagnosis: 'Nieznane', comorbidities: [] };
-    const trdAnalysis = patientData.trdAnalysis || { episodeStartDate: null, pharmacotherapy: [], conclusion: 'Brak danych' };
-    const reportConclusion = patientData.reportConclusion || { 
-      overallQualification: 'Nieznane', 
-      mainIssues: [], 
-      criticalInfoNeeded: [], 
-      estimatedProbability: 0 
-    };
-    const episodeEstimation = patientData.episodeEstimation || { scenarios: [], conclusion: 'Brak danych' };
-
-    return {
-      clinicalSynthesis: {
-        success: true,
-        data: {
-          patientOverview: `Pacjent ${summary.age} lat z głównym rozpoznaniem: ${summary.mainDiagnosis}. ${summary.comorbidities.length > 0 ? 'Choroby towarzyszące: ' + summary.comorbidities.join(', ') + '.' : ''}`,
-          mainDiagnosis: summary.mainDiagnosis,
-          comorbidities: summary.comorbidities,
-          clinicalTimeline: [
-            `Analiza przeprowadzona: ${patientData.analyzedAt ? new Date(patientData.analyzedAt).toLocaleDateString('pl-PL') : 'Nieznana data'}`,
-            `Model użyty: ${patientData.modelUsed || 'Nieznany'}`,
-            ...(trdAnalysis.pharmacotherapy.map(p => 
-              `${p.drugName} (${p.dose}): ${p.startDate} - ${p.endDate}`
-            ))
-          ],
-          keyObservations: [
-            `Główne rozpoznanie: ${summary.mainDiagnosis}`,
-            `Wiek pacjenta: ${summary.age} lat`,
-            `Liczba leków w historii: ${trdAnalysis.pharmacotherapy.length}`,
-            `Data rozpoczęcia epizodu: ${trdAnalysis.episodeStartDate || 'Nie określona'}`
-          ],
-          treatmentHistory: trdAnalysis.conclusion,
-          riskFactors: reportConclusion.mainIssues || []
-        },
-        confidence: 0.8,
-        warnings: ['Dane pochodzą z analizy monoagentowej - mogą być mniej szczegółowe']
-      },
-      episodeAnalysis: {
-        success: true,
-        data: {
-          scenarios: episodeEstimation.scenarios || [
-            {
-              id: 1,
-              description: episodeEstimation.conclusion,
-              evidence: 'Analiza oparta na danych z analizy klasycznej',
-              startDate: trdAnalysis.episodeStartDate,
-              endDate: null,
-              confidence: 0.7
-            }
-          ],
-          mostLikelyScenario: 1,
-          conclusion: episodeEstimation.conclusion,
-          remissionPeriods: []
-        },
-        confidence: 0.7,
-        warnings: ['Analiza epizodów z analizy monoagentowej - ograniczona szczegółowość']
-      },
-      pharmacotherapyAnalysis: {
-        success: true,
-        data: {
-          timeline: trdAnalysis.pharmacotherapy,
-          drugMappings: trdAnalysis.pharmacotherapy.map(p => ({
-            originalName: p.drugName,
-            standardName: p.drugName,
-            confidence: 0.8
-          })),
-          prohibitedDrugs: [],
-          gaps: [],
-          summary: `Zidentyfikowano ${trdAnalysis.pharmacotherapy.length} leków w historii farmakoterapii.`
-        },
-        confidence: 0.8,
-        warnings: ['Analiza farmakoterapii z systemu monoagentowego']
-      },
-      trdAssessment: {
-        success: true,
-        data: {
-          trdStatus: trdAnalysis.conclusion.toLowerCase().includes('trd') || 
-                   trdAnalysis.conclusion.toLowerCase().includes('lekoopora') ? 'confirmed' : 'not_confirmed',
-          failureCount: trdAnalysis.pharmacotherapy.filter(p => p.attemptGroup > 0).length,
-          episodeStartDate: trdAnalysis.episodeStartDate,
-          adequateTrials: trdAnalysis.pharmacotherapy.map(p => ({
-            drugName: p.drugName,
-            dose: p.dose,
-            duration: 8, // Domyślnie 8 tygodni
-            adequate: p.attemptGroup > 0
-          })),
-          conclusion: trdAnalysis.conclusion
-        },
-        confidence: 0.7,
-        warnings: ['Ocena TRD z analizy monoagentowej - może wymagać weryfikacji']
-      },
-      criteriaAssessment: {
-        success: true,
-        data: {
-          inclusionCriteria: patientData.inclusionCriteria.map(c => ({
-            id: c.id,
-            name: c.name,
-            status: c.status,
-            confidence: 0.8,
-            reasoning: c.details,
-            evidenceFromHistory: [c.details]
-          })),
-          psychiatricExclusionCriteria: patientData.psychiatricExclusionCriteria.map(c => ({
-            id: c.id,
-            name: c.name,
-            status: c.status,
-            confidence: 0.8,
-            reasoning: c.details,
-            evidenceFromHistory: [c.details],
-            riskLevel: c.status === 'spełnione' ? 'high' : 'low'
-          })),
-          medicalExclusionCriteria: patientData.medicalExclusionCriteria.map(c => ({
-            id: c.id,
-            name: c.name,
-            status: c.status,
-            confidence: 0.8,
-            reasoning: c.details,
-            evidenceFromHistory: [c.details],
-            riskLevel: c.status === 'spełnione' ? 'high' : 'low'
-          })),
-          overallAssessment: {
-            eligibilityScore: reportConclusion.estimatedProbability,
-            majorConcerns: reportConclusion.mainIssues,
-            minorConcerns: [],
-            strengthsForInclusion: []
-          }
-        },
-        confidence: 0.8,
-        warnings: ['Ocena kryteriów z analizy monoagentowej']
-      },
-      riskAssessment: {
-        success: true,
-        data: {
-          patientRiskProfile: {
-            suicidalRisk: {
-              level: 'medium',
-              indicators: ['Analiza z systemu monoagentowego - wymagana szczegółowa ocena'],
-              mitigationStrategies: ['Regularne monitorowanie psychiatryczne']
-            },
-            adherenceRisk: {
-              level: 'medium',
-              factors: ['Historia leczenia wskazuje na potrzebę oceny adherencji'],
-              recommendations: ['Edukacja pacjenta', 'Regularne kontrole']
-            },
-            adverseEventRisk: {
-              level: 'medium',
-              potentialEvents: ['Standardowe ryzyko dla leków przeciwdepresyjnych'],
-              monitoringNeeds: ['Standardowe monitorowanie']
-            },
-            dropoutRisk: {
-              level: 'medium',
-              factors: ['Wymagana ocena motywacji pacjenta'],
-              retentionStrategies: ['Regularne kontakty', 'Wsparcie psychologiczne']
-            }
-          },
-          studySpecificRisks: {
-            protocolCompliance: reportConclusion.estimatedProbability,
-            dataQuality: 70,
-            ethicalConcerns: reportConclusion.mainIssues
-          },
-          inclusionProbability: {
-            score: reportConclusion.estimatedProbability,
-            confidence: 70,
-            keyFactors: {
-              positive: [],
-              negative: reportConclusion.mainIssues,
-              neutral: reportConclusion.criticalInfoNeeded || []
-            },
-            recommendation: reportConclusion.estimatedProbability > 70 ? 'include' : 
-                           reportConclusion.estimatedProbability > 40 ? 'further_evaluation' : 'exclude',
-            reasoning: reportConclusion.overallQualification
-          }
-        },
-        confidence: 0.7,
-        warnings: ['Ocena ryzyka z analizy monoagentowej - może wymagać dodatkowej weryfikacji']
-      }
-    };
-  }
-
-  /**
-   * Wysyła pytanie do chatbota i zwraca odpowiedź
+   * Zadaje pytanie chatbotowi
    */
   public async askQuestion(
     question: string,
     focusArea?: 'criteria' | 'pharmacotherapy' | 'episodes' | 'risk' | 'general'
   ): Promise<ChatMessage> {
-    if (!this.session.context) {
-      throw new Error('Chat session not initialized');
+    if (!this.session.isActive || !this.session.patientData) {
+      throw new Error('Sesja chatbota nie jest aktywna');
     }
 
-    // Dodaj pytanie użytkownika
+    // Dodaj pytanie użytkownika do historii
     const userMessage: ChatMessage = {
       id: `user-${Date.now()}`,
       type: 'user',
@@ -340,38 +92,35 @@ Jak mogę ci pomóc?`,
     this.session.messages.push(userMessage);
 
     try {
-      // Wywołaj chatbota
-      const result: ChatbotResult = await this.chatbotAgent.answerQuestion(
-        question,
-        this.session.context,
-        focusArea
-      );
+      // Przygotuj kontekst dla AI
+      const context = this.buildContextForAI(question, focusArea);
+      
+      // Wywołaj AI bezpośrednio
+      const response = await this.callAI(context, this.session.patientData.modelUsed || 'claude-opus');
 
-      // Stwórz odpowiedź bota
+      // Przygotuj odpowiedź bota
       const botMessage: ChatMessage = {
         id: `bot-${Date.now()}`,
         type: 'bot',
-        content: result.response,
+        content: response,
         timestamp: new Date(),
-        confidence: result.confidence,
-        referencedSections: result.referencedSections,
-        suggestedFollowUp: result.suggestedFollowUp
+        confidence: 0.8,
+        referencedSections: this.extractReferencedSections(focusArea),
+        suggestedFollowUp: this.generateSuggestedFollowUp(question, focusArea)
       };
 
       this.session.messages.push(botMessage);
       return botMessage;
 
     } catch (error) {
+      console.error('Błąd podczas odpowiedzi chatbota:', error);
+      
       const errorMessage: ChatMessage = {
         id: `bot-error-${Date.now()}`,
         type: 'bot',
-        content: `Przepraszam, wystąpił błąd podczas przetwarzania twojego pytania: ${error instanceof Error ? error.message : 'Nieznany błąd'}. Proszę spróbować ponownie.`,
+        content: 'Przepraszam, wystąpił błąd podczas przetwarzania twojego pytania. Spróbuj ponownie lub zadaj pytanie w inny sposób.',
         timestamp: new Date(),
-        confidence: 0,
-        suggestedFollowUp: [
-          'Czy możesz zadać pytanie w inny sposób?',
-          'Czy potrzebujesz pomocy z konkretnym aspektem?'
-        ]
+        confidence: 0.1
       };
 
       this.session.messages.push(errorMessage);
@@ -380,68 +129,240 @@ Jak mogę ci pomóc?`,
   }
 
   /**
-   * Pobiera historię wiadomości
+   * Buduje kontekst dla AI na podstawie pytania i danych analizy
    */
-  public getMessages(): ChatMessage[] {
-    return [...this.session.messages];
+  private buildContextForAI(question: string, focusArea?: string): string {
+    const patientData = this.session.patientData!;
+    
+    let context = `Jesteś doświadczonym lekarzem psychiatrą i specjalistą badań klinicznych. Odpowiadasz na pytania dotyczące analizy pre-screeningowej pacjenta.
+
+PYTANIE UŻYTKOWNIKA: ${question}
+
+DANE PACJENTA:
+- ID: ${patientData.summary?.id || 'Nieznane'}
+- Wiek: ${patientData.summary?.age || 'Nieznany'} lat
+- Główna diagnoza: ${patientData.summary?.mainDiagnosis || 'Nieznana'}
+- Choroby towarzyszące: ${patientData.summary?.comorbidities?.join(', ') || 'Brak'}
+
+WYNIKI ANALIZY:
+- Ogólna kwalifikacja: ${patientData.reportConclusion?.overallQualification || 'Nieznana'}
+- Prawdopodobieństwo kwalifikacji: ${patientData.reportConclusion?.estimatedProbability || 0}%
+- Główne problemy: ${patientData.reportConclusion?.mainIssues?.join('; ') || 'Brak'}
+- Krytyczne informacje do weryfikacji: ${patientData.reportConclusion?.criticalInfoNeeded?.join('; ') || 'Brak'}
+
+ANALIZA TRD:
+${patientData.trdAnalysis?.conclusion || 'Brak danych o TRD'}
+
+KRYTERIA WŁĄCZENIA:
+${patientData.inclusionCriteria?.map(c => `- ${c.id}: ${c.name} - ${c.status} (${c.details})`).join('\n') || 'Brak danych'}
+
+KRYTERIA WYŁĄCZENIA PSYCHIATRYCZNE:
+${patientData.psychiatricExclusionCriteria?.map(c => `- ${c.id}: ${c.name} - ${c.status} (${c.details})`).join('\n') || 'Brak danych'}
+
+KRYTERIA WYŁĄCZENIA MEDYCZNE:
+${patientData.medicalExclusionCriteria?.map(c => `- ${c.id}: ${c.name} - ${c.status} (${c.details})`).join('\n') || 'Brak danych'}`;
+
+    if (focusArea) {
+      context += `\n\nOBSZAR FOKUS: ${focusArea}`;
+    }
+
+    context += `\n\nODPOWIEDZ w sposób profesjonalny, konkretny i pomocny. Odwołuj się do konkretnych danych z analizy. Jeśli nie masz wystarczających informacji, powiedz o tym wprost.`;
+
+    return context;
   }
 
   /**
-   * Sprawdza czy sesja jest aktywna
+   * Wywołuje AI bezpośrednio
    */
+  private async callAI(prompt: string, model: SupportedAIModel): Promise<string> {
+    const config = getAIConfig(model);
+    
+    if (!config.apiKey) {
+      throw new Error(`Brak konfiguracji dla modelu ${model}`);
+    }
+
+    const systemPrompt = `Jesteś doświadczonym lekarzem psychiatrą i specjalistą badań klinicznych. Odpowiadasz na pytania dotyczące analizy pre-screeningowej pacjentów w sposób profesjonalny, konkretny i pomocny.
+
+ZASADY:
+- Odwołuj się do konkretnych danych z analizy
+- Bądź precyzyjny w ocenach medycznych
+- Wskazuj na potrzebę weryfikacji przez lekarza
+- Używaj polskiej terminologii medycznej
+- Jeśli nie masz wystarczających danych, powiedz o tym wprost`;
+
+    if (model === 'claude-opus') {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': config.apiKey,
+          'anthropic-version': '2023-06-01'
+        },
+        body: JSON.stringify({
+          model: config.model,
+          max_tokens: 2000,
+          temperature: 0.3,
+          system: systemPrompt,
+          messages: [
+            {
+              role: 'user',
+              content: prompt
+            }
+          ]
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Claude API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.content[0].text;
+
+    } else if (model === 'gemini') {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${config.model}:generateContent?key=${config.apiKey}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  text: `${systemPrompt}\n\n${prompt}`
+                }
+              ]
+            }
+          ],
+          generationConfig: {
+            temperature: 0.3,
+            maxOutputTokens: 2000
+          }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Gemini API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.candidates[0].content.parts[0].text;
+
+    } else {
+      // o3 lub inne modele OpenAI-like
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${config.apiKey}`
+        },
+        body: JSON.stringify({
+          model: config.model,
+          messages: [
+            {
+              role: 'system',
+              content: systemPrompt
+            },
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          temperature: 0.3,
+          max_tokens: 2000
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`OpenAI API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.choices[0].message.content;
+    }
+  }
+
+  /**
+   * Wyciąga sekcje, do których odnosi się odpowiedź
+   */
+  private extractReferencedSections(focusArea?: string): string[] {
+    const sections: string[] = [];
+    
+    if (focusArea === 'criteria') {
+      sections.push('Kryteria włączenia', 'Kryteria wyłączenia');
+    } else if (focusArea === 'pharmacotherapy') {
+      sections.push('Analiza farmakoterapii', 'Ocena TRD');
+    } else if (focusArea === 'episodes') {
+      sections.push('Analiza epizodów');
+    } else if (focusArea === 'risk') {
+      sections.push('Ocena ryzyka');
+    } else {
+      sections.push('Analiza ogólna');
+    }
+    
+    return sections;
+  }
+
+  /**
+   * Generuje sugerowane pytania następne
+   */
+  private generateSuggestedFollowUp(question: string, focusArea?: string): string[] {
+    const suggestions: string[] = [];
+    
+    if (focusArea === 'criteria') {
+      suggestions.push(
+        'Które kryteria wymagają dodatkowej weryfikacji?',
+        'Jakie badania mogą pomóc w ocenie kryteriów?'
+      );
+    } else if (focusArea === 'pharmacotherapy') {
+      suggestions.push(
+        'Czy pacjent spełnia kryteria TRD?',
+        'Jakie leki były nieskuteczne?'
+      );
+    } else {
+      suggestions.push(
+        'Jakie są główne ryzyka dla tego pacjenta?',
+        'Czy możesz wyjaśnić prawdopodobieństwo kwalifikacji?',
+        'Jakie dodatkowe informacje są potrzebne?'
+      );
+  }
+
+    return suggestions;
+  }
+
+  public getMessages(): ChatMessage[] {
+    return this.session.messages;
+  }
+
   public isSessionActive(): boolean {
     return this.session.isActive;
   }
 
-  /**
-   * Pobiera typ analizy używanej w sesji
-   */
-  public getAnalysisType(): 'multi-agent' | 'single-agent' {
-    return this.session.analysisType;
-  }
-
-  /**
-   * Czyści sesję
-   */
   public clearSession(): void {
     this.session = {
       messages: [],
-      context: null,
-      isActive: false,
-      analysisType: 'multi-agent'
+      patientData: null,
+      medicalHistory: '',
+      studyProtocol: '',
+      isActive: false
     };
   }
 
-  /**
-   * Pobiera predefiniowane pytania sugerowane
-   */
   public getSuggestedQuestions(): string[] {
-    const baseQuestions = [
-      'Dlaczego ten pacjent może nie spełniać kryteriów włączenia?',
-      'Jakie są główne ryzyka związane z tym pacjentem?',
-      'Czy możesz wyjaśnić szczegóły oceny TRD?',
-      'Jakie dodatkowe badania lub informacje są potrzebne?',
-      'Jaka jest interpretacja analizy farmakoterapii?',
-      'Czy pacjent nadaje się do włączenia do badania?',
-      'Które kryteria wymagają dodatkowej weryfikacji?'
-    ];
+    if (!this.session.isActive) {
+      return [];
+    }
 
-    if (this.session.analysisType === 'single-agent') {
-      return [
-        ...baseQuestions,
-        'Jakie są ograniczenia analizy klasycznej?',
-        'Czy warto przeprowadzić analizę wieloagentową?'
-      ];
-    } else {
-      return [
-        ...baseQuestions,
-        'Jakie są alternatywne scenariusze epizodów depresyjnych?',
-        'Jak różni się ta analiza od klasycznej?'
+    return [
+      'Dlaczego ten pacjent może nie spełniać kryteriów?',
+      'Jakie są główne problemy w analizie?',
+      'Czy możesz wyjaśnić ocenę TRD?',
+      'Jakie dodatkowe informacje są potrzebne?',
+      'Jakie badania mogą pomóc w kwalifikacji?',
+      'Czy pacjent ma przeciwwskazania do badania?'
       ];
     }
   }
-}
 
-// Singleton instance
 export const chatbotService = new ChatbotService();
-export default chatbotService; 
