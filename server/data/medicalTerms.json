@@ -1,0 +1,29 @@
+{
+  "preserve": [
+    "aspiryna", "ibuprofen", "paracetamol", "ketoprofen", "nimesulid", "diklofenak",
+    "amoksycylina", "azytromycyna", "klarytromycyna", "cefaleksyna", "metronidazol",
+    "nadciśnienie", "hipotonia", "cukrzyca", "insulina", "metformina", "migotanie",
+    "arytmia", "tachykardia", "bradykardia", "zawał", "udar", "niedokrwienie",
+    "astma", "przewlekła", "obturacyjna", "choroba", "płuc", "zapalenie", "oskrzeli",
+    "depresja", "lęk", "psychoza", "schizofrenia", "autyzm", "ADHD", "demencja",
+    "alergia", "anafilaksja", "pokrzywka", "egzema", "łuszczyca", "dermatitis",
+    "gastroenterologia", "endokrynologia", "kardiologia", "neurologia", "psychiatria",
+    "ortopedia", "ginekologia", "urologia", "okulistyka", "otolaryngologia",
+    "morfina", "fentanyl", "tramadol", "codeina", "oksykodon", "metadon",
+    "haloperidol", "risperidon", "olanzapina", "kwetiapina", "aripiprazol",
+    "sertraline", "fluoksetyna", "citalopram", "escitalopram", "wenlafaksyna",
+    "mg", "ml", "mcg", "jednostka", "dawka", "tabletka", "kapsułka", "ampułka",
+    "rano", "wieczorem", "przed", "po", "posiłku", "na", "czczo", "doraźnie",
+    "RTG", "USG", "TK", "MRI", "EKG", "EEG", "EMG", "spirometria", "endoskopia",
+    "biopsja", "punkcja", "operacja", "zabieg", "transplantacja", "dializa"
+  ],
+  "medicalPrefixes": [
+    "dr", "prof", "lek", "med", "mgr", "specjalista", "konsultant", "ordynator"
+  ],
+  "units": [
+    "mg", "ml", "mcg", "g", "kg", "cm", "mm", "l", "mmHg", "bpm", "°C", "%"
+  ],
+  "timePatterns": [
+    "rano", "wieczorem", "południe", "przed snem", "co", "godzin", "dni", "tygodni", "miesięcy"
+  ]
+} 

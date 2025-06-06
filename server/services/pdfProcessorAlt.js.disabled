@@ -1,0 +1,99 @@
+import pdfParse from 'pdf-parse';
+import { createWorker } from 'tesseract.js';
+import fs from 'fs';
+import path from 'path';
+import Jimp from 'jimp';
+
+class PDFProcessorAlt {
+  constructor() {
+    this.tesseractWorker = null;
+  }
+
+  async initTesseract() {
+    if (!this.tesseractWorker) {
+      console.log('🔄 [PDFProcessor] Initializing Tesseract worker...');
+      this.tesseractWorker = await createWorker('pol+eng');
+      console.log('✅ [PDFProcessor] Tesseract worker ready');
+    }
+    return this.tesseractWorker;
+  }
+
+  async extractTextFromPDF(filePath) {
+    console.log('📄 [PDFProcessor] Starting PDF text extraction:', path.basename(filePath));
+    
+    try {
+      // Try native PDF text extraction first
+      const nativeResult = await this.extractNativeText(filePath);
+      
+      if (nativeResult && nativeResult.text && nativeResult.text.trim().length > 100) {
+        console.log('✅ [PDFProcessor] Native text extraction successful');
+        return {
+          text: nativeResult.text,
+          method: 'native',
+          confidence: 1.0,
+          pages: nativeResult.pages
+        };
+      }
+      
+      console.log('⚠️ [PDFProcessor] Native extraction insufficient, would need OCR...');
+      // For now, return what we have from native extraction
+      // OCR can be added later if needed
+      return {
+        text: nativeResult ? nativeResult.text : '',
+        method: 'native_fallback',
+        confidence: 0.8,
+        pages: nativeResult ? nativeResult.pages : 0,
+        warning: 'OCR functionality available but not used in this version'
+      };
+      
+    } catch (error) {
+      console.error('❌ [PDFProcessor] Error extracting text:', error);
+      throw new Error('Failed to extract text from PDF');
+    }
+  }
+
+  async extractNativeText(filePath) {
+    try {
+      const dataBuffer = fs.readFileSync(filePath);
+      const data = await pdfParse(dataBuffer);
+      
+      console.log(`📊 [PDFProcessor] Native extraction - Pages: ${data.numpages}, Text length: ${data.text.length}`);
+      
+      return {
+        text: data.text,
+        pages: data.numpages
+      };
+    } catch (error) {
+      console.error('❌ [PDFProcessor] Native text extraction failed:', error);
+      return null;
+    }
+  }
+
+  async cleanup() {
+    if (this.tesseractWorker) {
+      console.log('🧹 [PDFProcessor] Terminating Tesseract worker...');
+      await this.tesseractWorker.terminate();
+      this.tesseractWorker = null;
+    }
+  }
+
+  // Get basic PDF info
+  async getPDFInfo(filePath) {
+    try {
+      const dataBuffer = fs.readFileSync(filePath);
+      const data = await pdfParse(dataBuffer);
+      
+      return {
+        pages: data.numpages,
+        fileSize: fs.statSync(filePath).size,
+        hasText: data.text.length > 100,
+        filename: path.basename(filePath)
+      };
+    } catch (error) {
+      console.error('❌ [PDFProcessor] Error getting PDF info:', error);
+      return null;
+    }
+  }
+}
+
+export default PDFProcessorAlt; 

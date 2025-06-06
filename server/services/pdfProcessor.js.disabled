@@ -1,0 +1,143 @@
+import pdfParse from 'pdf-parse';
+import { createWorker } from 'tesseract.js';
+import pdf2pic from 'pdf2pic';
+import fs from 'fs';
+import path from 'path';
+
+class PDFProcessor {
+  constructor() {
+    this.tesseractWorker = null;
+  }
+
+  async initTesseract() {
+    if (!this.tesseractWorker) {
+      console.log('🔄 [PDFProcessor] Initializing Tesseract worker...');
+      this.tesseractWorker = await createWorker('pol+eng');
+      console.log('✅ [PDFProcessor] Tesseract worker ready');
+    }
+    return this.tesseractWorker;
+  }
+
+  async extractTextFromPDF(filePath) {
+    console.log('📄 [PDFProcessor] Starting PDF text extraction:', path.basename(filePath));
+    
+    try {
+      // First try native PDF text extraction
+      const nativeText = await this.extractNativeText(filePath);
+      
+      if (nativeText && nativeText.trim().length > 100) {
+        console.log('✅ [PDFProcessor] Native text extraction successful');
+        return {
+          text: nativeText,
+          method: 'native',
+          confidence: 1.0
+        };
+      }
+      
+      console.log('⚠️ [PDFProcessor] Native extraction insufficient, trying OCR...');
+      // If native extraction fails or returns little text, use OCR
+      const ocrResult = await this.extractTextWithOCR(filePath);
+      return ocrResult;
+      
+    } catch (error) {
+      console.error('❌ [PDFProcessor] Error extracting text:', error);
+      throw new Error('Failed to extract text from PDF');
+    }
+  }
+
+  async extractNativeText(filePath) {
+    try {
+      const dataBuffer = fs.readFileSync(filePath);
+      const data = await pdfParse(dataBuffer);
+      
+      console.log(`📊 [PDFProcessor] Native extraction - Pages: ${data.numpages}, Text length: ${data.text.length}`);
+      
+      return data.text;
+    } catch (error) {
+      console.error('❌ [PDFProcessor] Native text extraction failed:', error);
+      return null;
+    }
+  }
+
+  async extractTextWithOCR(filePath) {
+    try {
+      console.log('🔄 [PDFProcessor] Converting PDF to images...');
+      
+      // Convert PDF to images
+      const convert = pdf2pic.fromPath(filePath, {
+        density: 300,           // Higher density for better OCR
+        saveFilename: "page",
+        savePath: "./temp/",
+        format: "png",
+        width: 2000,
+        height: 2000
+      });
+
+      // Get first few pages for analysis
+      const pages = await convert.bulk(-1, { responseType: "image" });
+      console.log(`📊 [PDFProcessor] Converted ${pages.length} pages to images`);
+
+      // Initialize Tesseract
+      await this.initTesseract();
+
+      let fullText = '';
+      let totalConfidence = 0;
+
+      for (let i = 0; i < Math.min(pages.length, 10); i++) { // Limit to first 10 pages
+        console.log(`🔍 [PDFProcessor] OCR processing page ${i + 1}/${pages.length}`);
+        
+        const { data } = await this.tesseractWorker.recognize(pages[i].path);
+        fullText += data.text + '\n\n';
+        totalConfidence += data.confidence;
+
+        // Clean up image file
+        try {
+          fs.unlinkSync(pages[i].path);
+        } catch (err) {
+          console.warn('⚠️ [PDFProcessor] Could not delete temp image:', err);
+        }
+      }
+
+      const averageConfidence = totalConfidence / Math.min(pages.length, 10);
+      
+      console.log(`✅ [PDFProcessor] OCR completed - Text length: ${fullText.length}, Confidence: ${averageConfidence.toFixed(2)}%`);
+
+      return {
+        text: fullText,
+        method: 'ocr',
+        confidence: averageConfidence / 100
+      };
+
+    } catch (error) {
+      console.error('❌ [PDFProcessor] OCR extraction failed:', error);
+      throw new Error('OCR processing failed');
+    }
+  }
+
+  async cleanup() {
+    if (this.tesseractWorker) {
+      console.log('🧹 [PDFProcessor] Terminating Tesseract worker...');
+      await this.tesseractWorker.terminate();
+      this.tesseractWorker = null;
+    }
+  }
+
+  // Get basic PDF info
+  async getPDFInfo(filePath) {
+    try {
+      const dataBuffer = fs.readFileSync(filePath);
+      const data = await pdfParse(dataBuffer);
+      
+      return {
+        pages: data.numpages,
+        fileSize: fs.statSync(filePath).size,
+        hasText: data.text.length > 100
+      };
+    } catch (error) {
+      console.error('❌ [PDFProcessor] Error getting PDF info:', error);
+      return null;
+    }
+  }
+}
+
+export default PDFProcessor; 

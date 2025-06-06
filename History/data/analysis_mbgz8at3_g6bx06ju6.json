@@ -1,0 +1,844 @@
+{
+  "metadata": {
+    "id": "analysis_mbgz8at3_g6bx06ju6",
+    "patientId": "Pacjent TRR_WRO_01",
+    "analysisType": "single-agent",
+    "modelUsed": "gemini",
+    "createdAt": "2025-06-03T20:34:08.412Z",
+    "updatedAt": "2025-06-03T20:34:08.461Z",
+    "status": "completed",
+    "version": "1.0.0",
+    "tags": [
+      "F42 Zaburzenia obsesyjno-kompulsyjne",
+      "Astma oskrzelowa",
+      "single-agent"
+    ],
+    "notes": "Pacjent TRR_WRO_01 - Analiza - 3.06.2025 22:34"
+  },
+  "patientData": {
+    "summary": {
+      "id": "Pacjent TRR_WRO_01",
+      "age": 33,
+      "mainDiagnosis": "F33.1 Zaburzenie depresyjne nawracające, obecnie epizod depresyjny umiarkowany",
+      "comorbidities": [
+        "F42 Zaburzenia obsesyjno-kompulsyjne",
+        "Astma oskrzelowa"
+      ]
+    },
+    "episodeEstimation": {
+      "scenarios": [
+        {
+          "id": 1,
+          "description": "Obecny epizod depresyjny rozpoczął się około 8 maja 2023 roku.",
+          "evidence": "Wizyta z dnia 2023-05-08: notatka lekarska \"zmiana leczenia , na prosbe pacjenta , epizod depresyjny . brak skutecznosci escitilu. zmiana na velaxin.\" Wskazuje to na początek nowego epizodu lub znaczące pogorszenie wymagające zmiany strategii leczenia z powodu braku skuteczności poprzedniego leku (Escitalopram) w leczeniu objawów depresyjnych."
+        }
+      ],
+      "conclusion": "Najbardziej prawdopodobna data rozpoczęcia obecnego epizodu depresyjnego, istotnego dla oceny kryteriów TRD, to 2023-05-08."
+    },
+    "trdAnalysis": {
+      "episodeStartDate": "2023-05-08",
+      "pharmacotherapy": [
+        {
+          "id": "par-1-period-1",
+          "drugName": "Paroksetyna",
+          "shortName": "PAR",
+          "startDate": "2022-12-19",
+          "endDate": "2023-01-18",
+          "dose": "20mg tabl.",
+          "attemptGroup": 0,
+          "notes": "Przed obecnym epizodem depresyjnym. Zmieniono na Escitalopram na prośbę pacjenta."
+        },
+        {
+          "id": "klo-1-period-1",
+          "drugName": "Klorazepat",
+          "shortName": "KLO",
+          "startDate": "2022-12-19",
+          "endDate": "2023-01-18",
+          "dose": "10mg kaps.",
+          "attemptGroup": 0,
+          "notes": "Lek przeciwlękowy."
+        },
+        {
+          "id": "esc-1-period-1",
+          "drugName": "Escitalopram",
+          "shortName": "ESC",
+          "startDate": "2023-01-12",
+          "endDate": "2023-02-09",
+          "dose": "10mg tabl.",
+          "attemptGroup": 0,
+          "notes": "Zmiana z Paroksetyny. Dawka 10mg. Przed obecnym epizodem depresyjnym wg notatki z 2023-05-08."
+        },
+        {
+          "id": "klo-1-period-2",
+          "drugName": "Klorazepat",
+          "shortName": "KLO",
+          "startDate": "2023-01-12",
+          "endDate": "2023-02-11",
+          "dose": "10mg kaps.",
+          "attemptGroup": 0,
+          "notes": "Lek przeciwlękowy."
+        },
+        {
+          "id": "esc-1-period-2",
+          "drugName": "Escitalopram",
+          "shortName": "ESC",
+          "startDate": "2023-02-13",
+          "endDate": "2023-04-14",
+          "dose": "20mg tabl. (2x10mg)",
+          "attemptGroup": 1,
+          "notes": "Zwiększenie dawki do 20mg. Część adekwatnej próby Escitalopramem 20mg/d. Zgłoszono brak skuteczności 2023-05-08."
+        },
+        {
+          "id": "klo-1-period-3",
+          "drugName": "Klorazepat",
+          "shortName": "KLO",
+          "startDate": "2023-02-13",
+          "endDate": "2023-04-14",
+          "dose": "10mg kaps.",
+          "attemptGroup": 0,
+          "notes": "Lek przeciwlękowy."
+        },
+        {
+          "id": "esc-1-period-3",
+          "drugName": "Escitalopram",
+          "shortName": "ESC",
+          "startDate": "2023-04-27",
+          "endDate": "2023-05-08",
+          "dose": "20mg tabl. (2x10mg)",
+          "attemptGroup": 1,
+          "notes": "Kontynuacja. Próba leczenia Escitalopramem 20mg/d (od 2023-02-13 do 2023-05-08, łącznie 11 tygodni i 4 dni). Adekwatna wg kryt. MGH-ATRQ badania (min. 10mg/d, >=8 tyg). Zgłoszono brak skuteczności 2023-05-08 (Failure 1)."
+        },
+        {
+          "id": "klo-1-period-4",
+          "drugName": "Klorazepat",
+          "shortName": "KLO",
+          "startDate": "2023-04-27",
+          "endDate": "2023-06-26",
+          "dose": "10mg kaps.",
+          "attemptGroup": 0,
+          "notes": "Lek przeciwlękowy."
+        },
+        {
+          "id": "wen-1-period-1",
+          "drugName": "Wenlafaksyna",
+          "shortName": "WEN",
+          "startDate": "2023-05-08",
+          "endDate": "2023-07-03",
+          "dose": "37.5mg ER kaps.",
+          "attemptGroup": 0,
+          "notes": "Rozpoczęcie leczenia Wenlafaksyną. Dawka nieadekwatna wg kryt. MGH-ATRQ badania (min. 150mg/d)."
+        },
+        {
+          "id": "kwe-1-period-1",
+          "drugName": "Kwetiapina",
+          "shortName": "KWE",
+          "startDate": "2023-05-08",
+          "endDate": "2023-07-07",
+          "dose": "50mg XR tabl.",
+          "attemptGroup": 0,
+          "notes": "Rozpoczęcie leczenia Kwetiapiną. Dawka nieadekwatna dla augmentacji wg kryt. MGH-ATRQ badania (min. 150mg/d)."
+        },
+        {
+          "id": "wen-1-period-2",
+          "drugName": "Wenlafaksyna",
+          "shortName": "WEN",
+          "startDate": "2023-06-19",
+          "endDate": "2023-07-17",
+          "dose": "150mg ER kaps.",
+          "attemptGroup": 2,
+          "notes": "Zwiększenie dawki Wenlafaksyny do 150mg. Część adekwatnej próby."
+        },
+        {
+          "id": "kwe-1-period-2",
+          "drugName": "Kwetiapina",
+          "shortName": "KWE",
+          "startDate": "2023-06-19",
+          "endDate": "2023-07-19",
+          "dose": "50mg XR tabl.",
+          "attemptGroup": 0,
+          "notes": "Kontynuacja Kwetiapiny 50mg. Dawka nieadekwatna dla augmentacji."
+        },
+        {
+          "id": "klo-1-period-5",
+          "drugName": "Klorazepat",
+          "shortName": "KLO",
+          "startDate": "2023-06-19",
+          "endDate": "2023-07-19",
+          "dose": "10mg kaps.",
+          "attemptGroup": 0,
+          "notes": "Lek przeciwlękowy."
+        },
+        {
+          "id": "wen-1-period-3",
+          "drugName": "Wenlafaksyna",
+          "shortName": "WEN",
+          "startDate": "2023-07-17",
+          "endDate": "2023-09-18",
+          "dose": "150mg ER kaps.",
+          "attemptGroup": 2,
+          "notes": "Kontynuacja Wenlafaksyny 150mg. Próba leczenia Wenlafaksyną 150mg/d (od 2023-06-19 do 2023-09-18, łącznie 13 tygodni). Adekwatna wg kryt. MGH-ATRQ badania (min. 150mg/d, >=8 tyg). Zwiększenie dawki 2023-09-18 sugeruje brak skuteczności (Failure 2)."
+        },
+        {
+          "id": "kwe-1-period-3",
+          "drugName": "Kwetiapina",
+          "shortName": "KWE",
+          "startDate": "2023-07-17",
+          "endDate": "2023-09-15",
+          "dose": "50mg XR tabl.",
+          "attemptGroup": 0,
+          "notes": "Kontynuacja Kwetiapiny 50mg. Dawka nieadekwatna dla augmentacji."
+        },
+        {
+          "id": "klo-1-period-6",
+          "drugName": "Klorazepat",
+          "shortName": "KLO",
+          "startDate": "2023-07-17",
+          "endDate": "2023-09-15",
+          "dose": "10mg kaps.",
+          "attemptGroup": 0,
+          "notes": "Lek przeciwlękowy."
+        },
+        {
+          "id": "wen-1-period-4",
+          "drugName": "Wenlafaksyna",
+          "shortName": "WEN",
+          "startDate": "2023-09-18",
+          "endDate": "2023-10-16",
+          "dose": "225mg ER kaps. (150mg+75mg)",
+          "attemptGroup": 0,
+          "notes": "Zwiększenie dawki Wenlafaksyny do 225mg."
+        },
+        {
+          "id": "kwe-1-period-4",
+          "drugName": "Kwetiapina",
+          "shortName": "KWE",
+          "startDate": "2023-09-18",
+          "endDate": "2023-11-17",
+          "dose": "50mg XR tabl.",
+          "attemptGroup": 0,
+          "notes": "Kontynuacja Kwetiapiny 50mg. Dawka nieadekwatna dla augmentacji."
+        },
+        {
+          "id": "wen-1-period-5",
+          "drugName": "Wenlafaksyna",
+          "shortName": "WEN",
+          "startDate": "2023-10-20",
+          "endDate": "2023-11-17",
+          "dose": "225mg ER kaps. (150mg+75mg)",
+          "attemptGroup": 0,
+          "notes": "Kontynuacja Wenlafaksyny 225mg."
+        },
+        {
+          "id": "kwe-1-period-5",
+          "drugName": "Kwetiapina",
+          "shortName": "KWE",
+          "startDate": "2023-10-20",
+          "endDate": "2023-12-19",
+          "dose": "200mg XR tabl. (50mg+150mg)",
+          "attemptGroup": 3,
+          "notes": "Zwiększenie dawki Kwetiapiny do 200mg jako augmentacja Wenlafaksyny. Próba augmentacji (od 2023-10-20 do 2024-01-04, łącznie 10 tygodni i 6 dni). Adekwatna wg kryt. MGH-ATRQ badania (min. 150mg/d, >=8 tyg). Zmiana leczenia 2024-01-04 sugeruje brak skuteczności (Failure 3)."
+        },
+        {
+          "id": "sul-1-period-1",
+          "drugName": "Sulpiryd",
+          "shortName": "SUL",
+          "startDate": "2023-10-20",
+          "endDate": "2023-11-13",
+          "dose": "100mg tabl.",
+          "attemptGroup": 0,
+          "notes": "Dodanie Sulpirydu. Nie ujęty w MGH-ATRQ badania jako lek antydepresyjny lub augmentacyjny."
+        },
+        {
+          "id": "klo-1-period-7",
+          "drugName": "Klorazepat",
+          "shortName": "KLO",
+          "startDate": "2023-10-20",
+          "endDate": "2023-11-19",
+          "dose": "10mg kaps.",
+          "attemptGroup": 0,
+          "notes": "Lek przeciwlękowy."
+        },
+        {
+          "id": "wen-1-period-6",
+          "drugName": "Wenlafaksyna",
+          "shortName": "WEN",
+          "startDate": "2023-12-14",
+          "endDate": "2024-01-04",
+          "dose": "225mg ER kaps. (150mg+75mg)",
+          "attemptGroup": 0,
+          "notes": "Kontynuacja Wenlafaksyny 225mg w ramach augmentacji Kwetiapiną. Zwiększenie dawki Wenlafaksyny 2024-01-04."
+        },
+        {
+          "id": "kwe-1-period-6",
+          "drugName": "Kwetiapina",
+          "shortName": "KWE",
+          "startDate": "2023-12-14",
+          "endDate": "2024-01-04",
+          "dose": "200mg XR tabl. (50mg+150mg)",
+          "attemptGroup": 3,
+          "notes": "Kontynuacja Kwetiapiny 200mg jako augmentacja Wenlafaksyny. Część adekwatnej próby augmentacji (Failure 3). Zakończona zmianą leczenia 2024-01-04."
+        },
+        {
+          "id": "sul-1-period-2",
+          "drugName": "Sulpiryd",
+          "shortName": "SUL",
+          "startDate": "2023-12-14",
+          "endDate": "2024-01-07",
+          "dose": "100mg tabl.",
+          "attemptGroup": 0,
+          "notes": "Kontynuacja Sulpirydu."
+        },
+        {
+          "id": "klo-1-period-8",
+          "drugName": "Klorazepat",
+          "shortName": "KLO",
+          "startDate": "2023-12-14",
+          "endDate": "2024-01-13",
+          "dose": "10mg kaps.",
+          "attemptGroup": 0,
+          "notes": "Lek przeciwlękowy."
+        },
+        {
+          "id": "wen-1-period-7",
+          "drugName": "Wenlafaksyna",
+          "shortName": "WEN",
+          "startDate": "2024-01-04",
+          "endDate": "2024-03-28",
+          "dose": "300mg ER kaps. (2x150mg)",
+          "attemptGroup": 0,
+          "notes": "Zwiększenie dawki Wenlafaksyny do 300mg. Kwetiapina 200mg (z poprzedniego Rx) kontynuowana do ok. 2024-02-12."
+        },
+        {
+          "id": "klo-1-period-9",
+          "drugName": "Klorazepat",
+          "shortName": "KLO",
+          "startDate": "2024-02-08",
+          "endDate": "2024-03-09",
+          "dose": "10mg kaps.",
+          "attemptGroup": 0,
+          "notes": "Lek przeciwlękowy."
+        },
+        {
+          "id": "sul-1-period-3",
+          "drugName": "Sulpiryd",
+          "shortName": "SUL",
+          "startDate": "2024-02-19",
+          "endDate": "2024-04-07",
+          "dose": "100mg tabl.",
+          "attemptGroup": 0,
+          "notes": "Ponowne włączenie Sulpirydu."
+        },
+        {
+          "id": "kwe-1-period-7",
+          "drugName": "Kwetiapina",
+          "shortName": "KWE",
+          "startDate": "2024-02-19",
+          "endDate": "2024-04-19",
+          "dose": "150mg XR tabl.",
+          "attemptGroup": 4,
+          "notes": "Ponowne włączenie Kwetiapiny 150mg jako augmentacja Wenlafaksyny 300mg. Próba augmentacji (od 2024-02-19 do 2024-05-16, łącznie 12 tygodni i 4 dni). Adekwatna wg kryt. MGH-ATRQ badania. 'Nieznaczna poprawa' i brak odnowienia Kwetiapiny 2024-05-16 sugerują brak skuteczności (Failure 4)."
+        },
+        {
+          "id": "klo-1-period-10",
+          "drugName": "Klorazepat",
+          "shortName": "KLO",
+          "startDate": "2024-02-19",
+          "endDate": "2024-05-19",
+          "dose": "10mg kaps.",
+          "attemptGroup": 0,
+          "notes": "Lek przeciwlękowy."
+        },
+        {
+          "id": "wen-1-period-8",
+          "drugName": "Wenlafaksyna",
+          "shortName": "WEN",
+          "startDate": "2024-04-15",
+          "endDate": "2024-05-13",
+          "dose": "300mg ER kaps. (2x150mg)",
+          "attemptGroup": 0,
+          "notes": "Kontynuacja Wenlafaksyny 300mg w ramach augmentacji Kwetiapiną."
+        },
+        {
+          "id": "sul-1-period-4",
+          "drugName": "Sulpiryd",
+          "shortName": "SUL",
+          "startDate": "2024-04-15",
+          "endDate": "2024-06-02",
+          "dose": "100mg tabl.",
+          "attemptGroup": 0,
+          "notes": "Kontynuacja Sulpirydu."
+        },
+        {
+          "id": "kwe-1-period-8",
+          "drugName": "Kwetiapina",
+          "shortName": "KWE",
+          "startDate": "2024-04-15",
+          "endDate": "2024-06-14",
+          "dose": "150mg XR tabl.",
+          "attemptGroup": 4,
+          "notes": "Kontynuacja Kwetiapiny 150mg jako augmentacja Wenlafaksyny 300mg. Część adekwatnej próby augmentacji (Failure 4). Kwetiapina nie została odnowiona na wizycie 2024-05-16."
+        },
+        {
+          "id": "klo-1-period-11",
+          "drugName": "Klorazepat",
+          "shortName": "KLO",
+          "startDate": "2024-04-15",
+          "endDate": "2024-07-14",
+          "dose": "10mg kaps.",
+          "attemptGroup": 0,
+          "notes": "Lek przeciwlękowy."
+        },
+        {
+          "id": "wen-1-period-9",
+          "drugName": "Wenlafaksyna",
+          "shortName": "WEN",
+          "startDate": "2024-05-16",
+          "endDate": "2024-07-15",
+          "dose": "300mg ER kaps. (2x150mg)",
+          "attemptGroup": 5,
+          "notes": "Kontynuacja Wenlafaksyny 300mg jako monoterapia po odstawieniu Kwetiapiny. Próba leczenia Wenlafaksyną 300mg/d (od 2024-05-16 do 2024-07-15, łącznie 8 tygodni i 4 dni). Adekwatna wg kryt. MGH-ATRQ badania. Zgłoszone pogorszenie 2024-07-15 sugeruje brak skuteczności (Failure 5)."
+        },
+        {
+          "id": "klo-1-period-12",
+          "drugName": "Klorazepat",
+          "shortName": "KLO",
+          "startDate": "2024-05-16",
+          "endDate": "2024-06-15",
+          "dose": "10mg kaps.",
+          "attemptGroup": 0,
+          "notes": "Lek przeciwlękowy."
+        },
+        {
+          "id": "wen-1-period-10",
+          "drugName": "Wenlafaksyna",
+          "shortName": "WEN",
+          "startDate": "2024-07-15",
+          "endDate": "2024-09-09",
+          "dose": "300mg ER kaps. (2x150mg)",
+          "attemptGroup": 0,
+          "notes": "Kontynuacja Wenlafaksyny 300mg. Rx na 4 op. (56 dni). Pogorszenie zgłoszone 2024-07-15."
+        },
+        {
+          "id": "klo-1-period-13",
+          "drugName": "Klorazepat",
+          "shortName": "KLO",
+          "startDate": "2024-07-15",
+          "endDate": "2024-08-14",
+          "dose": "10mg kaps.",
+          "attemptGroup": 0,
+          "notes": "Lek przeciwlękowy."
+        },
+        {
+          "id": "wen-1-period-11",
+          "drugName": "Wenlafaksyna",
+          "shortName": "WEN",
+          "startDate": "2024-08-01",
+          "endDate": "2024-08-29",
+          "dose": "300mg ER kaps. (2x150mg)",
+          "attemptGroup": 0,
+          "notes": "Kontynuacja Wenlafaksyny 300mg. Rx na 2 op. (28 dni), prawdopodobnie uzupełnienie zapasu. Sulpiryd dodany."
+        },
+        {
+          "id": "sul-1-period-5",
+          "drugName": "Sulpiryd",
+          "shortName": "SUL",
+          "startDate": "2024-08-01",
+          "endDate": "2024-09-18",
+          "dose": "100mg tabl.",
+          "attemptGroup": 0,
+          "notes": "Ponowne włączenie Sulpirydu jako augmentacja."
+        },
+        {
+          "id": "klo-1-period-14",
+          "drugName": "Klorazepat",
+          "shortName": "KLO",
+          "startDate": "2024-08-01",
+          "endDate": "2024-09-30",
+          "dose": "10mg kaps.",
+          "attemptGroup": 0,
+          "notes": "Lek przeciwlękowy."
+        },
+        {
+          "id": "klo-1-period-15",
+          "drugName": "Klorazepat",
+          "shortName": "KLO",
+          "startDate": "2024-09-12",
+          "endDate": "2024-11-11",
+          "dose": "10mg kaps.",
+          "attemptGroup": 0,
+          "notes": "Lek przeciwlękowy. Wenlafaksyna prawdopodobnie zakończona 2024-09-09 z powodu braku nowego Rx do 2024-11-21."
+        },
+        {
+          "id": "wen-1-period-12",
+          "drugName": "Wenlafaksyna",
+          "shortName": "WEN",
+          "startDate": "2024-11-21",
+          "endDate": "2024-12-19",
+          "dose": "187.5mg ER kaps. (150mg + 37.5mg)",
+          "attemptGroup": 0,
+          "notes": "Ponowne włączenie/kontynuacja Wenlafaksyny w dawce 187.5mg (150mg rano + 37.5mg w południe, jedna z opcji z Rx). Stan nadal objawowy."
+        },
+        {
+          "id": "klo-1-period-16",
+          "drugName": "Klorazepat",
+          "shortName": "KLO",
+          "startDate": "2024-11-21",
+          "endDate": "2024-12-21",
+          "dose": "5mg kaps.",
+          "attemptGroup": 0,
+          "notes": "Redukcja dawki Klorazepatu, odstawianie BZD."
+        }
+      ],
+      "conclusion": "Na podstawie Kryteriów MGH-ATRQ Badania, zidentyfikowano 5 nieudanych, adekwatnych prób leczenia w obecnym epizodzie depresyjnym (rozpoczętym ok. 2023-05-08):\n- Próba 1: Escitalopram 20mg/d przez 11 tygodni i 4 dni (zakończona 2023-05-08).\n- Próba 2: Wenlafaksyna 150mg/d przez 13 tygodni (od 2023-06-19 do 2023-09-18).\n- Próba 3: Augmentacja Wenlafaksyny (225mg/d) Kwetiapiną 200mg/d przez 10 tygodni i 6 dni (od 2023-10-20 do 2024-01-04).\n- Próba 4: Augmentacja Wenlafaksyny (300mg/d) Kwetiapiną 150mg/d przez 12 tygodni i 4 dni (od 2024-02-19 do 2024-05-16).\n- Próba 5: Wenlafaksyna 300mg/d (monoterapia) przez 8 tygodni i 4 dni (od 2024-05-16 do 2024-07-15).\nPacjent spełnia kryterium TRD (wymagane co najmniej 2 niepowodzenia)."
+    },
+    "inclusionCriteria": [
+      {
+        "id": "IC1",
+        "name": "Zgoda na udział w badaniu (ICF)",
+        "status": "weryfikacja",
+        "details": "Świadoma zgoda na udział w badaniu musi zostać uzyskana od pacjenta.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "IC2",
+        "name": "Wiek ≥18 lat",
+        "status": "spełnione",
+        "details": "Pacjent ma 33 lata, co spełnia kryterium wieku ≥18 lat.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "IC3",
+        "name": "Diagnoza dużej depresji",
+        "status": "spełnione",
+        "details": "Pacjent ma udokumentowane rozpoznanie F33.1 Zaburzenie depresyjne nawracające, obecnie epizod depresyjny umiarkowany. Wymaga potwierdzenia przez MINI 7.0.2 zgodnie z protokołem. Brak objawów psychotycznych odnotowany w dokumentacji.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "IC4",
+        "name": "Czas trwania pierwszego epizodu",
+        "status": "spełnione",
+        "details": "Pacjent leczony psychiatrycznie od 18. roku życia, obecny epizod nie jest pierwszym w życiu. Kryterium dotyczy tylko pierwszych epizodów, więc w tym przypadku jest spełnione (nie stanowi podstawy do wykluczenia).",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "IC5",
+        "name": "Wynik MADRS ≥20",
+        "status": "weryfikacja",
+        "details": "Wynik w skali MADRS musi zostać oceniony podczas screeningu i wizyty początkowej.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "IC6",
+        "name": "Lekooporność (TRD) wg MGH-ATRQ (specyficzne dla badania)",
+        "status": "spełnione",
+        "details": "Pacjent doświadczył niepowodzenia 5 adekwatnych prób leczenia w obecnym epizodzie depresyjnym (rozpoczętym ok. 2023-05-08), zgodnie ze specyficznymi kryteriami MGH-ATRQ dla tego badania (wymagane 2-4 niepowodzenia):\n1. Escitalopram 20mg/d przez >11 tygodni.\n2. Wenlafaksyna 150mg/d przez 13 tygodni.\n3. Augmentacja Wenlafaksyny (225mg/d) Kwetiapiną 200mg/d przez >10 tygodni.\n4. Augmentacja Wenlafaksyny (300mg/d) Kwetiapiną 150mg/d przez >12 tygodni.\n5. Wenlafaksyna 300mg/d (monoterapia) przez >8 tygodni.\nWszystkie próby spełniały kryteria minimalnej dawki i minimalnego czasu trwania (>=8 tygodni) zgodnie z protokołem badania.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "IC7",
+        "name": "Odstawienie leków",
+        "status": "weryfikacja",
+        "details": "Pacjent aktualnie przyjmuje Klorazepat (Tranxene), który jest w trakcie odstawiania (ostatnia recepta na 5mg). Należy potwierdzić całkowite odstawienie Klorazepatu i innych potencjalnie zabronionych leków oraz uzyskać zgodę na przestrzeganie okresów washout przed wizytą początkową. Benzodiazepiny są typowo lekami zabronionymi w takich badaniach.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "IC8",
+        "name": "Zdolność do udziału",
+        "status": "spełnione",
+        "details": "Na podstawie dostępnych informacji zakłada się, że pacjent jest w stanie wykonać wszystkie procedury i przestrzegać harmonogramu wizyt. Do potwierdzenia.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      }
+    ],
+    "psychiatricExclusionCriteria": [
+      {
+        "id": "EC1",
+        "name": "Historia zaburzeń afektywnych dwubiegunowych",
+        "status": "spełnione",
+        "details": "Brak informacji w dokumentacji o historii zaburzeń afektywnych dwubiegunowych. Zakłada się brak.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC2",
+        "name": "Zaburzenia psychotyczne",
+        "status": "spełnione",
+        "details": "W dokumentacji wielokrotnie odnotowano \"bez obj. psychozy\". Zakłada się brak historii zaburzeń psychotycznych.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC3",
+        "name": "Zaburzenia osobowości",
+        "status": "spełnione",
+        "details": "Brak diagnozy zaburzeń osobowości wymienionych w kryterium (paranoiczne, schizoidalne, schizotypowe, histrioniczne, narcystyczne). Zakłada się brak.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC4",
+        "name": "Zaburzenie osobowości typu borderline",
+        "status": "spełnione",
+        "details": "Brak informacji w dokumentacji o diagnozie zaburzenia osobowości borderline. Zakłada się brak.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC5",
+        "name": "Aktywne zaburzenia współistniejące",
+        "status": "niespełnione",
+        "details": "Pacjent ma diagnozę F42 Zaburzenia obsesyjno-kompulsyjne. Notatka z 2024-08-06 stwierdza: \"Liczne kompulsje zabierające wiele czasu w ciągu dnia nadal obecne.\" Notatka z 2023-12-14: \"nadal rytualy ilosc podobna\". Wskazuje to na aktywne, objawowe OCD, co jest kryterium wyłączenia.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC6",
+        "name": "Hospitalizacja psychiatryczna",
+        "status": "spełnione",
+        "details": "Brak informacji o hospitalizacji psychiatrycznej w ciągu ostatnich 6 miesięcy. Zakłada się brak.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC7",
+        "name": "Historia leczenia inwazyjnego",
+        "status": "spełnione",
+        "details": "Brak informacji o stosowaniu ECT, DBS, VNS w obecnym epizodzie depresyjnym. Zakłada się brak.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC8",
+        "name": "Historia leczenia nieinwazyjnego",
+        "status": "spełnione",
+        "details": "Pacjent miał stosowane TMS: \"tms 3 cykle na klinice w ramach badań klinicznych\" (notatka z 2024-07-15), ostatnia sesja TMS \"15 stycznia powtorkowa sesja przezczaszkowej stymulacji\" (notatka z 2024-01-12). Jeśli screening odbywa się np. w grudniu 2024, TMS ze stycznia 2024 było ponad 6 miesięcy temu (10-11 miesięcy), więc kryterium wykluczenia nie jest spełnione.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC9",
+        "name": "Aktywna psychoterapia",
+        "status": "weryfikacja",
+        "details": "Pacjent ma bogatą historię psychoterapii. Należy zweryfikować, czy obecnie uczestniczy w programie psychoterapii i czy pozostanie on stabilny przez wymagany okres 9 tygodni.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC10",
+        "name": "Uzależnienia",
+        "status": "spełnione",
+        "details": "W dokumentacji odnotowano \"nie leczony odwykowo\". Zakłada się brak uzależnienia od alkoholu lub substancji psychoaktywnych w ciągu ostatnich 12 miesięcy.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC11",
+        "name": "Ryzyko samobójcze",
+        "status": "weryfikacja",
+        "details": "W dokumentacji pojawiają się wzmianki o \"myślach rezygnacyjnych\", ale także \"ms,ts przeczy\". Wymaga formalnej oceny ryzyka samobójczego zgodnie z protokołem.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC12",
+        "name": "Depresja wtórna",
+        "status": "spełnione",
+        "details": "Diagnoza wskazuje na pierwotne zaburzenie depresyjne. Zakłada się brak depresji wtórnej do przyczyn medycznych lub polekowych.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC13",
+        "name": "Przeciwwskazania osobiste",
+        "status": "spełnione",
+        "details": "Na podstawie dostępnych informacji nie zidentyfikowano okoliczności osobistych lub zachowań uniemożliwiających bezpieczny udział. Do potwierdzenia.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC14",
+        "name": "Historia rodzinna",
+        "status": "spełnione",
+        "details": "Brak informacji o historii rodzinnej schizofrenii, zaburzenia schizoafektywnego lub ChAD I. Zakłada się brak.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC15",
+        "name": "Ekspozycja na psychodeliki",
+        "status": "spełnione",
+        "details": "Brak informacji o stosowaniu klasycznych psychodelików. Zakłada się brak.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      }
+    ],
+    "medicalExclusionCriteria": [
+      {
+        "id": "GMEC1",
+        "name": "Ciąża lub karmienie",
+        "status": "spełnione",
+        "details": "Pacjent jest mężczyzną, kryterium nie dotyczy.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC2",
+        "name": "Antykoncepcja",
+        "status": "spełnione",
+        "details": "Pacjent jest mężczyzną. Jeśli protokół wymaga od mężczyzn stosowania antykoncepcji, należy to zweryfikować. Standardowo, jeśli partnerka nie jest w wieku rozrodczym lub stosuje antykoncepcję, może nie być wymagane od pacjenta.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC3",
+        "name": "Testy ciążowe",
+        "status": "spełnione",
+        "details": "Pacjent jest mężczyzną, kryterium nie dotyczy.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC4",
+        "name": "Dawstwo nasienia",
+        "status": "weryfikacja",
+        "details": "Należy zapytać pacjenta o plany dotyczące oddawania nasienia.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC5",
+        "name": "Choroby układu krążenia",
+        "status": "spełnione",
+        "details": "Brak informacji o historii udaru, zawału, niekontrolowanego nadciśnienia, tachykardii, wydłużonego QT lub arytmii. Notatka z 2023-12-05 \"rr,tętno w/n\". Zakłada się brak.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC6",
+        "name": "Cukrzyca",
+        "status": "spełnione",
+        "details": "Brak informacji o cukrzycy. Zakłada się brak.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC7",
+        "name": "Choroby tarczycy",
+        "status": "spełnione",
+        "details": "Brak informacji o chorobach tarczycy. Zakłada się brak.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC8",
+        "name": "Padaczka",
+        "status": "spełnione",
+        "details": "Brak informacji o zaburzeniach drgawkowych. Zakłada się brak.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC9",
+        "name": "Wyniki badań",
+        "status": "weryfikacja",
+        "details": "Należy wykonać i ocenić badania laboratoryjne zgodnie z protokołem.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC10",
+        "name": "Inne choroby",
+        "status": "weryfikacja",
+        "details": "Pacjent ma astmę oskrzelową. Należy ocenić jej stabilność i czy stanowi istotne schorzenie mogące wpływać na udział w badaniu lub interpretację wyników.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC11",
+        "name": "Udział w innych badaniach",
+        "status": "spełnione",
+        "details": "Pacjent uczestniczył w przeszłości w badaniach klinicznych (TMS), ale brak informacji o aktualnym udziale w innym badaniu interwencyjnym. Zakłada się brak.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC12",
+        "name": "Nadwrażliwość",
+        "status": "weryfikacja",
+        "details": "Należy zapytać pacjenta o znaną nadwrażliwość na badany lek lub substancje pomocnicze.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      }
+    ],
+    "reportConclusion": {
+      "overallQualification": "Prawdopodobnie nie kwalifikuje się",
+      "mainIssues": [
+        "EC5: Aktywne, objawowe zaburzenia obsesyjno-kompulsyjne (OCD) są kryterium wykluczającym. Dokumentacja wskazuje na \"Liczne kompulsje zabierające wiele czasu w ciągu dnia nadal obecne\"."
+      ],
+      "criticalInfoNeeded": [
+        "Potwierdzenie statusu OCD (aktywności i nasilenia objawów) za pomocą MINI 7.0.2 i wywiadu klinicznego.",
+        "Wynik w skali MADRS.",
+        "Potwierdzenie całkowitego odstawienia Klorazepatu (Tranxene) i innych leków zabronionych.",
+        "Status aktualnie prowadzonej psychoterapii i jej stabilności.",
+        "Formalna ocena ryzyka samobójczego.",
+        "Ocena stabilności astmy oskrzelowej.",
+        "Wyniki badań laboratoryjnych.",
+        "Informacja o planach dotyczących dawstwa nasienia.",
+        "Informacja o ewentualnej nadwrażliwości na badany lek."
+      ],
+      "estimatedProbability": 10
+    },
+    "analyzedAt": "2025-06-03T20:28:16.331Z",
+    "modelUsed": "gemini",
+    "isMockData": false,
+    "drugMappingInfo": {
+      "mappingsApplied": 0,
+      "mappings": [],
+      "preprocessedAt": "2025-06-03T20:28:16.331Z"
+    }
+  },
+  "medicalHistory": " / /01 Velaxin® ER 37,5, 28 szt. kaps. o przedł. uwalnianiu 1 op. 2024-11-21 30% Tranxene®, 30 szt. kaps. 1 op. 2024-09-12 100% Tranxene®, 30 szt. kaps. 2 op. 2024-09-12 100% Sulpiryd Hasco, 24 szt. tabl. 2 op. 2024-08-01 B Tranxene®, 30 szt. kaps. 1 op. 2024-05-16 100% Velaxin® ER 150, 28 szt. kaps. o przedł. uwalnianiu 4 op. 2024-07-15 30% Tranxene®, 30 szt. kaps. 1 op. 2024-07-15 100% Tranxene®, 30 szt. kaps. 2 op. 2024-08-01 100% Nazwa Postać Opakowanie Wypisano Odpłatność Velaxin® ER 150, 28 szt. kaps. o przedł. uwalnianiu 6 op. 2024-05-16 30% Velaxin® ER 150, 28 szt. kaps. o przedł. uwalnianiu 2 op. 2024-08-01 30% Velaxin® ER 150, 28 szt. kaps. o przedł. uwalnianiu 2 op. 2024-04-15 30% Sulpiryd Hasco, 24 szt. tabl. 1 op. 2024-04-15 B Kwetaplex XR, 60 szt. tabl. o przedł. uwalnianiu 1 op. 2024-02-19 100% Sulpiryd Hasco, 24 szt. tabl. 2 op. 2024-02-19 B Kwetaplex XR, 60 szt. tabl. o przedł. uwalnianiu 1 op. 2024-04-15 100% Sulpiryd Hasco, 24 szt. tabl. 2 op. 2024-04-15 B Tranxene®, 30 szt. kaps. 3 op. 2024-04-15 100% Tranxene®, 30 szt. kaps. 3 op. 2024-02-19 100% Tranxene®, 30 szt. kaps. 1 op. 2024-02-08 100% Tranxene®, 30 szt. kaps. 1 op. 2023-12-05 100% Tranxene®, 30 szt. kaps. 1 op. 2023-12-14 100% Kwetaplex XR, 60 szt. tabl. o przedł. uwalnianiu 1 op. 2023-10-20 100% Sulpiryd Hasco, 24 szt. tabl. 1 op. 2023-10-20 B Tranxene®, 30 szt. kaps. 1 op. 2023-10-20 100% Kwetaplex XR, 60 szt. tabl. o przedł. uwalnianiu 1 op. 2023-12-14 100% Sulpiryd Hasco, 24 szt. tabl. 1 op. 2023-12-14 B Velaxin® ER 75, 28 szt. kaps. o przedł. uwalnianiu 1 op. 2023-10-20 30% Velaxin® ER 75, 28 szt. kaps. o przedł. uwalnianiu 1 op. 2023-12-14 30% Towarzystwo Rozwoju Rodziny o/w we Wrocławiu NIP: 8992446185, tel. 71-342-14-13 Strona 3 z 20 Numer księgi rejestrowej: 000000001739 Kod res. cz. VIII/VII/V: / /01 Velaxin® ER 75, 28 szt. kaps. o przedł. uwalnianiu 1 op. 2023-09-18 30% Velaxin® ER 150, 28 szt. kaps. o przedł. uwalnianiu 2 op. 2023-07-17 30% Velaxin® ER 150, 28 szt. kaps. o przedł. uwalnianiu 2 op. 2023-10-20 30% Tranxene®, 30 szt. kaps. 2 op. 2023-07-17 100% Velaxin® ER 150, 28 szt. kaps. o przedł. uwalnianiu 6 op. 2024-01-04 30% Velaxin® ER 150, 28 szt. kaps. o przedł. uwalnianiu 1 op. 2023-06-19 30% Velaxin® ER 150, 28 szt. kaps. o przedł. uwalnianiu 2 op. 2023-09-18 30% Tranxene®, 30 szt. kaps. 1 op. 2023-06-19 100% Nazwa Postać Opakowanie Wypisano Odpłatność Paroxinor, 30 szt. tabl. powl. 1 op. 2022-12-19 30% Tranxene®, 30 szt. kaps. 1 op. 2022-12-19 100% Velaxin® ER 150, 28 szt. kaps. o przedł. uwalnianiu 2 op. 2023-12-14 30% Kwetaplex XR, 30 szt. tabl. o przedł. uwalnianiu 2 op. 2023-10-20 100% Kwetaplex XR, 30 szt. tabl. o przedł. uwalnianiu 2 op. 2023-12-14 100% Kwetaplex XR, 30 szt. tabl. o przedł. uwalnianiu 1 op. 2023-06-19 100% Velaxin® ER 37,5, 28 szt. kaps. o przedł. uwalnianiu 1 op. 2023-05-08 30% Kwetaplex XR, 30 szt. tabl. o przedł. uwalnianiu 1 op. 2023-05-08 100% Kwetaplex XR, 30 szt. tabl. o przedł. uwalnianiu 2 op. 2023-07-17 100% Kwetaplex XR, 30 szt. tabl. o przedł. uwalnianiu 2 op. 2023-09-18 100% Velaxin® ER 37,5, 28 szt. kaps. o przedł. uwalnianiu 1 op. 2023-05-08 30% Kwetaplex XR, 30 szt. tabl. o przedł. uwalnianiu 1 op. 2023-05-08 100% Escipram, 30 szt. tabl. powl. 2 op. 2023-02-13 100% Tranxene®, 30 szt. kaps. 2 op. 2023-02-13 100% Escipram, 30 szt. tabl. powl. 2 op. 2023-02-13 100% Tranxene®, 30 szt. kaps. 2 op. 2023-04-27 100% Escipram, 30 szt. tabl. powl. 2 op. 2023-04-27 100% Escitil, 28 szt. tabl. powl. 1 op. 2023-01-12 100% Tranxene®, 30 szt. kaps. 1 op. 2023-01-12 100% Dane medyczne Rozpoznania Towarzystwo Rozwoju Rodziny o/w we Wrocławiu NIP: 8992446185, tel. 71-342-14-13 Strona 4 z 20 Numer księgi rejestrowej: 000000001739 Kod res. cz. VIII/VII/V: / /01 Kod Jednostka chorobowa Rodzaj schorzenia Data F33.1 Zaburzenie depresyjne nawracające, obecnie epizod depresyjny umiarkowany nieprzew. główne 2024-11-21 F33.1 Zaburzenie depresyjne nawracające, obecnie epizod depresyjny umiarkowany nieprzew. główne 2024-10-08 F33.1 Zaburzenie depresyjne nawracające, obecnie epizod depresyjny umiarkowany nieprzew. główne 2024-09-12 F42 Zaburzenia obsesyjno-kompulsyjne nieprzew. główne 2024-08-08 F42 Zaburzenia obsesyjno-kompulsyjne nieprzew. główne 2024-08-01 F42 Zaburzenia obsesyjno-kompulsyjne nieprzew. główne 2024-07-15 F42 Zaburzenia obsesyjno-kompulsyjne nieprzew. główne 2024-05-16 F42 Zaburzenia obsesyjno-kompulsyjne nieprzew. główne 2024-04-15 F42 Zaburzenia obsesyjno-kompulsyjne nieprzew. główne 2024-02-19 F42 Zaburzenia obsesyjno-kompulsyjne nieprzew. główne 2024-02-08 F42 Zaburzenia obsesyjno-kompulsyjne nieprzew. główne 2024-01-12 F42 Zaburzenia obsesyjno-kompulsyjne nieprzew. główne 2024-01-04 F42 Zaburzenia obsesyjno-kompulsyjne nieprzew. główne 2023-12-14 F42 Zaburzenia obsesyjno-kompulsyjne nieprzew. główne 2023-12-05 F42 Zaburzenia obsesyjno-kompulsyjne nieprzew. główne 2023-10-20 F42 Zaburzenia obsesyjno-kompulsyjne nieprzew. główne 2023-09-18 F42 Zaburzenia obsesyjno-kompulsyjne nieprzew. główne 2023-07-17 F42 Zaburzenia obsesyjno-kompulsyjne nieprzew. główne 2023-06-19 F42 Zaburzenia obsesyjno-kompulsyjne nieprzew. główne 2023-05-08 F42 Zaburzenia obsesyjno-kompulsyjne nieprzew. główne 2023-04-27 F42 Zaburzenia obsesyjno-kompulsyjne nieprzew. główne 2023-02-13 F42 Zaburzenia obsesyjno-kompulsyjne nieprzew. główne 2023-01-12 F42 Zaburzenia obsesyjno-kompulsyjne nieprzew. główne 2023-01-05 F42 Zaburzenia obsesyjno-kompulsyjne nieprzew. główne 2022-12-19 Towarzystwo Rozwoju Rodziny o/w we Wrocławiu NIP: 8992446185, tel. 71-342-14-13 Strona 5 z 20 Numer księgi rejestrowej: 000000001739 Kod res. cz. VIII/VII/V: / /01 F42 Zaburzenia obsesyjno-kompulsyjne nieprzew. główne 2022-12-01 F33 Zaburzenia depresyjne nawracające nieprzew. towarzyszące 2024-11-21 F33 Zaburzenia depresyjne nawracające nieprzew. towarzyszące 2024-08-08 F41.2 Zaburzenia depresyjne i lękowe mieszane nieprzew. towarzyszące 2024-08-08 F33 Zaburzenia depresyjne nawracające nieprzew. towarzyszące 2024-07-15 Dokumenty Nazwa pliku Data dodania Typ pliku Notatka Zaświadczenie lekarskie, Zaburzenie obsesyjno-kompulsyjne F42 Zaburzenia depresyjne F33.1 Leczony u psychiatry od 18rz ,nie leczony odwykowo, choroby somatyczne astma oskrzelowa. 33letni kawaler, bezdzietny, wykształcenie średnie, technikum informatyczne ,mieszka z babką , utrzymuje się od lat z renty. Od wielu lat leczony w różnych pzp Wroclawia , diagnozowano f42 , ciężkie epizody depresji ,aktualnie funkcjonuje od w stanie częściowej ,niezadawalajacej remisji choroby. Liczne kompulsje zabierające wiele czasu w ciągu dnia nadal obecne. Dodatkowo okresowo rozwija epizody depresyjne: obniżenie nastroju, redukcja napędu , związane z reaktywnymi problemami , sezonowością lub bez uchwytnej przyczyny. stan psych świadomość jasna , orientacja, pamięć niezaburzona . nastrój obojętny, napęd p-m w /n , afekt miernie żywy . tok myślenia zwarty , tempo myślenia w/n, bez obj.psychozy, przeczy ms,ts ,potwierdza myśli rezygnacyjne , sen okresowo zaburzony ,rozregulowany rytm dobowy, łaknienie w/n . 2024- 08-06 Formularz Zaświadczenie lekarskie, pacjent leczony od 2009r z dgn zaburzen obses,i, zaburzen depresyjnych , terapia psychodyminamiczna 7 lsat , poznawczo-behawioralna 3 lata, tms 3 cykle na klinice w ramach badań klinicznych, eriksonowska ok 5 lat, gestalt rok . Farmakoterapia nigdy nie przyniosla calkowitej remisji. mimo ,ze były stosowane wszystkie leki z grup ssri, snri, bupropion, moklobemid, mirtazapina, anafranil, kilka stabilizatorow nastroju, kwetiapina, sulpiryd itd. potwierdzona lekoopornosc. 2024- 07-15 Formularz Historia wizyt Lekarz: Alicja Górna (7560940) Gabinet: Oddział Podwale - Lekarska Przychodnia Specjalistyczna TRR Data: 1 grudnia 2022 Godzina: 08:40 - 08:45 Stan: Zakończona Typ wizyty: Porada psychiatryczna Skierowanie Nie Wywiad: kontynuacja leczenia Rozpoznanie: F42 - Zaburzenia obsesyjno-kompulsyjne - nieprzewlekłe główne Świadczenia: PORADA LEKARSKA KONTROLNA - 1,0000 szt. Towarzystwo Rozwoju Rodziny o/w we Wrocławiu NIP: 8992446185, tel. 71-342-14-13 Strona 6 z 20 Numer księgi rejestrowej: 000000001739 Kod res. cz. VIII/VII/V: / /01 Lekarz: Alicja Górna (7560940) Gabinet: Oddział Podwale - Lekarska Przychodnia Specjalistyczna TRR Data: 19 grudnia 2022 Godzina: 08:55 - 09:00 Stan: Zakończona Typ wizyty: Porada psychiatryczna Skierowanie Nie Wywiad: kontynuacja leczenia Rozpoznanie: F42 - Zaburzenia obsesyjno-kompulsyjne - nieprzewlekłe główne Zalecenia: Kod e-Recepty: 1488 – realizacja od teraz Paroxinor: tabl. powl., 20 mg / 1 op. po 30 szt. DS: 1x1 Odpłatność: 30% Kod e-Recepty: 3958 – realizacja od teraz Tranxene®: kaps., 10 mg / 1 op. po 30 szt. DS: 1x1 Odpłatność: 100% Świadczenia: PORADA LEKARSKA KONTROLNA - 1,0000 szt. Lekarz: Alicja Górna (7560940) Gabinet: Oddział Podwale - Lekarska Przychodnia Specjalistyczna TRR Data: 5 stycznia 2023 Godzina: 13:00 - 13:15 Stan: Zakończona Typ wizyty: Porada psychiatryczna Skierowanie Nie Wywiad: Stan psych stabilny,brak remisji. Utrzymują się natręctwa czystościowe, lęk przed epidemią,kompulsje. Wydano druk ol 9 Rozpoznanie: F42 - Zaburzenia obsesyjno-kompulsyjne - nieprzewlekłe główne Świadczenia: PORADA LEKARSKA KONTROLNA - 1,0000 szt. Lekarz: Alicja Górna (7560940) Gabinet: Oddział Podwale - Lekarska Przychodnia Specjalistyczna TRR Data: 12 stycznia 2023 Godzina: 08:30 - 08:35 Stan: Zakończona Typ wizyty: Porada psychiatryczna Skierowanie Nie Wywiad: Pacjent chce zrezygnować z paroksetyny. Lepiej funkcjonował na escitalopramie miał więcej energii. Rozpoznanie: F42 - Zaburzenia obsesyjno-kompulsyjne - nieprzewlekłe główne Towarzystwo Rozwoju Rodziny o/w we Wrocławiu NIP: 8992446185, tel. 71-342-14-13 Strona 7 z 20 Numer księgi rejestrowej: 000000001739 Kod res. cz. VIII/VII/V: / /01 Zalecenia: Kod e-Recepty: 0722 – realizacja od teraz Escitil: tabl. powl., 10 mg / 1 op. po 28 szt. DS: 1x1 Odpłatność: 100% Kod e-Recepty: 2950 – realizacja od teraz Tranxene®: kaps., 10 mg / 1 op. po 30 szt. DS: 1x1 Odpłatność: 100% Świadczenia: PORADA LEKARSKA KONTROLNA - 1,0000 szt. Lekarz: Alicja Górna (7560940) Gabinet: Oddział Podwale - Lekarska Przychodnia Specjalistyczna TRR Data: 13 lutego 2023 Godzina: 08:55 - 09:00 Stan: Zakończona Typ wizyty: Porada psychiatryczna Skierowanie Nie Wywiad: po odstawieniu paroksetyny i włączeniu escitalopramu wzrost energii. dobra tolerancja leczenia. bez obj psychozy,ms,ts przeczy. Rozpoznanie: F42 - Zaburzenia obsesyjno-kompulsyjne - nieprzewlekłe główne Zalecenia: Kod e-Recepty: 3402 – realizacja od teraz Escipram: tabl. powl., 10 mg / 2 op. po 30 szt. DS: 1x2 Odpłatność: 100% Kod e-Recepty: 3436 – realizacja od 28.02 Escipram: tabl. powl., 10 mg / 2 op. po 30 szt. DS: 1x2 Odpłatność: 100% Kod e-Recepty: 1302 – realizacja od teraz Tranxene®: kaps., 10 mg / 2 op. po 30 szt. DS: 1x1 Odpłatność: 100% Świadczenia: PORADA LEKARSKA KONTROLNA - 1,0000 szt. Oddział Podwale - Lekarska Przychodnia Specjalistyczna TRR Lekarz: Alicja Górna (7560940) Gabinet: Data: 27 kwietnia 2023 Godzina: 09:05 - 09:10 Stan: Zakończona Typ wizyty: Porada psychiatryczna Skierowanie Nie Wywiad: kontynuacja leczenia. dobra tolerancja leczenia. bez obj psychozy,ms,ts przeczy. Rozpoznanie: F42 - Zaburzenia obsesyjno-kompulsyjne - nieprzewlekłe główne Towarzystwo Rozwoju Rodziny o/w we Wrocławiu NIP: 8992446185, tel. 71-342-14-13 Strona 8 z 20 Numer księgi rejestrowej: 000000001739 Kod res. cz. VIII/VII/V: / /01 Zalecenia: Kod e-Recepty: 4618 – realizacja od teraz Tranxene®: kaps., 10 mg / 2 op. po 30 szt. DS: 1x1 Odpłatność: 100% Kod e-Recepty: 9549 – realizacja od teraz Escipram: tabl. powl., 10 mg / 2 op. po 30 szt. DS: 1x2 Odpłatność: 100% Świadczenia: PORADA LEKARSKA KONTROLNA - 1,0000 szt. Lekarz: Alicja Górna (7560940) Gabinet: Oddział Podwale - Lekarska Przychodnia Specjalistyczna TRR Data: 8 maja 2023 Godzina: 09:00 - 09:05 Stan: Zakończona Typ wizyty: Porada psychiatryczna Skierowanie Nie Wywiad: zmiana leczenia , na prosbe pacjenta , epizod depresyjny . brak skutecznosci escitilu. zmiana na velaxin. bez obj psychozy,ms,ts przeczy. Rozpoznanie: F42 - Zaburzenia obsesyjno-kompulsyjne - nieprzewlekłe główne Zalecenia: Kod e-Recepty: 0392 – realizacja od teraz Velaxin® ER 37,5: kaps. o przedł. uwalnianiu, 37,5 mg / 1 op. po 28 szt. DS: 1x1 Odpłatność: 30% Kwetaplex XR: tabl. o przedł. uwalnianiu, 50 mg / 1 op. po 30 szt. DS: 1x1 Odpłatność: 100% Kod e-Recepty: 7314 – realizacja od teraz Velaxin® ER 37,5: kaps. o przedł. uwalnianiu, 37,5 mg / 1 op. po 28 szt. DS: 1x1 Odpłatność: 30% Kwetaplex XR: tabl. o przedł. uwalnianiu, 50 mg / 1 op. po 30 szt. DS: 1x1 Odpłatność: 100% Świadczenia: PORADA LEKARSKA KONTROLNA - 1,0000 szt. Lekarz: Alicja Górna (7560940) Gabinet: Oddział Podwale - Lekarska Przychodnia Specjalistyczna TRR Data: 19 czerwca 2023 Godzina: 08:30 - 08:35 Stan: Zakończona Typ wizyty: Porada psychiatryczna Skierowanie Nie Towarzystwo Rozwoju Rodziny o/w we Wrocławiu NIP: 8992446185, tel. 71-342-14-13 Strona 9 z 20 Numer księgi rejestrowej: 000000001739 Kod res. cz. VIII/VII/V: / /01 Wywiad: poprawa st psych , lepszy napęd . zmiana na velaxin. zadowolony ze zmiany . chce zwiekszyc dawkę. bez obj psychozy,ms,ts przeczy. Rozpoznanie: F42 - Zaburzenia obsesyjno-kompulsyjne - nieprzewlekłe główne Zalecenia: Kod e-Recepty: 4237 – realizacja od teraz Kwetaplex XR: tabl. o przedł. uwalnianiu, 50 mg / 1 op. po 30 szt. DS: 1x1 Odpłatność: 100% Velaxin® ER 150: kaps. o przedł. uwalnianiu, 150 mg / 1 op. po 28 szt. DS: 1x1 Odpłatność: 30% Kod e-Recepty: 0874 – realizacja od teraz Tranxene®: kaps., 10 mg / 1 op. po 30 szt. DS: 1x1 Odpłatność: 100% Świadczenia: PORADA LEKARSKA KONTROLNA - 1,0000 szt. Lekarz: Alicja Górna (7560940) Gabinet: Oddział Podwale - Lekarska Przychodnia Specjalistyczna TRR Data: 17 lipca 2023 Godzina: 08:50 - 08:55 Stan: Zakończona Typ wizyty: Porada psychiatryczna Skierowanie Nie Wywiad: \"Bylem na zabiegach tms 7 x dziennie , przez 5 dni w ramach badan klinicznych\" .Pacjent relacjonuje,że ewentualne zmiany moga wystapic w przeciagu 3 m-cy , na razie nie widzi jakichkolwiek efektow. obecnie duzo stresu , napiecia , nerwow, list przyszedl do babci o eksmisje . bez objawow psychozy, przeczy ms,ts . Rozpoznanie: F42 - Zaburzenia obsesyjno-kompulsyjne - nieprzewlekłe główne Zalecenia: Kod e-Recepty: 9085 – realizacja od teraz Tranxene®: kaps., 10 mg / 2 op. po 30 szt. DS: 1x1 Odpłatność: 100% Kod e-Recepty: 8801 – realizacja od teraz Kwetaplex XR: tabl. o przedł. uwalnianiu, 50 mg / 2 op. po 30 szt. DS: 1x1 Odpłatność: 100% Velaxin® ER 150: kaps. o przedł. uwalnianiu, 150 mg / 2 op. po 28 szt. DS: 1x1 Odpłatność: 30% Świadczenia: PORADA LEKARSKA KONTROLNA - 1,0000 szt. Towarzystwo Rozwoju Rodziny o/w we Wrocławiu NIP: 8992446185, tel. 71-342-14-13 Strona 10 z 20 Numer księgi rejestrowej: 000000001739 Kod res. cz. VIII/VII/V: / /01 Lekarz: Alicja Górna (7560940) Gabinet: Oddział Podwale - Lekarska Przychodnia Specjalistyczna TRR Data: 18 września 2023 Godzina: 08:35 - 08:40 Stan: Zakończona Typ wizyty: Porada psychiatryczna Skierowanie Nie Wywiad: wzrost dawki wenlafaxyny obecnie duzo stresu , napiecia , nerwow, list przyszedl do babci o eksmisje . bez objawow psychozy, przeczy ms,ts . Rozpoznanie: F42 - Zaburzenia obsesyjno-kompulsyjne - nieprzewlekłe główne Zalecenia: Kod e-Recepty: 2423 – realizacja od teraz Kwetaplex XR: tabl. o przedł. uwalnianiu, 50 mg / 2 op. po 30 szt. DS: 1x1 Odpłatność: 100% Velaxin® ER 150: kaps. o przedł. uwalnianiu, 150 mg / 2 op. po 28 szt. DS: 1x1 Odpłatność: 30% Velaxin® ER 75: kaps. o przedł. uwalnianiu, 75 mg / 1 op. po 28 szt. DS: 1x1 Odpłatność: 30% Świadczenia: PORADA LEKARSKA KONTROLNA - 1,0000 szt. Lekarz: Alicja Górna (7560940) Gabinet: Oddział Podwale - Lekarska Przychodnia Specjalistyczna TRR Data: 20 października 2023 Godzina: 08:30 - 08:35 Stan: Zakończona Typ wizyty: Porada psychiatryczna Skierowanie Nie Wywiad: wzrost dawki wenlafaxyny, tolerancja dobra. nie bylo epizodow wyłączenia ,. obecnie duzo stresu , napiecia , nerwow, obnizenie nastroju , wzrost kwetaplexu 50-0-150mg. bez objawow psychozy, przeczy ms,ts . Rozpoznanie: F42 - Zaburzenia obsesyjno-kompulsyjne - nieprzewlekłe główne Towarzystwo Rozwoju Rodziny o/w we Wrocławiu NIP: 8992446185, tel. 71-342-14-13 Strona 11 z 20 Numer księgi rejestrowej: 000000001739 Kod res. cz. VIII/VII/V: / /01 Zalecenia: Kod e-Recepty: 4040 – realizacja od teraz Tranxene®: kaps., 10 mg / 1 op. po 30 szt. DS: 1x1 Odpłatność: 100% Kod e-Recepty: 8076 – realizacja od teraz Kwetaplex XR: tabl. o przedł. uwalnianiu, 50 mg / 2 op. po 30 szt. DS: 1x1 Odpłatność: 100% Velaxin® ER 150: kaps. o przedł. uwalnianiu, 150 mg / 2 op. po 28 szt. DS: 1x1 Odpłatność: 30% Velaxin® ER 75: kaps. o przedł. uwalnianiu, 75 mg / 1 op. po 28 szt. DS: 1x1 Odpłatność: 30% Kwetaplex XR: tabl. o przedł. uwalnianiu, 150 mg / 1 op. po 60 szt. DS: 1x1 Odpłatność: 100% Sulpiryd Hasco: tabl., 100 mg / 1 op. po 24 szt. DS: 1x1 rano Odpłatność: B Świadczenia: PORADA LEKARSKA KONTROLNA - 1,0000 szt. Lekarz: Tomasz Piss (8178081) Gabinet: Oddział Podwale - Lekarska Przychodnia Specjalistyczna TRR Data: 5 grudnia 2023 Godzina: 10:05 - 10:10 Stan: Zakończona Typ wizyty: Porada psychiatryczna Skierowanie Nie Wywiad: stan psych wyrównany , bez obj psychozy, nasilonych zaburzeń nastroju, napędu, ms, ts przeczy,rr,tętno w/n,kontynuacja leczenia, sen wyrównany. Rozpoznanie: F42 - Zaburzenia obsesyjno-kompulsyjne - nieprzewlekłe główne Zalecenia: Kod e-Recepty: 0351 – realizacja od teraz Tranxene®: kaps., 10 mg / 1 op. po 30 szt. DS: 1x1 Odpłatność: 100% Świadczenia: PORADA LEKARSKA KONTROLNA - 1,0000 szt. Lekarz: Alicja Górna (7560940) Gabinet: Oddział Podwale - Lekarska Przychodnia Specjalistyczna TRR Data: 14 grudnia 2023 Godzina: 09:00 - 09:05 Stan: Zakończona Typ wizyty: Porada psychiatryczna Skierowanie Nie Towarzystwo Rozwoju Rodziny o/w we Wrocławiu NIP: 8992446185, tel. 71-342-14-13 Strona 12 z 20 Numer księgi rejestrowej: 000000001739 Kod res. cz. VIII/VII/V: / /01 Wywiad: wzrost dawki wenlafaxyny, tolerancja dobra. nie bylo epizodow wyłączenia ,. obecnie duzo stresu , napiecia , nerwow, obnizenie nastroju , sen nadmiarowy, spie po kilkanascie godzin bez objawow psychozy, przeczy ms,ts . pacjent korzystał z sesji hipnoterapii w Krakowie , ale ze względów finansowych zrezygnował. zmniejszenie ilosci koszmarow sennych,bez zmiany w zakresie ocd, nadal rytualy ilosc podobna , sprawdzanie drzwi, czy wszystko wylaczone, czy czegos nie zgubilem , sprawdzanie w myslach , co powiedzialem ,czego nie . uporczywe zamartwianie finansami , upadloscia konsumencką. Rozpoznanie: F42 - Zaburzenia obsesyjno-kompulsyjne - nieprzewlekłe główne Zalecenia: Kod e-Recepty: 8789 – realizacja od teraz Tranxene®: kaps., 10 mg / 1 op. po 30 szt. DS: 1x1 Odpłatność: 100% Kod e-Recepty: 9160 – realizacja od teraz Kwetaplex XR: tabl. o przedł. uwalnianiu, 50 mg / 2 op. po 30 szt. DS: 1x1 Odpłatność: 100% Velaxin® ER 150: kaps. o przedł. uwalnianiu, 150 mg / 2 op. po 28 szt. DS: 1x1 Odpłatność: 30% Velaxin® ER 75: kaps. o przedł. uwalnianiu, 75 mg / 1 op. po 28 szt. DS: 1x1 Odpłatność: 30% Kwetaplex XR: tabl. o przedł. uwalnianiu, 150 mg / 1 op. po 60 szt. DS: 1x1 Odpłatność: 100% Sulpiryd Hasco: tabl., 100 mg / 1 op. po 24 szt. DS: 1x1 rano Odpłatność: B Świadczenia: PORADA LEKARSKA KONTROLNA - 1,0000 szt. Oddział Podwale - Lekarska Przychodnia Specjalistyczna TRR Lekarz: Alicja Górna (7560940) Gabinet: Data: 4 stycznia 2024 Godzina: 08:45 - 08:50 Stan: Zakończona Typ wizyty: Porada psychiatryczna Skierowanie Nie Wywiad: nie bylo epizodow wyłączenia ,. nadal otwarte kwestie upadlosci konsumenckiej ,ryzyka eksmisji. nastroj reaktywnie nieznacznie obnizony , obecnie duzo stresu , napiecia , nerwow, obnizenie nastroju , sen nadmiarowy, \"spie po kilkanascie godzin\" bez objawow psychozy, przeczy ms,ts . Rozpoznanie: F42 - Zaburzenia obsesyjno-kompulsyjne - nieprzewlekłe główne Zalecenia: Kod e-Recepty: 1923 – realizacja od teraz Velaxin® ER 150: kaps. o przedł. uwalnianiu, 150 mg / 6 op. po 28 szt. DS: 2x1 Odpłatność: 30% Świadczenia: PORADA LEKARSKA KONTROLNA - 1,0000 szt. Towarzystwo Rozwoju Rodziny o/w we Wrocławiu NIP: 8992446185, tel. 71-342-14-13 Strona 13 z 20 Numer księgi rejestrowej: 000000001739 Kod res. cz. VIII/VII/V: / /01 Lekarz: Alicja Górna (7560940) Gabinet: Oddział Podwale - Lekarska Przychodnia Specjalistyczna TRR Data: 12 stycznia 2024 Godzina: 08:00 - 08:05 Stan: Zakończona Typ wizyty: Porada psychiatryczna Skierowanie Nie Wywiad: stan psych swiadomosc jasna , orientacja, pamiec niezaburzona . nastroj obojetny, naped p-m w /n , afekt miernie zywy . tok myslenia zwarty , tempo myslenia w/n, bez obj.psychozy, przeczy ms,ts ,potwierdza mysli rezygnacyjne , sen, laknienie zmienne. problemy mieszkaniowe obsesje i kompulsje na poziomie jak zwykle, 15 stycznia powtorkowa sesja przezczaszkowej stymulacji. ol-9 wydałam Rozpoznanie: F42 - Zaburzenia obsesyjno-kompulsyjne - nieprzewlekłe główne Świadczenia: PORADA LEKARSKA KONTROLNA - 1,0000 szt. Lekarz: Alicja Górna (7560940) Gabinet: Oddział Podwale - Lekarska Przychodnia Specjalistyczna TRR Data: 8 lutego 2024 Godzina: 09:15 - 09:20 Stan: Zakończona Typ wizyty: Porada psychiatryczna Skierowanie Nie Wywiad: kontynuacja leczenia Rozpoznanie: F42 - Zaburzenia obsesyjno-kompulsyjne - nieprzewlekłe główne Zalecenia: Kod e-Recepty: 9802 – realizacja od teraz Tranxene®: kaps., 10 mg / 1 op. po 30 szt. DS: 1x1 Odpłatność: 100% Świadczenia: PORADA LEKARSKA KONTROLNA - 1,0000 szt. Lekarz: Alicja Górna (7560940) Gabinet: Oddział Podwale - Lekarska Przychodnia Specjalistyczna TRR Data: 19 lutego 2024 Godzina: 08:10 - 08:15 Świadczenia: PORADA LEKARSKA KONTROLNA - 1,0000 szt. Stan: Zakończona Typ wizyty: Porada psychiatryczna Skierowanie Nie Towarzystwo Rozwoju Rodziny o/w we Wrocławiu NIP: 8992446185, tel. 71-342-14-13 Strona 14 z 20 Numer księgi rejestrowej: 000000001739 Kod res. cz. VIII/VII/V: / /01 Wywiad: kontynuacja leczenia, spokojny. Rozpoznanie: F42 - Zaburzenia obsesyjno-kompulsyjne - nieprzewlekłe główne Zalecenia: Kod e-Recepty: 0263 – realizacja od teraz Sulpiryd Hasco: tabl., 100 mg / 2 op. po 24 szt. DS: 1x1 rano Odpłatność: B Kwetaplex XR: tabl. o przedł. uwalnianiu, 150 mg / 1 op. po 60 szt. DS: 1x1 Odpłatność: 100% Kod e-Recepty: 5610 – realizacja od teraz Tranxene®: kaps., 10 mg / 3 op. po 30 szt. DS: 1x1 Odpłatność: 100% Lekarz: Alicja Górna (7560940) Gabinet: Oddział Podwale - Lekarska Przychodnia Specjalistyczna TRR Data: 15 kwietnia 2024 Godzina: 08:20 - 08:25 Stan: Zakończona Typ wizyty: Porada psychiatryczna Skierowanie Nie Wywiad: trudna sytuacja zyciowa, wrocil ojciec pacjenta , zamieszkał z ojcem. jest to bardzo trudne dla pacjenta, z powodu przemocy , ktorej podlegał ze strony ojca w dziecinstwie i okresie nastoletnim. Wzrost niepokoju , brak poczucia bezpieczenstwa. bez obj psychozy,ms,ts przeczy Rozpoznanie: F42 - Zaburzenia obsesyjno-kompulsyjne - nieprzewlekłe główne Zalecenia: Kod e-Recepty: 3644 – realizacja od teraz Sulpiryd Hasco: tabl., 100 mg / 2 op. po 24 szt. DS: 1x1 rano Odpłatność: B Kwetaplex XR: tabl. o przedł. uwalnianiu, 150 mg / 1 op. po 60 szt. DS: 1x1 Odpłatność: 100% Velaxin® ER 150: kaps. o przedł. uwalnianiu, 150 mg / 2 op. po 28 szt. DS: 2x1 Odpłatność: 30% Kod e-Recepty: 0041 – realizacja od teraz Tranxene®: kaps., 10 mg / 3 op. po 30 szt. DS: 1x1 Odpłatność: 100% Towarzystwo Rozwoju Rodziny o/w we Wrocławiu NIP: 8992446185, tel. 71-342-14-13 Strona 15 z 20 Numer księgi rejestrowej: 000000001739 Kod res. cz. VIII/VII/V: / /01 Świadczenia: PORADA LEKARSKA TERAPEUTYCZNA. - 1,0000 szt. Lekarz: Alicja Górna (7560940) Gabinet: Oddział Podwale - Lekarska Przychodnia Specjalistyczna TRR Data: 16 maja 2024 Godzina: 08:55 - 09:00 Stan: Zakończona Typ wizyty: Porada psychiatryczna Skierowanie Nie Wywiad: nieznaczna poprawa , mimo trudnej sytuacji rodzinnej. bez objawów psychozy . ms,ts przeczy. trudna sytuacja zyciowa, wrocil ojciec pacjenta , zamieszkał z ojcem. Rozpoznanie: F42 - Zaburzenia obsesyjno-kompulsyjne - nieprzewlekłe główne Zalecenia: Kod e-Recepty: 0293 – realizacja od teraz Velaxin® ER 150: kaps. o przedł. uwalnianiu, 150 mg / 6 op. po 28 szt. DS: 2x1 Odpłatność: 30% Kod e-Recepty: 0385 – realizacja od teraz Tranxene®: kaps., 10 mg / 1 op. po 30 szt. DS: 1x1 Odpłatność: 100% Świadczenia: PORADA LEKARSKA TERAPEUTYCZNA. - 1,0000 szt. Lekarz: Alicja Górna (7560940) Gabinet: Oddział Podwale - Lekarska Przychodnia Specjalistyczna TRR Data: 15 lipca 2024 Godzina: 08:35 - 08:40 Stan: Zakończona Typ wizyty: Porada psychiatryczna Skierowanie Nie Wywiad: pogorszenie stanu psych , mimo ,ze ojciec pacjenta wyprowadził sie z domu . bez objawów psychozy . ms,ts przeczy. chce podjąć leczenie esketaminy. Rozpoznanie: F42 - Zaburzenia obsesyjno-kompulsyjne - nieprzewlekłe główne F33 - Zaburzenia depresyjne nawracające - nieprzewlekłe towarzyszące Zalecenia: Kod e-Recepty: 9630 – realizacja od teraz Tranxene®: kaps., 10 mg / 1 op. po 30 szt. DS: 1x1 Odpłatność: 100% Kod e-Recepty: 4817 – realizacja od teraz Velaxin® ER 150: kaps. o przedł. uwalnianiu, 150 mg / 4 op. po 28 szt. DS: 2x1 Odpłatność: 30% Towarzystwo Rozwoju Rodziny o/w we Wrocławiu NIP: 8992446185, tel. 71-342-14-13 Strona 16 z 20 Numer księgi rejestrowej: 000000001739 Kod res. cz. VIII/VII/V: / /01 Dokumenty: Zaświadczenie lekarskie, pacjent leczony od 2009r z dgn zaburzen obses, zaburzen depresyjnych terapia psychodyminamiczna 7 lsat , poznawczo-behawioralna 3 lata, tms 3 cykle na klinice w ramach badań klinicznych, eriksonowska ok 5 lat, gestalt rok . Farmakoterapia nigdy nie przyniosla calkowitej remisji. mimo ,ze były stosowane wszystkie leki z grup ssri, snri, bupropion, moklobemid, mirtazapina, anafranil, kilka stabilizatorow nastroju, kwetiapina, sulpiryd itd. potwierdzona lekoopornosc. Świadczenia: PORADA LEKARSKA TERAPEUTYCZNA. - 1,0000 szt. Oddział Podwale - Lekarska Przychodnia Specjalistyczna TRR Lekarz: Alicja Górna (7560940) Gabinet: Data: 1 sierpnia 2024 Godzina: 09:15 - 09:20 Stan: Zakończona Typ wizyty: Porada psychiatryczna Skierowanie Nie Wywiad: Pogorszenie stanu psych,. bez objawów psychozy . myśli rezygnacyjne. ms ,ts przeczy. Rozpoznanie: F42 - Zaburzenia obsesyjno-kompulsyjne - nieprzewlekłe główne Zalecenia: Kod e-Recepty: 5646 – realizacja od teraz Tranxene®: kaps., 10 mg / 2 op. po 30 szt. DS: 1x1 Odpłatność: 100% Kod e-Recepty: 9833 – realizacja od teraz Velaxin® ER 150: kaps. o przedł. uwalnianiu, 150 mg / 2 op. po 28 szt. DS: 2x1 Odpłatność: 30% Sulpiryd Hasco: tabl., 100 mg / 2 op. po 24 szt. DS: 1x1 rano Odpłatność: B Świadczenia: PORADA LEKARSKA TERAPEUTYCZNA. - 1,0000 szt. Lekarz: Alicja Górna (7560940) Gabinet: Oddział Podwale - Lekarska Przychodnia Specjalistyczna TRR Data: 8 sierpnia 2024 Godzina: 14:30 - 14:45 Stan: Zakończona Typ wizyty: Porada psychiatryczna Skierowanie Nie Wywiad: Rozpoznanie: F42 - Zaburzenia obsesyjno-kompulsyjne - nieprzewlekłe główne F33 - Zaburzenia depresyjne nawracające - nieprzewlekłe towarzyszące Towarzystwo Rozwoju Rodziny o/w we Wrocławiu NIP: 8992446185, tel. 71-342-14-13 Strona 17 z 20 Numer księgi rejestrowej: 000000001739 Kod res. cz. VIII/VII/V: / /01 Dokumenty: Zaświadczenie lekarskie, Zaburzenie obsesyjno-kompulsyjne F42 Zaburzenia depresyjne F33.1 Leczony u psychiatry od 18rz, nie leczony odwykowo, choroby somatyczne astma oskrzelowa. 33letni kawaler, bezdzietny, wykształcenie średnie, technikum informatyczne ,mieszka z babką , utrzymuje się od lat z renty. Od wielu lat leczony w różnych pzp Wroclawia , diagnozowano f42 , ciężkie epizody depresji, aktualnie funkcjonuje od w stanie częściowej ,niezadawalajacej remisji choroby. Liczne kompulsje zabierające wiele czasu w ciągu dnia nadal obecne. Dodatkowo okresowo rozwija epizody depresyjne: obniżenie nastroju, redukcja napędu , związane z reaktywnymi problemami , sezonowością lub bez uchwytnej przyczyny. stan psych świadomość jasna , orientacja, pamięć niezaburzona . nastrój obojętny, napęd p-m w /n , afekt miernie żywy . tok myślenia zwarty , tempo myślenia w/n, bez obj.psychozy, przeczy ms,ts ,potwierdza myśli rezygnacyjne , sen okresowo zaburzony ,rozregulowany rytm dobowy, łaknienie w/n . Świadczenia: PORADA LEKARSKA TERAPEUTYCZNA. - 1,0000 szt. Lekarz: Alicja Górna (7560940) Gabinet: Oddział Podwale - Lekarska Przychodnia Specjalistyczna TRR Data: 12 września 2024 Godzina: 09:15 - 09:20 Stan: Zakończona Typ wizyty: Porada psychiatryczna Skierowanie Nie Wywiad: Pacjent zgłasza obnizenie nastroju , napedu , napiecie , mysli rezygnacyjne . Rozpoznanie: F33.1 - Zaburzenie depresyjne nawracające, obecnie epizod depresyjny umiarkowany - nieprzewlekłe główne Zalecenia: Kod e-Recepty: 4902 – realizacja od 12.09 Tranxene®: kaps., 10 mg / 2 op. po 30 szt. DS: 1x1 Odpłatność: 100% Świadczenia: PORADA LEKARSKA TERAPEUTYCZNA. - 1,0000 szt. Lekarz: Tomasz Piss (8178081) Gabinet: Oddział Podwale - Lekarska Przychodnia Specjalistyczna TRR Data: 8 października 2024 Godzina: 09:50 - 09:55 Stan: Zakończona Typ wizyty: Porada psychiatryczna Skierowanie Nie Wywiad: zaświadczenie do przychodni-leczenie TNS Rozpoznanie: F33.1 - Zaburzenie depresyjne nawracające, obecnie epizod depresyjny umiarkowany - nieprzewlekłe główne Towarzystwo Rozwoju Rodziny o/w we Wrocławiu NIP: 8992446185, tel. 71-342-14-13 Strona 18 z 20 Numer księgi rejestrowej: 000000001739 Kod res. cz. VIII/VII/V: / /01 Zalecenia: zaświadczenie o leczeniu Świadczenia: PORADA LEKARSKA TERAPEUTYCZNA. - 1,0000 szt. Lekarz: Alicja Górna (7560940) Gabinet: Oddział Podwale - Lekarska Przychodnia Specjalistyczna TRR Data: 21 listopada 2024 Godzina: 08:00 - 08:05 Stan: Zakończona Typ wizyty: Porada psychiatryczna Skierowanie Nie Wywiad: Pacjent prosi o odstawienie bzd ,. nastroj miernie reaktywnie obnizony. bez objawow psychozy,ms,ts przeczy. Rozpoznanie: F42 - Zaburzenia obsesyjno-kompulsyjne - nieprzewlekłe główne F33 - Zaburzenia depresyjne nawracające - nieprzewlekłe towarzyszące Zalecenia: Kod e-Recepty: 6825 – realizacja od 21.11 Tranxene®: kaps., 5 mg / 1 op. po 30 szt. DS: 1x1 szt. Odpłatność: 100% Kod e-Recepty: 9181 – realizacja od 21.11 Velaxin® ER 150: kaps. o przedł. uwalnianiu, 150 mg / 1 op. po 28 szt. DS: 1x1 szt. Odpłatność: 30% Velaxin® ER 37,5: kaps. o przedł. uwalnianiu, 37,5 mg / 1 op. po 28 szt. DS: 1x1 w poludnie Odpłatność: 30% Velaxin® ER 75: kaps. o przedł. uwalnianiu, 75 mg / 1 op. po 28 szt. DS: 1x1 w poludnie Odpłatność: 30% Świadczenia: PORADA LEKARSKA TERAPEUTYCZNA. - 1,0000 szt. Ubezpieczenie NFZ Data złożenia Ważne do Rodzaj Stan 22 listopada 2024 10:25 22 listopada 2024 Ewuś (L0124M01105886702) Ubezpieczony 21 listopada 2024 03:03 21 listopada 2024 Ewuś (L0124M01105405459) Ubezpieczony Towarzystwo Rozwoju Rodziny o/w we Wrocławiu NIP: 8992446185, tel. 71-342-14-13 Strona 19 z 20 Numer księgi rejestrowej: 000000001739 Kod res. cz. VIII/VII/V: / /01 20 listopada 2024 13:40 20 listopada 2024 Ewuś (L0124M01105252547) Ubezpieczony 19 listopada 2024 11:44 19 listopada 2024 Ewuś (L0124M01104879553) Ubezpieczony 8 października 2024 01:06 8 października 2024 Ewuś (L0124M01002095755) Ubezpieczony 7 października 2024 12:06 7 października 2024 Ewuś (L0124M01001958937) Ubezpieczony 12 września 2024 00:53 12 września 2024 Ewuś (L0124M00903222155) Ubezpieczony 11 września 2024 09:57 11 września 2024 Ewuś (L0124M00903085937) Ubezpieczony 8 sierpnia 2024 00:49 8 sierpnia 2024 Ewuś (L0124M00802085342) Ubezpieczony 1 sierpnia 2024 00:52 1 sierpnia 2024 Ewuś (L0124M00800019979) Ubezpieczony 31 lipca 2024 12:51 31 lipca 2024 Ewuś (L0124M00709329859) Ubezpieczony 15 lipca 2024 00:45 15 lipca 2024 Ewuś (L0124M00704312273) Ubezpieczony 12 lipca 2024 11:18 12 lipca 2024 Ewuś (L0124M00703911571) Ubezpieczony 16 maja 2024 00:55 16 maja 2024 Ewuś (L0124M00504909853) Ubezpieczony 15 maja 2024 12:23 15 maja 2024 Ewuś (L0124M00504784082) Ubezpieczony 18 kwietnia 2024 13:16 18 kwietnia 2024 Ewuś (L0124M00408432714) Nieubezpieczony 15 kwietnia 2024 00:52 15 kwietnia 2024 Ewuś (L0124M00406496737) Nieubezpieczony 15 kwietnia 2024 13:45 15 kwietnia 2024 Oświadczenie pacjenta Ubezpieczony Data złożenia Ważne do Rodzaj Stan 12 kwietnia 2024 11:24 12 kwietnia 2024 Ewuś (L0124M00405949620) Nieubezpieczony 19 lutego 2024 01:29 19 lutego 2024 Ewuś (L0124M00207965890) Ubezpieczony 16 lutego 2024 11:39 16 lutego 2024 Ewuś (L0124M00207373265) Ubezpieczony 8 lutego 2024 01:41 8 lutego 2024 Ewuś (L0124M00203182707) Ubezpieczony 7 lutego 2024 10:32 7 lutego 2024 Ewuś (L0124M00202964626) Ubezpieczony 5 lutego 2024 13:52 5 lutego 2024 Ewuś (L0124M00201920445) Ubezpieczony 12 stycznia 2024 01:29 12 stycznia 2024 Ewuś (L0124M00104596456) Ubezpieczony 11 stycznia 2024 14:44 11 stycznia 2024 Ewuś (L0124M00104472706) Ubezpieczony 4 stycznia 2024 01:39 4 stycznia 2024 Ewuś (L0124M00101322842) Ubezpieczony 3 stycznia 2024 11:12 3 stycznia 2024 Ewuś (L0124M00101116575) Ubezpieczony 14 grudnia 2023 01:37 14 grudnia 2023 Ewuś (L0123M01205150011) Ubezpieczony 13 grudnia 2023 12:21 13 grudnia 2023 Ewuś (L0123M01204985949) Ubezpieczony Towarzystwo Rozwoju Rodziny o/w we Wrocławiu NIP: 8992446185, tel. 71-342-14-13 Strona 20 z 20 Numer księgi rejestrowej: 000000001739 Kod res. cz. VIII/VII/V: / /01 7 grudnia 2023 01:36 7 grudnia 2023 Ewuś (L0123M01202420138) Ubezpieczony 6 grudnia 2023 10:17 6 grudnia 2023 Ewuś (L0123M01202201708) Ubezpieczony 5 grudnia 2023 01:46 5 grudnia 2023 Ewuś (L0123M01201431558) Ubezpieczony 4 grudnia 2023 01:30 4 grudnia 2023 Ewuś (L0123M01200928684) Ubezpieczony 1 grudnia 2023 13:13 1 grudnia 2023 Ewuś (L0123M01200433634) Ubezpieczony 20 października 2023 01:24 20 października 2023 Ewuś (L0123M01007751973) Ubezpieczony 19 października 2023 13:18 19 października 2023 Ewuś (L0123M01007614023) Ubezpieczony 18 września 2023 01:31 18 września 2023 Ewuś (L0123M00906248069) Ubezpieczony 15 września 2023 12:14 15 września 2023 Ewuś (L0123M00905734385) Ubezpieczony 17 lipca 2023 01:24 17 lipca 2023 Ewuś (L0123M00705977187) Ubezpieczony 14 lipca 2023 09:42 14 lipca 2023 Ewuś (L0123M00705407921) Ubezpieczony 10 lipca 2023 01:23 10 lipca 2023 Ewuś (L0123M00703306651) Ubezpieczony 19 czerwca 2023 01:33 19 czerwca 2023 Ewuś (L0123M00607353669) Ubezpieczony 16 czerwca 2023 11:11 16 czerwca 2023 Ewuś (L0123M00606768184) Ubezpieczony 8 maja 2023 08:00 8 maja 2023 Ewuś (L0123M00502421426) Ubezpieczony 5 maja 2023 09:52 5 maja 2023 Ewuś (L0123M00501639250) Ubezpieczony 27 kwietnia 2023 05:29 27 kwietnia 2023 Ewuś (L0123M00410733451) Ubezpieczony 26 kwietnia 2023 11:39 26 kwietnia 2023 Ewuś (L0123M00410444134) Ubezpieczony 13 lutego 2023 01:27 13 lutego 2023 Ewuś (L0123M00204579347) Ubezpieczony 10 lutego 2023 11:18 10 lutego 2023 Ewuś (L0123M00204066816) Ubezpieczony 12 stycznia 2023 01:29 12 stycznia 2023 Ewuś (L0123M00104403778) Ubezpieczony 11 stycznia 2023 10:21 11 stycznia 2023 Ewuś (L0123M00104236895) Ubezpieczony 5 stycznia 2023 01:28 5 stycznia 2023 Ewuś (L0123M00101816465) Ubezpieczony 3 stycznia 2023 13:06 3 stycznia 2023 Ewuś (L0123M00101180660) Ubezpieczony 19 grudnia 2022 01:27 19 grudnia 2022 Ewuś (L0122M01207531189) Ubezpieczony 16 grudnia 2022 14:19 16 grudnia 2022 Ewuś (L0122M01206980345) Ubezpieczony 1 grudnia 2022 01:30 1 grudnia 2022 Ewuś (L0122M01200081163) Ubezpieczony 24 listopada 2022 01:29 24 listopada 2022 Ewuś (L0122M01108635045) Ubezpieczony 17 listopada 2022 01:31 17 listopada 2022 Ewuś (L0122M01105935008) Ubezpieczony 16 listopada 2022 12:21 16 listopada 2022 Ewuś (L0122M01105770529) Ubezpieczony 10 listopada 2022 15:23 10 listopada 2022 Ewuś (L0122M01103906402) Ubezpieczony",
+  "studyProtocol": "{\n  \"inclusion\": [\n    {\n      \"id\": \"IC1\",\n      \"name\": \"Zgoda na udział w badaniu (ICF)\",\n      \"details\": \"Pacjent musi podpisać świadomą zgodę na udział w badaniu.\"\n    },\n    {\n      \"id\": \"IC2\",\n      \"name\": \"Wiek ≥18 lat\",\n      \"details\": \"Pacjent musi mieć ukończone 18 lat w momencie screeningu.\"\n    },\n    {\n      \"id\": \"IC3\",\n      \"name\": \"Diagnoza dużej depresji\",\n      \"details\": \"Duża depresja bez objawów psychotycznych (pojedynczy lub nawracający epizod wg DSM-5) potwierdzona przez MINI 7.0.2.\"\n    },\n    {\n      \"id\": \"IC4\",\n      \"name\": \"Czas trwania pierwszego epizodu\",\n      \"details\": \"Jeśli obecny epizod jest pierwszym w życiu, musi trwać ≥6 miesięcy i ≤2 lata w momencie screeningu.\"\n    },\n    {\n      \"id\": \"IC5\",\n      \"name\": \"Wynik MADRS ≥20\",\n      \"details\": \"Całkowity wynik w skali MADRS ≥20 podczas screeningu i wizyty początkowej.\"\n    },\n    {\n      \"id\": \"IC6\",\n      \"name\": \"Lekooporność (TRD) wg MGH-ATRQ (specyficzne dla badania)\",\n      \"details\": \"Niepowodzenie co najmniej dwóch (2) do czterech (4) różnych, adekwatnych prób leczenia przeciwdepresyjnego (monoterapia lub leczenie adjuwantowe) w obecnym epizodzie depresyjnym. Adekwatność próby leczenia oceniana jest wyłącznie na podstawie specyficznego dla tego badania formularza MGH-ATRQ (minimalna dawka i czas trwania). Dodatkowo, dla Polski, uwzględnia się Kwetiapinę 150mg jako leczenie adjuwantowe. Szczegóły poniżej.\",\n      \"mghAtrqPoland\": {\n        \"minTrialDurationWeeks\": \"co najmniej 8 lub 10 tygodni\",\n        \"medications\": [\n          {\n            \"drugName\": \"Doxepin\",\n            \"brandName\": \"Adapin\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Clomipramine\",\n            \"brandName\": \"Anafranil\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Amoxapine\",\n            \"brandName\": \"Asendin\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Amitriptyline\",\n            \"brandName\": \"Endep/Elavil\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Maprotiline\",\n            \"brandName\": \"Ludiomil\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Desipramine\",\n            \"brandName\": \"Norpramin\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Nortriptyline\",\n            \"brandName\": \"Pamelor\",\n            \"minDose\": \"75mg/d\"\n          },\n          {\n            \"drugName\": \"Doxepin \",\n            \"brandName\": \"Sinequan\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Trimipramine\",\n            \"brandName\": \"Surmontil\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Imipramine\",\n            \"brandName\": \"Tofranil\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Protriptyline\",\n            \"brandName\": \"Vivactil\",\n            \"minDose\": \"30mg/d\"\n          },\n          {\n            \"drugName\": \"Pipofezine\",\n            \"brandName\": \"Azafen\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Noxiptiline\",\n            \"brandName\": \"Agedal/Elronon\",\n            \"minDose\": \"100mg/d\"\n          },\n          {\n            \"drugName\": \"Isocarboxazid\",\n            \"brandName\": \"Marplan\",\n            \"minDose\": \"30mg/d\",\n            \"notes\": \"MAOI\"\n          },\n          {\n            \"drugName\": \"Phenelzine\",\n            \"brandName\": \"Nardil\",\n            \"minDose\": \"45mg/d\",\n            \"notes\": \"MAOI\"\n          },\n          {\n            \"drugName\": \"Tranylcypromine\",\n            \"brandName\": \"Parnate\",\n            \"minDose\": \"30mg/d\",\n            \"notes\": \"MAOI\"\n          },\n          {\n            \"drugName\": \"Selegiline patch\",\n            \"brandName\": \"Emsam\",\n            \"minDose\": \"6 mg/24 hrs\",\n            \"notes\": \"MAOI\"\n          },\n          {\n            \"drugName\": \"Moclobemide\",\n            \"brandName\": \"Aurorix\",\n            \"minDose\": \"300 mg/d\",\n            \"notes\": \"MAOI (RIMA)\"\n          },\n          {\n            \"drugName\": \"Pirlindole\",\n            \"brandName\": \"Pirazidol\",\n            \"minDose\": \"200 mg/d\",\n            \"notes\": \"MAOI (RIMA)\"\n          },\n          {\n            \"drugName\": \"Escitalopram\",\n            \"brandName\": \"Lexapro\",\n            \"minDose\": \"10mg/d\",\n            \"notes\": \"SSRI\"\n          },\n          {\n            \"drugName\": \"Fluvoxamine\",\n            \"brandName\": \"Luvox\",\n            \"minDose\": \"50mg/d\",\n            \"notes\": \"SSRI\"\n          },\n          {\n            \"drugName\": \"Paroxetine\",\n            \"brandName\": \"Paxil\",\n            \"minDose\": \"20/25mg/d\",\n            \"notes\": \"SSRI - dawka 20 LUB 25 mg/d\"\n          },\n          {\n            \"drugName\": \"Fluoxetine\",\n            \"brandName\": \"Prozac\",\n            \"minDose\": \"20mg/d\",\n            \"notes\": \"SSRI\"\n          },\n          {\n            \"drugName\": \"Sertraline\",\n            \"brandName\": \"Zoloft\",\n            \"minDose\": \"50mg/d\",\n            \"notes\": \"SSRI\"\n          },\n          {\n            \"drugName\": \"Citalopram\",\n            \"brandName\": \"Celexa\",\n            \"minDose\": \"20mg/d\",\n            \"notes\": \"SSRI\"\n          },\n          {\n            \"drugName\": \"Vilazodone\",\n            \"brandName\": \"Viibryd\",\n            \"minDose\": \"40mg/d\"\n          },\n          {\n            \"drugName\": \"Vortioxetine\",\n            \"brandName\": \"Brintellix\",\n            \"minDose\": \"10mg/d\"\n          },\n          {\n            \"drugName\": \"Venlafaxine\",\n            \"brandName\": \"Effexor\",\n            \"minDose\": \"150mg/d\",\n            \"notes\": \"SNRI\"\n          },\n          {\n            \"drugName\": \"Duloxetine\",\n            \"brandName\": \"Cymbalta\",\n            \"minDose\": \"60mg/d\",\n            \"notes\": \"SNRI\"\n          },\n          {\n            \"drugName\": \"Desvenlafaxine\",\n            \"brandName\": \"Pristiq\",\n            \"minDose\": \"50mg/d\",\n            \"notes\": \"SNRI\"\n          },\n          {\n            \"drugName\": \"Milnacipran\",\n            \"brandName\": \"Savella\",\n            \"minDose\": \"100mg/d\",\n            \"notes\": \"SNRI\"\n          },\n          {\n            \"drugName\": \"Levomilnacipran\",\n            \"brandName\": \"Fetzima\",\n            \"minDose\": \"40mg/d\",\n            \"notes\": \"SNRI\"\n          },\n          {\n            \"drugName\": \"Trazodone\",\n            \"brandName\": \"Desyrel\",\n            \"minDose\": \"300mg/d\"\n          },\n          {\n            \"drugName\": \"Nefazodone\",\n            \"brandName\": \"Serzone\",\n            \"minDose\": \"300mg/d\"\n          },\n          {\n            \"drugName\": \"Bupropion\",\n            \"brandName\": \"Wellbutrin\",\n            \"minDose\": \"300mg/d\"\n          },\n          {\n            \"drugName\": \"Mirtazapine\",\n            \"brandName\": \"Remeron\",\n            \"minDose\": \"15mg/d\"\n          },\n          {\n            \"drugName\": \"Agomelatine\",\n            \"brandName\": \"Valdoxan\",\n            \"minDose\": \"25mg/d\"\n          },\n          {\n            \"drugName\": \"Tianeptine\",\n            \"brandName\": \"Stablon\",\n            \"minDose\": \"37.5mg/d\"\n          },\n          {\n            \"drugName\": \"Reboxetine\",\n            \"brandName\": \"Edronax\",\n            \"minDose\": \"4 mg/d\"\n          },\n          {\n            \"drugName\": \"Mianserin\",\n            \"brandName\": \"Bolvidon/Depnon, Norval/Tolvon\",\n            \"minDose\": \"30 mg/d\"\n          },\n          {\n            \"drugName\": \"Opipramol\",\n            \"brandName\": \"Insidon\",\n            \"minDose\": \"150 mg/d\"\n          },\n          {\n            \"drugName\": \"Kwetiapina (jako leczenie adjuwantowe)\",\n            \"minDose\": \"150 mg/dzień\",\n            \"notes\": \"Specyficzne dla Polski, leczenie adjuwantowe przez co najmniej 8 lub 10 tygodni.\"\n          }\n        ],\n        \"generalNotes\": [\n          \"Powyższa lista leków i dawek opiera się wyłącznie na specyficznym formularzu MGH-ATRQ dostarczonym dla tego badania.\",\n          \"Za adekwatną próbę leczenia uznaje się stosowanie leku w określonej minimalnej dawce (lub wyższej) przez co najmniej 8 lub 10 tygodni.\",\n          \"Kwetiapina 150mg/dzień jest uznawana w Polsce jako adekwatne leczenie adjuwantowe trwające co najmniej 8 lub 10 tygodni.\",\n          \"Ocena powinna ściśle bazować na powyższych kryteriach. Należy zwrócić uwagę na instrukcję na formularzu MGH-ATRQ dotyczącą sprawdzania, czy lek był dodany w celu augmentacji/wzmocnienia efektu antydepresyjnego.\"\n        ]\n      }\n    },\n    {\n      \"id\": \"IC7\",\n      \"name\": \"Odstawienie leków\",\n      \"details\": \"Zgoda na odstawienie wszystkich zabronionych leków i potwierdzenie ich odstawienia przed wizytą początkową.\"\n    },\n    {\n      \"id\": \"IC8\",\n      \"name\": \"Zdolność do udziału\",\n      \"details\": \"Możliwość wykonania wszystkich procedur bez pomocy i zgoda na przestrzeganie harmonogramu wizyt.\"\n    }\n  ],\n  \"psychiatricExclusion\": [\n    {\n      \"id\": \"EC1\",\n      \"name\": \"Historia zaburzeń afektywnych dwubiegunowych\",\n      \"details\": \"Obecność lub historia zaburzeń afektywnych dwubiegunowych.\"\n    },\n    {\n      \"id\": \"EC2\",\n      \"name\": \"Zaburzenia psychotyczne\",\n      \"details\": \"Obecność lub historia schizofrenii, zaburzenia schizofreniformnego, schizoafektywnego lub innych zaburzeń psychotycznych.\"\n    },\n    {\n      \"id\": \"EC3\",\n      \"name\": \"Zaburzenia osobowości\",\n      \"details\": \"Zaburzenia osobowości: paranoiczne, schizoidalne, schizotypowe, histrioniczne, narcystyczne lub inne poważne współistniejące zaburzenia psychiatryczne.\"\n    },\n    {\n      \"id\": \"EC4\",\n      \"name\": \"Zaburzenie osobowości typu borderline\",\n      \"details\": \"Zaburzenie osobowości z pogranicza potwierdzone wywiadem lub modułem MINI plus.\"\n    },\n    {\n      \"id\": \"EC5\",\n      \"name\": \"Aktywne zaburzenia współistniejące\",\n      \"details\": \"Aktywne PTSD, OCD lub anoreksja potwierdzone wywiadem i MINI 7.0.2.\"\n    },\n    {\n      \"id\": \"EC6\",\n      \"name\": \"Hospitalizacja psychiatryczna\",\n      \"details\": \"Hospitalizacja psychiatryczna w ciągu 6 miesięcy przed screeningiem.\"\n    },\n    {\n      \"id\": \"EC7\",\n      \"name\": \"Historia leczenia inwazyjnego\",\n      \"details\": \"Stosowanie inwazyjnych metod leczenia (ECT, DBS, VNS) w obecnym epizodzie.\"\n    },\n    {\n      \"id\": \"EC8\",\n      \"name\": \"Historia leczenia nieinwazyjnego\",\n      \"details\": \"Stosowanie nieinwazyjnych metod leczenia (TMS) w ciągu 6 miesięcy przed screeningiem.\"\n    },\n    {\n      \"id\": \"EC9\",\n      \"name\": \"Aktywna psychoterapia\",\n      \"details\": \"Udział w programie psychoterapii, który nie pozostanie stabilny przez 9 tygodni.\"\n    },\n    {\n      \"id\": \"EC10\",\n      \"name\": \"Uzależnienia\",\n      \"details\": \"Uzależnienie od alkoholu lub substancji psychoaktywnych w ciągu 12 miesięcy przed screeningiem.\"\n    },\n    {\n      \"id\": \"EC11\",\n      \"name\": \"Ryzyko samobójcze\",\n      \"details\": \"Znaczące ryzyko samobójcze według określonych kryteriów.\"\n    },\n    {\n      \"id\": \"EC12\",\n      \"name\": \"Depresja wtórna\",\n      \"details\": \"Depresja wtórna do przyczyn medycznych lub polekowych.\"\n    },\n    {\n      \"id\": \"EC13\",\n      \"name\": \"Przeciwwskazania osobiste\",\n      \"details\": \"Okoliczności osobiste lub zachowanie uniemożliwiające bezpieczny udział.\"\n    },\n    {\n      \"id\": \"EC14\",\n      \"name\": \"Historia rodzinna\",\n      \"details\": \"Występowanie schizofrenii, zaburzenia schizoafektywnego lub ChAD I w rodzinie.\"\n    },\n    {\n      \"id\": \"EC15\",\n      \"name\": \"Ekspozycja na psychodeliki\",\n      \"details\": \"Stosowanie klasycznych psychodelików w ciągu ostatniego roku lub obecnego epizodu.\"\n    }\n  ],\n  \"medicalExclusion\": [\n    {\n      \"id\": \"GMEC1\",\n      \"name\": \"Ciąża lub karmienie\",\n      \"details\": \"Pacjentki w ciąży, karmiące lub planujące ciążę.\"\n    },\n    {\n      \"id\": \"GMEC2\",\n      \"name\": \"Antykoncepcja\",\n      \"details\": \"Brak zgody na stosowanie skutecznej antykoncepcji podczas badania.\"\n    },\n    {\n      \"id\": \"GMEC3\",\n      \"name\": \"Testy ciążowe\",\n      \"details\": \"Brak negatywnego wyniku testu ciążowego przed rozpoczęciem badania.\"\n    },\n    {\n      \"id\": \"GMEC4\",\n      \"name\": \"Dawstwo nasienia\",\n      \"details\": \"Planowane oddawanie nasienia w ciągu 3 miesięcy po zakończeniu badania.\"\n    },\n    {\n      \"id\": \"GMEC5\",\n      \"name\": \"Choroby układu krążenia\",\n      \"details\": \"Historia udaru, zawału, niekontrolowane nadciśnienie, tachykardia, wydłużony QT lub arytmia.\"\n    },\n    {\n      \"id\": \"GMEC6\",\n      \"name\": \"Cukrzyca\",\n      \"details\": \"Cukrzyca typu 1 lub niekontrolowana typu 2 (HbA1c >8%).\"\n    },\n    {\n      \"id\": \"GMEC7\",\n      \"name\": \"Choroby tarczycy\",\n      \"details\": \"Niestabilna choroba tarczycy lub nieprawidłowe wyniki badań.\"\n    },\n    {\n      \"id\": \"GMEC8\",\n      \"name\": \"Padaczka\",\n      \"details\": \"Występowanie zaburzeń drgawkowych.\"\n    },\n    {\n      \"id\": \"GMEC9\",\n      \"name\": \"Wyniki badań\",\n      \"details\": \"Istotne klinicznie nieprawidłowości w badaniach laboratoryjnych.\"\n    },\n    {\n      \"id\": \"GMEC10\",\n      \"name\": \"Inne choroby\",\n      \"details\": \"Inne istotne schorzenia mogące wpływać na interpretację wyników.\"\n    },\n    {\n      \"id\": \"GMEC11\",\n      \"name\": \"Udział w innych badaniach\",\n      \"details\": \"Aktualny udział w innym badaniu interwencyjnym.\"\n    },\n    {\n      \"id\": \"GMEC12\",\n      \"name\": \"Nadwrażliwość\",\n      \"details\": \"Nadwrażliwość na badany lek lub substancje pomocnicze.\"\n    }\n  ]\n}"
+}

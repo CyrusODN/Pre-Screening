@@ -1,0 +1,709 @@
+{
+  "metadata": {
+    "id": "analysis_mbkl0x4u_qalbnv7vt",
+    "patientId": "[PACJENT_004]",
+    "analysisType": "single-agent",
+    "modelUsed": "gemini",
+    "createdAt": "2025-06-06T09:07:34.194Z",
+    "updatedAt": "2025-06-06T09:07:34.226Z",
+    "status": "completed",
+    "version": "1.0.0",
+    "tags": [
+      "Nadciśnienie tętnicze (prawdopodobnie kontrolowane)",
+      "Podejrzenie choroby niedokrwiennej serca (w trakcie diagnostyki w przeszłości)",
+      "F15.5 Zaburzenia psychiczne i zaburzenia zachowania spowodowane używaniem substancji stymulujących (w historii)",
+      "F23 Ostre i przemijające zaburzenia psychotyczne (w historii)",
+      "single-agent"
+    ],
+    "notes": "[PACJENT_004] - Analiza - 6.06.2025 11:07"
+  },
+  "patientData": {
+    "summary": {
+      "id": "[PACJENT_004]",
+      "age": 32,
+      "mainDiagnosis": "F33.0 Zaburzenie depresyjne nawracające, obecnie epizod depresyjny umiarkowany/łagodny",
+      "comorbidities": [
+        "Nadciśnienie tętnicze (prawdopodobnie kontrolowane)",
+        "Podejrzenie choroby niedokrwiennej serca (w trakcie diagnostyki w przeszłości)",
+        "F15.5 Zaburzenia psychiczne i zaburzenia zachowania spowodowane używaniem substancji stymulujących (w historii)",
+        "F23 Ostre i przemijające zaburzenia psychotyczne (w historii)"
+      ]
+    },
+    "episodeEstimation": {
+      "scenarios": [
+        {
+          "id": 1,
+          "description": "Obecny, główny epizod depresyjny rozpoczął się w czerwcu 2023 roku, z intensyfikacją objawów i formalnym rozpoczęciem leczenia psychiatrycznego w styczniu 2024 roku.",
+          "evidence": "Notatka z wizyty 2024-01-29 (NURT): 'Od czerwca 2023r. narastające objawy depresyjne'. Notatka z wizyty 2025-02-24 (Remedy): 'Od ponad roku leczy się w centrum terapii Nurt w Gdańsku z powodu epizodu depresyjnego (początek w grudniu 2023)' - grudzień 2023 mógł być momentem zgłoszenia się do Nurt lub kolejnym nasileniem."
+        }
+      ],
+      "conclusion": "Najbardziej prawdopodobny początek obecnego epizodu depresyjnego to czerwiec 2023 roku. Pacjent ma diagnozę F33.0 (zaburzenie depresyjne nawracające), co sugeruje wcześniejsze epizody, jednak dokumentacja z 2024-01-29 wskazuje 'dotychczas nieleczony psychiatrycznie', choć wspomina o doraźnym przyjmowaniu Afobamu i Trittico od lekarza rodzinnego w przeszłości z powodu zaburzeń snu."
+    },
+    "trdAnalysis": {
+      "episodeStartDate": "2023-06-01",
+      "pharmacotherapy": [
+        {
+          "id": "drug-1-period-1",
+          "drugName": "Kandesartan",
+          "shortName": "KAN",
+          "startDate": null,
+          "endDate": null,
+          "dose": "40mg 1x/d (Revival)",
+          "attemptGroup": 0,
+          "notes": "Lek na nadciśnienie tętnicze. Data rozpoczęcia nieznana, odnotowany jako przyjmowany na wizycie 2024-01-29. Nie dotyczy MGH-ATRQ.; Nieprawidłowa lub brakująca data rozpoczęcia."
+        },
+        {
+          "id": "drug-2-period-1",
+          "drugName": "Bisoprolol",
+          "shortName": "BIS",
+          "startDate": null,
+          "endDate": null,
+          "dose": "nieznana dawka (Bibloc)",
+          "attemptGroup": 0,
+          "notes": "Lek na tachykardię. Data rozpoczęcia i dawka nieznane, odnotowany jako przyjmowany na wizycie 2024-01-29. Nie dotyczy MGH-ATRQ.; Nieprawidłowa lub brakująca data rozpoczęcia."
+        },
+        {
+          "id": "drug-3-period-1",
+          "drugName": "Alprazolam",
+          "shortName": "ALP",
+          "startDate": "2024-01-29",
+          "endDate": "2024-02-11",
+          "dose": "0.25mg doraźnie, max 2-3 tabl./dzień",
+          "attemptGroup": 0,
+          "notes": "Benzodiazepina, przepisana na 2 tygodnie. Nie dotyczy MGH-ATRQ."
+        },
+        {
+          "id": "drug-4-period-1",
+          "drugName": "Sertralina",
+          "shortName": "SER",
+          "startDate": "2024-01-29",
+          "endDate": "2024-02-04",
+          "dose": "25mg/d",
+          "attemptGroup": 0,
+          "notes": "Początkowa dawka. Nieadekwatna wg kryt. MGH-ATRQ badania: dawka za niska."
+        },
+        {
+          "id": "drug-4-period-2",
+          "drugName": "Sertralina",
+          "shortName": "SER",
+          "startDate": "2024-02-05",
+          "endDate": "2024-02-11",
+          "dose": "50mg/d",
+          "attemptGroup": 0,
+          "notes": "Adekwatna dawka wg kryt. MGH-ATRQ badania, ale czas trwania za krótki (1 tydzień)."
+        },
+        {
+          "id": "drug-4-period-3",
+          "drugName": "Sertralina",
+          "shortName": "SER",
+          "startDate": "2024-02-12",
+          "endDate": "2024-02-25",
+          "dose": "100mg/d",
+          "attemptGroup": 0,
+          "notes": "Adekwatna dawka wg kryt. MGH-ATRQ badania, ale czas trwania za krótki (2 tygodnie)."
+        },
+        {
+          "id": "drug-4-period-4",
+          "drugName": "Sertralina",
+          "shortName": "SER",
+          "startDate": "2024-02-26",
+          "endDate": "2024-06-14",
+          "dose": "150mg/d",
+          "attemptGroup": 0,
+          "notes": "Adekwatna dawka i czas (15.5 tygodni) wg kryt. MGH-ATRQ badania. Odnotowano 'pełną poprawę' 2024-04-16. Odstawiona z powodu epizodu psychotycznego 2024-06-15. Nie liczone jako niepowodzenie terapeutyczne depresji."
+        },
+        {
+          "id": "drug-5-period-1",
+          "drugName": "Kwetiapina",
+          "shortName": "KWE",
+          "startDate": "2024-01-29",
+          "endDate": "2024-06-14",
+          "dose": "25mg/d",
+          "attemptGroup": 0,
+          "notes": "Prawdopodobnie na sen/lęk. Nieadekwatna wg kryt. MGH-ATRQ badania dla augmentacji (wymagane 150mg/d)."
+        },
+        {
+          "id": "drug-6-period-1",
+          "drugName": "Rysperydon",
+          "shortName": "RYS",
+          "startDate": "2024-06-15",
+          "endDate": "2024-06-30",
+          "dose": "3mg/d (1mg 1-0-2)",
+          "attemptGroup": 0,
+          "notes": "Włączony po epizodzie psychotycznym. Nie dotyczy MGH-ATRQ."
+        },
+        {
+          "id": "drug-6-period-2",
+          "drugName": "Rysperydon",
+          "shortName": "RYS",
+          "startDate": "2024-07-01",
+          "endDate": "2024-07-07",
+          "dose": "2mg/d (0-0-2)",
+          "attemptGroup": 0,
+          "notes": "Redukcja dawki. Nie dotyczy MGH-ATRQ."
+        },
+        {
+          "id": "drug-6-period-3",
+          "drugName": "Rysperydon",
+          "shortName": "RYS",
+          "startDate": "2024-07-08",
+          "endDate": "2024-07-14",
+          "dose": "1mg/d (0-0-1)",
+          "attemptGroup": 0,
+          "notes": "Redukcja dawki, następnie odstawienie. Nie dotyczy MGH-ATRQ."
+        },
+        {
+          "id": "drug-4-period-5",
+          "drugName": "Sertralina",
+          "shortName": "SER",
+          "startDate": "2024-08-06",
+          "endDate": "2024-08-12",
+          "dose": "25mg/d",
+          "attemptGroup": 0,
+          "notes": "Ponowne włączenie, dawka początkowa. Nieadekwatna wg kryt. MGH-ATRQ badania: dawka za niska."
+        },
+        {
+          "id": "drug-4-period-6",
+          "drugName": "Sertralina",
+          "shortName": "SER",
+          "startDate": "2024-08-13",
+          "endDate": "2024-08-26",
+          "dose": "50mg/d",
+          "attemptGroup": 1,
+          "notes": "Adekwatna dawka wg kryt. MGH-ATRQ badania. Część dłuższej próby leczenia Sertraliną (łącznie ~13 tygodni na dawkach >=50mg), która okazała się nieskuteczna."
+        },
+        {
+          "id": "drug-4-period-7",
+          "drugName": "Sertralina",
+          "shortName": "SER",
+          "startDate": "2024-08-27",
+          "endDate": "2024-10-28",
+          "dose": "100mg/d",
+          "attemptGroup": 1,
+          "notes": "Adekwatna dawka wg kryt. MGH-ATRQ badania. Część dłuższej próby leczenia Sertraliną. Bupropion dołączony 2024-09-20."
+        },
+        {
+          "id": "drug-7-period-1",
+          "drugName": "Bupropion",
+          "shortName": "BUP",
+          "startDate": "2024-09-20",
+          "endDate": "2024-10-28",
+          "dose": "150mg/d",
+          "attemptGroup": 0,
+          "notes": "Augmentacja Sertraliny. Nieadekwatna wg kryt. MGH-ATRQ badania: dawka za niska (wymagane 300mg/d). Brak odpowiedzi."
+        },
+        {
+          "id": "drug-4-period-8",
+          "drugName": "Sertralina",
+          "shortName": "SER",
+          "startDate": "2024-10-29",
+          "endDate": "2024-11-11",
+          "dose": "150mg/d",
+          "attemptGroup": 1,
+          "notes": "Adekwatna dawka wg kryt. MGH-ATRQ badania. Część dłuższej próby leczenia Sertraliną."
+        },
+        {
+          "id": "drug-4-period-9",
+          "drugName": "Sertralina",
+          "shortName": "SER",
+          "startDate": "2024-11-12",
+          "endDate": "2024-11-26",
+          "dose": "200mg/d",
+          "attemptGroup": 1,
+          "notes": "Adekwatna dawka wg kryt. MGH-ATRQ badania. Zakończenie próby Sertraliną, brak poprawy. Cała próba Sertraliną (50-200mg) od 2024-08-13 do 2024-11-26 (ok. 15 tygodni) uznana za niepowodzenie."
+        },
+        {
+          "id": "drug-4-period-10",
+          "drugName": "Sertralina",
+          "shortName": "SER",
+          "startDate": "2024-11-27",
+          "endDate": "2024-12-03",
+          "dose": "150mg/d",
+          "attemptGroup": 0,
+          "notes": "Redukcja dawki w trakcie wprowadzania Wortioksetyny."
+        },
+        {
+          "id": "drug-4-period-11",
+          "drugName": "Sertralina",
+          "shortName": "SER",
+          "startDate": "2024-12-04",
+          "endDate": "2025-01-15",
+          "dose": "100mg/d",
+          "attemptGroup": 0,
+          "notes": "Redukcja dawki w trakcie wprowadzania Wortioksetyny."
+        },
+        {
+          "id": "drug-8-period-1",
+          "drugName": "Wortioksetyna",
+          "shortName": "WOR",
+          "startDate": "2024-12-04",
+          "endDate": "2024-12-10",
+          "dose": "5mg/d",
+          "attemptGroup": 0,
+          "notes": "Początkowa dawka. Nieadekwatna wg kryt. MGH-ATRQ badania: dawka za niska."
+        },
+        {
+          "id": "drug-8-period-2",
+          "drugName": "Wortioksetyna",
+          "shortName": "WOR",
+          "startDate": "2024-12-11",
+          "endDate": "2025-01-09",
+          "dose": "10mg/d",
+          "attemptGroup": 2,
+          "notes": "Adekwatna dawka wg kryt. MGH-ATRQ badania. Początek drugiej adekwatnej próby."
+        },
+        {
+          "id": "drug-8-period-3",
+          "drugName": "Wortioksetyna",
+          "shortName": "WOR",
+          "startDate": "2025-01-10",
+          "endDate": "2025-01-11",
+          "dose": "5mg/d",
+          "attemptGroup": 2,
+          "notes": "Krótki okres niższej dawki podczas dostosowywania."
+        },
+        {
+          "id": "drug-8-period-4",
+          "drugName": "Wortioksetyna",
+          "shortName": "WOR",
+          "startDate": "2025-01-12",
+          "endDate": "2025-01-15",
+          "dose": "10mg/d",
+          "attemptGroup": 2,
+          "notes": "Adekwatna dawka wg kryt. MGH-ATRQ badania."
+        },
+        {
+          "id": "drug-4-period-12",
+          "drugName": "Sertralina",
+          "shortName": "SER",
+          "startDate": "2025-01-16",
+          "endDate": "2025-02-23",
+          "dose": "50mg/d",
+          "attemptGroup": 0,
+          "notes": "Redukcja dawki, następnie odstawienie. Przyjmowana równocześnie z Wortioksetyną."
+        },
+        {
+          "id": "drug-8-period-5",
+          "drugName": "Wortioksetyna",
+          "shortName": "WOR",
+          "startDate": "2025-01-16",
+          "endDate": "2025-01-22",
+          "dose": "15mg/d",
+          "attemptGroup": 2,
+          "notes": "Adekwatna dawka wg kryt. MGH-ATRQ badania."
+        },
+        {
+          "id": "drug-8-period-6",
+          "drugName": "Wortioksetyna",
+          "shortName": "WOR",
+          "startDate": "2025-01-23",
+          "endDate": "2025-03-24",
+          "dose": "20mg/d",
+          "attemptGroup": 2,
+          "notes": "Adekwatna dawka wg kryt. MGH-ATRQ badania. Łączny czas na Wortioksetynie >=10mg od 2024-12-11 do 2025-03-24 (z krótką przerwą na 5mg) to ponad 12 tygodni. Brak poprawy zgłoszony 2025-03-24. Uznane za niepowodzenie."
+        },
+        {
+          "id": "drug-8-period-7",
+          "drugName": "Wortioksetyna",
+          "shortName": "WOR",
+          "startDate": "2025-03-25",
+          "endDate": "2025-03-31",
+          "dose": "10mg/d",
+          "attemptGroup": 0,
+          "notes": "Redukcja dawki przed odstawieniem."
+        },
+        {
+          "id": "drug-9-period-1",
+          "drugName": "Wenlafaksyna",
+          "shortName": "WEN",
+          "startDate": "2025-04-02",
+          "endDate": "2025-04-06",
+          "dose": "37.5mg ER/d",
+          "attemptGroup": 0,
+          "notes": "Początkowa dawka. Nieadekwatna wg kryt. MGH-ATRQ badania: dawka za niska."
+        },
+        {
+          "id": "drug-9-period-2",
+          "drugName": "Wenlafaksyna",
+          "shortName": "WEN",
+          "startDate": "2025-04-07",
+          "endDate": "2025-04-13",
+          "dose": "75mg ER/d",
+          "attemptGroup": 0,
+          "notes": "Nieadekwatna wg kryt. MGH-ATRQ badania: dawka za niska (wymagane 150mg/d)."
+        },
+        {
+          "id": "drug-9-period-3",
+          "drugName": "Wenlafaksyna",
+          "shortName": "WEN",
+          "startDate": "2025-04-14",
+          "endDate": "2025-05-18",
+          "dose": "112.5mg ER/d",
+          "attemptGroup": 0,
+          "notes": "Nieadekwatna wg kryt. MGH-ATRQ badania: dawka za niska. Brak poprawy zgłoszony 2025-05-19. Częściowo refundowana przez POZ."
+        },
+        {
+          "id": "drug-9-period-4",
+          "drugName": "Wenlafaksyna",
+          "shortName": "WEN",
+          "startDate": "2025-05-19",
+          "endDate": "2025-07-13",
+          "dose": "112.5mg ER/d",
+          "attemptGroup": 0,
+          "notes": "Kontynuacja. Nieadekwatna wg kryt. MGH-ATRQ badania: dawka za niska. endDate szacowana na podstawie recepty."
+        }
+      ],
+      "conclusion": "Na podstawie Kryteriów MGH-ATRQ Badania, zidentyfikowano 2 nieudane, adekwatne próby leczenia:\n- Próba 1: Sertralina w dawkach 50-200mg/d przez około 15 tygodni (od 2024-08-13 do 2024-11-26) zakończona brakiem istotnej poprawy.\n- Próba 2: Wortioksetyna w dawkach 10-20mg/d przez około 14 tygodni (od 2024-12-11 do 2025-03-24) zakończona brakiem poprawy.\nPacjent spełnia kryterium TRD (co najmniej 2 niepowodzenia)."
+    },
+    "inclusionCriteria": [
+      {
+        "id": "IC1",
+        "name": "Zgoda na udział w badaniu (ICF)",
+        "status": "weryfikacja",
+        "details": "Pacjent musi podpisać świadomą zgodę na udział w badaniu na wizycie przesiewowej.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "IC2",
+        "name": "Wiek ≥18 lat",
+        "status": "spełnione",
+        "details": "Pacjent urodzony 1992-11-14, wiek 32 lata.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "IC3",
+        "name": "Diagnoza dużej depresji",
+        "status": "weryfikacja",
+        "details": "Pacjent ma diagnozę F32.1/F33.0 (epizod depresji/zaburzenie depresyjne nawracające). Protokół wymaga 'Duża depresja bez objawów psychotycznych'. W historii pacjenta odnotowano epizod psychotyczny (F23) w czerwcu 2024 (opisany jako potencjalnie związany z substancją) oraz 'omamy wzorkowe i słuchowe po zażyciu ketrelu'. Aktualne opisy stanu psychicznego negują objawy psychotyczne. Należy dokładnie zweryfikować, czy objawy psychotyczne nie są częścią obrazu dużej depresji.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "IC4",
+        "name": "Czas trwania pierwszego epizodu",
+        "status": "spełnione",
+        "details": "Kryterium dotyczy sytuacji, 'Jeśli obecny epizod jest pierwszym w życiu'. Pacjent ma diagnozę F33.0 (zaburzenie depresyjne nawracające), co sugeruje, że obecny epizod nie jest pierwszym. Dlatego warunek dotyczący czasu trwania pierwszego epizodu (≥6 miesięcy i ≤2 lata) nie ma zastosowania w swojej specyficznej formie. Jeśli jednak uznać obecny epizod za pierwszy (wbrew F33.0, ale zgodnie z 'dotychczas nieleczony psychiatrycznie'), to trwając od czerwca 2023 do czerwca 2025 (ok. 24 miesiące), mieściłby się na granicy lub nieznacznie przekraczałby limit ≤2 lata, w zależności od dokładnej daty screeningu.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "IC5",
+        "name": "Wynik MADRS ≥20",
+        "status": "weryfikacja",
+        "details": "Wynik MADRS zostanie oceniony podczas screeningu i wizyty początkowej.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "IC6",
+        "name": "Lekooporność (TRD) wg MGH-ATRQ (specyficzne dla badania)",
+        "status": "spełnione",
+        "details": "Pacjent doświadczył niepowodzenia dwóch adekwatnych prób leczenia w obecnym epizodzie depresyjnym, zgodnie z kryteriami MGH-ATRQ specyficznymi dla badania:\n1. Sertralina: dawki 50-200mg/d (min. MGH-ATRQ 50mg/d) przez ok. 15 tygodni (od 2024-08-13 do 2024-11-26; min. MGH-ATRQ 8 tygodni). Brak istotnej poprawy.\n2. Wortioksetyna: dawki 10-20mg/d (min. MGH-ATRQ 10mg/d) przez ok. 14 tygodni (od 2024-12-11 do 2025-03-24; min. MGH-ATRQ 8 tygodni). Brak poprawy.\nPróba leczenia Bupropionem (150mg/d) była nieadekwatna ze względu na zbyt niską dawkę (min. MGH-ATRQ 300mg/d). Próba leczenia Kwetiapiną (25mg/d) była nieadekwatna ze względu na zbyt niską dawkę (min. MGH-ATRQ dla augmentacji 150mg/d). Obecne leczenie Wenlafaksyną (112.5mg/d) jest w dawce niższej niż minimalna dawka adekwatna wg MGH-ATRQ (150mg/d).",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "IC7",
+        "name": "Odstawienie leków",
+        "status": "weryfikacja",
+        "details": "Pacjent musi wyrazić zgodę na odstawienie wszystkich zabronionych leków i potwierdzić ich odstawienie przed wizytą początkową.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "IC8",
+        "name": "Zdolność do udziału",
+        "status": "spełnione",
+        "details": "Na podstawie dostępnej dokumentacji brak informacji wskazujących na niemożność wykonania procedur badania lub przestrzegania harmonogramu wizyt.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      }
+    ],
+    "psychiatricExclusionCriteria": [
+      {
+        "id": "EC1",
+        "name": "Historia zaburzeń afektywnych dwubiegunowych",
+        "status": "spełnione",
+        "details": "Wywiad w kierunku ChAD był ujemny (notatka z 2024-01-29). Brak danych sugerujących ChAD.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC2",
+        "name": "Zaburzenia psychotyczne",
+        "status": "niespełnione",
+        "details": "Pacjent ma w historii odnotowany epizod psychotyczny (F23 Ostre i przemijające zaburzenia psychotyczne) w czerwcu 2024, który trwał ok. 4h i wymagał interwencji na izbie przyjęć. Dodatkowo, pacjent zgłaszał w przeszłości 'omamy wzorkowe i słuchowe po zażyciu ketrelu'. Nawet jeśli epizody te były krótkotrwałe lub potencjalnie związane z substancjami/lekami, stanowią one historię zaburzeń psychotycznych, co jest kryterium wykluczającym.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC3",
+        "name": "Zaburzenia osobowości",
+        "status": "weryfikacja",
+        "details": "W dokumentacji kilkukrotnie pojawia się adnotacja 'Osobowość: do dalszej oceny'. Brak diagnozy zaburzeń osobowości z grupy paranoicznych, schizoidalnych, schizotypowych, histrionicznych, narcystycznych, ale wymaga to potwierdzenia na wizycie przesiewowej.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC4",
+        "name": "Zaburzenie osobowości typu borderline",
+        "status": "weryfikacja",
+        "details": "Brak diagnozy zaburzenia osobowości borderline. Wymaga potwierdzenia wywiadem lub modułem MINI plus na wizycie przesiewowej.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC5",
+        "name": "Aktywne zaburzenia współistniejące",
+        "status": "spełnione",
+        "details": "Brak informacji w dokumentacji o aktywnym PTSD, OCD lub anoreksji. Zakłada się brak tych zaburzeń.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC6",
+        "name": "Hospitalizacja psychiatryczna",
+        "status": "spełnione",
+        "details": "Pacjent był na izbie przyjęć psychiatrycznej w czerwcu 2024, ale 'Nie zgodził się na hospitalizację psych.'. Wizyta na izbie przyjęć nie jest równoznaczna z hospitalizacją. Brak informacji o hospitalizacji psychiatrycznej w ciągu ostatnich 6 miesięcy.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC7",
+        "name": "Historia leczenia inwazyjnego",
+        "status": "spełnione",
+        "details": "Brak informacji o stosowaniu ECT, DBS, VNS w obecnym epizodzie. Zakłada się brak takiego leczenia.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC8",
+        "name": "Historia leczenia nieinwazyjnego",
+        "status": "spełnione",
+        "details": "Brak informacji o stosowaniu TMS w ciągu ostatnich 6 miesięcy. Zakłada się brak takiego leczenia.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC9",
+        "name": "Aktywna psychoterapia",
+        "status": "weryfikacja",
+        "details": "Pacjent 'Od ponad roku leczy się w centrum terapii Nurt w Gdańsku' (notatka z 2025-02-24), co może obejmować psychoterapię. Zalecono podjęcie psychoterapii w 2024-01-29. Należy zweryfikować, czy pacjent aktualnie uczestniczy w psychoterapii i czy program ten pozostanie stabilny przez 9 tygodni.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC10",
+        "name": "Uzależnienia",
+        "status": "weryfikacja",
+        "details": "W wywiadzie (2024-01-29) podano: 'papierosy codziennie, marihuana sporadycznie ok. raz w miesiącu, extasy i kokaina raz w życiu'. Diagnoza F15.5 (Zaburzenia psychiczne i zaburzenia zachowania spowodowane używaniem innych substancji stymulujących) była wielokrotnie stawiana, szczególnie w kontekście epizodu psychotycznego z czerwca 2024 ('opisano zażycie nieznanej substancji'). Należy dokładnie ocenić, czy kryteria uzależnienia od alkoholu lub substancji psychoaktywnych (innych niż nikotyna, kofeina) były spełnione w ciągu ostatnich 12 miesięcy.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC11",
+        "name": "Ryzyko samobójcze",
+        "status": "spełnione",
+        "details": "W przeszłości 'zwiewne ideacje s'. W ostatnich notatkach (np. 2025-05-19) 'neguje myśli samobójcze'. Na podstawie dostępnych informacji, obecne ryzyko nie wydaje się znaczące, ale wymaga formalnej oceny na wizycie przesiewowej.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC12",
+        "name": "Depresja wtórna",
+        "status": "spełnione",
+        "details": "Brak jednoznacznych danych wskazujących na depresję wtórną do przyczyn medycznych lub polekowych, choć epizod psychotyczny był łączony z substancjami/lekami. Główny obraz kliniczny pasuje do pierwotnego zaburzenia depresyjnego.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC13",
+        "name": "Przeciwwskazania osobiste",
+        "status": "spełnione",
+        "details": "Brak informacji o okolicznościach osobistych lub zachowaniu uniemożliwiającym bezpieczny udział w badaniu.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC14",
+        "name": "Historia rodzinna",
+        "status": "spełnione",
+        "details": "W wywiadzie rodzinnym podano brak historii leczenia psychiatrycznego, w tym schizofrenii, zaburzenia schizoafektywnego lub ChAD I (notatki z 2024-01-29 i 2025-02-24).",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "EC15",
+        "name": "Ekspozycja na psychodeliki",
+        "status": "weryfikacja",
+        "details": "W wywiadzie (2024-01-29) 'extasy i kokaina raz w życiu'. Epizod psychotyczny w czerwcu 2024 był związany z 'zażyciem nieznanej substancji'. Należy ustalić, czy ta substancja była klasycznym psychodelikiem i czy doszło do ekspozycji w ciągu ostatniego roku lub w obecnym epizodzie.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      }
+    ],
+    "medicalExclusionCriteria": [
+      {
+        "id": "GMEC1",
+        "name": "Ciąża lub karmienie",
+        "status": "spełnione",
+        "details": "Pacjent jest mężczyzną.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC2",
+        "name": "Antykoncepcja",
+        "status": "spełnione",
+        "details": "Kryterium dotyczy pacjentek. Dla mężczyzn mogą obowiązywać inne zapisy protokołu dotyczące antykoncepcji partnerki lub abstynencji, które nie są tu wyszczególnione. Zakładając, że to kryterium dotyczy tylko kobiet, jest spełnione.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC3",
+        "name": "Testy ciążowe",
+        "status": "spełnione",
+        "details": "Pacjent jest mężczyzną.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC4",
+        "name": "Dawstwo nasienia",
+        "status": "weryfikacja",
+        "details": "Należy zapytać pacjenta o plany dotyczące oddawania nasienia.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC5",
+        "name": "Choroby układu krążenia",
+        "status": "weryfikacja",
+        "details": "Pacjent ma w wywiadzie nadciśnienie tętnicze (leczone Kandesartanem, ciśnienie ok. 130/80 mmHg w 2024-10-29, co sugeruje kontrolę) oraz był diagnozowany w kierunku choroby niedokrwiennej serca. Przyjmował Bisoprolol z powodu tachykardii. Należy dokładnie ocenić aktualny stan układu krążenia, w tym EKG, aby wykluczyć niekontrolowane nadciśnienie, istotną tachykardię, wydłużony QT lub arytmię.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC6",
+        "name": "Cukrzyca",
+        "status": "spełnione",
+        "details": "Brak informacji o cukrzycy. Zakłada się brak.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC7",
+        "name": "Choroby tarczycy",
+        "status": "weryfikacja",
+        "details": "W badaniach laboratoryjnych (2024-08-06) TSH wynosiło 4,13 uIU/ml, co jest wartością graniczną lub nieznacznie podwyższoną. Należy ocenić, czy stanowi to 'niestabilną chorobę tarczycy' lub 'nieprawidłowe wyniki badań' w kontekście klinicznym i wymagań protokołu.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC8",
+        "name": "Padaczka",
+        "status": "spełnione",
+        "details": "W wywiadzie (2024-01-29) pacjent negował padaczkę.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC9",
+        "name": "Wyniki badań",
+        "status": "weryfikacja",
+        "details": "W badaniach laboratoryjnych (2024-08-06) ALT wynosiło 52 U/L (nieznacznie podwyższone). TSH 4,13 uIU/ml (graniczne/nieznacznie podwyższone). Należy ocenić, czy te odchylenia są klinicznie istotne w kontekście protokołu.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC10",
+        "name": "Inne choroby",
+        "status": "spełnione",
+        "details": "Poza wymienionymi (nadciśnienie, podejrzenie ChNS, F15.5, F23), brak informacji o innych istotnych schorzeniach. Zakłada się brak.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC11",
+        "name": "Udział w innych badaniach",
+        "status": "spełnione",
+        "details": "Brak informacji o aktualnym udziale w innym badaniu interwencyjnym. Zakłada się brak.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      },
+      {
+        "id": "GMEC12",
+        "name": "Nadwrażliwość",
+        "status": "spełnione",
+        "details": "Brak informacji o nadwrażliwości na badany lek lub substancje pomocnicze. Zakłada się brak.",
+        "userStatus": null,
+        "userComment": null,
+        "userOverrideTimestamp": null
+      }
+    ],
+    "reportConclusion": {
+      "overallQualification": "Prawdopodobnie nie kwalifikuje się",
+      "mainIssues": [
+        "EC2: Historia zaburzeń psychotycznych (F23 Ostre i przemijające zaburzenia psychotyczne oraz zgłaszane omamy po Kwetiapinie) stanowi prawdopodobne kryterium wykluczające.",
+        "Potencjalne problemy z kryteriami medycznymi: GMEC5 (choroby układu krążenia - wymaga dokładnej oceny), GMEC7 (graniczny wynik TSH), GMEC9 (nieznacznie podwyższone ALT, graniczne TSH).",
+        "Potencjalne problemy z kryteriami psychiatrycznymi: EC10 (historia F15.5 - zaburzenia związane z substancjami stymulującymi, wymaga oceny pod kątem 'uzależnienia'), EC15 (ekspozycja na psychodeliki - nieznana substancja z czerwca 2024)."
+      ],
+      "criticalInfoNeeded": [
+        "Dokładna weryfikacja charakteru epizodu psychotycznego z czerwca 2024 i omamów po Kwetiapinie w kontekście kryterium EC2.",
+        "Aktualna ocena stanu układu krążenia, w tym EKG, i kontroli nadciśnienia (GMEC5).",
+        "Ocena klinicznej istotności wyników TSH i ALT (GMEC7, GMEC9).",
+        "Szczegółowy wywiad dotyczący używania substancji psychoaktywnych w ciągu ostatnich 12 miesięcy (EC10, EC15).",
+        "Wynik skali MADRS (IC5).",
+        "Status psychoterapii (EC9).",
+        "Plany dotyczące dawstwa nasienia (GMEC4).",
+        "Ocena zaburzeń osobowości (EC3, EC4)."
+      ],
+      "estimatedProbability": 10
+    },
+    "analyzedAt": "2025-06-06T09:00:43.597Z",
+    "modelUsed": "gemini",
+    "isMockData": false,
+    "drugMappingInfo": {
+      "mappingsApplied": 0,
+      "mappings": [],
+      "preprocessedAt": "2025-06-06T09:00:43.597Z"
+    }
+  },
+  "medicalHistory": "=== DOKUMENT 1 ===\n\nKarta pacjenta: [PACJENT_004]\n Dane osobowe\n\n Imię                                    [PACJENT_003]                           Adres zameldowania\n\n Drugie imię                             [PACJENT_002]                           Ulica                           [ADRES_003]\n\n Nazwisko                                [PACJENT_001]                  Nr domu                         [NR_DOMU_003]\n\n Data urodzenia                          1992-11-14                       Nr mieszkania                   [NR_DOMU_002]\n\n Pesel                                   [PESEL_001]                      Kod pocztowy                    [KOD_POCZTOWY_002]\n\n Płeć                                    Mężczyzna                        Miasto                          [ADRES_002]\n\n Grupa krwi                              Nieznana                         Województwo                     [ADRES_001]\n\n Telefon                                 [NR_DOMU_004]                        Kraj                            Polska\n\n Email                                                                    Adres zamieszkania\n NFZ                                     11 NFZ Gdańsk                    Ulica                           [ADRES_003]\n Uprawnienia                             X                                Nr domu                         [NR_DOMU_003]\n dodatkowe\n                                                                          Nr mieszkania                   [NR_DOMU_002]\n TERYT gminy                             Reda (gmina miejska) (2215011)\n                                         (województwo [ADRES_001])          Kod pocztowy                    [KOD_POCZTOWY_002]\n                                                                          Miasto                          [ADRES_002]\n                                                                          Województwo                     [ADRES_001]\n                                                                          Kraj                            Polska\n\n\n\nPrzepisane leki\nNazwa                             Postać                                          Opakowanie              Wypisano          Odpłatność\n\nPrefaxine, 28 szt.                kaps. o przedł. uwalnianiu, twarde              2 op.                   2025-05-19        30%\nPrefaxine, 28 szt.                kaps. o przedł. uwalnianiu, twarde              2 op.                   2025-05-19        30%\n\nPrefaxine, 28 szt.                kaps. o przedł. uwalnianiu, twarde              2 op.                   2025-03-24        30%\nPrefaxine, 28 szt.                kaps. o przedł. uwalnianiu, twarde              1 op.                   2025-03-24        30%\nBrintellix, 56 szt.               tabl. powl.                                     1 op.                   2025-02-24        100%\n\n\n\n\n Dane medyczne\n\nRozpoznania\nKod              Jednostka chorobowa                                        Rodzaj schorzenia                          Data\nF32.1            Epizod depresji umiarkowany                                nieprzew. główne                           2025-05-19\nF32.1            Epizod depresji umiarkowany                                nieprzew. główne                           2025-03-24\nF32.1            Epizod depresji umiarkowany                                nieprzew. główne                           2025-02-24\n\n\n\n\n Historia wizyt\n\n                                                                                          REMEDY CENTRUM PSYCHIATRII I PSYCHOTERAPII\nLekarz:             CYRUS TAHERY (3883164)                                Gabinet:        - REMEDY CENTRUM PSYCHIATRII I\n                                                                                          PSYCHOTERAPII\n\nData:               24 lutego 2025                                        Godzina:        15:40 - 15:50\nStan:               Do rozliczenia                                        Typ wizyty: BRAK\nSkierowanie         Nie\nCena:               320,00\n\n\n\n\nRemedy Group sp zoo.                                                                                                   GDYNIA , 02.06.2025r 17:36:58\n\nBEMA 15/1, [KOD_POCZTOWY_001] GDYNIA                                                                                                                 Strona 1 z 4\nNIP: [TELEFON_002]1, tel. [NR_DOMU_001]\nNumer księgi rejestrowej: [TELEFON_001]401\nKod res. cz. VIII/VII/V: 1700/ 002/02\n\f                    Kontekst:\n                    Pacjent, 32 -letni mężczyzna, zgłasza się na pierwszorazową wizytę psychiatryczną w tutejszym gabinecie. Od\n                    ponad roku leczy się w centrum terapii Nurt w Gdańsku z powodu epizodu depresyjnego (początek w grudniu\n                    2023). Był leczony Setraliną w dawce do 200mg, kwetiapiną 25mg, bupropionem 150mg przez miesiąc. Obecnie\n                    przyjmuje sertralinę 50mg + 20mg wortioksetyny od 6 tygodni. Pacjent odczuwa, że dotychczasowe leczenie\n                    farmakologiczne nie przynosi oczekiwanych rezultatów. Początkowo leki wyhamowały epizod depresyjny na około\n                    miesiąc, jednak późniejsze zmiany w farmakoterapii doprowadziły do anhedonii polekowej. Pacjent nie pracuje od\n                    marca zeszłego roku, co częściowo wiąże z objawami depresyjnymi. Czuje się niepasujący do otaczającego\n                    świata, brak mu motywacji do codziennych działań. Mieszka u siostry w Redzie, utrzymuje się z zasiłku dla\n                    bezrobotnych. W rodzinie brak historii leczenia psychiatrycznego i uzależnień.\n\n                    Objawy Kliniczne:\n                    Pacjent zgłasza utrzymujące się objawy depresyjne, w tym anhedonię, abulie, poczucie obojętności wobec\n                    otoczenia, myśli rezygnacyjne oraz jeden. Problemy ze snem dotyczyły trudności z zasypianiem, jednak obecnie\n                    pacjent sypia dobrze bez leków nasennych. Występuje brak apetytu i spadek energii. Pacjent nie odczuwa lęku\n                    ani niepokojów w ciągu dnia. W przeszłości występowały myśli samobójcze, które były jednym z powodów\nWywiad:             zgłoszenia się do psychiatry.\n\n                    Ocena Stanu Psychicznego: Świadomość jasna, orientacja pełna, kontakt logiczny, afekt moduluje, nastrój\n                    obojętny, napęd wyrównany, anhedonia, abulia, anergia, życie popędowe zaburzone w sferze łaknienia, neguje\n                    myśli samobójcze, bez ostrych objawów psychotycznych.\n\n                    Plan:\n\n                    Kontynuacja leczenia wortioksetyną (Brintellix) 20 mg przez co najmniej 8 tygodni w celu oceny skuteczności.\n\n                    Odstawienie sertraliny.\n\n                    Pacjent ma dostarczyć historię leczenia z poprzedniej poradni w celu dokładniejszej analizy dotychczasowego\n                    przebiegu terapii.\n\n                    Zaplanowanie kolejnej wizyty kontrolnej za miesiąc w celu oceny postępów leczenia i ewentualnej modyfikacji\n                    planu terapeutycznego.\n\nRozpoznanie: F32.1 - Epizod depresji umiarkowany - nieprzewlekłe główne\n                    Kod e-Recepty: 5141 – realizacja od 24.02\n\nZalecenia:           Brintellix: tabl. powl., 10 mg / 1 op. po 56 szt.\n                     DS: 1x2 szt.\n                     Odpłatność: 100%\nDokumenty:\n\nUsługi                      Wizyta Pierwszorazowa - 1 szt. - 320,00 zł\nprywatne:\n\n                                                                                    REMEDY CENTRUM PSYCHIATRII I PSYCHOTERAPII\nLekarz:             CYRUS TAHERY (3883164)                               Gabinet:   - REMEDY CENTRUM PSYCHIATRII I\n                                                                                    PSYCHOTERAPII\n\nData:               24 marca 2025                                        Godzina:   15:20 - 15:30\nStan:               Do rozliczenia                                       Typ wizyty: BRAK\n\nSkierowanie         Nie\n\nCena:               280,00\n\n\n\n\nRemedy Group sp zoo.                                                                                           GDYNIA , 02.06.2025r 17:36:58\n\nBEMA 15/1, [KOD_POCZTOWY_001] GDYNIA                                                                                                         Strona 2 z 4\nNIP: [TELEFON_002]1, tel. [NR_DOMU_001]\nNumer księgi rejestrowej: [TELEFON_001]401\nKod res. cz. VIII/VII/V: 1700/ 002/02\n\f                    Podczas poprzedniej wizyty utrzymano wortioksertynę, sertraline odstawiono.\n\n                    Pacjent nie zgłasza poprawy samopoczucia od ostatniej wizyty. Nadal odczuwa brak sensu w podejmowanych\n                    działaniach i oczekuje na poprawę. Nie zgłasza nowych objawów psychotycznych ani lęku, ale opisuje swoje\n                    emocje jako obojętne. Nie zgłasza działań niepożądanych związanych z aktualną farmakoterapią. W przeszłości\n                    wystąpiły omamy wzorkowe i słuchowe po zażyciu ketrelu.\n\n                    Ocena Stanu Psychicznego:\n                    Świadomość jasna, orientacja pełna, kontakt logiczny, afekt moduluje, nastrój obojętny, napęd wyrównany,\n                    anhedonia, abulia, anergia, życie popędowe zaburzone w sferze łaknienia, neguje myśli samobójcze, bez ostrych\n                    objawów psychotycznych.\n\nWywiad:             Pacjent dostarczył badania - D3 TSH FT3 FT4 - w wynikach niedobór d3.\n\n                    Plan:\n\n                    Zmiana farmakoterapii: stopniowe odstawienie Brinellixu i wprowadzenie Prefaxine wg schematu:\n                    Od jutra redukcja Brintellix do 10 mg przez 7 dni, następnie 8 dnia odstawienie.\n                    Dziewiątego dnia wprowadzenie wenlafaksyny 37,5 mg rano do śniadania przez 5 dni.\n                    Następnie zwiększenie dawki do 75 mg do śniadania przez kolejne 7 dni.\n                    Następnie zwiększenie do 75 mg 37,5 mg rano do śniadania aż do kolejnej wizyty.\n                    Wprowadzenie D3 2000j na dobę rano.\n\n                    Kontrola za 4 tygodnie\n                    Monitorowanie samopoczucia pacjenta oraz ewentualnych działań niepożądanych nowej terapii.\nRozpoznanie: F32.1 - Epizod depresji umiarkowany - nieprzewlekłe główne\n\n                    Kod e-Recepty: 8989 – realizacja od 24.03\n\n                     Prefaxine: kaps. o przedł. uwalnianiu, twarde, 37,5 mg / 2 op. po 28 szt.\n                     DS: 1x1 szt.\nZalecenia:           Odpłatność: 30%\n\n                     Prefaxine: kaps. o przedł. uwalnianiu, twarde, 75 mg / 1 op. po 28 szt.\n                     DS: 1x1 szt.\n                     Odpłatność: 30%\n\nDokumenty:\n\nUsługi                      Wizyta Kolejna - 1 szt. - 280,00 zł\nprywatne:\n\n                                                                                 REMEDY CENTRUM PSYCHIATRII I PSYCHOTERAPII\nLekarz:             CYRUS TAHERY (3883164)                           Gabinet:    - REMEDY CENTRUM PSYCHIATRII I\n                                                                                 PSYCHOTERAPII\n\nData:               19 maja 2025                                     Godzina:    18:30 - 18:45\nStan:               Do rozliczenia                                   Typ wizyty: BRAK\n\nSkierowanie         Nie\nCena:               280,00\n\n                    Pacjent kontynuuje leczenie wenlafaksyną zgodnie z wcześniej ustalonym schematem. Zgłasza brak istotnej\n                    poprawy samopoczucia. Farmakoterapia została przedłużona przez lekarza POZ. Brak działań niepożądanych.\n                    Planowana kontynuacja leczenia i dalsza ocena efektów terapii przy kolejnej wizycie.\n\nWywiad:\n                    Ocena Stanu Psychicznego:\n                    Świadomość jasna, orientacja pełna, kontakt logiczny, afekt moduluje, nastrój obojętny, napęd wyrównany,\n                    anhedonia, abulia, anergia, życie popędowe zaburzone w sferze łaknienia, neguje myśli samobójcze, bez ostrych\n                    objawów psychotycznych.\n\nRozpoznanie: F32.1 - Epizod depresji umiarkowany - nieprzewlekłe główne\n\n                    Kod e-Recepty: 4834 – realizacja od 19.05\n\n                     Prefaxine: kaps. o przedł. uwalnianiu, twarde, 75 mg / 2 op. po 28 szt.\n                     DS: 1x1 szt.\nZalecenia:           Odpłatność: 30%\n\n                     Prefaxine: kaps. o przedł. uwalnianiu, twarde, 37,5 mg / 2 op. po 28 szt.\n                     DS: 1x1 szt.\n                     Odpłatność: 30%\n\n\n\n\nRemedy Group sp zoo.                                                                                         GDYNIA , 02.06.2025r 17:36:58\n\nBEMA 15/1, [KOD_POCZTOWY_001] GDYNIA                                                                                                       Strona 3 z 4\nNIP: [TELEFON_002]1, tel. [NR_DOMU_001]\nNumer księgi rejestrowej: [TELEFON_001]401\nKod res. cz. VIII/VII/V: 1700/ 002/02\n\fUsługi                      Wizyta Kolejna - 1 szt. - 280,00 zł\nprywatne:\n\n\n\n\n Ubezpieczenie NFZ\n\nData złożenia                                Ważne do             Rodzaj                                  Stan\n\n2 czerwca 2025 17:36                         2 czerwca 2025       Ewuś (L1125M[TELEFON_007]76)                Ubezpieczony\n\n19 maja 2025 18:25                           19 maja 2025         Ewuś (L1125M[TELEFON_006]64)                Ubezpieczony\n\n24 marca 2025 15:39                          24 marca 2025        Ewuś (L1125M[TELEFON_005]24)                Ubezpieczony\n\n25 lutego 2025 15:02                         25 lutego 2025       Ewuś (L1125M[TELEFON_004]54)                Ubezpieczony\n24 lutego 2025 15:21                         24 lutego 2025       Ewuś (L1125M[TELEFON_003]87)                Ubezpieczony\n\n\n\n\n Usługi prywatne w karcie pacjenta\n\n                Data                                      Nazwa                   Cena           Liczba             Łącznie\n\n19 maja 2025                             Wizyta Kolejna                      280,00 zł       1                280,00 zł\n\n24 marca 2025                            Wizyta Kolejna                      280,00 zł       1                280,00 zł\n\n24 lutego 2025                           Wizyta Pierwszorazowa               320,00 zł       1                320,00 zł\n\n\n\n\nRemedy Group sp zoo.                                                                                      GDYNIA , 02.06.2025r 17:36:58\n\nBEMA 15/1, [KOD_POCZTOWY_001] GDYNIA                                                                                                    Strona 4 z 4\nNIP: [TELEFON_002]1, tel. [NR_DOMU_001]\nNumer księgi rejestrowej: [TELEFON_001]401\nKod res. cz. VIII/VII/V: 1700/ 002/02\n\n=== DOKUMENT 2 ===\n\nKarta pacjenta: [PACJENT_004]\n Dane osobowe\n\n Imię                                    [PACJENT_003]                             Adres zameldowania\n\n Nazwisko                                [PACJENT_001]                     Ulica                  [ADRES_005]\n\n Data urodzenia                          1992-11-14                          Nr domu                [NR_DOMU_002]\n\n Pesel                                   [PESEL_001]                         Nr mieszkania          [NR_DOMU_005]\n\n Dokument tożsamości:                    Dowód osobisty                      Kod pocztowy           [KOD_POCZTOWY_003]\n                                         [DOKUMENT_001]                           Miasto                 Gdańsk\n Płeć                                    Mężczyzna                           Województwo            [ADRES_001]\n Grupa krwi                              Nieznana                            Kraj                   Polska\n Telefon                                 [TELEFON_026]\n                                                                            Adres zamieszkania\n Email                                   [EMAIL_002]\n                                                                             Ulica                  [ADRES_005]\n NFZ                                     11 NFZ Gdańsk\n                                                                             Nr domu                [NR_DOMU_002]\n Uprawnienia                             X\n dodatkowe                                                                   Nr mieszkania          [NR_DOMU_005]\n\n TERYT gminy                             Gdańsk (gmina miejska)              Kod pocztowy           [KOD_POCZTOWY_003]\n                                         (2261011) (województwo\n                                                                             [ADRES_004]                 Gdańsk\n                                         Pomorskie)\n                                                                             Województwo            [ADRES_001]\n                                                                             Kraj                   Polska\n\n\n\nPrzepisane leki\nNazwa                                                 Postać                           Opakowanie       Wypisano     Odpłatność\n\nBrintellix, 56 szt.                                   tabl. powl.                      1 op.            2025-01-10   30%\nBrintellix, 56 szt.                                   tabl. powl.                      1 op.            2025-01-10   30%\n\nZoloft®, 28 szt.                                      tabl. powl.                      2 op.            2024-11-27   30%\nBrintellix, 56 szt.                                   tabl. powl.                      1 op.            2024-11-27   30%\nZoloft®, 28 szt.                                      tabl. powl.                      2 op.            2024-10-29   30%\n\nZoloft®, 28 szt.                                      tabl. powl.                      2 op.            2024-09-20   30%\nBupropion Neuraxpharm, 30 szt.                        tabl. o zmodyf. uwalnianiu       2 op.            2024-09-20   100%\n\nZoloft®, 28 szt.                                      tabl. powl.                      1 op.            2024-08-06   30%\nZoloft®, 28 szt.                                      tabl. powl.                      2 op.            2024-08-06   30%\nZoloft®, 28 szt.                                      tabl. powl.                      3 op.            2024-04-16   30%\nKetrel, 60 szt.                                       tabl. powl.                      1 op.            2024-04-16   100%\n\nZoloft®, 28 szt.                                      tabl. powl.                      3 op.            2024-04-16   30%\nZoloft®, 28 szt.                                      tabl. powl.                      2 op.            2024-02-26   30%\nKetrel, 60 szt.                                       tabl. powl.                      1 op.            2024-02-26   100%\nZoloft®, 28 szt.                                      tabl. powl.                      2 op.            2024-01-29   30%\nKetrel, 60 szt.                                       tabl. powl.                      1 op.            2024-01-29   100%\n\nAfobam®, 30 szt.                                      tabl.                            1 op.            2024-01-29   100%\n\n\n\n\n Dane medyczne\n\n\n\n\nNURT Centrum Terapii\n\nNIP: [TELEFON_010]6, tel. [TELEFON_009]                                                                                           Strona 1 z 13\nNumer księgi rejestrowej: [TELEFON_008]532\nKod res. cz. VIII/VII/V: 1700/ 001/01\n\fRozpoznania\n                                                                                                       Rodzaj\nKod       Jednostka chorobowa                                                                                          Data\n                                                                                                       schorzenia\n\n          Zaburzenia psychiczne i zaburzenia zachowania spowodowane używaniem innych substancji        nieprzew.       2025-\nF15.5\n          stymulujących, w tym kofeiny - Zaburzenia psychotyczne                                       główne          01-10\n                                                                                                       nieprzew.       2024-\nF33.0 Zaburzenie depresyjne nawracające, obecnie epizod depresyjny łagodny\n                                                                                                       główne          11-27\n\n          Zaburzenia psychiczne i zaburzenia zachowania spowodowane używaniem innych substancji        nieprzew.       2024-\nF15.5\n          stymulujących, w tym kofeiny - Zaburzenia psychotyczne                                       główne          10-29\n                                                                                                       nieprzew.       2024-\nF33.0 Zaburzenie depresyjne nawracające, obecnie epizod depresyjny łagodny\n                                                                                                       główne          09-20\n                                                                                                       nieprzew.       2024-\nF33.0 Zaburzenie depresyjne nawracające, obecnie epizod depresyjny łagodny\n                                                                                                       główne          08-06\n                                                                                                       nieprzew.       2024-\nF32.1 Epizod depresji umiarkowany\n                                                                                                       główne          07-01\n                                                                                                       nieprzew.       2024-\nF32.1 Epizod depresji umiarkowany\n                                                                                                       główne          04-16\n\n                                                                                                       nieprzew.       2024-\nF32.1 Epizod depresji umiarkowany\n                                                                                                       główne          02-26\n\n                                                                                                       nieprzew.       2024-\nF32.1 Epizod depresji umiarkowany\n                                                                                                       główne          01-29\n\n                                                                                                       nieprzew.       2025-\nF33.0 Zaburzenie depresyjne nawracające, obecnie epizod depresyjny łagodny\n                                                                                                       towarzyszące    01-10\n\n          Zaburzenia psychiczne i zaburzenia zachowania spowodowane używaniem innych substancji        nieprzew.       2024-\nF15.5\n          stymulujących, w tym kofeiny - Zaburzenia psychotyczne                                       towarzyszące    11-27\n                                                                                                       nieprzew.       2024-\nF33.0 Zaburzenie depresyjne nawracające, obecnie epizod depresyjny łagodny\n                                                                                                       towarzyszące    10-29\n          Zaburzenia psychiczne i zaburzenia zachowania spowodowane używaniem innych substancji        nieprzew.       2024-\nF15.5\n          stymulujących, w tym kofeiny - Zaburzenia psychotyczne                                       towarzyszące    09-20\n\n                                                                                                       nieprzew.       2024-\nF23       Ostre i przemijające zaburzenia psychotyczne\n                                                                                                       towarzyszące    07-01\n\n\n\n\n Dokumenty\n\n                                                           Data            Typ\nNazwa pliku                                                                          Notatka\n                                                           dodania         pliku\n\nMłynarczyński_Hubert.pdf                                   2024-07-01      Badanie\n                                                                                     Dokument podpisany elektronicznie przez\nZgoda_osob_upowaznionych_go948jY.pdf                       2024-01-29      Brak\n                                                                                     pacjenta\n                                                                                     Dokument podpisany elektronicznie przez\nZgoda_na_przetwarzanie_danych_osobowych_FZ3B8DO.pdf 2024-01-29             Brak\n                                                                                     pacjenta\n\n\n\n\n Historia wizyt\n\nLekarz:             Olga Genge (3319350)                        Gabinet:      Gabinet 3 - NURT Poradnia Zdrowia Psychicznego\n\nData:               29 stycznia 2024                            Godzina:      15:40 - 16:20\nStan:               Archiwalna                                  Typ wizyty: BRAK\n\nSkierowanie         Nie\nCena:               300,00\n\n\n\n\nNURT Centrum Terapii\n\nNIP: [TELEFON_010]6, tel. [TELEFON_009]                                                                                     Strona 2 z 13\nNumer księgi rejestrowej: [TELEFON_008]532\nKod res. cz. VIII/VII/V: 1700/ 001/01\n\f                    Aktualne dolegliwości: od śmierci ojca narastający lęk i niepokój, poczucie, że \"coś musi\", że \"żyje dla kogoś, nie\n                    dla siebie\", \"że musi dać radę\". Od czerwca 2023r. narastające objawy depresyjne, obniżenie nastroju, napędu,\n                    anhedonia, triada depresyjna Becka, poczucie braku sensu w życiu. Zwiewne ideacje \"s\" bez tendencji do\n                    realizacji, zapytany wprost neguje chęć odebrania sobie życia. Czynniki reaktywne w życiu osobistym i pracy.\n                    Wywiad trudny do zebrania, pacjent ma trudności z koncentracją uwagi wtórnie do niepokoju który odczuwa,\n                    wierci się na krześle, gryzie paznokcie. Od dwóch tygodni znaczne pogorszenie - ma problemy ze snem, wybudza\n                    się, apetyt obniżony. Historia leczenia psychiatrycznego: dotychczas nieleczony psychiatrycznie, dostawał w\n                    przeszłości Afobam i Trittico od lekarza rodzinnego z powodu zaburzeń snu przy okazji czynników reaktywnych -\n                    hospitalizacje, leczenie farmakologiczne i psychoterapia - neguje -Historia zaburzeń psychicznych – objawów\n                    psychotycznych - neguje, nie prezentuje zachowaniem, wywiad w kierunku ChAD - ujemny, ryzyka samobójczego\n                    – myśli S - zwiewne myśli \"S\" od kilku tygodni, bez tendencji do realizacji/próby S w wywiadzie - neguje Wywiad\nWywiad:\n                    rodzinny w kierunku ch psychiatrycznych: ujemny Sytuacja bytowa: dobra Sytuacja zawodowa i osobista: pracuje,\n                    samotny, wcześniej 5 lat w związku Choroby somatyczne/operacje: NT - Revival 40 mg 1x/d, Bibloc? - z powodu\n                    tachykardii w EKG?? poza tym nie zna rozpoznania jakie było postawione, jest diagnozowany w kierunku choroby\n                    niedokrwiennej serca?, poza tym neguje choroby somatyczne, operacje - zabieg korekty stulejki kilka lat temu\n                    Leki przyjmowane: j.w. Alergie w tym na leki: neguje Wywiad okołoporodowy i rozwój wczesnodziecięcy: b/z\n                    Urazy głowy w wywiadzie: neguje Infekcje OUN w wywiadzie: neguje Padaczka: neguje Jaskra: neguje Przerost gr\n                    krokowego: neguje SPA: papierosy codziennie, marihuana sporadycznie ok. raz w miesiącu, extasy i kokaina raz\n                    w życiu Pacjent zaakceptował zaproponowane leczenie, poinformowano o możliwych do wystąpienia działaniach\n                    niepożądanych. Poinformowano, że w przypadku wystąpienia myśli i zamiarów samobójczych, ciężkich działań\n                    niepożądanych leków, omamów imperatywnych, konieczne jest zgłoszenie na IP WSP Srebrzysko, KOR UCK lub\n                    powiadomienie 112. Przeprowadzono psychoedukację dot. stosowania SPA i BDZ.\n\n                    Świadomość: jasna Orientacja: pełna Tok myślenia: zwarty Afekt: dostosowany Nastrój: obniżony Napęd: utrata\n                    zainteresowań, zmniejszony napęd Życie popędowe: sen - wybudzenia, apetyt -od dwóch tygodni obniżony\n                    znacznie, libido Funkcje poznawcze - trudności z koncentracją uwagi, pamięć w normie Objawy lękowe: nasilony\nBadanie:\n                    lęk wolnopłynący, zamartwianie się, czarne scenariusze Myśli samobójcze - zwiewne myśli \"S\" bez tendencji do\n                    realizacji, neguje chęć zabicia się Myśli rezygnacyjne: neguje Objawy wytwórcze: neguje, nie prezentuje\n                    Osobowość: do dalszej oceny Inne: anhedonia, negatywny obraz siebie i świata\nRozpoznanie: F32.1 - Epizod depresji umiarkowany - nieprzewlekłe główne\n\nRozpoznanie\n                    Epizod depresji umiarkowany/ciężki bez objawów psychotycznych\nopisowe:\n\n\n\n\nNURT Centrum Terapii\n\nNIP: [TELEFON_010]6, tel. [TELEFON_009]                                                                                             Strona 3 z 13\nNumer księgi rejestrowej: [TELEFON_008]532\nKod res. cz. VIII/VII/V: 1700/ 001/01\n\f                    - Wykonanie kontrolnych badań laboratoryjnych: ast, alt, morfologia krwi, glukoza, TSH, ft4, sód, potas,\n                    kreatynina\n                    - Podjęcie psychoterapii\n                    - Włączenie leczenia farmakologicznego:\n                    Zoloft 50 mg 1/2 tabl. rano przez 7 dni, następnie 1 tabl. rano przez 7 dni, następnie 2 tabl. rano.\n                    Ketrel 25 mg 0-0-1 tabl.\n                    Afobam 0,25 mg 1 tabl. doraźnie w razie niepokoju, max. 2-3 tabl. dziennie przez pierwsze 2 tygodnie leczenia\n                    Zoloftem. Potem proszę odstawić lek.\n                    Lek ma potencjał uzależniający, zakaz spożywania alkoholu i prowadzenia pojazdów mechanicznych przy\n                    stosowaniu leku.\n                    Wizyta kontrolna za miesiąc.\n                    - Poinformowano o możliwych działaniach niepożądanych i interakcjach, w tym z alkoholem, oraz o możliwym\n                    wpływie na sprawność psychomotoryczną.\n                    - Abstynencja od alkoholu i innych substancji psychoaktywnych.\n                    - W razie istotnego pogorszenia stanu psychicznego wskazany kontakt z psychiatrą we wcześniejszym terminie.\n                    W razie wystąpienia silnych myśli czy tendencji samobójczych należy niezwłocznie zgłosić się na izbę przyjęć\n                    najbliższego szpitala psychiatrycznego lub SOR albo zadzwonić na 112.\n                    - W razie pytań/wątpliwości wskazany kontakt z rejestracją Kliniki: telefonicznie [TELEFON_025] lub mailowo\n                    [EMAIL_001]\n                    - W wyjątkowych sytuacjach, aby uniknąć nagłego przerwania farmakoterapii dopuszczalne jest zamówienie\n                    recepty na ilość leku niezbędną do kolejnej wizyty. Przy zamówieniu recepty należy potwierdzić stabilne\n                    samopoczucie, brak niepokojących objawów (w tym myśli samobójczych) oraz brak istotnych działań\n                    niepożądanych. Jeśli stan uległ pogorszeniu lub występują jakiekolwiek niepokojące objawy, należy o tym\n                    poinformować lekarza. W razie wątpliwości co do stanu pacjenta lekarz może odmówić wystawienia takiej\n                    recepty i zalecić pilną konsultację lub skontaktować się z pacjentem w celu uzyskania potrzebnych informacji\nZalecenia:          przed jej wystawieniem.\n\n                    Kod e-Recepty: 0801 – realizacja od teraz\n\n                     Afobam®: tabl., 0,25 mg / 1 op. po 30 szt.\n                     DS: 1 tabl. doraźnie w razie niepokoju, max. 2-3 tabl. dziennie przez pierwsze 2 tygodnie leczenia Zoloftem.\n                     Potem proszę odstawić lek.\n                     Lek ma potencjał uzależniający, zakaz spożywania alkoholu i prowadzenia pojazdów mechanicznych przy\n                     stosowaniu leku.\n                     Odpłatność: 100%\n\n                    Kod e-Recepty: 3823 – realizacja od teraz\n\n                     Zoloft®: tabl. powl., 50 mg / 2 op. po 28 szt.\n                     DS: 1/2 tabl. rano przez 7 dni, następnie 1 tabl. rano przez 7 dni, następnie 2 tabl. rano (w sumie 100 mg/d).\n                     Odpłatność: 30%\n\n                     Ketrel: tabl. powl., 25 mg / 1 op. po 1 poj. 60 szt.\n                     DS: 0-0-1 tabl.\n                     Odpłatność: 100%\n\n                    Zwolnienia\n\n                            Zwolnienie (e-ZLA ZJ5256380) dla [PACJENT_003] Młynarczykowski od 29-01-2024 do 26-02-2024.\n\n\n\nUsługi                      konsultacja psychiatryczna (pierwsza wizyta) - 1 szt. - 300,00 zł\nprywatne:\n\nLekarz:             Olga Genge (3319350)                                  Gabinet:     Gabinet 3 - NURT Poradnia Zdrowia Psychicznego\n\nData:               26 lutego 2024                                        Godzina:     16:00 - 16:20\nStan:               Archiwalna                                            Typ wizyty: BRAK\n\nSkierowanie         Nie\n\nCena:               250,00\n\n                    Wizyta kontrolna stacjonarnie. Deklaruje, że leki bierze zgodnie z zaleceniami. Tolerancja dobra. W badaniach\n                    lab. bez odchyleń. Częściowa poprawa w zakresie nastroju, napędu, lęku, ale bez całkowitej\n                    poprawy/pełnowymiarowej. Sen regulowany farmakologicznie, bez myśli 's'. Bez skarg somatycznych, wydolny\n                    ko. Zwiększono dawkę Zoloftu do 150 mg/d. Afobam odstawił zgodnie z zaleceniami. Pacjent zaakceptował\nWywiad:\n                    zaproponowane leczenie, poinformowano o możliwych do wystąpienia działaniach niepożądanych.\n                    Poinformowano, że w przypadku wystąpienia myśli i zamiarów samobójczych, ciężkich działań niepożądanych\n                    leków, omamów imperatywnych, konieczne jest zgłoszenie na IP WSP Srebrzysko, KOR UCK lub powiadomienie\n                    112.\n\n\n\n\nNURT Centrum Terapii\n\nNIP: [TELEFON_010]6, tel. [TELEFON_009]                                                                                             Strona 4 z 13\nNumer księgi rejestrowej: [TELEFON_008]532\nKod res. cz. VIII/VII/V: 1700/ 001/01\n\f                    Świadomość: jasna Orientacja: pełna Tok myślenia: zwarty Afekt: dostosowany Nastrój: obniżony, z poprawą\n                    Napęd: zmniejszony Życie popędowe: sen - wybudzenia, apetyt -od dwóch tygodni obniżony znacznie, libido\nBadanie:            Funkcje poznawcze - trudności z koncentracją uwagi, pamięć w normie Objawy lękowe: lęk wolnopłynący,\n                    zamartwianie się Myśli samobójcze - neguje Myśli rezygnacyjne: neguje Objawy wytwórcze: neguje, nie\n                    prezentuje Osobowość: do dalszej oceny Inne: anhedonia, negatywny obraz siebie i świata\nRozpoznanie: F32.1 - Epizod depresji umiarkowany - nieprzewlekłe główne\n\n                    - Wykonanie kontrolnych badań laboratoryjnych\n                    - Podjęcie psychoterapii\n                    - Włączenie leczenia farmakologicznego:\n                    Zoloft 100 mg 1,5 -0-0 tabl.\n                    Ketrel 25 mg 0-0-1 tabl.\n                    Wizyta kontrolna za ok.1,5 miesiąca.\n                    - Poinformowano o możliwych działaniach niepożądanych i interakcjach, w tym z alkoholem, oraz o możliwym\n                    wpływie na sprawność psychomotoryczną.\n                    - Abstynencja od alkoholu i innych substancji psychoaktywnych.\n                    - W razie istotnego pogorszenia stanu psychicznego wskazany kontakt z psychiatrą we wcześniejszym terminie.\n                    W razie wystąpienia silnych myśli czy tendencji samobójczych należy niezwłocznie zgłosić się na izbę przyjęć\n                    najbliższego szpitala psychiatrycznego lub SOR albo zadzwonić na 112.\n                    - W razie pytań/wątpliwości wskazany kontakt z rejestracją Kliniki: telefonicznie [TELEFON_025] lub mailowo\n                    [EMAIL_001]\n                    - W wyjątkowych sytuacjach, aby uniknąć nagłego przerwania farmakoterapii dopuszczalne jest zamówienie\n                    recepty na ilość leku niezbędną do kolejnej wizyty. Przy zamówieniu recepty należy potwierdzić stabilne\n                    samopoczucie, brak niepokojących objawów (w tym myśli samobójczych) oraz brak istotnych działań\nZalecenia:          niepożądanych. Jeśli stan uległ pogorszeniu lub występują jakiekolwiek niepokojące objawy, należy o tym\n                    poinformować lekarza. W razie wątpliwości co do stanu pacjenta lekarz może odmówić wystawienia takiej\n                    recepty i zalecić pilną konsultację lub skontaktować się z pacjentem w celu uzyskania potrzebnych informacji\n                    przed jej wystawieniem.\n\n                    Kod e-Recepty: 6489 – realizacja od teraz\n\n                     Zoloft®: tabl. powl., 100 mg / 2 op. po 28 szt.\n                     DS: 1,5-0-0\n                     Odpłatność: 30%\n\n                     Ketrel: tabl. powl., 25 mg / 1 op. po 1 poj. 60 szt.\n                     DS: 0-0-1 tabl.\n                     Odpłatność: 100%\n\n                    Zwolnienia\n\n                            Zwolnienie (e-ZLA ZJ2444183) dla [PACJENT_003] Młynarczykowski od 27-02-2024 do 31-03-2024.\n\n\nUsługi                      konsultacja psychiatryczna (kolejna wizyta) - 1 szt. - 250,00 zł\nprywatne:\n\nLekarz:             Olga Genge (3319350)                                  Gabinet:      Gabinet 3 - NURT Poradnia Zdrowia Psychicznego\nData:               16 kwietnia 2024                                      Godzina:      13:20 - 13:40\n\nStan:               Archiwalna                                            Typ wizyty: BRAK\n\nSkierowanie         Nie\n\nCena:               250,00\n\n                    Wizyta kontrolna stacjonarnie. Stan psychiczny w pełnej poprawie. Tolerancja leczenia dobra. Kontynuacja\n                    farmakoterapii. Ketrel okazjonalnie, kiedy nie może spać. Afobamu nie używa. Pacjent zaakceptował\n                    zaproponowane leczenie, poinformowano o możliwych do wystąpienia działaniach niepożądanych.\nWywiad:\n                    Poinformowano, że w przypadku wystąpienia myśli i zamiarów samobójczych, ciężkich działań niepożądanych\n                    leków, omamów imperatywnych, konieczne jest zgłoszenie na IP WSP Srebrzysko, KOR UCK lub powiadomienie\n                    112. Przeprowadzono psychoedukację dot. stosowania SPA i BDZ.\n\n                    Świadomość: jasna Orientacja: pełna Tok myślenia: zwarty Afekt: dostosowany Nastrój: w normie Napęd: w\n                    normie Życie popędowe: sen - uregulowany, apetyt -w normie libido w normie Funkcje poznawcze - w normie\nBadanie:\n                    Objawy lękowe: zredukowane Myśli samobójcze - neguje Myśli rezygnacyjne: neguje Objawy wytwórcze: neguje,\n                    nie prezentuje Osobowość: do dalszej oceny Inne: -\n\nRozpoznanie: F32.1 - Epizod depresji umiarkowany - nieprzewlekłe główne\n\n\n\n\nNURT Centrum Terapii\n\nNIP: [TELEFON_010]6, tel. [TELEFON_009]                                                                                             Strona 5 z 13\nNumer księgi rejestrowej: [TELEFON_008]532\nKod res. cz. VIII/VII/V: 1700/ 001/01\n\f                    - Podjęcie psychoterapii\n                    - Włączenie leczenia farmakologicznego:\n                    Zoloft 100 mg 1,5 -0-0 tabl.\n                    Ketrel 25 mg 1 tabl. w razie bezsenności.\n                    Wizyta kontrolna za ok. 3-4 miesiące. W razie pogorszenia proszę zgłosić się szybciej.\n                    - Poinformowano o możliwych działaniach niepożądanych i interakcjach, w tym z alkoholem, oraz o możliwym\n                    wpływie na sprawność psychomotoryczną.\n                    - Abstynencja od alkoholu i innych substancji psychoaktywnych.\n                    - W razie istotnego pogorszenia stanu psychicznego wskazany kontakt z psychiatrą we wcześniejszym terminie.\n                    W razie wystąpienia silnych myśli czy tendencji samobójczych należy niezwłocznie zgłosić się na izbę przyjęć\n                    najbliższego szpitala psychiatrycznego lub SOR albo zadzwonić na 112.\n                    - W razie pytań/wątpliwości wskazany kontakt z rejestracją Kliniki: telefonicznie [TELEFON_025] lub mailowo\n                    [EMAIL_001]\n                    - W wyjątkowych sytuacjach, aby uniknąć nagłego przerwania farmakoterapii dopuszczalne jest zamówienie\n                    recepty na ilość leku niezbędną do kolejnej wizyty. Przy zamówieniu recepty należy potwierdzić stabilne\n                    samopoczucie, brak niepokojących objawów (w tym myśli samobójczych) oraz brak istotnych działań\n                    niepożądanych. Jeśli stan uległ pogorszeniu lub występują jakiekolwiek niepokojące objawy, należy o tym\n                    poinformować lekarza. W razie wątpliwości co do stanu pacjenta lekarz może odmówić wystawienia takiej\nZalecenia:\n                    recepty i zalecić pilną konsultację lub skontaktować się z pacjentem w celu uzyskania potrzebnych informacji\n                    przed jej wystawieniem.\n\n                    Kod e-Recepty: 3580 – realizacja od 31.05\n\n                     Zoloft®: tabl. powl., 100 mg / 3 op. po 28 szt.\n                     DS: 1,5-0-0\n                     Odpłatność: 30%\n\n                    Kod e-Recepty: 9721 – realizacja od teraz\n\n                     Zoloft®: tabl. powl., 100 mg / 3 op. po 28 szt.\n                     DS: 1,5-0-0 tabl.\n                     Odpłatność: 30%\n\n                     Ketrel: tabl. powl., 25 mg / 1 op. po 1 poj. 60 szt.\n                     DS: 1 tabl. w razie bezsenności.\n                     Odpłatność: 100%\nUsługi                      konsultacja psychiatryczna (kolejna wizyta) - 1 szt. - 250,00 zł\nprywatne:\n\nLekarz:             Olga Genge (3319350)                                  Gabinet:      Gabinet 3 - NURT Poradnia Zdrowia Psychicznego\n\nData:               1 lipca 2024                                          Godzina:      16:00 - 16:20\n\nStan:               Archiwalna                                            Typ wizyty: BRAK\n\nSkierowanie         Nie\n\nCena:               250,00\n\n                    Wizyta kontrolna stacjonarnie. 15.06.2024r. był na izbie przyjęć z powodu epizodu psychotycznego trwającego\n                    ok. 4 h. (opisano zażycie nieznanej substancji, pacjent twierdzi, że nie wie co to było). Odstawiono Zoloft i\n                    włączono Rispolept 1 mg 1-0-2. Odstawiono Ketrel. Nie zgodził się na hospitalizację psych. Wypis z Izby przyjęć\n                    zeskanowano do systemu. Od dwóch tygodni czuje się dobrze, śpi dobrze, jest przytłumiony w dzień. nie\n                    Doświadcza objawów psychotycznych, w czasie tamtego epizodu krytyczny. Odstawienie Rispoleptu przez\nWywiad:\n                    stopniową redukcję i dalsza ocena po wash-out. Zalecono wykonanie badań lab. Pacjent zaakceptował\n                    zaproponowane leczenie, poinformowano o możliwych do wystąpienia działaniach niepożądanych.\n                    Poinformowano, że w przypadku wystąpienia myśli i zamiarów samobójczych, ciężkich działań niepożądanych\n                    leków, omamów imperatywnych, konieczne jest zgłoszenie na IP WSP Srebrzysko, KOR UCK lub powiadomienie\n                    112. Przeprowadzono psychoedukację dot. stosowania SPA i BDZ.\n\n                    Świadomość: jasna Orientacja: pełna Tok myślenia: zwarty Afekt: dostosowany Nastrój: w normie Napęd: w\n                    normie Życie popędowe: sen - uregulowany, apetyt -w normie libido w normie Funkcje poznawcze - w normie\nBadanie:\n                    Objawy lękowe: zredukowane Myśli samobójcze - neguje Myśli rezygnacyjne: neguje Objawy wytwórcze: neguje,\n                    nie prezentuje Osobowość: do dalszej oceny Inne: -\n\n                    F32.1 - Epizod depresji umiarkowany - nieprzewlekłe główne\nRozpoznanie:\n                    F23 - Ostre i przemijające zaburzenia psychotyczne - nieprzewlekłe towarzyszące\n\n\n\n\nNURT Centrum Terapii\n\nNIP: [TELEFON_010]6, tel. [TELEFON_009]                                                                                             Strona 6 z 13\nNumer księgi rejestrowej: [TELEFON_008]532\nKod res. cz. VIII/VII/V: 1700/ 001/01\n\f                    - Podjęcie psychoterapii\n                    - Redukcja leczenia farmakologicznego:\n                    Rispolept 1 mg\n                    0-0-2 przez 7 dni, następnie 0-0-1 przez 7 dni, następnie odstawić lek.\n                    Pacjent posiada lek w zapasie.\n                    Wizyta kontrolna za ok. ok. 6 tygodni. W razie pogorszenia proszę zgłosić się szybciej.\n                    - Badania laboratoryjne: morfologia, kreatynina, sód potas, ast, alt, TSH, ft4.\n                    - Poinformowano o możliwych działaniach niepożądanych i interakcjach, w tym z alkoholem, oraz o możliwym\n                    wpływie na sprawność psychomotoryczną.\n                    - Abstynencja od alkoholu i innych substancji psychoaktywnych.\n                    - W razie istotnego pogorszenia stanu psychicznego wskazany kontakt z psychiatrą we wcześniejszym terminie.\nZalecenia:          W razie wystąpienia silnych myśli czy tendencji samobójczych należy niezwłocznie zgłosić się na izbę przyjęć\n                    najbliższego szpitala psychiatrycznego lub SOR albo zadzwonić na 112.\n                    - W razie pytań/wątpliwości wskazany kontakt z rejestracją Kliniki: telefonicznie [TELEFON_025] lub mailowo\n                    [EMAIL_001]\n                    - W wyjątkowych sytuacjach, aby uniknąć nagłego przerwania farmakoterapii dopuszczalne jest zamówienie\n                    recepty na ilość leku niezbędną do kolejnej wizyty. Przy zamówieniu recepty należy potwierdzić stabilne\n                    samopoczucie, brak niepokojących objawów (w tym myśli samobójczych) oraz brak istotnych działań\n                    niepożądanych. Jeśli stan uległ pogorszeniu lub występują jakiekolwiek niepokojące objawy, należy o tym\n                    poinformować lekarza. W razie wątpliwości co do stanu pacjenta lekarz może odmówić wystawienia takiej\n                    recepty i zalecić pilną konsultację lub skontaktować się z pacjentem w celu uzyskania potrzebnych informacji\n                    przed jej wystawieniem.\n\nUsługi                      konsultacja psychiatryczna (kolejna wizyta) - 1 szt. - 250,00 zł\nprywatne:\n\nLekarz:             [PACJENT_005] Czarnota-Śmiechowska (3319008)             Gabinet:      Gabinet 3 - NURT Poradnia Zdrowia Psychicznego\n\nData:               6 sierpnia 2024                                       Godzina:      10:20 - 10:40\n\nStan:               Archiwalna                                            Typ wizyty: konsultacja psychiatryczna kolejna\n\nSkierowanie         Nie\n\nCena:               250,00\n\n                    w kontroli lab. ALT 52, TSH 4,13 uIU/ml Zgłosił się na kontrolę, czuje, że po odstawieniu leku wraca uczucie\n                    bezsilności i obojętności Stanowczo przeczy doświadczaniu urojeń czy omamów. Pogorszenie stanu psychicznego\nWywiad:\n                    zauważa od ok 2 tyg (tj. od 4 tyg od odstawienia antydepresantów wracają obawy afektywne). Mieszka u siostry -\n                    musi znaleźć mieszkanie i pracę\n\n                    Świadomość: jasna Orientacja: pełna Tok myślenia: zwarty Afekt: dostosowany Nastrój: jednostajnie obniżony -\n                    dominuje zobojętnienie, anhedonia Napęd: jednostajnie obniżony Życie popędowe: sen w normie, przesypia 7h,\n                    apetyt -w normie, aktualna masa ciała 83 kg , wzrost 180cm libido obniżony- na pewno w sferze pożądania\n                    Funkcje poznawcze - w normie Objawy lękowe: poczucie napięcia- wiąże z obecną sytuacją życiową, tendencja\nBadanie:\n                    do katastrofizacji Myśli samobójcze - neguje Myśli rezygnacyjne: potwierdza- przez ostatnie 2 tyg codziennie myśl\n                    \"że chce zasnąć i się już nie obudzić\" Objawy wytwórcze: neguje, nie prezentuje Osobowość: do dalszej oceny\n                    Inne: przekonania o tym, że nic dobrego już go nie czeka, potwierdza brak zaufania do siebie, potwierdza\n                    spowolnienie psychoruchowe (?)\n\nRozpoznanie: F33.0 - Zaburzenie depresyjne nawracające, obecnie epizod depresyjny łagodny - nieprzewlekłe główne\n\n\n\n\nNURT Centrum Terapii\n\nNIP: [TELEFON_010]6, tel. [TELEFON_009]                                                                                             Strona 7 z 13\nNumer księgi rejestrowej: [TELEFON_008]532\nKod res. cz. VIII/VII/V: 1700/ 001/01\n\f                    Powrót do wcześniej skutecznego leczenia sertraliną;\n                    1 tydz 25mg ( 0,5 tabl)\n                    2 tydz 50mg ( 1 tabl) - jeśli po 2 tygodniach stosowania leku nie będzie żadnej poprawy to od 4 tyg zwiększamy\n                    do 100mg.\n                    Kontrola za 7 tyg.\n                    - WAŻNE: recepta na dany lek ważna jest na 30 dni od daty wystawienia.\n                    - Poinformowano o możliwych działaniach niepożądanych i interakcjach, w tym z alkoholem, oraz o możliwym\n                    wpływie na sprawność psychomotoryczną.\n                    - Abstynencja od alkoholu i innych substancji psychoaktywnych.\n                    - W razie istotnego pogorszenia stanu psychicznego wskazany kontakt z psychiatrą we wcześniejszym terminie.\n                    W razie wystąpienia silnych myśli czy tendencji samobójczych należy niezwłocznie zgłosić się na izbę przyjęć\n                    najbliższego szpitala psychiatrycznego lub SOR albo zadzwonić na 112.\n                    - W wyjątkowych sytuacjach, aby uniknąć nagłego przerwania farmakoterapii dopuszczalne jest zamówienie\n                    recepty na ilość leku niezbędną do kolejnej wizyty. Przy zamówieniu recepty należy potwierdzić stabilne\n                    samopoczucie, brak niepokojących objawów (w tym myśli samobójczych) oraz brak istotnych działań\nZalecenia:          niepożądanych. Jeśli stan uległ pogorszeniu lub występują jakiekolwiek niepokojące objawy, należy o tym\n                    poinformować lekarza. W razie wątpliwości co do stanu pacjenta lekarz może odmówić wystawienia takiej\n                    recepty i zalecić pilną konsultację lub skontaktować się z pacjentem w celu uzyskania potrzebnych informacji\n                    przed jej wystawieniem.\n\n                    Kod e-Recepty: 9259 – realizacja od 06.08\n\n                     Zoloft®: tabl. powl., 50 mg / 2 op. po 28 szt.\n                     DS: 2-0-0 tabl.\n                     Odpłatność: 30%\n\n                    Kod e-Recepty: 4510 – realizacja od 06.08\n\n                     Zoloft®: tabl. powl., 50 mg / 1 op. po 28 szt.\n                     DS: 1-0-0 tabl.\n                     Odpłatność: 30%\n\nUsługi                      Konsultacja psychiatryczna kolejna - 1 szt. - 250,00 zł\nprywatne:\n\nLekarz:             [PACJENT_005] Czarnota-Śmiechowska (3319008)             Gabinet:    Gabinet 2 - NURT Poradnia Zdrowia Psychicznego\n\nData:               20 września 2024                                      Godzina:    12:00 - 12:20\n\nStan:               Archiwalna                                            Typ wizyty: BRAK\nSkierowanie         Nie\n\nCena:               260,00\n\nWywiad:             przyjmuje 100mg sertraliny tolerancje leczenia: neguje dolegliwości zauważa redukcję napięcia i niepokoju\n\n                    Świadomość: jasna Orientacja: pełna Tok myślenia: zwarty Afekt: dostosowany Nastrój: zobojętnienie może nieco\n                    mniejsze ale w dalszym ciagu dominuje, utrzymuje się anhedonia Napęd: zniechęcenie wtórnie do zobojętnienia\n                    (?) Życie popędowe: sen w normie, przesypia 7h- sen jest regenerujący, apetyt -obniżony, relacjonuje dni kiedy\n                    poranny niski apetyt nie ustępuje z biegiem dnia, w normie, aktualna masa ciała 83 kg , wzrost 180cm libido\nBadanie:\n                    utrzymujące się obniżone pożądanie Funkcje poznawcze - w normie Objawy lękowe: częściowa redukcja napięcia,\n                    Myśli samobójcze - neguje Myśli rezygnacyjne: neguje Objawy wytwórcze: neguje, nie prezentuje Osobowość: do\n                    dalszej oceny Inne: przekonania o tym, że nic dobrego już go nie czeka, zauważa obniżenie zaufania do siebie,\n                    swoich możliwości\n\n             F33.0 - Zaburzenie depresyjne nawracające, obecnie epizod depresyjny łagodny - nieprzewlekłe główne\nRozpoznanie: F15.5 - Zaburzenia psychiczne i zaburzenia zachowania spowodowane używaniem innych substancji\n             stymulujących, w tym kofeiny - Zaburzenia psychotyczne - nieprzewlekłe towarzyszące\n\nRozpoznanie\n                    Nieznana substancja powodowała objawy psychotyczne- możliwe substancja stymulująca\nopisowe:\n\n\n\n\nNURT Centrum Terapii\n\nNIP: [TELEFON_010]6, tel. [TELEFON_009]                                                                                           Strona 8 z 13\nNumer księgi rejestrowej: [TELEFON_008]532\nKod res. cz. VIII/VII/V: 1700/ 001/01\n\f                    Utrzymujemy sertraline 100mg\n                    Dołączamy bupropion 150mg 1 x d rano\n                    Regularne pomiary ciśnienia tętniczego i tętna\n                    Kontrola za 6 tyg.\n                    - WAŻNE: recepta na dany lek ważna jest na 30 dni od daty wystawienia.\n                    - Poinformowano o możliwych działaniach niepożądanych i interakcjach, w tym z alkoholem, oraz o możliwym\n                    wpływie na sprawność psychomotoryczną.\n                    - Abstynencja od alkoholu i innych substancji psychoaktywnych.\n                    - W razie istotnego pogorszenia stanu psychicznego wskazany kontakt z psychiatrą we wcześniejszym terminie.\n                    W razie wystąpienia silnych myśli czy tendencji samobójczych należy niezwłocznie zgłosić się na izbę przyjęć\n                    najbliższego szpitala psychiatrycznego lub SOR albo zadzwonić na 112.\n                    - W wyjątkowych sytuacjach, aby uniknąć nagłego przerwania farmakoterapii dopuszczalne jest zamówienie\n                    recepty na ilość leku niezbędną do kolejnej wizyty. Przy zamówieniu recepty należy potwierdzić stabilne\n                    samopoczucie, brak niepokojących objawów (w tym myśli samobójczych) oraz brak istotnych działań\nZalecenia:          niepożądanych. Jeśli stan uległ pogorszeniu lub występują jakiekolwiek niepokojące objawy, należy o tym\n                    poinformować lekarza. W razie wątpliwości co do stanu pacjenta lekarz może odmówić wystawienia takiej\n                    recepty i zalecić pilną konsultację lub skontaktować się z pacjentem w celu uzyskania potrzebnych informacji\n                    przed jej wystawieniem.\n\n                    Kod e-Recepty: 1062 – realizacja od 20.09\n\n                     Zoloft®: tabl. powl., 100 mg / 2 op. po 28 szt.\n                     DS: 1-0-0 tabl.\n                     Odpłatność: 30%\n\n                     Bupropion Neuraxpharm: tabl. o zmodyf. uwalnianiu, 150 mg / 2 op. po 1 but. 30 szt.\n                     DS: 1-0-0 tabl.\n                     Odpłatność: 100%\n\nUsługi                      konsultacja psychiatryczna (kolejna wizyta) - 1 szt. - 260,00 zł\nprywatne:\n\nLekarz:             [PACJENT_005] Czarnota-Śmiechowska (3319008)             Gabinet:      Gabinet 2 - NURT Poradnia Zdrowia Psychicznego\n\nData:               29 października 2024                                  Godzina:      09:40 - 10:00\n\nStan:               Archiwalna                                            Typ wizyty: BRAK\n\nSkierowanie         Nie\n\nCena:               260,00\n\n                    RR: bez wzrostu przy dołączeniu bupropionu ok. 130/80 mmHg bez wpływu bupropionu na objawy depresyjne -\nWywiad:\n                    brak odpowiedzi na lek\n\n                    Świadomość: jasna Orientacja: pełna Tok myślenia: zwarty Afekt: dostosowany Nastrój: zobojętnienie może nieco\n                    mniejsze ale w dalszym ciagu dominuje, utrzymuje się anhedonia Napęd: zniechęcenie wtórnie do zobojętnienia\n                    (?) Życie popędowe: sen w normie, przesypia 7h- sen jest regenerujący, rano wybudza się spowolniały \"do 1\nBadanie:            kawy\", apetyt - średni, w pomiarze gabinetowym 83kg (bz), wzrost 180cm libido utrzymujące się obniżone\n                    pożądanie Funkcje poznawcze - w normie Objawy lękowe: nie dostrzega dolegliwości Myśli samobójcze - neguje\n                    Myśli rezygnacyjne: obecne Objawy wytwórcze: neguje, nie prezentuje Osobowość: do dalszej oceny Inne:\n                    przekonania o tym, że nic dobrego już go nie czeka, zauważa obniżenie zaufania do siebie, swoich możliwości\n\n             F15.5 - Zaburzenia psychiczne i zaburzenia zachowania spowodowane używaniem innych substancji\nRozpoznanie: stymulujących, w tym kofeiny - Zaburzenia psychotyczne - nieprzewlekłe główne\n             F33.0 - Zaburzenie depresyjne nawracające, obecnie epizod depresyjny łagodny - nieprzewlekłe towarzyszące\n\n\n\n\nNURT Centrum Terapii\n\nNIP: [TELEFON_010]6, tel. [TELEFON_009]                                                                                             Strona 9 z 13\nNumer księgi rejestrowej: [TELEFON_008]532\nKod res. cz. VIII/VII/V: 1700/ 001/01\n\f                    Odstawiamy bupropion 150mg ( brak odpowiedzi na lek)\n                    Zwiększamy sertralinę do 150mg. Jeśli po 2 tyg. stosowania sertraliny w dawce 150mg nie będzie żadnej\n                    odpowiedzi na lek to zwiększamy od 3 tyg do 200mg.\n                    Kontrola za 4 tyg.\n                    - WAŻNE: recepta na dany lek ważna jest na 30 dni od daty wystawienia.\n                    - Poinformowano o możliwych działaniach niepożądanych i interakcjach, w tym z alkoholem, oraz o możliwym\n                    wpływie na sprawność psychomotoryczną.\n                    - Abstynencja od alkoholu i innych substancji psychoaktywnych.\n                    - W razie istotnego pogorszenia stanu psychicznego wskazany kontakt z psychiatrą we wcześniejszym terminie.\n                    W razie wystąpienia silnych myśli czy tendencji samobójczych należy niezwłocznie zgłosić się na izbę przyjęć\n                    najbliższego szpitala psychiatrycznego lub SOR albo zadzwonić na 112.\n                    - W wyjątkowych sytuacjach, aby uniknąć nagłego przerwania farmakoterapii dopuszczalne jest zamówienie\nZalecenia:\n                    recepty na ilość leku niezbędną do kolejnej wizyty. Przy zamówieniu recepty należy potwierdzić stabilne\n                    samopoczucie, brak niepokojących objawów (w tym myśli samobójczych) oraz brak istotnych działań\n                    niepożądanych. Jeśli stan uległ pogorszeniu lub występują jakiekolwiek niepokojące objawy, należy o tym\n                    poinformować lekarza. W razie wątpliwości co do stanu pacjenta lekarz może odmówić wystawienia takiej\n                    recepty i zalecić pilną konsultację lub skontaktować się z pacjentem w celu uzyskania potrzebnych informacji\n                    przed jej wystawieniem.\n\n                    Kod e-Recepty: 3201 – realizacja od 29.10\n\n                     Zoloft®: tabl. powl., 100 mg / 2 op. po 28 szt.\n                     DS: 1,5-0-0 tabl.\n                     Odpłatność: 30%\n\nUsługi                      Konsultacja psychiatryczna kolejna - 1 szt. - 260,00 zł\nprywatne:\n\nLekarz:             [PACJENT_005] Czarnota-Śmiechowska (3319008)             Gabinet:    Gabinet 2 - NURT Poradnia Zdrowia Psychicznego\n\nData:               27 listopada 2024                                     Godzina:    09:20 - 09:40\nStan:               Archiwalna                                            Typ wizyty: konsultacja psychiatryczna kolejna\n\nSkierowanie         Nie\n\nCena:               260,00\n\n                    Przy stosowaniu 200mg sertraliny ( ww dawka od 2 tyg) nie zauważa istotnej poprawy między 50 a 200mg .\nWywiad:\n                    wypłycenie emocjonalne - anhedonia polekowa redukuje chęci do działania zobojętnienie\n\n                    Świadomość: jasna Orientacja: pełna Tok myślenia: zwarty Afekt: dostosowany Nastrój: zobojętnienie, utrzymuje\n                    się anhedonia Napęd: zniechęcenie wtórnie do zobojętnienia Życie popędowe: sen w normie, przesypia 7h- sen\n                    jest regenerujący?, nadmierna senność, przymulenia rano wybudza się po pierwszej kawie, apetyt - średni, w\n                    pomiarze gabinetowym 82,5kg (bz), wzrost 180cm libido utrzymujące się obniżone pożądanie Funkcje poznawcze\nBadanie:            - w normie Objawy lękowe: nie dostrzega dolegliwości Myśli samobójcze - neguje Myśli rezygnacyjne: neguje\n                    Objawy wytwórcze: neguje, nie prezentuje Osobowość: do dalszej oceny Inne: mniej pesymistycznych myśli -\n                    dominuje zobojętnienie, zauważa obniżenie zaufania do siebie, swoich możliwości, bez nadmiernego poczucia\n                    winy, bez spowolnienia psychoruchowego , bez nadmiernego wahania się przy podejmowaniu codziennych\n                    decyzji\n\n             F33.0 - Zaburzenie depresyjne nawracające, obecnie epizod depresyjny łagodny - nieprzewlekłe główne\nRozpoznanie: F15.5 - Zaburzenia psychiczne i zaburzenia zachowania spowodowane używaniem innych substancji\n             stymulujących, w tym kofeiny - Zaburzenia psychotyczne - nieprzewlekłe towarzyszące\n\n\n\n\nNURT Centrum Terapii\n\nNIP: [TELEFON_010]6, tel. [TELEFON_009]                                                                                          Strona 10 z 13\nNumer księgi rejestrowej: [TELEFON_008]532\nKod res. cz. VIII/VII/V: 1700/ 001/01\n\f                    Anhedonia polekowa zobojętnienie i mierny efekt p/depresyjny sertraliny w dawce 200mg, ze względu na\n                    przeciwlękową korzyść 100mg sertraliny zaplanowana stopniowa redukcja leku. dodatkowo dołączamy brintellix.\n                    1 tydz sertralia 150mg\n                    od 2 tyg sertralina 100mg + brintellix 5 mg\n                    od 3 tyg sertralina 100mg + brintellix 10mg LEK NALEŻY PRZYJMOWAĆ Z POSIŁKIEM\n                    Jeśli przy połączeniu sertraliny i brintellixu będą obecne objawy serotoninowe: wahania ciśnienia, skurcze mięśni,\n                    drżenia, biegunki, wzrost temperatury to w pierwszej kolejności redukujemy sertralinę do 50mg\n                    Kontrola za 4 tyg.\n                    - WAŻNE: recepta na dany lek ważna jest na 30 dni od daty wystawienia.\n                    - Poinformowano o możliwych działaniach niepożądanych i interakcjach, w tym z alkoholem, oraz o możliwym\n                    wpływie na sprawność psychomotoryczną.\n                    - Abstynencja od alkoholu i innych substancji psychoaktywnych.\n                    - W razie istotnego pogorszenia stanu psychicznego wskazany kontakt z psychiatrą we wcześniejszym terminie.\n                    W razie wystąpienia silnych myśli czy tendencji samobójczych należy niezwłocznie zgłosić się na izbę przyjęć\n                    najbliższego szpitala psychiatrycznego lub SOR albo zadzwonić na 112.\n                    - W wyjątkowych sytuacjach, aby uniknąć nagłego przerwania farmakoterapii dopuszczalne jest zamówienie\nZalecenia:          recepty na ilość leku niezbędną do kolejnej wizyty. Przy zamówieniu recepty należy potwierdzić stabilne\n                    samopoczucie, brak niepokojących objawów (w tym myśli samobójczych) oraz brak istotnych działań\n                    niepożądanych. Jeśli stan uległ pogorszeniu lub występują jakiekolwiek niepokojące objawy, należy o tym\n                    poinformować lekarza. W razie wątpliwości co do stanu pacjenta lekarz może odmówić wystawienia takiej\n                    recepty i zalecić pilną konsultację lub skontaktować się z pacjentem w celu uzyskania potrzebnych informacji\n                    przed jej wystawieniem.\n\n                    Kod e-Recepty: 5751 – realizacja od 27.11\n\n                     Zoloft®: tabl. powl., 100 mg / 2 op. po 28 szt.\n                     DS: 1,5-0-0 tabl.\n                     Odpłatność: 30%\n\n                     Brintellix: tabl. powl., 5 mg / 1 op. po 56 szt.\n                     DS: 2-0-0 szt.\n                     Odpłatność: 30%\n\nUsługi                      Konsultacja psychiatryczna kolejna - 1 szt. - 260,00 zł\nprywatne:\n\nLekarz:             [PACJENT_005] Czarnota-Śmiechowska (3319008)             Gabinet:    Gabinet 2 - NURT Poradnia Zdrowia Psychicznego\n\nData:               10 stycznia 2025                                      Godzina:    10:20 - 10:40\n\nStan:               Archiwalna                                            Typ wizyty: BRAK\n\nSkierowanie         Nie\n\nCena:               260,00\n\n                    przy stosowaniu brintellixu przez 2 tyg nie obserwował żadnej korzyści, ale tolerancja leczenia była dobra\nWywiad:\n                    utrzymuje się wypłycenie emocjonalne, nie obserwuje poprawy\n\n                    Świadomość: jasna Orientacja: pełna Tok myślenia: zwarty Afekt: dostosowany Nastrój: zobojętnienie, utrzymuje\n                    się anhedonia Napęd: zniechęcenie wtórnie do zobojętnienia (bz) - nie jest w stanie znaleźć pracy mieszkania- to\n                    co go zatrzymuje to zobojętnienie, w zakresie podstawowych obowiązków nie jest źle Życie popędowe: sen\n                    wybudzenia śródnocne- sam ich nie pamięta rejestrowane przez zegarek, przesypia 7h-8h nadmierna senność w\n                    godzinach porannych - do pół godziny, przymulenia rano wybudza się po pierwszej kawie, apetyt - średni, w\nBadanie:            pomiarze gabinetowym 81,5kg (bz), wzrost 180cm, libido utrzymujące się obniżone pożądanie, w sferze erekcji i\n                    orgazmów jest ok Funkcje poznawcze - w normie Objawy lękowe: nie dostrzega dolegliwości Myśli samobójcze -\n                    neguje Myśli rezygnacyjne: neguje- w ostatnich 2 tych Objawy wytwórcze: neguje, nie prezentuje Osobowość: do\n                    dalszej oceny Inne: pesymistyczne myśli są ale tak jak wszystko inne są mu obojętne, utrzymuje się brak\n                    zaufania do siebie, swoich możliwości, bez nadmiernego poczucia winy, bez spowolnienia psychoruchowego , bez\n                    nadmiernego wahania się przy podejmowaniu codziennych decyzji\n\n             F15.5 - Zaburzenia psychiczne i zaburzenia zachowania spowodowane używaniem innych substancji\nRozpoznanie: stymulujących, w tym kofeiny - Zaburzenia psychotyczne - nieprzewlekłe główne\n             F33.0 - Zaburzenie depresyjne nawracające, obecnie epizod depresyjny łagodny - nieprzewlekłe towarzyszące\n\n\n\n\nNURT Centrum Terapii\n\nNIP: [TELEFON_010]6, tel. [TELEFON_009]                                                                                            Strona 11 z 13\nNumer księgi rejestrowej: [TELEFON_008]532\nKod res. cz. VIII/VII/V: 1700/ 001/01\n\f                    Wracamy do brintellixu 10mg\n                    1-2 dzień 0,5 tabl.\n                    od 3 dnia 1 tabl. 1 x d =10mg\n                    od 7 dnia 15mg 1 x d - redukujemy sertralinę do 50mg\n                    od 14 dnia 20mg 1 x d - WZROST DAWKI POD WARUNKIEM DOBREJ TOLERANCJI - sertralina do 50mg\n                    JEŚLI PRZY STOSOWANIU BRINTELLIXU 20MG PRZEZ 4 TYG NIE BEDZIE POPRAWY HEDONII TO DO KOLEJNEJ\n                    WIZYTY ROBIMY BADANIA LAB. AST I ALT.\n                    Kontrola za 6 tyg.\n                    - WAŻNE: recepta na dany lek ważna jest na 30 dni od daty wystawienia.\n                    - Poinformowano o możliwych działaniach niepożądanych i interakcjach, w tym z alkoholem, oraz o możliwym\n                    wpływie na sprawność psychomotoryczną.\n                    - Abstynencja od alkoholu i innych substancji psychoaktywnych.\n                    - W razie istotnego pogorszenia stanu psychicznego wskazany kontakt z psychiatrą we wcześniejszym terminie.\n                    W razie wystąpienia silnych myśli czy tendencji samobójczych należy niezwłocznie zgłosić się na izbę przyjęć\n                    najbliższego szpitala psychiatrycznego lub SOR albo zadzwonić na 112.\n                    - W wyjątkowych sytuacjach, aby uniknąć nagłego przerwania farmakoterapii dopuszczalne jest zamówienie\nZalecenia:          recepty na ilość leku niezbędną do kolejnej wizyty. Przy zamówieniu recepty należy potwierdzić stabilne\n                    samopoczucie, brak niepokojących objawów (w tym myśli samobójczych) oraz brak istotnych działań\n                    niepożądanych. Jeśli stan uległ pogorszeniu lub występują jakiekolwiek niepokojące objawy, należy o tym\n                    poinformować lekarza. W razie wątpliwości co do stanu pacjenta lekarz może odmówić wystawienia takiej\n                    recepty i zalecić pilną konsultację lub skontaktować się z pacjentem w celu uzyskania potrzebnych informacji\n                    przed jej wystawieniem.\n\n                    Kod e-Recepty: 2946 – realizacja od 10.01\n\n                     Brintellix: tabl. powl., 10 mg / 1 op. po 56 szt.\n                     DS: 2-0-0 szt.\n                     Odpłatność: 30%\n\n                     Brintellix: tabl. powl., 5 mg / 1 op. po 56 szt.\n                     DS: 1-0-0 szt.\n                     Odpłatność: 30%\n\n\nUsługi                      konsultacja psychiatryczna (kolejna wizyta) - 1 szt. - 260,00 zł\nprywatne:\n\n\n\n\n Ubezpieczenie NFZ\n\nData złożenia                                 Ważne do                        Rodzaj                           Stan\n\n25 lutego 2025 12:24                          25 lutego 2025                  Ewuś (L1125M[TELEFON_024]45)         Ubezpieczony\n\n12 stycznia 2025 13:07                        12 stycznia 2025                Ewuś (L1125M[TELEFON_023]43)         Ubezpieczony\n\n10 stycznia 2025 08:48                        10 stycznia 2025                Ewuś (L1125M[TELEFON_022]47)         Ubezpieczony\n\n28 listopada 2024 11:31                       28 listopada 2024               Ewuś (L1124M[TELEFON_021]51)         Ubezpieczony\n\n27 listopada 2024 04:40                       27 listopada 2024               Ewuś (L1124M[TELEFON_020]72)         Ubezpieczony\n\n17 listopada 2024 13:41                       17 listopada 2024               Ewuś (L1124M[TELEFON_019]18)         Ubezpieczony\n\n16 listopada 2024 14:58                       16 listopada 2024               Ewuś (L1124M[TELEFON_018]53)         Ubezpieczony\n\n29 października 2024 04:47                    29 października 2024            Ewuś (L1124M[TELEFON_017]56)         Ubezpieczony\n\n20 września 2024 01:43                        20 września 2024                Ewuś (L1124M[TELEFON_016]19)         Ubezpieczony\n\n6 sierpnia 2024 02:10                         6 sierpnia 2024                 Ewuś (L1124M[TELEFON_015]11)         Ubezpieczony\n\n1 lipca 2024 02:04                            1 lipca 2024                    Ewuś (L1124M[TELEFON_014]21)         Ubezpieczony\n\n16 kwietnia 2024 02:30                        16 kwietnia 2024                Ewuś (L1124M[TELEFON_013]57)         Ubezpieczony\n\n26 lutego 2024 02:36                          26 lutego 2024                  Ewuś (L1124M[TELEFON_012]99)         Ubezpieczony\n\n29 stycznia 2024 15:27                        29 stycznia 2024                Ewuś (L1124M[TELEFON_011]16)         Ubezpieczony\n\n\n\n\n Historia zwolnień\n\nData wystawienia                            Data od                         Data do                Data anulowania\n\n26 lutego 2024                              27 lutego 2024                  31 marca 2024          -\n\n\n\n\nNURT Centrum Terapii\n\nNIP: [TELEFON_010]6, tel. [TELEFON_009]                                                                                        Strona 12 z 13\nNumer księgi rejestrowej: [TELEFON_008]532\nKod res. cz. VIII/VII/V: 1700/ 001/01\n\fData wystawienia                               Data od                        Data do              Data anulowania\n\n29 stycznia 2024                               29 stycznia 2024               26 lutego 2024       -\n\n\n\n\n Usługi prywatne w karcie pacjenta\n\n\n                Data                                              Nazwa                           Cena         Liczba     Łącznie\n\n10 stycznia 2025                         konsultacja psychiatryczna (kolejna wizyta)           260,00 zł   1            260,00 zł\n\n27 listopada 2024                        Konsultacja psychiatryczna kolejna                    260,00 zł   1            260,00 zł\n\n29 października 2024                     Konsultacja psychiatryczna kolejna                    260,00 zł   1            260,00 zł\n\n20 września 2024                         konsultacja psychiatryczna (kolejna wizyta)           260,00 zł   1            260,00 zł\n6 sierpnia 2024                          Konsultacja psychiatryczna kolejna                    250,00 zł   1            250,00 zł\n\n1 lipca 2024                             konsultacja psychiatryczna (kolejna wizyta)           250,00 zł   1            250,00 zł\n\n16 kwietnia 2024                         konsultacja psychiatryczna (kolejna wizyta)           250,00 zł   1            250,00 zł\n\n26 lutego 2024                           konsultacja psychiatryczna (kolejna wizyta)           250,00 zł   1            250,00 zł\n\n29 stycznia 2024                         konsultacja psychiatryczna (pierwsza wizyta)          300,00 zł   1            300,00 zł\n\n\n\n\nNURT Centrum Terapii\n\nNIP: [TELEFON_010]6, tel. [TELEFON_009]                                                                                          Strona 13 z 13\nNumer księgi rejestrowej: [TELEFON_008]532\nKod res. cz. VIII/VII/V: 1700/ 001/01\n\n",
+  "studyProtocol": "{\n  \"inclusion\": [\n    {\n      \"id\": \"IC1\",\n      \"name\": \"Zgoda na udział w badaniu (ICF)\",\n      \"details\": \"Pacjent musi podpisać świadomą zgodę na udział w badaniu.\"\n    },\n    {\n      \"id\": \"IC2\",\n      \"name\": \"Wiek ≥18 lat\",\n      \"details\": \"Pacjent musi mieć ukończone 18 lat w momencie screeningu.\"\n    },\n    {\n      \"id\": \"IC3\",\n      \"name\": \"Diagnoza dużej depresji\",\n      \"details\": \"Duża depresja bez objawów psychotycznych (pojedynczy lub nawracający epizod wg DSM-5) potwierdzona przez MINI 7.0.2.\"\n    },\n    {\n      \"id\": \"IC4\",\n      \"name\": \"Czas trwania pierwszego epizodu\",\n      \"details\": \"Jeśli obecny epizod jest pierwszym w życiu, musi trwać ≥6 miesięcy i ≤2 lata w momencie screeningu.\"\n    },\n    {\n      \"id\": \"IC5\",\n      \"name\": \"Wynik MADRS ≥20\",\n      \"details\": \"Całkowity wynik w skali MADRS ≥20 podczas screeningu i wizyty początkowej.\"\n    },\n    {\n      \"id\": \"IC6\",\n      \"name\": \"Lekooporność (TRD) wg MGH-ATRQ (specyficzne dla badania)\",\n      \"details\": \"Niepowodzenie co najmniej dwóch (2) do czterech (4) różnych, adekwatnych prób leczenia przeciwdepresyjnego (monoterapia lub leczenie adjuwantowe) w obecnym epizodzie depresyjnym. Adekwatność próby leczenia oceniana jest wyłącznie na podstawie specyficznego dla tego badania formularza MGH-ATRQ (minimalna dawka i czas trwania). Dodatkowo, dla Polski, uwzględnia się Kwetiapinę 150mg jako leczenie adjuwantowe. Szczegóły poniżej.\",\n      \"mghAtrqPoland\": {\n        \"minTrialDurationWeeks\": \"co najmniej 8 lub 10 tygodni\",\n        \"medications\": [\n          {\n            \"drugName\": \"Doxepin\",\n            \"brandName\": \"Adapin\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Clomipramine\",\n            \"brandName\": \"Anafranil\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Amoxapine\",\n            \"brandName\": \"Asendin\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Amitriptyline\",\n            \"brandName\": \"Endep/Elavil\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Maprotiline\",\n            \"brandName\": \"Ludiomil\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Desipramine\",\n            \"brandName\": \"Norpramin\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Nortriptyline\",\n            \"brandName\": \"Pamelor\",\n            \"minDose\": \"75mg/d\"\n          },\n          {\n            \"drugName\": \"Doxepin \",\n            \"brandName\": \"Sinequan\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Trimipramine\",\n            \"brandName\": \"Surmontil\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Imipramine\",\n            \"brandName\": \"Tofranil\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Protriptyline\",\n            \"brandName\": \"Vivactil\",\n            \"minDose\": \"30mg/d\"\n          },\n          {\n            \"drugName\": \"Pipofezine\",\n            \"brandName\": \"Azafen\",\n            \"minDose\": \"150mg/d\"\n          },\n          {\n            \"drugName\": \"Noxiptiline\",\n            \"brandName\": \"Agedal/Elronon\",\n            \"minDose\": \"100mg/d\"\n          },\n          {\n            \"drugName\": \"Isocarboxazid\",\n            \"brandName\": \"Marplan\",\n            \"minDose\": \"30mg/d\",\n            \"notes\": \"MAOI\"\n          },\n          {\n            \"drugName\": \"Phenelzine\",\n            \"brandName\": \"Nardil\",\n            \"minDose\": \"45mg/d\",\n            \"notes\": \"MAOI\"\n          },\n          {\n            \"drugName\": \"Tranylcypromine\",\n            \"brandName\": \"Parnate\",\n            \"minDose\": \"30mg/d\",\n            \"notes\": \"MAOI\"\n          },\n          {\n            \"drugName\": \"Selegiline patch\",\n            \"brandName\": \"Emsam\",\n            \"minDose\": \"6 mg/24 hrs\",\n            \"notes\": \"MAOI\"\n          },\n          {\n            \"drugName\": \"Moclobemide\",\n            \"brandName\": \"Aurorix\",\n            \"minDose\": \"300 mg/d\",\n            \"notes\": \"MAOI (RIMA)\"\n          },\n          {\n            \"drugName\": \"Pirlindole\",\n            \"brandName\": \"Pirazidol\",\n            \"minDose\": \"200 mg/d\",\n            \"notes\": \"MAOI (RIMA)\"\n          },\n          {\n            \"drugName\": \"Escitalopram\",\n            \"brandName\": \"Lexapro\",\n            \"minDose\": \"10mg/d\",\n            \"notes\": \"SSRI\"\n          },\n          {\n            \"drugName\": \"Fluvoxamine\",\n            \"brandName\": \"Luvox\",\n            \"minDose\": \"50mg/d\",\n            \"notes\": \"SSRI\"\n          },\n          {\n            \"drugName\": \"Paroxetine\",\n            \"brandName\": \"Paxil\",\n            \"minDose\": \"20/25mg/d\",\n            \"notes\": \"SSRI - dawka 20 LUB 25 mg/d\"\n          },\n          {\n            \"drugName\": \"Fluoxetine\",\n            \"brandName\": \"Prozac\",\n            \"minDose\": \"20mg/d\",\n            \"notes\": \"SSRI\"\n          },\n          {\n            \"drugName\": \"Sertraline\",\n            \"brandName\": \"Zoloft\",\n            \"minDose\": \"50mg/d\",\n            \"notes\": \"SSRI\"\n          },\n          {\n            \"drugName\": \"Citalopram\",\n            \"brandName\": \"Celexa\",\n            \"minDose\": \"20mg/d\",\n            \"notes\": \"SSRI\"\n          },\n          {\n            \"drugName\": \"Vilazodone\",\n            \"brandName\": \"Viibryd\",\n            \"minDose\": \"40mg/d\"\n          },\n          {\n            \"drugName\": \"Vortioxetine\",\n            \"brandName\": \"Brintellix\",\n            \"minDose\": \"10mg/d\"\n          },\n          {\n            \"drugName\": \"Venlafaxine\",\n            \"brandName\": \"Effexor\",\n            \"minDose\": \"150mg/d\",\n            \"notes\": \"SNRI\"\n          },\n          {\n            \"drugName\": \"Duloxetine\",\n            \"brandName\": \"Cymbalta\",\n            \"minDose\": \"60mg/d\",\n            \"notes\": \"SNRI\"\n          },\n          {\n            \"drugName\": \"Desvenlafaxine\",\n            \"brandName\": \"Pristiq\",\n            \"minDose\": \"50mg/d\",\n            \"notes\": \"SNRI\"\n          },\n          {\n            \"drugName\": \"Milnacipran\",\n            \"brandName\": \"Savella\",\n            \"minDose\": \"100mg/d\",\n            \"notes\": \"SNRI\"\n          },\n          {\n            \"drugName\": \"Levomilnacipran\",\n            \"brandName\": \"Fetzima\",\n            \"minDose\": \"40mg/d\",\n            \"notes\": \"SNRI\"\n          },\n          {\n            \"drugName\": \"Trazodone\",\n            \"brandName\": \"Desyrel\",\n            \"minDose\": \"300mg/d\"\n          },\n          {\n            \"drugName\": \"Nefazodone\",\n            \"brandName\": \"Serzone\",\n            \"minDose\": \"300mg/d\"\n          },\n          {\n            \"drugName\": \"Bupropion\",\n            \"brandName\": \"Wellbutrin\",\n            \"minDose\": \"300mg/d\"\n          },\n          {\n            \"drugName\": \"Mirtazapine\",\n            \"brandName\": \"Remeron\",\n            \"minDose\": \"15mg/d\"\n          },\n          {\n            \"drugName\": \"Agomelatine\",\n            \"brandName\": \"Valdoxan\",\n            \"minDose\": \"25mg/d\"\n          },\n          {\n            \"drugName\": \"Tianeptine\",\n            \"brandName\": \"Stablon\",\n            \"minDose\": \"37.5mg/d\"\n          },\n          {\n            \"drugName\": \"Reboxetine\",\n            \"brandName\": \"Edronax\",\n            \"minDose\": \"4 mg/d\"\n          },\n          {\n            \"drugName\": \"Mianserin\",\n            \"brandName\": \"Bolvidon/Depnon, Norval/Tolvon\",\n            \"minDose\": \"30 mg/d\"\n          },\n          {\n            \"drugName\": \"Opipramol\",\n            \"brandName\": \"Insidon\",\n            \"minDose\": \"150 mg/d\"\n          },\n          {\n            \"drugName\": \"Kwetiapina (jako leczenie adjuwantowe)\",\n            \"minDose\": \"150 mg/dzień\",\n            \"notes\": \"Specyficzne dla Polski, leczenie adjuwantowe przez co najmniej 8 lub 10 tygodni.\"\n          }\n        ],\n        \"generalNotes\": [\n          \"Powyższa lista leków i dawek opiera się wyłącznie na specyficznym formularzu MGH-ATRQ dostarczonym dla tego badania.\",\n          \"Za adekwatną próbę leczenia uznaje się stosowanie leku w określonej minimalnej dawce (lub wyższej) przez co najmniej 8 lub 10 tygodni.\",\n          \"Kwetiapina 150mg/dzień jest uznawana w Polsce jako adekwatne leczenie adjuwantowe trwające co najmniej 8 lub 10 tygodni.\",\n          \"Ocena powinna ściśle bazować na powyższych kryteriach. Należy zwrócić uwagę na instrukcję na formularzu MGH-ATRQ dotyczącą sprawdzania, czy lek był dodany w celu augmentacji/wzmocnienia efektu antydepresyjnego.\"\n        ]\n      }\n    },\n    {\n      \"id\": \"IC7\",\n      \"name\": \"Odstawienie leków\",\n      \"details\": \"Zgoda na odstawienie wszystkich zabronionych leków i potwierdzenie ich odstawienia przed wizytą początkową.\"\n    },\n    {\n      \"id\": \"IC8\",\n      \"name\": \"Zdolność do udziału\",\n      \"details\": \"Możliwość wykonania wszystkich procedur bez pomocy i zgoda na przestrzeganie harmonogramu wizyt.\"\n    }\n  ],\n  \"psychiatricExclusion\": [\n    {\n      \"id\": \"EC1\",\n      \"name\": \"Historia zaburzeń afektywnych dwubiegunowych\",\n      \"details\": \"Obecność lub historia zaburzeń afektywnych dwubiegunowych.\"\n    },\n    {\n      \"id\": \"EC2\",\n      \"name\": \"Zaburzenia psychotyczne\",\n      \"details\": \"Obecność lub historia schizofrenii, zaburzenia schizofreniformnego, schizoafektywnego lub innych zaburzeń psychotycznych.\"\n    },\n    {\n      \"id\": \"EC3\",\n      \"name\": \"Zaburzenia osobowości\",\n      \"details\": \"Zaburzenia osobowości: paranoiczne, schizoidalne, schizotypowe, histrioniczne, narcystyczne lub inne poważne współistniejące zaburzenia psychiatryczne.\"\n    },\n    {\n      \"id\": \"EC4\",\n      \"name\": \"Zaburzenie osobowości typu borderline\",\n      \"details\": \"Zaburzenie osobowości z pogranicza potwierdzone wywiadem lub modułem MINI plus.\"\n    },\n    {\n      \"id\": \"EC5\",\n      \"name\": \"Aktywne zaburzenia współistniejące\",\n      \"details\": \"Aktywne PTSD, OCD lub anoreksja potwierdzone wywiadem i MINI 7.0.2.\"\n    },\n    {\n      \"id\": \"EC6\",\n      \"name\": \"Hospitalizacja psychiatryczna\",\n      \"details\": \"Hospitalizacja psychiatryczna w ciągu 6 miesięcy przed screeningiem.\"\n    },\n    {\n      \"id\": \"EC7\",\n      \"name\": \"Historia leczenia inwazyjnego\",\n      \"details\": \"Stosowanie inwazyjnych metod leczenia (ECT, DBS, VNS) w obecnym epizodzie.\"\n    },\n    {\n      \"id\": \"EC8\",\n      \"name\": \"Historia leczenia nieinwazyjnego\",\n      \"details\": \"Stosowanie nieinwazyjnych metod leczenia (TMS) w ciągu 6 miesięcy przed screeningiem.\"\n    },\n    {\n      \"id\": \"EC9\",\n      \"name\": \"Aktywna psychoterapia\",\n      \"details\": \"Udział w programie psychoterapii, który nie pozostanie stabilny przez 9 tygodni.\"\n    },\n    {\n      \"id\": \"EC10\",\n      \"name\": \"Uzależnienia\",\n      \"details\": \"Uzależnienie od alkoholu lub substancji psychoaktywnych w ciągu 12 miesięcy przed screeningiem.\"\n    },\n    {\n      \"id\": \"EC11\",\n      \"name\": \"Ryzyko samobójcze\",\n      \"details\": \"Znaczące ryzyko samobójcze według określonych kryteriów.\"\n    },\n    {\n      \"id\": \"EC12\",\n      \"name\": \"Depresja wtórna\",\n      \"details\": \"Depresja wtórna do przyczyn medycznych lub polekowych.\"\n    },\n    {\n      \"id\": \"EC13\",\n      \"name\": \"Przeciwwskazania osobiste\",\n      \"details\": \"Okoliczności osobiste lub zachowanie uniemożliwiające bezpieczny udział.\"\n    },\n    {\n      \"id\": \"EC14\",\n      \"name\": \"Historia rodzinna\",\n      \"details\": \"Występowanie schizofrenii, zaburzenia schizoafektywnego lub ChAD I w rodzinie.\"\n    },\n    {\n      \"id\": \"EC15\",\n      \"name\": \"Ekspozycja na psychodeliki\",\n      \"details\": \"Stosowanie klasycznych psychodelików w ciągu ostatniego roku lub obecnego epizodu.\"\n    }\n  ],\n  \"medicalExclusion\": [\n    {\n      \"id\": \"GMEC1\",\n      \"name\": \"Ciąża lub karmienie\",\n      \"details\": \"Pacjentki w ciąży, karmiące lub planujące ciążę.\"\n    },\n    {\n      \"id\": \"GMEC2\",\n      \"name\": \"Antykoncepcja\",\n      \"details\": \"Brak zgody na stosowanie skutecznej antykoncepcji podczas badania.\"\n    },\n    {\n      \"id\": \"GMEC3\",\n      \"name\": \"Testy ciążowe\",\n      \"details\": \"Brak negatywnego wyniku testu ciążowego przed rozpoczęciem badania.\"\n    },\n    {\n      \"id\": \"GMEC4\",\n      \"name\": \"Dawstwo nasienia\",\n      \"details\": \"Planowane oddawanie nasienia w ciągu 3 miesięcy po zakończeniu badania.\"\n    },\n    {\n      \"id\": \"GMEC5\",\n      \"name\": \"Choroby układu krążenia\",\n      \"details\": \"Historia udaru, zawału, niekontrolowane nadciśnienie, tachykardia, wydłużony QT lub arytmia.\"\n    },\n    {\n      \"id\": \"GMEC6\",\n      \"name\": \"Cukrzyca\",\n      \"details\": \"Cukrzyca typu 1 lub niekontrolowana typu 2 (HbA1c >8%).\"\n    },\n    {\n      \"id\": \"GMEC7\",\n      \"name\": \"Choroby tarczycy\",\n      \"details\": \"Niestabilna choroba tarczycy lub nieprawidłowe wyniki badań.\"\n    },\n    {\n      \"id\": \"GMEC8\",\n      \"name\": \"Padaczka\",\n      \"details\": \"Występowanie zaburzeń drgawkowych.\"\n    },\n    {\n      \"id\": \"GMEC9\",\n      \"name\": \"Wyniki badań\",\n      \"details\": \"Istotne klinicznie nieprawidłowości w badaniach laboratoryjnych.\"\n    },\n    {\n      \"id\": \"GMEC10\",\n      \"name\": \"Inne choroby\",\n      \"details\": \"Inne istotne schorzenia mogące wpływać na interpretację wyników.\"\n    },\n    {\n      \"id\": \"GMEC11\",\n      \"name\": \"Udział w innych badaniach\",\n      \"details\": \"Aktualny udział w innym badaniu interwencyjnym.\"\n    },\n    {\n      \"id\": \"GMEC12\",\n      \"name\": \"Nadwrażliwość\",\n      \"details\": \"Nadwrażliwość na badany lek lub substancje pomocnicze.\"\n    }\n  ]\n}"
+}

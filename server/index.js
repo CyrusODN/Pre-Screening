@@ -2,12 +2,28 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
+import { v4 as uuidv4 } from 'uuid';
+
+// PDF Anonymization imports
+import upload, { cleanupTempFiles } from './middleware/fileUpload.js';
+import PopplerPdfProcessor from './services/popplerPdfProcessor.js';
+import PIIDetector from './services/piiDetector.js';
+import Anonymizer from './services/anonymizer.js';
 
 // Load environment variables from current directory (server/.env)
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Initialize PDF processing services
+const pdfProcessor = new PopplerPdfProcessor();
+const piiDetector = new PIIDetector();
+const anonymizer = new Anonymizer();
+
+// In-memory storage for anonymization sessions
+const anonymizationSessions = new Map();
 
 // Middleware
 app.use(cors({
@@ -52,6 +68,356 @@ checkApiKeys();
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
+
+// ============ PDF ANONYMIZATION ENDPOINTS ============
+
+// Step 1: Upload PDF and get basic info
+app.post('/api/upload-pdf', upload.single('pdf'), async (req, res) => {
+  try {
+    console.log('📄 [Backend] PDF upload request');
+    
+    if (!req.file) {
+      return res.status(400).json({ error: 'No PDF file uploaded' });
+    }
+
+    const filePath = req.file.path;
+    const sessionId = uuidv4();
+    
+    // Get basic PDF info
+    const pdfInfo = await pdfProcessor.getPDFInfo(filePath);
+    
+    if (!pdfInfo) {
+      // Cleanup failed file
+      fs.unlinkSync(filePath);
+      return res.status(400).json({ error: 'Invalid PDF file' });
+    }
+
+    // Store session info
+    anonymizationSessions.set(sessionId, {
+      sessionId,
+      filePath,
+      originalFilename: req.file.originalname,
+      pdfInfo,
+      extractedText: null,
+      piiDetection: null,
+      anonymizedText: null,
+      approved: false,
+      createdAt: new Date()
+    });
+
+    console.log(`✅ [Backend] PDF uploaded successfully: ${sessionId}`);
+    
+    res.json({
+      sessionId,
+      filename: req.file.originalname,
+      fileSize: pdfInfo.fileSize,
+      pages: pdfInfo.pages,
+      hasText: pdfInfo.hasText
+    });
+
+  } catch (error) {
+    console.error('❌ [Backend] PDF upload error:', error);
+    
+    // Cleanup file if exists
+    if (req.file?.path) {
+      try {
+        fs.unlinkSync(req.file.path);
+      } catch (cleanupError) {
+        console.error('Error cleaning up file:', cleanupError);
+      }
+    }
+    
+    res.status(500).json({ 
+      error: 'PDF upload failed', 
+      details: error.message 
+    });
+  }
+});
+
+// Step 2: Extract text and detect PII for preview
+app.post('/api/anonymize-preview', async (req, res) => {
+  try {
+    const { sessionId } = req.body;
+    console.log(`🔍 [Backend] Anonymization preview request: ${sessionId}`);
+    
+    if (!sessionId || !anonymizationSessions.has(sessionId)) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+
+    const session = anonymizationSessions.get(sessionId);
+    
+    // Extract text from PDF if not already done
+    if (!session.extractedText) {
+      console.log('📄 [Backend] Extracting text from PDF...');
+      const textResult = await pdfProcessor.extractTextFromPDF(session.filePath);
+      
+      // Sprawdzamy czy PDF wymaga hasła
+      if (textResult.error === 'PASSWORD_REQUIRED') {
+        console.log(`🔒 [Backend] PDF requires password: ${sessionId}`);
+        return res.status(423).json({ // 423 Locked
+          error: 'PASSWORD_REQUIRED',
+          message: textResult.message || 'Ten PDF jest zabezpieczony hasłem',
+          sessionId,
+          filename: session.originalFilename
+        });
+      }
+      
+      // Sprawdzamy czy hasło było nieprawidłowe
+      if (textResult.error === 'WRONG_PASSWORD') {
+        console.log(`❌ [Backend] Wrong password provided: ${sessionId}`);
+        return res.status(401).json({ // 401 Unauthorized
+          error: 'WRONG_PASSWORD',
+          message: textResult.message || 'Podane hasło jest nieprawidłowe',
+          sessionId,
+          filename: session.originalFilename
+        });
+      }
+      
+      session.extractedText = textResult.text;
+      session.extractionMethod = textResult.method;
+      session.extractionConfidence = textResult.confidence;
+    }
+
+    // Detect PII if not already done
+    if (!session.piiDetection) {
+      console.log('🔍 [Backend] Detecting PII...');
+      session.piiDetection = piiDetector.detectPII(session.extractedText);
+    }
+
+    // Generate anonymized text
+    session.anonymizedText = anonymizer.anonymize(
+      session.extractedText, 
+      session.piiDetection.detections
+    );
+
+    // Get anonymization stats
+    const anonymizationStats = anonymizer.getStats();
+
+    console.log(`✅ [Backend] Anonymization preview ready: ${session.piiDetection.detections.length} PII entities found`);
+    
+    res.json({
+      sessionId,
+      originalText: session.extractedText,
+      anonymizedText: session.anonymizedText,
+      detections: session.piiDetection.detections,
+      overallConfidence: session.piiDetection.overallConfidence,
+      summary: session.piiDetection.summary,
+      extractionMethod: session.extractionMethod,
+      extractionConfidence: session.extractionConfidence,
+      anonymizationStats: anonymizationStats
+    });
+
+  } catch (error) {
+    console.error('❌ [Backend] Anonymization preview error:', error);
+    res.status(500).json({ 
+      error: 'Anonymization preview failed', 
+      details: error.message 
+    });
+  }
+});
+
+// New endpoint: Retry PDF extraction with password
+app.post('/api/retry-with-password', async (req, res) => {
+  try {
+    const { sessionId, password } = req.body;
+    console.log(`🔐 [Backend] Password retry request: ${sessionId}`);
+    
+    if (!sessionId || !anonymizationSessions.has(sessionId)) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+    
+    if (!password || typeof password !== 'string') {
+      return res.status(400).json({ error: 'Password is required' });
+    }
+
+    const session = anonymizationSessions.get(sessionId);
+    
+    // Clear previous failed extraction attempts
+    session.extractedText = null;
+    session.extractionMethod = null;
+    session.extractionConfidence = null;
+    session.piiDetection = null;
+    session.anonymizedText = null;
+    
+    console.log('📄 [Backend] Retrying text extraction with password...');
+    const textResult = await pdfProcessor.extractTextFromPDF(session.filePath, password);
+    
+    // Sprawdzamy czy hasło było nieprawidłowe
+    if (textResult.error === 'WRONG_PASSWORD') {
+      console.log(`❌ [Backend] Wrong password provided for retry: ${sessionId}`);
+      return res.status(401).json({
+        error: 'WRONG_PASSWORD',
+        message: textResult.message || 'Podane hasło jest nieprawidłowe',
+        sessionId,
+        filename: session.originalFilename
+      });
+    }
+    
+    // Sprawdzamy czy nadal wymaga hasła (nie powinno się zdarzyć)
+    if (textResult.error === 'PASSWORD_REQUIRED') {
+      console.log(`🔒 [Backend] Still requires password after retry: ${sessionId}`);
+      return res.status(423).json({
+        error: 'PASSWORD_REQUIRED',
+        message: 'PDF nadal wymaga hasła',
+        sessionId,
+        filename: session.originalFilename
+      });
+    }
+    
+    // Sukces - zapisujemy wyniki
+    session.extractedText = textResult.text;
+    session.extractionMethod = textResult.method;
+    session.extractionConfidence = textResult.confidence;
+    session.passwordUsed = true; // Oznaczamy że użyto hasła
+    
+    // Detect PII
+    console.log('🔍 [Backend] Detecting PII...');
+    session.piiDetection = piiDetector.detectPII(session.extractedText);
+
+    // Generate anonymized text
+    session.anonymizedText = anonymizer.anonymize(
+      session.extractedText, 
+      session.piiDetection.detections
+    );
+
+    // Get anonymization stats
+    const anonymizationStats = anonymizer.getStats();
+
+    console.log(`✅ [Backend] Password retry successful: ${session.piiDetection.detections.length} PII entities found`);
+    
+    res.json({
+      sessionId,
+      originalText: session.extractedText,
+      anonymizedText: session.anonymizedText,
+      detections: session.piiDetection.detections,
+      overallConfidence: session.piiDetection.overallConfidence,
+      summary: session.piiDetection.summary,
+      extractionMethod: session.extractionMethod,
+      extractionConfidence: session.extractionConfidence,
+      anonymizationStats: anonymizationStats,
+      passwordSuccess: true
+    });
+
+  } catch (error) {
+    console.error('❌ [Backend] Password retry error:', error);
+    res.status(500).json({ 
+      error: 'Password retry failed', 
+      details: error.message 
+    });
+  }
+});
+
+// Step 3: Approve and get final anonymized text for analysis
+app.post('/api/approve-analysis', async (req, res) => {
+  try {
+    const { sessionId, manualCorrections } = req.body;
+    console.log(`✅ [Backend] Analysis approval request: ${sessionId}`);
+    
+    if (!sessionId || !anonymizationSessions.has(sessionId)) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+
+    const session = anonymizationSessions.get(sessionId);
+    
+    // Apply manual corrections if provided
+    let finalAnonymizedText = session.anonymizedText;
+    if (manualCorrections && manualCorrections.length > 0) {
+      console.log(`🔧 [Backend] Applying ${manualCorrections.length} manual corrections`);
+      finalAnonymizedText = anonymizer.applyManualCorrections(finalAnonymizedText, manualCorrections);
+    }
+
+    // Mark session as approved
+    session.approved = true;
+    session.finalAnonymizedText = finalAnonymizedText;
+    session.approvedAt = new Date();
+
+    console.log(`✅ [Backend] Analysis approved and ready for LLM: ${sessionId}`);
+    
+    res.json({
+      sessionId,
+      anonymizedText: finalAnonymizedText,
+      ready: true,
+      message: 'PDF successfully anonymized and ready for analysis'
+    });
+
+  } catch (error) {
+    console.error('❌ [Backend] Analysis approval error:', error);
+    res.status(500).json({ 
+      error: 'Analysis approval failed', 
+      details: error.message 
+    });
+  }
+});
+
+// Helper endpoint: Get session status
+app.get('/api/pdf-session/:sessionId', (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    
+    if (!anonymizationSessions.has(sessionId)) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+
+    const session = anonymizationSessions.get(sessionId);
+    
+    res.json({
+      sessionId,
+      originalFilename: session.originalFilename,
+      hasExtractedText: !!session.extractedText,
+      hasPIIDetection: !!session.piiDetection,
+      hasAnonymizedText: !!session.anonymizedText,
+      approved: session.approved,
+      createdAt: session.createdAt,
+      approvedAt: session.approvedAt
+    });
+
+  } catch (error) {
+    console.error('❌ [Backend] Session status error:', error);
+    res.status(500).json({ 
+      error: 'Failed to get session status', 
+      details: error.message 
+    });
+  }
+});
+
+// Helper endpoint: Cleanup session
+app.delete('/api/pdf-session/:sessionId', (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    console.log(`🗑️ [Backend] Session cleanup request: ${sessionId}`);
+    
+    if (!anonymizationSessions.has(sessionId)) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+
+    const session = anonymizationSessions.get(sessionId);
+    
+    // Delete file
+    try {
+      if (fs.existsSync(session.filePath)) {
+        fs.unlinkSync(session.filePath);
+        console.log(`🗑️ [Backend] File deleted: ${session.filePath}`);
+      }
+    } catch (fileError) {
+      console.warn('⚠️ [Backend] Could not delete file:', fileError);
+    }
+
+    // Remove session
+    anonymizationSessions.delete(sessionId);
+    
+    console.log(`✅ [Backend] Session cleaned up: ${sessionId}`);
+    res.json({ success: true });
+
+  } catch (error) {
+    console.error('❌ [Backend] Session cleanup error:', error);
+    res.status(500).json({ 
+      error: 'Session cleanup failed', 
+      details: error.message 
+    });
+  }
+});
+
+// ============ END PDF ANONYMIZATION ENDPOINTS ============
 
 // AI API proxy endpoint
 app.post('/api/ai/chat', async (req, res) => {
@@ -463,9 +829,50 @@ app.get('/api/analysis/stats', async (req, res) => {
   }
 });
 
+// ============================================================================
+// HELPER FUNCTIONS FOR PDF ANONYMIZATION
+// ============================================================================
+
+/**
+ * Schedule cleanup of old anonymization sessions
+ */
+function cleanupOldSessions() {
+  const now = new Date();
+  const maxAge = 2 * 60 * 60 * 1000; // 2 hours in milliseconds
+
+  for (const [sessionId, session] of anonymizationSessions.entries()) {
+    const sessionAge = now.getTime() - session.createdAt.getTime();
+    
+    if (sessionAge > maxAge) {
+      console.log(`🧹 [Backend] Cleaning up old session: ${sessionId}`);
+      
+      // Delete file
+      try {
+        if (fs.existsSync(session.filePath)) {
+          fs.unlinkSync(session.filePath);
+        }
+      } catch (error) {
+        console.warn(`⚠️ [Backend] Could not delete file for session ${sessionId}:`, error);
+      }
+      
+      // Remove from memory
+      anonymizationSessions.delete(sessionId);
+    }
+  }
+}
+
+// Schedule session cleanup every 30 minutes
+setInterval(cleanupOldSessions, 30 * 60 * 1000);
+
+// ============================================================================
+// SERVER START
+// ============================================================================
+
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 [Backend] Server running on http://localhost:${PORT}`);
   console.log(`🔗 [Backend] CORS enabled for frontend ports`);
   console.log(`🤖 [Backend] AI API proxy ready`);
+  console.log(`📄 [Backend] PDF anonymization system ready`);
+  console.log(`🛡️ [Backend] PII detection enabled for Polish documents`);
 }); 

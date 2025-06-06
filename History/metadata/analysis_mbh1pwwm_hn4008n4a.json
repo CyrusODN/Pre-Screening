@@ -1,0 +1,18 @@
+{
+  "id": "analysis_mbh1pwwm_hn4008n4a",
+  "patientId": "TEST_PATIENT_001",
+  "analysisType": "single-agent",
+  "modelUsed": "o3",
+  "createdAt": "2025-06-03T21:43:49.449Z",
+  "updatedAt": "2025-06-03T21:43:49.462Z",
+  "status": "completed",
+  "version": "1.0.0",
+  "tags": [
+    "single-agent",
+    "diagnosis:depresja_major",
+    "age:middle",
+    "model:o3",
+    "trd:confirmed"
+  ],
+  "notes": "Analiza klasyczna pacjenta 45 lat"
+}

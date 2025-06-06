@@ -1,0 +1,313 @@
+import fs from 'fs';
+import path from 'path';
+
+class PIIDetector {
+  constructor() {
+    this.polishNames = null;
+    this.medicalTerms = null;
+    this.loadDictionaries();
+  }
+
+  loadDictionaries() {
+    try {
+      this.polishNames = JSON.parse(fs.readFileSync('./data/polishNames.json', 'utf8'));
+      this.medicalTerms = JSON.parse(fs.readFileSync('./data/medicalTerms.json', 'utf8'));
+      console.log('✅ [PIIDetector] Dictionaries loaded successfully');
+    } catch (error) {
+      console.error('❌ [PIIDetector] Error loading dictionaries:', error);
+    }
+  }
+
+  detectPII(text) {
+    console.log('🔍 [PIIDetector] Starting PII detection...');
+    
+    const detections = [];
+    
+    // Detect different types of PII
+    detections.push(...this.detectPESEL(text));
+    detections.push(...this.detectPhoneNumbers(text));
+    detections.push(...this.detectNames(text));
+    detections.push(...this.detectDates(text));
+    detections.push(...this.detectEmails(text));
+    detections.push(...this.detectAddresses(text));
+    
+    // Sort by position in text
+    detections.sort((a, b) => a.startIndex - b.startIndex);
+    
+    // Remove overlapping detections (keep highest confidence)
+    const cleanedDetections = this.removeOverlaps(detections);
+    
+    console.log(`✅ [PIIDetector] Found ${cleanedDetections.length} PII entities`);
+    
+    return {
+      detections: cleanedDetections,
+      overallConfidence: this.calculateOverallConfidence(cleanedDetections),
+      summary: {
+        totalDetections: cleanedDetections.length,
+        byType: this.generateSummary(cleanedDetections)
+      }
+    };
+  }
+
+  detectPESEL(text) {
+    const detections = [];
+    const peselPattern = /\b\d{11}\b/g;
+    let match;
+
+    while ((match = peselPattern.exec(text)) !== null) {
+      // Validate PESEL checksum
+      const pesel = match[0];
+      if (this.validatePESEL(pesel)) {
+        detections.push({
+          type: 'PESEL',
+          text: pesel,
+          startIndex: match.index,
+          endIndex: match.index + pesel.length,
+          confidence: 0.98,
+          replacement: '[PESEL]'
+        });
+      }
+    }
+
+    return detections;
+  }
+
+  validatePESEL(pesel) {
+    const weights = [1, 3, 7, 9, 1, 3, 7, 9, 1, 3];
+    let sum = 0;
+    
+    for (let i = 0; i < 10; i++) {
+      sum += parseInt(pesel[i]) * weights[i];
+    }
+    
+    const checksum = (10 - (sum % 10)) % 10;
+    return checksum === parseInt(pesel[10]);
+  }
+
+  detectPhoneNumbers(text) {
+    const detections = [];
+    const phonePatterns = [
+      /(?:\+48\s?)?\d{3}[-\s]?\d{3}[-\s]?\d{3}/g,
+      /(?:\+48\s?)?\d{2}[-\s]?\d{3}[-\s]?\d{2}[-\s]?\d{2}/g,
+      /\b\d{9}\b/g
+    ];
+
+    phonePatterns.forEach(pattern => {
+      let match;
+      while ((match = pattern.exec(text)) !== null) {
+        const phone = match[0];
+        detections.push({
+          type: 'PHONE',
+          text: phone,
+          startIndex: match.index,
+          endIndex: match.index + phone.length,
+          confidence: 0.85,
+          replacement: '[TELEFON]'
+        });
+      }
+    });
+
+    return detections;
+  }
+
+  detectNames(text) {
+    const detections = [];
+    
+    // Detect full names (First Last)
+    const fullNamePattern = new RegExp(this.polishNames.patterns.fullName, 'g');
+    let match;
+
+    while ((match = fullNamePattern.exec(text)) !== null) {
+      const fullName = match[0];
+      const [firstName, lastName] = fullName.split(/\s+/);
+      
+      // Check if both parts are in our dictionaries
+      const isFirstName = this.isPolishFirstName(firstName);
+      const isLastName = this.isPolishLastName(lastName);
+      
+      // Check if it's not a medical term
+      const isMedicalTerm = this.isMedicalTerm(fullName);
+      
+      if ((isFirstName || isLastName) && !isMedicalTerm) {
+        detections.push({
+          type: 'NAME',
+          text: fullName,
+          startIndex: match.index,
+          endIndex: match.index + fullName.length,
+          confidence: isFirstName && isLastName ? 0.95 : 0.75,
+          replacement: '[PACJENT]'
+        });
+      }
+    }
+
+    // Detect contextual names (Pan/Pani [Name])
+    this.polishNames.patterns.contextualPatterns.forEach(pattern => {
+      const contextPattern = new RegExp(pattern, 'gi');
+      while ((match = contextPattern.exec(text)) !== null) {
+        const fullMatch = match[0];
+        const name = match[1];
+        
+        if (this.isPolishFirstName(name) && !this.isMedicalTerm(name)) {
+          detections.push({
+            type: 'NAME',
+            text: fullMatch,
+            startIndex: match.index,
+            endIndex: match.index + fullMatch.length,
+            confidence: 0.90,
+            replacement: fullMatch.replace(name, '[IMIĘ]')
+          });
+        }
+      }
+    });
+
+    return detections;
+  }
+
+  detectDates(text) {
+    const detections = [];
+    const datePatterns = [
+      /\b\d{1,2}[./-]\d{1,2}[./-]\d{4}\b/g,
+      /\b\d{4}[./-]\d{1,2}[./-]\d{1,2}\b/g,
+      /\bur\.\s*\d{1,2}[./-]\d{1,2}[./-]\d{4}/gi
+    ];
+
+    datePatterns.forEach(pattern => {
+      let match;
+      while ((match = pattern.exec(text)) !== null) {
+        const date = match[0];
+        detections.push({
+          type: 'DATE',
+          text: date,
+          startIndex: match.index,
+          endIndex: match.index + date.length,
+          confidence: 0.80,
+          replacement: '[DATA]'
+        });
+      }
+    });
+
+    return detections;
+  }
+
+  detectEmails(text) {
+    const detections = [];
+    const emailPattern = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g;
+    let match;
+
+    while ((match = emailPattern.exec(text)) !== null) {
+      const email = match[0];
+      detections.push({
+        type: 'EMAIL',
+        text: email,
+        startIndex: match.index,
+        endIndex: match.index + email.length,
+        confidence: 0.95,
+        replacement: '[EMAIL]'
+      });
+    }
+
+    return detections;
+  }
+
+  detectAddresses(text) {
+    const detections = [];
+    const addressPatterns = [
+      /\bul\.\s*[A-ZĄĆĘŁŃÓŚŹŻ][A-Za-ząćęłńóśźż\s]+\d+/gi,
+      /\b\d{2}-\d{3}\s+[A-ZĄĆĘŁŃÓŚŹŻ][A-Za-ząćęłńóśźż]+/g
+    ];
+
+    addressPatterns.forEach(pattern => {
+      let match;
+      while ((match = pattern.exec(text)) !== null) {
+        const address = match[0];
+        detections.push({
+          type: 'ADDRESS',
+          text: address,
+          startIndex: match.index,
+          endIndex: match.index + address.length,
+          confidence: 0.70,
+          replacement: '[ADRES]'
+        });
+      }
+    });
+
+    return detections;
+  }
+
+  isPolishFirstName(name) {
+    if (!this.polishNames) return false;
+    
+    return this.polishNames.firstNames.male.includes(name) ||
+           this.polishNames.firstNames.female.includes(name);
+  }
+
+  isPolishLastName(name) {
+    if (!this.polishNames) return false;
+    
+    return this.polishNames.lastNames.some(lastName => 
+      lastName.toLowerCase() === name.toLowerCase()
+    );
+  }
+
+  isMedicalTerm(term) {
+    if (!this.medicalTerms) return false;
+    
+    const lowerTerm = term.toLowerCase();
+    return this.medicalTerms.preserve.some(medTerm => 
+      medTerm.toLowerCase() === lowerTerm
+    );
+  }
+
+  removeOverlaps(detections) {
+    const cleaned = [];
+    
+    for (let i = 0; i < detections.length; i++) {
+      const current = detections[i];
+      let isOverlapping = false;
+      
+      for (let j = 0; j < cleaned.length; j++) {
+        const existing = cleaned[j];
+        
+        // Check for overlap
+        if (current.startIndex < existing.endIndex && current.endIndex > existing.startIndex) {
+          isOverlapping = true;
+          
+          // Keep the one with higher confidence
+          if (current.confidence > existing.confidence) {
+            cleaned.splice(j, 1);
+            cleaned.push(current);
+          }
+          break;
+        }
+      }
+      
+      if (!isOverlapping) {
+        cleaned.push(current);
+      }
+    }
+    
+    return cleaned.sort((a, b) => a.startIndex - b.startIndex);
+  }
+
+  calculateOverallConfidence(detections) {
+    if (detections.length === 0) return 1.0;
+    
+    const avgConfidence = detections.reduce((sum, det) => sum + det.confidence, 0) / detections.length;
+    return parseFloat(avgConfidence.toFixed(3));
+  }
+
+  generateSummary(detections) {
+    const summary = {};
+    
+    detections.forEach(detection => {
+      if (!summary[detection.type]) {
+        summary[detection.type] = 0;
+      }
+      summary[detection.type]++;
+    });
+    
+    return summary;
+  }
+}
+
+export default PIIDetector; 

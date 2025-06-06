@@ -1,0 +1,40 @@
+{
+  "firstNames": {
+    "male": [
+      "Adam", "Adrian", "Aleksander", "Andrzej", "Antoni", "Artur", "Bartosz", "Bartłomiej",
+      "Damian", "Daniel", "Dariusz", "Dawid", "Dominik", "Emil", "Filip", "Grzegorz",
+      "Hubert", "Igor", "Jacek", "Jakub", "Jan", "Janusz", "Jerzy", "Józef", "Kacper",
+      "Kamil", "Karol", "Krystian", "Krzysztof", "Łukasz", "Maciej", "Marcin", "Marek",
+      "Mariusz", "Mateusz", "Michał", "Mirosław", "Norbert", "Paweł", "Piotr", "Przemysław",
+      "Radosław", "Rafał", "Robert", "Sebastian", "Sławomir", "Stanisław", "Stefan",
+      "Szymon", "Tomasz", "Wiktor", "Wojciech", "Zbigniew"
+    ],
+    "female": [
+      "Agata", "Agnieszka", "Aleksandra", "Anna", "Barbara", "Beata", "Danuta", "Dorota",
+      "Ewa", "Elżbieta", "Ewelina", "Grażyna", "Halina", "Iwona", "Jadwiga", "Janina",
+      "Joanna", "Jolanta", "Julia", "Justyna", "Kasia", "Katarzyna", "Krystyna", "Lucyna",
+      "Magdalena", "Małgorzata", "Maria", "Marianna", "Marta", "Monika", "Natalia",
+      "Patrycja", "Paula", "Paulina", "Renata", "Sylwia", "Teresa", "Urszula", "Wanda",
+      "Weronika", "Zofia", "Żaneta"
+    ]
+  },
+  "lastNames": [
+    "Kowalski", "Nowak", "Wiśniewski", "Wójcik", "Kowalczyk", "Kamiński", "Lewandowski",
+    "Zieliński", "Szymański", "Woźniak", "Dąbrowski", "Kozłowski", "Jankowski", "Mazur",
+    "Kwiatkowski", "Krawczyk", "Kaczmarek", "Piotrowski", "Grabowski", "Nowakowski",
+    "Pawłowski", "Michalski", "Adamski", "Dudek", "Zając", "Wieczorek", "Jabłoński",
+    "Król", "Majewski", "Olszewski", "Jaworski", "Malinowski", "Zawadzki", "Sadowski",
+    "Bąk", "Wilk", "Witkowski", "Walczak", "Stępień", "Górski", "Rutkowski", "Michalak",
+    "Sikora", "Ostrowski", "Baran", "Duda", "Szewczyk", "Tomaszewski", "Pietrzak",
+    "Marciniak", "Wróbel", "Zalewski", "Jakubowski", "Jasiński", "Zawada", "Żółć"
+  ],
+  "patterns": {
+    "fullName": "\\b([A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+)\\s+([A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+)\\b",
+    "contextualPatterns": [
+      "Pan\\s+([A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+)",
+      "Pani\\s+([A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+)",
+      "Pacjent\\s+([A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+)",
+      "Pacjentka\\s+([A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+)"
+    ]
+  }
+} 

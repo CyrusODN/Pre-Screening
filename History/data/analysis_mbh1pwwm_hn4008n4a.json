@@ -1,0 +1,54 @@
+{
+  "metadata": {
+    "id": "analysis_mbh1pwwm_hn4008n4a",
+    "patientId": "TEST_PATIENT_001",
+    "analysisType": "single-agent",
+    "modelUsed": "o3",
+    "createdAt": "2025-06-03T21:43:49.449Z",
+    "updatedAt": "2025-06-03T21:43:49.462Z",
+    "status": "completed",
+    "version": "1.0.0",
+    "tags": [
+      "single-agent",
+      "diagnosis:depresja_major",
+      "age:middle",
+      "model:o3",
+      "trd:confirmed"
+    ],
+    "notes": "Analiza klasyczna pacjenta 45 lat"
+  },
+  "patientData": {
+    "summary": {
+      "id": "TEST_PATIENT_001",
+      "age": 45,
+      "mainDiagnosis": "Depresja major",
+      "comorbidities": [
+        "Lęk uogólniony"
+      ]
+    },
+    "episodeEstimation": {
+      "scenarios": [],
+      "conclusion": "Test episode estimation"
+    },
+    "trdAnalysis": {
+      "episodeStartDate": null,
+      "pharmacotherapy": [],
+      "conclusion": "Test TRD analysis"
+    },
+    "inclusionCriteria": [],
+    "psychiatricExclusionCriteria": [],
+    "medicalExclusionCriteria": [],
+    "reportConclusion": {
+      "overallQualification": "Test qualification",
+      "mainIssues": [],
+      "criticalInfoNeeded": [],
+      "estimatedProbability": 0.8
+    },
+    "analyzedAt": "2025-06-03T21:43:49.449Z",
+    "isMockData": true,
+    "modelUsed": "o3"
+  },
+  "medicalHistory": "Test medical history",
+  "studyProtocol": "Test study protocol",
+  "rawResponse": "Test raw response"
+}

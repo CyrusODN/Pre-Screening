@@ -36,19 +36,52 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ isOpen, onClose }) => {
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Funkcja przewijania na dół
+  const scrollToBottom = (force = false) => {
+    if (messagesEndRef.current) {
+      // Opcja 1: Używaj scrollIntoView
+      messagesEndRef.current.scrollIntoView({ 
+        behavior: force ? 'auto' : 'smooth',
+        block: 'end',
+        inline: 'nearest'
+      });
+    }
+    
+    // Opcja 2: Backup - przewiń kontener do końca
+    if (messagesContainerRef.current) {
+      const container = messagesContainerRef.current;
+      if (force) {
+        container.scrollTop = container.scrollHeight;
+      } else {
+        container.scrollTo({
+          top: container.scrollHeight,
+          behavior: 'smooth'
+        });
+      }
+    }
+  };
 
   // Załaduj wiadomości przy otwieraniu
   useEffect(() => {
     if (isOpen && chatbotService.isSessionActive()) {
       setMessages(chatbotService.getMessages());
       setAnalysisType(chatbotService.getAnalysisType());
+      // Przewiń na dół po załadowaniu wiadomości
+      setTimeout(() => scrollToBottom(true), 100);
     }
   }, [isOpen]);
 
-  // Auto-scroll do ostatniej wiadomości
+  // Auto-scroll do ostatniej wiadomości z opóźnieniem
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messages.length > 0) {
+      // Krótkie opóźnienie żeby DOM zdążył się zaktualizować
+      setTimeout(() => scrollToBottom(), 50);
+      // Dodatkowe przewijanie dla pewności po dłuższym czasie
+      setTimeout(() => scrollToBottom(), 200);
+    }
   }, [messages]);
 
   // Focus na input przy otwieraniu
@@ -90,13 +123,20 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ isOpen, onClose }) => {
     const question = inputValue.trim();
     setInputValue('');
 
+    // Przewiń natychmiast po dodaniu wiadomości użytkownika
+    setTimeout(() => scrollToBottom(), 50);
+
     try {
       const response = await chatbotService.askQuestion(question, selectedFocus);
       setMessages(chatbotService.getMessages());
+      // Wymuś przewijanie po otrzymaniu odpowiedzi
+      setTimeout(() => scrollToBottom(), 100);
     } catch (error) {
       console.error('Error sending message:', error);
     } finally {
       setIsLoading(false);
+      // Ostateczne przewijanie po zakończeniu
+      setTimeout(() => scrollToBottom(), 100);
     }
   };
 
@@ -104,13 +144,21 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ isOpen, onClose }) => {
     if (isLoading) return;
 
     setIsLoading(true);
+    
+    // Przewiń natychmiast po kliknięciu sugerowanego pytania
+    setTimeout(() => scrollToBottom(), 50);
+    
     try {
       const response = await chatbotService.askQuestion(question, selectedFocus);
       setMessages(chatbotService.getMessages());
+      // Wymuś przewijanie po otrzymaniu odpowiedzi
+      setTimeout(() => scrollToBottom(), 100);
     } catch (error) {
       console.error('Error sending suggested question:', error);
     } finally {
       setIsLoading(false);
+      // Ostateczne przewijanie po zakończeniu
+      setTimeout(() => scrollToBottom(), 100);
     }
   };
 
@@ -210,7 +258,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ isOpen, onClose }) => {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-gradient-to-b from-remedy-light to-white">
+        <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-3 space-y-3 bg-gradient-to-b from-remedy-light to-white">
           {messages.map((message) => (
             <div
               key={message.id}

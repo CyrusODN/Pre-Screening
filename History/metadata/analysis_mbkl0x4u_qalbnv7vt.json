@@ -1,0 +1,18 @@
+{
+  "id": "analysis_mbkl0x4u_qalbnv7vt",
+  "patientId": "[PACJENT_004]",
+  "analysisType": "single-agent",
+  "modelUsed": "gemini",
+  "createdAt": "2025-06-06T09:07:34.194Z",
+  "updatedAt": "2025-06-06T09:07:34.226Z",
+  "status": "completed",
+  "version": "1.0.0",
+  "tags": [
+    "Nadciśnienie tętnicze (prawdopodobnie kontrolowane)",
+    "Podejrzenie choroby niedokrwiennej serca (w trakcie diagnostyki w przeszłości)",
+    "F15.5 Zaburzenia psychiczne i zaburzenia zachowania spowodowane używaniem substancji stymulujących (w historii)",
+    "F23 Ostre i przemijające zaburzenia psychotyczne (w historii)",
+    "single-agent"
+  ],
+  "notes": "[PACJENT_004] - Analiza - 6.06.2025 11:07"
+}

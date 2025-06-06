@@ -1,0 +1,16 @@
+{
+  "id": "analysis_mbgz8at3_g6bx06ju6",
+  "patientId": "Pacjent TRR_WRO_01",
+  "analysisType": "single-agent",
+  "modelUsed": "gemini",
+  "createdAt": "2025-06-03T20:34:08.412Z",
+  "updatedAt": "2025-06-03T20:34:08.461Z",
+  "status": "completed",
+  "version": "1.0.0",
+  "tags": [
+    "F42 Zaburzenia obsesyjno-kompulsyjne",
+    "Astma oskrzelowa",
+    "single-agent"
+  ],
+  "notes": "Pacjent TRR_WRO_01 - Analiza - 3.06.2025 22:34"
+}

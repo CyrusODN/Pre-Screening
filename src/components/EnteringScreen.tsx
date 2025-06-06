@@ -1,6 +1,6 @@
 // src/components/EnteringScreen.tsx
 import React, { useState } from 'react';
-import { Upload, FileText, AlertCircle, History, BrainCircuit, PlayCircle, Zap, FolderOpen } from 'lucide-react';
+import { Upload, FileText, AlertCircle, History, BrainCircuit, PlayCircle, Zap, FolderOpen, XCircle } from 'lucide-react';
 import { ProtocolSelector } from './ProtocolSelector';
 import { Logo } from './Logo';
 import { SavedAnalysesManager } from './SavedAnalysesManager';
@@ -16,6 +16,14 @@ interface EnteringScreenProps {
   enableSpecialistAnalysis: boolean;
   onSpecialistAnalysisChange: (enabled: boolean) => void;
   onLoadSavedAnalysis?: (analysis: StoredAnalysis) => void;
+  onPdfUpload?: () => void;
+  anonymizedPdfData?: {
+    texts: string[];
+    sessionIds: string[];
+    combinedText: string;
+    fileCount: number;
+  } | null;
+  onClearAnonymizedData?: () => void;
 }
 
 export const EnteringScreen: React.FC<EnteringScreenProps> = ({ 
@@ -26,7 +34,10 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
     onAIModelChange,
     enableSpecialistAnalysis,
     onSpecialistAnalysisChange,
-    onLoadSavedAnalysis
+    onLoadSavedAnalysis,
+    onPdfUpload,
+    anonymizedPdfData,
+    onClearAnonymizedData
 }) => {
   const [protocol, setProtocol] = useState<string>('');
   const [selectedProtocol, setSelectedProtocol] = useState<Protocol | null>(null);
@@ -59,11 +70,15 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
       ? JSON.stringify(selectedProtocol.criteria, null, 2) 
       : protocol;
       
-    if (!protocolText || !medicalHistory) {
-      setError('Proszę wprowadzić zarówno protokół (lub wybrać predefiniowany) jak i historię choroby.');
+    // Użyj zanonimizowanych danych jeśli są dostępne, inaczej sprawdź formularz
+    const historyToUse = anonymizedPdfData ? anonymizedPdfData.combinedText : medicalHistory;
+      
+    if (!protocolText || !historyToUse) {
+      setError('Proszę wprowadzić zarówno protokół (lub wybrać predefiniowany) jak i historię choroby (lub załadować PDF).');
       return;
     }
-    onDataSubmit({ protocol: protocolText, medicalHistory, selectedAIModel });
+    
+    onDataSubmit({ protocol: protocolText, medicalHistory: historyToUse, selectedAIModel });
   };
 
   const handleProtocolSelect = (protocolObj: Protocol) => {
@@ -195,6 +210,46 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
               onProtocolSelect={handleProtocolSelect}
             />
 
+            {/* Informacja o załadowanych zanonimizowanych danych */}
+            {anonymizedPdfData && (
+              <div className="card-remedy">
+                <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded-lg">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0">
+                        <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                          <FileText className="w-4 h-4 text-green-600" />
+                        </div>
+                      </div>
+                      <div className="ml-3">
+                        <h3 className="text-lg font-medium text-green-900">
+                          ✅ Zanonimizowane dane PDF gotowe do analizy
+                        </h3>
+                        <div className="mt-2 text-sm text-green-700">
+                          <p>
+                            📄 <strong>{anonymizedPdfData.fileCount} plików PDF</strong> zostało pomyślnie zanonimizowanych
+                          </p>
+                          <p>
+                            📊 <strong>{Math.round(anonymizedPdfData.combinedText.length / 1000)}k znaków</strong> tekstu przygotowanych do analizy
+                          </p>
+                          <p className="mt-1 font-medium">
+                            💡 Wszystkie dane osobowe zostały zastąpione pseudonimami
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={onClearAnonymizedData}
+                      className="ml-4 text-green-600 hover:text-green-800"
+                      title="Usuń załadowane dane i wróć do wprowadzania ręcznego"
+                    >
+                      <XCircle className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="card-remedy space-y-3">
               <div>
                 <label className="block text-lg font-bold text-gray-900 mb-2">
@@ -202,29 +257,64 @@ export const EnteringScreen: React.FC<EnteringScreenProps> = ({
                 </label>
                 <div className="space-y-3">
                   <textarea
-                    value={medicalHistory}
-                    onChange={(e) => setMedicalHistory(e.target.value)}
-                    className="w-full h-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-remedy-accent focus:border-remedy-accent transition-all resize-none text-sm"
-                    placeholder="Wprowadź lub wklej historię choroby..."
+                    value={anonymizedPdfData ? '' : medicalHistory}
+                    onChange={(e) => {
+                      if (!anonymizedPdfData) {
+                        setMedicalHistory(e.target.value);
+                      }
+                    }}
+                    disabled={!!anonymizedPdfData}
+                    className={`w-full h-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-remedy-accent focus:border-remedy-accent transition-all resize-none text-sm ${
+                      anonymizedPdfData ? 'bg-gray-50 text-gray-500 cursor-not-allowed' : ''
+                    }`}
+                    placeholder={
+                      anonymizedPdfData 
+                        ? `✅ Załadowane ${anonymizedPdfData.fileCount} plików PDF (${Math.round(anonymizedPdfData.combinedText.length / 1000)}k znaków zanonimizowanych)` 
+                        : "Wprowadź lub wklej historię choroby..."
+                    }
                   />
+                  
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2 text-gray-600">
                       <FileText size={16} />
-                      <span className="font-medium text-sm">{medicalHistoryFile ? medicalHistoryFile.name : 'Nie wybrano pliku'}</span>
+                      <span className="font-medium text-sm">
+                        {anonymizedPdfData 
+                          ? `📄 ${anonymizedPdfData.fileCount} plików PDF załadowanych` 
+                          : (medicalHistoryFile ? medicalHistoryFile.name : 'Dane wprowadzane ręcznie lub z PDF')
+                        }
+                      </span>
                     </div>
-                    <label className="btn-primary cursor-pointer flex items-center gap-2">
-                      <Upload size={16} />
-                      <span>Wczytaj z pliku</span>
-                      <input
-                        type="file"
-                        accept=".txt,.doc,.docx,.pdf"
-                        className="hidden"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) handleFileUpload(file, 'medicalHistory');
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (onPdfUpload) {
+                            onPdfUpload();
+                          }
                         }}
-                      />
-                    </label>
+                        disabled={!!anonymizedPdfData}
+                        className={`btn-primary flex items-center gap-2 text-sm ${
+                          anonymizedPdfData ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                        title={anonymizedPdfData ? 'Najpierw usuń załadowane dane żeby wgrać nowe' : 'Upload PDF'}
+                      >
+                        <FileText size={16} />
+                        <span>Upload PDF</span>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {/* PDF Upload Info */}
+                  <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
+                    <div className="flex items-start gap-2">
+                      <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center mt-0.5">
+                        <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                      </div>
+                      <div className="text-sm text-blue-800">
+                        <strong>Upload PDF:</strong> Automatycznie wykrywamy i anonimizujemy dane osobowe (imiona, PESEL, telefony, dokumenty tożsamości) przed analizą AI. 
+                        Otrzymasz podgląd do weryfikacji.
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

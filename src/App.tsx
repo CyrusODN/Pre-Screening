@@ -42,6 +42,7 @@ import { StorageTestButton } from './components/StorageTestButton';
 import { SaveAnalysisButton } from './components/SaveAnalysisButton';
 import { SavedAnalysesManager } from './components/SavedAnalysesManager';
 import { PsychotherapeuticAnalysisView } from './components/PsychotherapeuticAnalysisView';
+import { PdfAnonymizer } from './components/PdfAnonymizer';
 import { initialPatientData, demoPatientData } from './data/mockData';
 import { analyzePatientData } from './services/ai';
 import { DrugMappingDemo } from './components/DrugMappingDemo';
@@ -506,18 +507,16 @@ const App = () => {
 
   const [hasSubmittedData, setHasSubmittedData] = useState(false);
   const [patientProfile, setPatientProfile] = useState<PatientData | null>(null);
-  const [selectedAIModel, setSelectedAIModel] = useState<SupportedAIModel>('claude-opus'); 
+  const [selectedAIModel, setSelectedAIModel] = useState<SupportedAIModel>('gemini');
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [isPrintMode, setIsPrintMode] = useState(false);
-  const [enableSpecialistAnalysis, setEnableSpecialistAnalysis] = useState(true);
+  const [enableSpecialistAnalysis, setEnableSpecialistAnalysis] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [hasChatSession, setHasChatSession] = useState(false);
   const [showDrugDemo, setShowDrugDemo] = useState(false);
   const [showSavedAnalyses, setShowSavedAnalyses] = useState(false);
-  const [originalAnalysisData, setOriginalAnalysisData] = useState<{
-    medicalHistory: string;
-    studyProtocol: string;
-  } | null>(null);
+  const [showPdfAnonymizer, setShowPdfAnonymizer] = useState(false);
+  const [originalAnalysisData, setOriginalAnalysisData] = useState<{medicalHistory: string, studyProtocol: string} | null>(null);
 
   const [dynamicConclusion, setDynamicConclusion] = useState({
     overallQualification: '',
@@ -527,84 +526,91 @@ const App = () => {
     riskFactors: [] as string[]
   });
 
+  // Stan dla zanonimizowanych danych z PDF
+  const [anonymizedPdfData, setAnonymizedPdfData] = useState<{
+    texts: string[];
+    sessionIds: string[];
+    combinedText: string;
+    fileCount: number;
+  } | null>(null);
+
   const handleDataSubmit = async (data: { protocol: string; medicalHistory: string; selectedAIModel: SupportedAIModel }) => {
-    console.log('📝 [App] handleDataSubmit called with:', {
-      historyLength: data.medicalHistory?.length || 0,
-      protocolLength: data.protocol?.length || 0,
-      model: data.selectedAIModel,
-      enableSpecialistAnalysis,
-      hasTrainingData: data.medicalHistory?.includes('KARTA WIZYTY') || false
-    });
-    
-    setHasSubmittedData(true); 
     setIsAnalyzing(true);
     setAnalysisError(null);
+    setPatientProfile(null);
+
+    console.log('🚀 Rozpoczynam analizę...');
+    console.log('📊 Model AI:', data.selectedAIModel);
+    console.log('🏥 Analiza specjalistyczna:', enableSpecialistAnalysis ? 'włączona' : 'wyłączona');
+
+    // Użyj zanonimizowanych danych PDF jeśli są dostępne, inaczej dane z formularza
+    const medicalHistoryToUse = anonymizedPdfData ? anonymizedPdfData.combinedText : data.medicalHistory;
     
-    // Store original data for saving
-    setOriginalAnalysisData({
-      medicalHistory: data.medicalHistory,
-      studyProtocol: data.protocol
-    });
-    
+    if (anonymizedPdfData) {
+      console.log(`📄 Używam zanonimizowanych danych PDF (${anonymizedPdfData.fileCount} plików, ${medicalHistoryToUse.length} znaków)`);
+    }
+
     try {
-      console.log('🔧 Rozpoczynanie analizy monoagentowej...');
-      
-      // Używaj tylko systemu monoagentowego
-      const analysisResult = await analyzePatientData(
-        data.medicalHistory, 
-        data.protocol, 
-        data.selectedAIModel, 
+      const result = await analyzePatientData(
+        data.protocol,
+        medicalHistoryToUse,
+        data.selectedAIModel,
         enableSpecialistAnalysis
       );
-      
-      // Inicjalizuj sesję chatbota
+
+      setPatientProfile(result);
+      setHasSubmittedData(true);
+      setOriginalAnalysisData({
+        medicalHistory: medicalHistoryToUse,
+        studyProtocol: data.protocol,
+      });
+
+      // Cleanup zanonimizowanych danych po użyciu
+      if (anonymizedPdfData) {
+        setTimeout(async () => {
+          try {
+            await Promise.all(
+              anonymizedPdfData.sessionIds.map(sessionId =>
+                fetch(`http://localhost:3001/api/pdf-session/${sessionId}`, {
+                  method: 'DELETE'
+                })
+              )
+            );
+            console.log(`🧹 ${anonymizedPdfData.sessionIds.length} sesji PDF zostało wyczyszczonych`);
+          } catch (error) {
+            console.warn('⚠️ Nie udało się wyczyścić niektórych sesji PDF:', error);
+          }
+        }, 1000);
+        
+        setAnonymizedPdfData(null); // Wyczyść z pamięci
+      }
+
+      // Initialize chatbot session
       try {
-        chatbotService.initializeSessionFromSingleAgent(
-          analysisResult,
-          data.medicalHistory,
-          data.protocol
-        );
+        if (enableSpecialistAnalysis) {
+          chatbotService.initializeSessionFromMultiAgent(
+            result,
+            medicalHistoryToUse,
+            data.protocol
+          );
+        } else {
+          chatbotService.initializeSessionFromSingleAgent(
+            result,
+            medicalHistoryToUse,
+            data.protocol
+          );
+        }
         setHasChatSession(true);
-        console.log('✅ Sesja chatbota została zainicjalizowana');
+        console.log(`✅ Sesja chatbota została zainicjalizowana (${enableSpecialistAnalysis ? 'multi-agent' : 'single-agent'})`);
       } catch (error) {
         console.error('❌ Błąd podczas inicjalizacji chatbota:', error);
+        setHasChatSession(false);
       }
-      
-      setPatientProfile(analysisResult);
-      saveToHistory(analysisResult);
 
-      if (analysisResult.reportConclusion) {
-        setDynamicConclusion({
-          overallQualification: analysisResult.reportConclusion.overallQualification || '',
-          mainIssues: analysisResult.reportConclusion.mainIssues || [],
-          criticalInfoNeeded: analysisResult.reportConclusion.criticalInfoNeeded || [],
-          estimatedProbability: analysisResult.reportConclusion.estimatedProbability || 0,
-          riskFactors: analysisResult.reportConclusion.riskFactors || []
-        });
-      }
+      console.log('✅ Analiza zakończona pomyślnie');
     } catch (error) {
-      console.error('Error analyzing data in App.tsx:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Wystąpił nieznany błąd.';
-      setAnalysisError(`Błąd podczas analizy (${data.selectedAIModel}): ${errorMessage}. Używam danych testowych.`);
-      
-      const mockDataWithModel: PatientData = {
-        ...initialPatientData, 
-        analyzedAt: new Date().toISOString(),
-        isMockData: true,
-        modelUsed: data.selectedAIModel
-      };
-      setPatientProfile(mockDataWithModel);
-      saveToHistory(mockDataWithModel);
-
-      if (mockDataWithModel.reportConclusion) {
-        setDynamicConclusion({
-          overallQualification: mockDataWithModel.reportConclusion.overallQualification || '',
-          mainIssues: mockDataWithModel.reportConclusion.mainIssues || [],
-          criticalInfoNeeded: mockDataWithModel.reportConclusion.criticalInfoNeeded || [],
-          estimatedProbability: mockDataWithModel.reportConclusion.estimatedProbability || 0,
-          riskFactors: mockDataWithModel.reportConclusion.riskFactors || []
-        });
-      }
+      console.error('❌ Błąd podczas analizy:', error);
+      setAnalysisError(error instanceof Error ? error.message : 'Nieznany błąd podczas analizy');
     } finally {
       setIsAnalyzing(false);
     }
@@ -653,6 +659,80 @@ const App = () => {
     }
     
     console.log('✅ Dane demonstracyjne załadowane pomyślnie');
+  };
+
+  // Funkcja do obsługi PDF upload
+  const handlePdfUpload = () => {
+    console.log('📄 Inicjowanie PDF upload workflow...');
+    setShowPdfAnonymizer(true);
+  };
+
+  // Funkcja wywoływana po zakończeniu anonimizacji PDF
+  const handleAnonymizedTextReady = (anonymizedTexts: string[], sessionIds: string[]) => {
+    console.log(`✅ Otrzymano ${anonymizedTexts.length} zanonimizowanych tekstów z sesji:`, sessionIds);
+    
+    // Połącz wszystkie zanonimizowane teksty w jeden
+    const combinedText = anonymizedTexts.map((text, index) => {
+      return `=== DOKUMENT ${index + 1} ===\n\n${text}\n\n`;
+    }).join('');
+    
+    console.log(`📄 Połączono ${anonymizedTexts.length} dokumentów (${combinedText.length} znaków)`);
+    
+    // Użyj połączonego zanonimizowanego tekstu jako historii choroby
+    const defaultProtocol = 'Protokół badania klinicznego'; // Można rozszerzyć
+    
+    setShowPdfAnonymizer(false);
+    
+    // Rozpocznij analizę z zanonimizowanym tekstem
+    handleDataSubmit({
+      protocol: defaultProtocol,
+      medicalHistory: combinedText,
+      selectedAIModel: selectedAIModel
+    });
+    
+    // Cleanup wszystkich sesji po analizie
+    setTimeout(async () => {
+      try {
+        await Promise.all(
+          sessionIds.map(sessionId =>
+            fetch(`http://localhost:3001/api/pdf-session/${sessionId}`, {
+              method: 'DELETE'
+            })
+          )
+        );
+        console.log(`🧹 ${sessionIds.length} sesji PDF zostało wyczyszczonych`);
+      } catch (error) {
+        console.warn('⚠️ Nie udało się wyczyścić niektórych sesji PDF:', error);
+      }
+    }, 1000);
+  };
+
+  // Funkcja do przechowywania zanonimizowanych danych bez analizy
+  const handleAnonymizedDataReady = (anonymizedTexts: string[], sessionIds: string[]) => {
+    console.log(`📦 Przygotowano ${anonymizedTexts.length} zanonimizowanych tekstów do analizy`);
+    
+    // Połącz wszystkie zanonimizowane teksty w jeden
+    const combinedText = anonymizedTexts.map((text, index) => {
+      return `=== DOKUMENT ${index + 1} ===\n\n${text}\n\n`;
+    }).join('');
+    
+    // Zapisz dane w stanie
+    setAnonymizedPdfData({
+      texts: anonymizedTexts,
+      sessionIds: sessionIds,
+      combinedText: combinedText,
+      fileCount: anonymizedTexts.length
+    });
+    
+    setShowPdfAnonymizer(false);
+    
+    console.log(`💾 Zanonimizowane dane zapisane w pamięci (${combinedText.length} znaków, ${anonymizedTexts.length} plików)`);
+  };
+
+  // Funkcja do anulowania PDF upload
+  const handlePdfUploadCancel = () => {
+    console.log('❌ Anulowano PDF upload workflow');
+    setShowPdfAnonymizer(false);
   };
 
   // Funkcja do ładowania zapisanej analizy
@@ -798,19 +878,6 @@ const App = () => {
     }, 100);
   };
 
-  if (!hasSubmittedData) {
-    return <EnteringScreen 
-      onDataSubmit={handleDataSubmit}
-      onSelectHistoricalPatient={handleSelectHistoricalPatient}
-      onLoadDemo={loadDemoData}
-      selectedAIModel={selectedAIModel}
-      onAIModelChange={setSelectedAIModel}
-      enableSpecialistAnalysis={enableSpecialistAnalysis}
-      onSpecialistAnalysisChange={setEnableSpecialistAnalysis}
-      onLoadSavedAnalysis={handleLoadSavedAnalysis}
-    />;
-  }
-
   if (isAnalyzing) {
     return (
       <div className="min-h-screen bg-gradient-theme-light p-3 sm:p-4 md:p-6 font-sans flex items-center justify-center">
@@ -845,6 +912,12 @@ const App = () => {
                   selectedAIModel.toUpperCase()
                 }</span></span>
               </div>
+              {anonymizedPdfData && (
+                <div className="flex items-center justify-center gap-2 text-sm">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-gray-600">Źródło: <span className="font-medium text-gray-800">{anonymizedPdfData.fileCount} zanonimizowanych PDF-ów</span></span>
+                </div>
+              )}
             </div>
             
             <p className="text-sm text-gray-500">Przeprowadzam analizę...</p>
@@ -857,6 +930,33 @@ const App = () => {
         </div>
       </div>
     );
+  }
+
+  if (!hasSubmittedData) {
+    // If PDF anonymizer is shown, render it
+    if (showPdfAnonymizer) {
+      return (
+        <PdfAnonymizer
+          onAnonymizedTextReady={handleAnonymizedTextReady}
+          onCancel={handlePdfUploadCancel}
+          onAnonymizedDataReady={handleAnonymizedDataReady}
+        />
+      );
+    }
+
+    return <EnteringScreen 
+      onDataSubmit={handleDataSubmit}
+      onSelectHistoricalPatient={handleSelectHistoricalPatient}
+      onLoadDemo={loadDemoData}
+      selectedAIModel={selectedAIModel}
+      onAIModelChange={setSelectedAIModel}
+      enableSpecialistAnalysis={enableSpecialistAnalysis}
+      onSpecialistAnalysisChange={setEnableSpecialistAnalysis}
+      onLoadSavedAnalysis={handleLoadSavedAnalysis}
+      onPdfUpload={handlePdfUpload}
+      anonymizedPdfData={anonymizedPdfData}
+      onClearAnonymizedData={() => setAnonymizedPdfData(null)}
+    />;
   }
 
   if (!patientProfile || Object.keys(patientProfile).length === 0) {
